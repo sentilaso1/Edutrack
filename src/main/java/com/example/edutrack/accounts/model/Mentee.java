@@ -15,4 +15,19 @@ public class Mentee extends User  {
 
     @Column(length = 512)
     private String interests;
+
+    public void setTotalSessions(Integer totalSessions) {
+        this.totalSessions = totalSessions;
+    }
+
+    public Integer getTotalSessions() {
+        return totalSessions;
+    }
+
+    public String getInterests() {
+        return interests;
+    }
+    public void setInterests(String interests) {
+        this.interests = interests;
+    }
 }
