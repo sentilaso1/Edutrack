@@ -23,31 +23,18 @@ public class Mentor extends User {
     @Column(columnDefinition = "DECIMAL(2,1)")
     private Double rating;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    @Column(name = "created_date", nullable = false)
-    @CreatedDate
-    private Date createdDate = new Date();
-
-    public enum Role {
-        Admin, Manager
-    }
-
     public Mentor() {
         super();
     }
 
-    public Mentor(User user, Role role) {
+    public Mentor(User user) {
         super(user.getEmail(), user.getPassword(), user.getFullName(), user.getPhone());
-        this.role = role;
     }
 
-    public Boolean getAvailable() {
+    public boolean isAvailable() {
         return isAvailable;
     }
-
-    public void setAvailable(Boolean available) {
+    public void setAvailable(boolean available) {
         isAvailable = available;
     }
 
@@ -75,14 +62,6 @@ public class Mentor extends User {
         this.rating = rating;
     }
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
     @Override
     public String toString() {
         return "Mentor{" +
@@ -90,8 +69,6 @@ public class Mentor extends User {
                 ", totalSessions=" + totalSessions +
                 ", expertise='" + expertise + '\'' +
                 ", rating=" + rating +
-                ", role=" + role +
-                ", createdDate=" + createdDate +
                 '}';
     }
 }
