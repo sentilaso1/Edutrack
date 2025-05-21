@@ -14,10 +14,12 @@ public class MentorService {
         this.mentorRepository = mentorRepository;
     }
 
+    // Receiving all mentors
     public List<Mentor> getAllMentors() {
         return mentorRepository.findAll();
     }
 
+    // Filter mentors
     public List<Mentor> searchMentors(String name, String expertise, Double rating, Integer totalSessions, Boolean isAvailable) {
         return mentorRepository.searchMentors(name, expertise, rating, totalSessions, isAvailable);
     }
