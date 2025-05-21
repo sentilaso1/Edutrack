@@ -10,12 +10,14 @@ import java.util.UUID;
 
 public interface MentorRepository extends JpaRepository<Mentor, UUID> {
 
+    // Receiving mentor list with certain conditions
     @Query("SELECT m FROM Mentor m " +
             "WHERE (:name IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
             "AND (:expertise IS NULL OR LOWER(m.expertise) LIKE LOWER(CONCAT('%', :expertise, '%'))) " +
             "AND (:rating IS NULL OR m.rating >= :rating) " +
             "AND (:totalSessions IS NULL OR m.totalSessions >= :totalSessions) " +
             "AND (:isAvailable IS NULL OR m.isAvailable = :isAvailable)")
+
 
     List<Mentor> searchMentors(
             @Param("name") String name,
