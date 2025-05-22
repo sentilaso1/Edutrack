@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Box Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #FFFDEC;
+            padding: 40px;
+        }
+
+        .course-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            background-color: #FFFFFF;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            padding: 15px;
+            width: 500px;
+            border-bottom: 5px solid #FFE2E2;
+        }
+
+        .course-card img {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .course-info {
+            flex: 1;
+        }
+
+        .course-price {
+            color: #e87878;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .course-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 5px 0;
+            color: #222;
+        }
+
+        .stars {
+            color: #f7c948;
+            margin-bottom: 8px;
+        }
+
+        .course-meta {
+            font-size: 0.9em;
+            color: #555;
+            display: flex;
+            gap: 20px;
+        }
+
+        .course-meta i {
+            margin-right: 5px;
+            color: #86A788;
+        }
+    </style>
+</head>
+<body>
+<div th:each="course : ${courses}" class="course-card">
+    <a th:href="@{/courses/{id}(id=${course.id})}" style="text-decoration:none; color: inherit;">
+        <img alt="Course Image" src="https://via.placeholder.com/120x90.png?text=Course">
+        <div class="course-info">
+            <div class="course-price">$29.28</div>
+            <div class="course-title" th:text="${course.name}"></div>
+            <div class="stars">★ ★ ★ ★ ☆</div>
+            <div class="course-meta">
+                <div><i class="fas fa-book"></i><span>2</span> Lessons</div>
+                <div><i class="fas fa-users"></i><span>4k</span> Students</div>
+            </div>
+        </div>
+    </a>
+</div>
+
+</body>
+</html>
