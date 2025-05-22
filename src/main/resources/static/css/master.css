@@ -23,5 +23,7 @@ time, mark, audio, video {
 .viewport {
     box-sizing: border-box;
     min-height: 100svh;
-    width: 100svw;
+    width: 100vw;
+
+    font-family: sans-serif;
 }
