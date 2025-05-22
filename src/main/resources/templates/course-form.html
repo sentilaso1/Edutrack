@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Tạo Khóa Học</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #FFFDEC;
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #FFFCFC;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #86A788;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea,
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #FFE2E2;
+            border-radius: 6px;
+            background-color: #FFE2E2;
+            font-size: 14px;
+            outline: none;
+            resize: vertical;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .tags {
+            margin-top: 5px;
+        }
+
+        .tags label {
+            font-weight: 400;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        button {
+            margin-top: 25px;
+            width: 100%;
+            background-color: #86A788;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #759976;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Tạo Khóa Học</h2>
+
+    <form th:action="@{/courses/create}" method="post" enctype="multipart/form-data" th:object="${courseForm}">
+        <label for="name">Tên Khóa Học</label>
+        <input type="text" id="name" th:field="*{name}" placeholder="Tên khóa học" required />
+tr
+        <label for="description">Mô Tả</label>
+        <textarea id="description" th:field="*{description}" placeholder="Mô tả khóa học"></textarea>
+
+        <label>Kỹ năng / Nội dung (Tags)</label>
+        <div class="tags" th:each="tag : ${tags}">
+            <label>
+                <input type="checkbox" name="tagIds" th:value="${tag.id}" /> [[${tag.title}]]
+            </label>
+        </div>
+
+        <label for="files">Tài liệu giảng dạy</label>
+        <input type="file" id="files" name="files" multiple />
+
+        <button type="submit">Tạo Khóa Học</button>
+    </form>
+</div>
+</body>
+</html>
