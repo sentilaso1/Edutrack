@@ -1,6 +1,7 @@
 package com.example.edutrack.profiles.model;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.model.User;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Table(name = "cv")
 public class CV {
     @Id
-    @Column(name = "mentor_id")
+    @Column(name = "user_id")
     private UUID id;
 
     @Column(name = "summary", length = 256, nullable = false)
@@ -40,14 +41,14 @@ public class CV {
     private Date updatedDate = new Date();
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "mentor_id", nullable = false)
-    private Mentor mentor;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public CV() {
 
     }
 
-    public CV(String summary, Integer experienceYears, String skills, String education, String certifications, String languages, String portfolioUrl, Date updatedDate, Mentor mentor) {
+    public CV(String summary, Integer experienceYears, String skills, String education, String certifications, String languages, String portfolioUrl, User user) {
         this.summary = summary;
         this.experienceYears = experienceYears;
         this.skills = skills;
@@ -55,8 +56,7 @@ public class CV {
         this.certifications = certifications;
         this.languages = languages;
         this.portfolioUrl = portfolioUrl;
-        this.updatedDate = updatedDate;
-        this.mentor = mentor;
+        this.user = user;
     }
 
     public UUID getId() {
@@ -131,12 +131,12 @@ public class CV {
         this.updatedDate = updatedDate;
     }
 
-    public Mentor getMentor() {
-        return mentor;
+    public User getUser() {
+        return user;
     }
 
-    public void setMentor(Mentor mentor) {
-        this.mentor = mentor;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override
@@ -151,7 +151,7 @@ public class CV {
                 ", languages='" + languages + '\'' +
                 ", portfolioUrl='" + portfolioUrl + '\'' +
                 ", updatedDate=" + updatedDate +
-                ", mentor=" + mentor +
+                ", user=" + user +
                 '}';
     }
 }
