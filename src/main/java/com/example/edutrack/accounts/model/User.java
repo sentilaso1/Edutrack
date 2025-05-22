@@ -2,8 +2,6 @@ package com.example.edutrack.accounts.model;
 
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
-
-import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -28,7 +26,7 @@ public class User {
     private String phone;
 
     @Lob
-    @Column
+    @Column(columnDefinition = "LONGBLOB")
     private byte[] avatar;
 
     @Column
