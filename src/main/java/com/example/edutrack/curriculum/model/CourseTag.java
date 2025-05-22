@@ -17,7 +17,7 @@ public class CourseTag {
     @JoinColumn(name = "tag_id")
     private Tags tag;
 
-    public CourseTag() {}
+    public CourseTag(){}
 
     public CourseTag(Course course, Tags tag) {
         this.course = course;
@@ -47,5 +47,10 @@ public class CourseTag {
 
     public void setTag(Tags tag) {
         this.tag = tag;
+    }
+
+    @Override
+    public String toString() {
+        return "CourseTag {" + "id=" + id + ", course=" + course + ", tag=" + tag + '}';
     }
 }

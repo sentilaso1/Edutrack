@@ -54,4 +54,8 @@ public class Tags {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String toString() {
+        return "Tags {id=" + id + ", title=" + title + ", description=" + description + "}";
+    }
 }

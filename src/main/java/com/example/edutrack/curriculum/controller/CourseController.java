@@ -4,8 +4,7 @@ import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
 import com.example.edutrack.curriculum.dto.TagDTO;
-import com.example.edutrack.curriculum.model.CourseTag;
-import com.example.edutrack.curriculum.service.*;
+import com.example.edutrack.curriculum.service.implementation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,32 +16,32 @@ import java.util.UUID;
 
 @Controller
 public class CourseController {
-    private final CourseService courseService;
-    private final MentorCourseService mentorCourseService;
-    private final MentorAvailableTimeService mentorAvailableTimeService;
-    private final CourseTagService courseTagService;
-    private final TagService tagService;
+    private final CourseServiceImpl courseServiceImpl;
+    private final MentorCourseServiceImpl mentorCourseServiceImpl;
+    private final MentorAvailableTimeServiceImpl mentorAvailableTimeServiceImpl;
+    private final CourseTagServiceImpl courseTagServiceImpl;
+    private final TagServiceImpl tagServiceImpl;
 
-    public CourseController(CourseService courseService, CourseTagService courseTagService , MentorCourseService mentorCourseService, MentorAvailableTimeService mentorAvailableTimeService, TagService tagService) {
-        this.courseService = courseService;
-        this.mentorCourseService = mentorCourseService;
-        this.mentorAvailableTimeService = mentorAvailableTimeService;
-        this.courseTagService = courseTagService;
-        this.tagService = tagService;
+    public CourseController(CourseServiceImpl courseServiceImpl, CourseTagServiceImpl courseTagServiceImpl, MentorCourseServiceImpl mentorCourseServiceImpl, MentorAvailableTimeServiceImpl mentorAvailableTimeServiceImpl, TagServiceImpl tagServiceImpl) {
+        this.courseServiceImpl = courseServiceImpl;
+        this.mentorCourseServiceImpl = mentorCourseServiceImpl;
+        this.mentorAvailableTimeServiceImpl = mentorAvailableTimeServiceImpl;
+        this.courseTagServiceImpl = courseTagServiceImpl;
+        this.tagServiceImpl = tagServiceImpl;
     }
 
     @GetMapping("/courses")
     public String courses(Model model) {
-        List<Course> courses = courseService.findAll();
+        List<Course> courses = courseServiceImpl.findAll();
         model.addAttribute("courses", courses);
         return "course-box";
     }
 
     @GetMapping("/courses/{courseId}")
     public String courseDetail(@PathVariable("courseId") UUID courseId, Model model) {
-        Course course = courseService.findById(courseId);
-        List<MentorDTO> mentorList = mentorCourseService.getMentorsByCourseId(courseId);
-        List<TagDTO> tagList = courseTagService.findTagsByCourseId(courseId);
+        Course course = courseServiceImpl.findById(courseId);
+        List<MentorDTO> mentorList = mentorCourseServiceImpl.getMentorsByCourseId(courseId);
+        List<TagDTO> tagList = courseTagServiceImpl.findTagsByCourseId(courseId);
         model.addAttribute("mentorList", mentorList);
         model.addAttribute("courseId", courseId);
         model.addAttribute("tagList", tagList);
@@ -54,7 +53,7 @@ public class CourseController {
     public String viewMentorAvailability(@PathVariable UUID courseId,
                                          @PathVariable UUID mentorId,
                                          Model model) {
-        List<MentorAvailableTimeDTO> times = mentorAvailableTimeService.getMentorAvailableTime(mentorId);
+        List<MentorAvailableTimeDTO> times = mentorAvailableTimeServiceImpl.getMentorAvailableTime(mentorId);
         model.addAttribute("availableTimes", times);
         model.addAttribute("courseId", courseId);
         model.addAttribute("mentorId", mentorId);
@@ -64,7 +63,7 @@ public class CourseController {
     @GetMapping("/courses/create")
     public String showCreateForm(Model model) {
         model.addAttribute("courseForm", new CourseFormDTO());
-        model.addAttribute("tags", tagService.findAll());
+        model.addAttribute("tags", tagServiceImpl.findAll());
         return "course-form";
     }
 

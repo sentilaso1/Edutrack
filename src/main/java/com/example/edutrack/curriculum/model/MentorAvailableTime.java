@@ -41,4 +41,9 @@ public class MentorAvailableTime {
         return day;
     }
 
+    @Override
+    public String toString() {
+        return "MentorAvailableTime {mentorId=" + mentorId + ", slotId=" + slotId + ", day=" + day + "}";
+    }
+
 }

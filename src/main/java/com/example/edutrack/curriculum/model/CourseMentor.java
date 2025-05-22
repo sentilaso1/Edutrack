@@ -7,7 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import java.util.Date;
 
 @Entity
-@Table(name = "course_mentors")
+@Table(name = "course_mentor")
 public class CourseMentor {
 
     @EmbeddedId
@@ -26,9 +26,6 @@ public class CourseMentor {
     @Column(name = "created_date", nullable = false)
     @CreatedDate
     private Date createdDate = new Date();
-
-    public CourseMentor() {
-    }
 
     public CourseMentor(CourseMentorId id, Date createdDate) {
         this.id = id;
@@ -49,6 +46,14 @@ public class CourseMentor {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public Mentor getMentor() {
+        return mentor;
     }
 
     @Override

@@ -1,28 +1,26 @@
-package com.example.edutrack.curriculum.service;
+package com.example.edutrack.curriculum.service.implementation;
 
 import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseTag;
-import com.example.edutrack.curriculum.model.TeachingMaterials;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.CourseTagsRepository;
 import com.example.edutrack.curriculum.repository.TeachingMaterialsRepository;
+import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @Service
-public class CourseService {
+public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final TeachingMaterialsRepository teachingMaterialsRepository;
     private final CourseTagsRepository courseTagsRepository;
 
     @Autowired
-    public CourseService(CourseRepository courseRepository, TeachingMaterialsRepository teachingMaterialsRepository, CourseTagsRepository courseTagsRepository) {
+    public CourseServiceImpl(CourseRepository courseRepository, TeachingMaterialsRepository teachingMaterialsRepository, CourseTagsRepository courseTagsRepository) {
         this.courseRepository = courseRepository;
         this.teachingMaterialsRepository = teachingMaterialsRepository;
         this.courseTagsRepository = courseTagsRepository;

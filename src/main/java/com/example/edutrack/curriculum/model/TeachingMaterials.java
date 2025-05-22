@@ -21,6 +21,12 @@ public class TeachingMaterials {
     @Column(name = "upload_date")
     private LocalDateTime uploadDate = LocalDateTime.now();
 
+    public TeachingMaterials() {}
+    public TeachingMaterials(byte[] file, Course course) {
+        this.file = file;
+        this.course = course;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -38,6 +44,17 @@ public class TeachingMaterials {
     }
     public void setCourse(Course course) {
         this.course = course;
+    }
+
+    public LocalDateTime getUploadDate() {
+        return uploadDate;
+    }
+    public void setUploadDate(LocalDateTime uploadDate) {
+        this.uploadDate = uploadDate;
+    }
+
+    public String toString() {
+        return "TeachingMaterials {id=" + id + ", file=" + file + ", course=" + course + ", uploadDate=" + uploadDate + "}";
     }
 
 

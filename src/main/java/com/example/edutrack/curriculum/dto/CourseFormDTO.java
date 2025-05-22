@@ -37,4 +37,13 @@ public class CourseFormDTO {
         return files;
     }
 
+    public void setFiles(MultipartFile[] files) {
+        this.files = files;
+    }
+
+    @Override
+    public String toString() {
+        return "CourseFormDTO {Name=" + name + ", description=" + description + ", tagIds=" + tagIds + "}";
+    }
+
 }

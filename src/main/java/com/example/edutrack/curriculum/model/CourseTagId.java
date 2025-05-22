@@ -53,5 +53,9 @@ public class CourseTagId implements Serializable {
         return Objects.hash(courseId, tagId);
     }
 
+    @Override
+    public String toString() {
+        return "CourseTagID {courseId=" + courseId + ", tagId=" + tagId + "}";
+    }
 
 }

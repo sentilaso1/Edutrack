@@ -26,4 +26,9 @@ public class MentorDTO {
         return avatarBase64;
     }
 
+    @Override
+    public String toString() {
+        return "MentorDTO {id=" + id + ", name=" + name + ", avatarBase64=" + avatarBase64 + "}";
+    }
+
 }
