@@ -1,7 +1,7 @@
 package com.example.edutrack.auth.service;
 
 import com.example.edutrack.accounts.model.User;
-import com.example.edutrack.auth.repository.UserRepository;
+import com.example.edutrack.accounts.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

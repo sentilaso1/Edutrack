@@ -1,12 +1,11 @@
 package com.example.edutrack.accounts.repository;
 
-import java.util.UUID;
-
+import com.example.edutrack.accounts.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.edutrack.accounts.model.User;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
-
-
+    Optional<User> findByEmail(String email);
 }
