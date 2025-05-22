@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Chi Tiết Khóa Học</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #FFFCFC;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #86A788;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            border-radius: 10px;
+        }
+        .section {
+            background-color: #FFFDEC;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #86A788;
+        }
+        .tag-list span {
+            display: inline-block;
+            background-color: #FFE2E2;
+            padding: 5px 10px;
+            margin: 5px 5px 0 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        ul.materials {
+            padding-left: 20px;
+        }
+        .mentor-card {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #E6F1E6;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .mentor-card:hover {
+            background-color: #d1e6d1;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">Chi Tiết Khóa Học</div>
+
+    <div class="section">
+        <h2>Mô tả khóa học</h2>
+        <p th:text="${course.description}">Mô tả khóa học</p>
+    </div>
+
+    <div class="section">
+        <h2>Thẻ khóa học (Tags)</h2>
+        <div class="tag-list">
+            <span th:each="tag : ${tagList}" th:text="'#' + ${tag.title}">#TagTitle</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Chương trình học</h2>
+        <ul class="materials">
+            <li>Giới thiệu Java và Lập trình hướng đối tượng</li>
+            <li>File I/O và Stream</li>
+            <li>Thiết kế Giao diện người dùng với Swing</li>
+            <li>Kết nối cơ sở dữ liệu MySQL</li>
+        </ul>
+    </div>
+
+    <div th:each="mt : ${mentorList}" class="mentor-card">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <!-- Mentor Info -->
+            <div style="display: flex; align-items: center;">
+                <strong th:text="${mt.name}">Mentor Name</strong>
+                <img th:if="${mt.avatarBase64 != null}"
+                     th:src="'data:image/png;base64,' + ${mt.avatarBase64}"
+                     alt="Avatar"
+                     style="height:30px; width:30px; border-radius:50%; margin-left:10px;">
+            </div>
+
+            <!-- Action Buttons -->
+            <div>
+                <a th:href="'/courses/' + ${courseId} + '/mentor/' + ${mt.id}"
+                   style="text-decoration: none; background-color: #86A788; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 5px;">
+                    Xem Hồ Sơ
+                </a>
+                <a th:href="'/courses/' + ${courseId} + '/mentor/' + ${mt.id}"
+                   style="text-decoration: none; background-color: #F4B860; color: white; padding: 5px 10px; border-radius: 5px;">
+                    Lịch Trống
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+<div class="footer">© 2025 Mentee Learning. All rights reserved.</div>
+</div>
+</body>
+</html>

@@ -3,7 +3,10 @@ package com.example.edutrack.curriculum.model;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -29,11 +32,9 @@ public class Course {
 
     @Column(name = "created_date", nullable = false)
     @CreatedDate
-    private Date createdDate = new Date();
+    private LocalDateTime createdDate = LocalDateTime.now();
 
-    public Course() {
-    }
-
+    public Course(){}
     public Course(String name, String description, Boolean isOpen, Boolean isOpen1) {
         this.name = name;
         this.description = description;
@@ -81,13 +82,16 @@ public class Course {
         isOpen = open;
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    private List<TeachingMaterials> materials = new ArrayList<>();
 
     @Override
     public String toString() {
