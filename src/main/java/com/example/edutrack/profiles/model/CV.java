@@ -35,6 +35,9 @@ public class CV {
     @Column(name = "portfolio_url", length = 1024, nullable = false)
     private String portfolioUrl;
 
+    @Column(name = "is_approved", nullable = false)
+    private Boolean isApproved = Boolean.FALSE;
+
     @Column(name = "updated_date", nullable = false)
     @LastModifiedDate
     private Date updatedDate = new Date();
