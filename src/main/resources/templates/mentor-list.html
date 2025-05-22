@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Mentor List</title>
+</head>
+<body>
+<h1>Mentor List</h1>
+
+<form method="get" action="/mentors">
+  <label>Name: <input type="text" name="name" th:value="${name ?: ''}" /></label>
+  <label>Expertise: <input type="text" name="expertise" th:value="${expertise}" /></label>
+  <label>Min Rating: <input type="number" step="0.1" name="rating" th:value="${rating}" /></label>
+  <label>Min Sessions: <input type="number" name="totalSessions" th:value="${totalSessions}" /></label>
+  <label>Available:
+    <select name="isAvailable">
+      <option th:value="''" th:selected="${isAvailable == null}">Any</option>
+      <option th:value="true" th:selected="${isAvailable == true}">Yes</option>
+      <option th:value="false" th:selected="${isAvailable == false}">No</option>
+    </select>
+  </label>
+  <button type="submit">Search</button>
+</form>
+
+<div th:if="${mentors.size() == 0}">
+  <p>No mentors found.</p>
+</div>
+
+<ul th:if="${mentors.size() > 0}">
+  <li th:each="mentor : ${mentors}">
+    <p><strong>Name:</strong> <span th:text="${mentor.getFullName()}"></span></p>
+    <p><strong>Email:</strong> <span th:text="${mentor.getEmail()}"></span></p>
+    <p><strong>Phone:</strong> <span th:text="${mentor.getPhone()}"></span></p>
+    <p><strong>Expertise:</strong> <span th:text="${mentor.getExpertise()}"></span></p>
+    <p><strong>Rating:</strong> <span th:text="${mentor.getRating()}"></span></p>
+    <p><strong>Available:</strong> <span th:text="${mentor.isAvailable() ? 'Yes' : 'No'}"></span></p>
+    <p><strong>Total Sessions:</strong> <span th:text="${mentor.getTotalSessions()}"></span></p>
+    <hr>
+  </li>
+</ul>
+
+</body>
+</html>
