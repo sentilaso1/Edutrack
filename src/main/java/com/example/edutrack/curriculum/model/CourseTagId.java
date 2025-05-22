@@ -57,5 +57,4 @@ public class CourseTagId implements Serializable {
     public String toString() {
         return "CourseTagID {courseId=" + courseId + ", tagId=" + tagId + "}";
     }
-
 }

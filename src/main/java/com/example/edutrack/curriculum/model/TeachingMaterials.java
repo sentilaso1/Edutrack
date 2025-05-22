@@ -3,6 +3,7 @@ package com.example.edutrack.curriculum.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "TEACHING_MATERIALS")
@@ -19,7 +20,7 @@ public class TeachingMaterials {
     private Course course;
 
     @Column(name = "upload_date")
-    private LocalDateTime uploadDate = LocalDateTime.now();
+    private Date uploadDate = new Date();
 
     public TeachingMaterials() {}
     public TeachingMaterials(byte[] file, Course course) {
@@ -46,16 +47,14 @@ public class TeachingMaterials {
         this.course = course;
     }
 
-    public LocalDateTime getUploadDate() {
+    public Date getUploadDate() {
         return uploadDate;
     }
-    public void setUploadDate(LocalDateTime uploadDate) {
+    public void setUploadDate(Date uploadDate) {
         this.uploadDate = uploadDate;
     }
 
     public String toString() {
         return "TeachingMaterials {id=" + id + ", file=" + file + ", course=" + course + ", uploadDate=" + uploadDate + "}";
     }
-
-
 }

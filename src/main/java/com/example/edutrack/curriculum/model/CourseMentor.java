@@ -13,6 +13,8 @@ public class CourseMentor {
     @EmbeddedId
     private CourseMentorId id;
 
+    public CourseMentor() {}
+
     @ManyToOne
     @MapsId("courseId")
     @JoinColumn(name = "course_id")

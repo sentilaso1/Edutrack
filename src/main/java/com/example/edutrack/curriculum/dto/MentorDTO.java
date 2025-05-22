@@ -30,5 +30,4 @@ public class MentorDTO {
     public String toString() {
         return "MentorDTO {id=" + id + ", name=" + name + ", avatarBase64=" + avatarBase64 + "}";
     }
-
 }

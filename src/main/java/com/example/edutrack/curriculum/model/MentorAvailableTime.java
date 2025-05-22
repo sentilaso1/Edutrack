@@ -45,5 +45,4 @@ public class MentorAvailableTime {
     public String toString() {
         return "MentorAvailableTime {mentorId=" + mentorId + ", slotId=" + slotId + ", day=" + day + "}";
     }
-
 }

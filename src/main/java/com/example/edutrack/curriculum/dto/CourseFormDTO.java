@@ -45,5 +45,4 @@ public class CourseFormDTO {
     public String toString() {
         return "CourseFormDTO {Name=" + name + ", description=" + description + ", tagIds=" + tagIds + "}";
     }
-
 }
