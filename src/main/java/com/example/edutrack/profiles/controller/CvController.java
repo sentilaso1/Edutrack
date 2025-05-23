@@ -36,6 +36,12 @@ public class CvController {
             } else {
                 cvList = cvService.findAllCVsDateAsc();
             }
+        } else {
+            if (sort == null || sort.equals(CVFilterForm.SORT_DATE_DESC)) {
+                cvList = cvService.findAllCVsByStatusDateDesc(filter);
+            } else {
+                cvList = cvService.findAllCVsByStatusDateAsc(filter);
+            }
         }
 
         model.addAttribute("cvList", cvList);

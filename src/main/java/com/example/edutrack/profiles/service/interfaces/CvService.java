@@ -8,4 +8,6 @@ public interface CvService {
     List<CV> findAllCVs();
     List<CV> findAllCVsDateAsc();
     List<CV> findAllCVsDateDesc();
+    List<CV> findAllCVsByStatusDateAsc(String status);
+    List<CV> findAllCVsByStatusDateDesc(String status);
 }

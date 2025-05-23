@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface CvRepository extends JpaRepository<CV, UUID> {
     List<CV> findAllByOrderByUpdatedDateDesc();
     List<CV> findAllByOrderByUpdatedDateAsc();
+    List<CV> findAllByStatusOrderByUpdatedDateDesc(String status);
+    List<CV> findAllByStatusOrderByUpdatedDateAsc(String status);
 }

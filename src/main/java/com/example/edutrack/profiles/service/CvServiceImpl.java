@@ -6,6 +6,7 @@ import com.example.edutrack.profiles.service.interfaces.CvService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +30,22 @@ public class CvServiceImpl implements CvService {
 
     @Override
     public List<CV> findAllCVsDateDesc() {
-        return cvRepository.findAllByOrderByUpdatedDateDesc();
+        List<CV> list = new ArrayList<>();
+
+        list.addAll(cvRepository.findAllByStatusOrderByUpdatedDateDesc(CV.STATUS_PENDING));
+        list.addAll(cvRepository.findAllByStatusOrderByUpdatedDateDesc(CV.STATUS_APPROVED));
+        list.addAll(cvRepository.findAllByStatusOrderByUpdatedDateDesc(CV.STATUS_REJECTED));
+
+        return list;
+    }
+
+    @Override
+    public List<CV> findAllCVsByStatusDateAsc(String status) {
+        return cvRepository.findAllByStatusOrderByUpdatedDateAsc(status);
+    }
+
+    @Override
+    public List<CV> findAllCVsByStatusDateDesc(String status) {
+        return cvRepository.findAllByStatusOrderByUpdatedDateDesc(status);
     }
 }
