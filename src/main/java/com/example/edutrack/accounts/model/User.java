@@ -36,13 +36,13 @@ public class User {
     @CreatedDate
     private Date createdDate = new Date();
 
-    //field for lock user because of too many failed login attempts (secutity reasons)
+    //field for lock user because of too many failed login attempts (security reasons)
     @Column(name = "is_locked", nullable = false)
-    private Boolean isLocked = false;
+    private Boolean isLocked = Boolean.FALSE;
 
     //field for delete user
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private Boolean isActive = Boolean.TRUE;
 
     public User() {
     }
@@ -131,6 +131,22 @@ public class User {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public Boolean getLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(Boolean locked) {
+        isLocked = locked;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 
     @Override
