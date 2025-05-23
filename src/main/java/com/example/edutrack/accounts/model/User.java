@@ -36,6 +36,14 @@ public class User {
     @CreatedDate
     private Date createdDate = new Date();
 
+    //field for lock user because of too many failed login attempts (secutity reasons)
+    @Column(name = "is_locked", nullable = false)
+    private Boolean isLocked = false;
+
+    //field for delete user
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
     public User() {
     }
 
@@ -44,6 +52,21 @@ public class User {
         this.password = password;
         this.fullName = fullName;
         this.phone = phone;
+    }
+
+    public Boolean getIsLocked() {
+        return isLocked;
+    }
+
+    public void setIsLocked(Boolean isLocked) {
+        this.isLocked = isLocked;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     public UUID getId() {
