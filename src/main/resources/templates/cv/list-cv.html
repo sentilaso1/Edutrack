@@ -1,0 +1,166 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduTrack - CV Approval List</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
+
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 0.5em;
+            padding: 0.5em;
+        }
+
+        .sidebar > form {
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0.5em;
+        }
+
+        .radio-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cv-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5em;
+        }
+
+        .cv-item {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+
+            padding: 0.5em;
+            border-radius: 0.25em;
+            background-color: #dadada;
+        }
+
+        .timestamp {
+            margin-bottom: 1em;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25em;
+        }
+
+        .tag-item {
+            background-color: #b5b5b5;
+            border-radius: 0.25em;
+            padding: 0.25em;
+        }
+    </style>
+</head>
+<body class="viewport">
+<h1 style="padding: 0.5em">CV Approval List</h1>
+<div class="main-grid">
+    <aside class="sidebar">
+        <form>
+            <label for="sort">Sorting Order:</label>
+            <select name="sort" id="sort" style="margin-bottom: 1em">
+                <option value="date-desc" selected>Date descending</option>
+                <option value="date-asc">Date ascending</option>
+            </select>
+
+            <p>Filter Options:</p>
+            <div class="radio-list" style="margin-bottom: 1em">
+                <label for="pending">
+                    <input type="radio" name="filter" id="pending" value="pending">
+                    Pending
+                </label>
+
+                <label for="approved">
+                    <input type="radio" name="filter" id="approved" value="approved">
+                    Approved
+                </label>
+
+                <label for="rejected">
+                    <input type="radio" name="filter" id="rejected" value="rejected">
+                    Rejected
+                </label>
+            </div>
+
+            <button type="submit">Filter</button>
+        </form>
+    </aside>
+
+    <main class="cv-grid">
+        <div th:each="cv : ${cvList}" class="cv-item">
+            <div class="timestamp">
+                <time th:text="${cv.updatedDate.toLocaleString()}" th:datetime="${cv.updatedDate.toString()}"></time>
+            </div>
+
+            <div class="">
+                <p th:text="${cv.user.fullName}" style="font-size: 1.5em; font-weight: bold; margin-bottom: 0.25em"></p>
+                <p th:text="${cv.summary}"></p>
+            </div>
+
+            <div class="">
+                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Skills</h3>
+                <div class="tags">
+                    <div class="tag-item" th:each="skill : ${cv.getSkillItems()}" th:text="${skill}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="">
+                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Education</h3>
+                <div class="tags">
+                    <div class="tag-item" th:each="education : ${cv.getEducationItems()}" th:text="${education}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="">
+                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Experience</h3>
+                <div class="tags">
+                    <div class="tag-item" th:if="${!cv.getExperienceItems().isEmpty()}"
+                         th:each="experience : ${cv.getExperienceItems()}" th:text="${experience}">
+                    </div>
+
+                    <p th:if="${cv.getExperienceItems().isEmpty()}">None</p>
+                </div>
+            </div>
+
+            <div class="">
+                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Certifications</h3>
+                <div class="tags">
+                    <div class="tag-item" th:if="${!cv.getCertificationItems().isEmpty()}"
+                         th:each="certification : ${cv.getCertificationItems()}" th:text="${certification}">
+                    </div>
+
+                    <p th:if="${cv.getCertificationItems().isEmpty()}">None</p>
+                </div>
+            </div>
+
+            <div class="">
+                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Certifications</h3>
+                <div class="tags">
+                    <div class="tag-item" th:if="${!cv.getLanguageItems().isEmpty()}"
+                         th:each="language : ${cv.getLanguageItems()}" th:text="${language}">
+                    </div>
+
+                    <p th:if="${cv.getLanguageItems().isEmpty()}">None</p>
+                </div>
+            </div>
+
+            <div class="">
+                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Portfolio</h3>
+                <a th:if="${cv.getPortfolioUrl != null && !cv.getPortfolioUrl().isEmpty() && !cv.getPortfolioUrl().isBlank()}"
+                   th:text="${cv.getPortfolioUrl()}" th:href="${cv.getPortfolioUrl()}"
+                   style="color: dodgerblue; text-decoration: underline"></a>
+                <p th:if="${cv.getPortfolioUrl() == null || cv.getPortfolioUrl().isEmpty() || cv.getPortfolioUrl().isBlank()}">
+                    None</p>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

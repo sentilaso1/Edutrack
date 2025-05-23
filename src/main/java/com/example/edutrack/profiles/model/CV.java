@@ -1,16 +1,23 @@
 package com.example.edutrack.profiles.model;
 
-import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "cv")
 public class CV {
+    public static final String ITEM_SEPARATOR = ";";
+
+    public static final String STATUS_PENDING = "pending";
+    public static final String STATUS_APPROVED = "approved";
+    public static final String STATUS_REJECTED = "rejected";
+
     @Id
     @Column(name = "user_id")
     private UUID id;
@@ -19,7 +26,7 @@ public class CV {
     private String summary;
 
     @Column(name = "experience_years", nullable = false)
-    private Integer experienceYears;
+    private Integer experienceYears = 0;
 
     @Column(name = "skills", length = 512, nullable = false)
     private String skills;
@@ -27,17 +34,20 @@ public class CV {
     @Column(name = "education", length = 512, nullable = false)
     private String education;
 
-    @Column(name = "certifications", length = 512, nullable = false)
+    @Column(name = "experience", length = 512)
+    private String experience;
+
+    @Column(name = "certifications", length = 512)
     private String certifications;
 
-    @Column(name = "languages", length = 512, nullable = false)
+    @Column(name = "languages", length = 512)
     private String languages;
 
-    @Column(name = "portfolio_url", length = 1024, nullable = false)
+    @Column(name = "portfolio_url", length = 1024)
     private String portfolioUrl;
 
-    @Column(name = "is_approved", nullable = false)
-    private Boolean isApproved = Boolean.FALSE;
+    @Column(name = "status", nullable = false)
+    private String status = STATUS_PENDING;
 
     @Column(name = "updated_date", nullable = false)
     @LastModifiedDate
@@ -51,14 +61,11 @@ public class CV {
 
     }
 
-    public CV(String summary, Integer experienceYears, String skills, String education, String certifications, String languages, String portfolioUrl, User user) {
+    public CV(String summary, Integer experienceYears, String skills, String education, User user) {
         this.summary = summary;
         this.experienceYears = experienceYears;
         this.skills = skills;
         this.education = education;
-        this.certifications = certifications;
-        this.languages = languages;
-        this.portfolioUrl = portfolioUrl;
         this.user = user;
     }
 
@@ -75,6 +82,9 @@ public class CV {
     }
 
     public void setSummary(String summary) {
+        if (summary == null || summary.isEmpty()) {
+            throw new IllegalArgumentException("Summary must not be empty");
+        }
         this.summary = summary;
     }
 
@@ -91,6 +101,9 @@ public class CV {
     }
 
     public void setSkills(String skills) {
+        if (skills == null || skills.isEmpty()) {
+            throw new IllegalArgumentException("Skills must not be empty");
+        }
         this.skills = skills;
     }
 
@@ -99,7 +112,33 @@ public class CV {
     }
 
     public void setEducation(String education) {
+        if (education == null || education.isEmpty()) {
+            throw new IllegalArgumentException("Education must not be empty");
+        }
         this.education = education;
+    }
+
+    public String getExperience() {
+        return experience;
+    }
+
+    public void setExperience(String experience) {
+        this.experience = experience;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        if (status == null || status.isEmpty()) {
+            throw new IllegalArgumentException("Status must not be empty");
+        }
+
+        if (!status.equals(STATUS_PENDING) && !status.equals(STATUS_APPROVED) && !status.equals(STATUS_REJECTED)) {
+            throw new IllegalArgumentException("Status must be pending, approved or rejected");
+        }
+        this.status = status;
     }
 
     public String getCertifications() {
@@ -142,6 +181,37 @@ public class CV {
         this.user = user;
     }
 
+    private static List<String> getItemList(String itemString) {
+        if (itemString == null || itemString.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> result = new ArrayList<>(List.of(itemString.split(ITEM_SEPARATOR)));
+        result.removeIf(String::isEmpty);
+
+        return result;
+    }
+
+    public List<String> getSkillItems() {
+        return getItemList(getSkills());
+    }
+
+    public List<String> getEducationItems() {
+        return getItemList(getEducation());
+    }
+
+    public List<String> getExperienceItems() {
+        return getItemList(getExperience());
+    }
+
+    public List<String> getCertificationItems() {
+        return getItemList(getCertifications());
+    }
+
+    public List<String> getLanguageItems() {
+        return getItemList(getLanguages());
+    }
+
     @Override
     public String toString() {
         return "CV{" +
@@ -150,9 +220,11 @@ public class CV {
                 ", experienceYears=" + experienceYears +
                 ", skills='" + skills + '\'' +
                 ", education='" + education + '\'' +
+                ", experience='" + experience + '\'' +
                 ", certifications='" + certifications + '\'' +
                 ", languages='" + languages + '\'' +
                 ", portfolioUrl='" + portfolioUrl + '\'' +
+                ", status='" + status + '\'' +
                 ", updatedDate=" + updatedDate +
                 ", user=" + user +
                 '}';
