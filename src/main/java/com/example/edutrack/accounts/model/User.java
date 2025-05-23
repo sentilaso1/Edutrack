@@ -9,6 +9,9 @@ import java.util.UUID;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
+    public static final String GENDER_MALE = "male";
+    public static final String GENDER_FEMALE = "female";
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -24,6 +27,12 @@ public class User {
 
     @Column(name = "phone", nullable = false)
     private String phone;
+
+    @Column(name = "gender", nullable = false)
+    private String gender;
+
+    @Column(name = "birth_date", nullable = false)
+    private Date birthDate;
 
     @Lob
     @Column(columnDefinition = "LONGBLOB")
@@ -107,6 +116,24 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        if (gender != null && (gender.equals(GENDER_MALE) || gender.equals(GENDER_FEMALE))) {
+            this.gender = gender;
+        }
+    }
+
+    public Date getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
     }
 
     public byte[] getAvatar() {
