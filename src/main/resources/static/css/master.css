@@ -20,10 +20,12 @@ time, mark, audio, video {
 }
 /* Reset all elements */
 
-.viewport {
+* {
     box-sizing: border-box;
-    min-height: 100svh;
-    width: 100vw;
+}
 
+.viewport {
+    min-height: 100svh;
+    max-width: 100svw;
     font-family: sans-serif;
 }

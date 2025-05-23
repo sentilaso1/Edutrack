@@ -7,9 +7,10 @@
 
     <style>
         .main-grid {
+            max-width: 100%;
             display: grid;
             grid-template-columns: 1fr 3fr;
-            gap: 0.5em;
+            gap: 1.5em;
             padding: 0.5em;
         }
 
@@ -26,9 +27,9 @@
         }
 
         .cv-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.5em;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5em;
         }
 
         .cv-item {
@@ -36,25 +37,76 @@
             width: 100%;
             height: 100%;
 
-            padding: 0.5em;
             border-radius: 0.25em;
-            background-color: #dadada;
+            background-color: #dddddd;
         }
 
-        .timestamp {
+        .cv-item .status {
+            border-radius: 0.25em 0.25em 0 0;
+            padding: 0.5em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cv-item .status span {
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .cv-item .content {
+            padding: 0.5em;
+        }
+
+        .cv-item .profile-section {
+            display: flex;
+            gap: 1em;
+            margin-top: 0.5em;
             margin-bottom: 1em;
+            align-items: center;
         }
 
-        .tags {
+        .cv-item .avatar-frame {
+            aspect-ratio: 1/1;
+            height: 6em;
+            border-radius: 100%;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .avatar-frame svg {
+            aspect-ratio: 1/1;
+            width: 60%;
+        }
+
+        .cv-item .tags {
             display: flex;
             flex-wrap: wrap;
             gap: 0.25em;
         }
 
-        .tag-item {
+        .cv-item .tag-item {
             background-color: #b5b5b5;
             border-radius: 0.25em;
             padding: 0.25em;
+        }
+
+        .small-heading {
+            font-weight: bold;
+            margin-bottom: 0.25em;
+        }
+
+        .bg-approved {
+            background-color: #86A788;
+        }
+
+        .bg-rejected {
+            background-color: #e87878;
+        }
+
+        .bg-pending {
+            background-color: #F4B860;
         }
     </style>
 </head>
@@ -63,13 +115,15 @@
 <div class="main-grid">
     <aside class="sidebar">
         <form>
-            <label for="sort">Sorting Order:</label>
+            <h3 class="small-heading">
+                <label for="sort">Sorting Order:</label>
+            </h3>
             <select name="sort" id="sort" style="margin-bottom: 1em">
                 <option value="date-desc" selected>Date descending</option>
                 <option value="date-asc">Date ascending</option>
             </select>
 
-            <p>Filter Options:</p>
+            <h3 class="small-heading">Filter Options:</h3>
             <div class="radio-list" style="margin-bottom: 1em">
                 <label for="pending">
                     <input type="radio" name="filter" id="pending" value="pending">
@@ -93,71 +147,53 @@
 
     <main class="cv-grid">
         <div th:each="cv : ${cvList}" class="cv-item">
-            <div class="timestamp">
+            <div class="status" th:classappend="${cv.status.equals('approved') ? 'bg-approved' : cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending'}">
+                <span th:text="${cv.status}"></span>
                 <time th:text="${cv.updatedDate.toLocaleString()}" th:datetime="${cv.updatedDate.toString()}"></time>
             </div>
 
-            <div class="">
-                <p th:text="${cv.user.fullName}" style="font-size: 1.5em; font-weight: bold; margin-bottom: 0.25em"></p>
-                <p th:text="${cv.summary}"></p>
-            </div>
-
-            <div class="">
-                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Skills</h3>
-                <div class="tags">
-                    <div class="tag-item" th:each="skill : ${cv.getSkillItems()}" th:text="${skill}">
-                    </div>
-                </div>
-            </div>
-
-            <div class="">
-                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Education</h3>
-                <div class="tags">
-                    <div class="tag-item" th:each="education : ${cv.getEducationItems()}" th:text="${education}">
-                    </div>
-                </div>
-            </div>
-
-            <div class="">
-                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Experience</h3>
-                <div class="tags">
-                    <div class="tag-item" th:if="${!cv.getExperienceItems().isEmpty()}"
-                         th:each="experience : ${cv.getExperienceItems()}" th:text="${experience}">
+            <div class="content">
+                <div class="profile-section">
+                    <div class="avatar-frame">
+                        <svg th:if="${cv.user.avatar == null}" xmlns="http://www.w3.org/2000/svg"
+                             class="bi bi-person-fill" viewBox="0 0 16 16">
+                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                        </svg>
                     </div>
 
-                    <p th:if="${cv.getExperienceItems().isEmpty()}">None</p>
-                </div>
-            </div>
-
-            <div class="">
-                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Certifications</h3>
-                <div class="tags">
-                    <div class="tag-item" th:if="${!cv.getCertificationItems().isEmpty()}"
-                         th:each="certification : ${cv.getCertificationItems()}" th:text="${certification}">
+                    <div>
+                        <p th:text="${cv.user.fullName}"
+                           style="font-size: 1.5em; font-weight: bold; margin-bottom: 0.25em"></p>
+                        <p th:text="${cv.summary}"></p>
                     </div>
-
-                    <p th:if="${cv.getCertificationItems().isEmpty()}">None</p>
                 </div>
-            </div>
 
-            <div class="">
-                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Certifications</h3>
-                <div class="tags">
-                    <div class="tag-item" th:if="${!cv.getLanguageItems().isEmpty()}"
-                         th:each="language : ${cv.getLanguageItems()}" th:text="${language}">
+                <div>
+                    <h3 style="margin-top: 1em; margin-bottom: 0.5em">Information</h3>
+                    <div>
+                        <p>Gender: <span th:text="${cv.user.gender}"></span></p>
+                        <p>Date of Birth:
+                            <time th:text="${cv.user.birthDate.toLocaleString()}"
+                                  th:datetime="${cv.user.birthDate.toString()}"></time>
+                        </p>
                     </div>
-
-                    <p th:if="${cv.getLanguageItems().isEmpty()}">None</p>
                 </div>
-            </div>
 
-            <div class="">
-                <h3 style="margin-top: 1em; margin-bottom: 0.5em">Portfolio</h3>
-                <a th:if="${cv.getPortfolioUrl != null && !cv.getPortfolioUrl().isEmpty() && !cv.getPortfolioUrl().isBlank()}"
-                   th:text="${cv.getPortfolioUrl()}" th:href="${cv.getPortfolioUrl()}"
-                   style="color: dodgerblue; text-decoration: underline"></a>
-                <p th:if="${cv.getPortfolioUrl() == null || cv.getPortfolioUrl().isEmpty() || cv.getPortfolioUrl().isBlank()}">
-                    None</p>
+                <div class="">
+                    <h3 style="margin-top: 1em; margin-bottom: 0.5em">Skills</h3>
+                    <div class="tags">
+                        <div class="tag-item" th:each="skill : ${cv.getSkillItems()}" th:text="${skill}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="">
+                    <h3 style="margin-top: 1em; margin-bottom: 0.5em">Education</h3>
+                    <div class="tags">
+                        <div class="tag-item" th:each="education : ${cv.getEducationItems()}" th:text="${education}">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
