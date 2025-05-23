@@ -1,4 +1,4 @@
-package com.example.edutrack.accounts.model;
+package com.example.edutrack.accounts.dto;
 
 public class UserFilter {
         private String email;
