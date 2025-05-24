@@ -1,0 +1,49 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduTrack - Page Not Found</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 5vh 2vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 6rem;
+            margin-bottom: 0;
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        a {
+            color: #007BFF;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 1rem;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="viewport">
+<h1>404</h1>
+<p>The page you're looking for doesn't exist.</p>
+<p>
+    <a th:href="@{/}">Home</a>
+    |
+    <a th:href="@{/contact}">Contact Us</a>
+</p>
+</body>
+</html>
