@@ -1,0 +1,294 @@
+body{
+  overflow: visible;
+}
+/* layout.css */
+.container{
+    padding-inline: 0;
+}
+
+/* Bố cục chia 1/4 trái và 3/4 phải */
+.course-section-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Bộ lọc bên trái */
+.course-filter {
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  max-width: 240px;
+}
+
+.course-filter form label {
+  font-size: 14px;
+  color: #333;
+}
+
+.filter-price {
+  margin-top: 24px;
+}
+
+.filter-subtitle {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.price-filter {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.price-filter li {
+  margin-bottom: 8px;
+}
+
+.price-filter input[type="radio"] {
+  margin-right: 6px;
+}
+
+
+.card-container {
+  font-size: 1px !important;
+}
+
+/* Danh sách khóa học bên phải */
+.course-listing {
+  width: 80%;
+}
+
+/* Grid hiển thị 3 card mỗi dòng */
+.grid-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 24px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.course .grid-list {    
+    margin-block: 0 !important;
+    padding-block: 0 !important;
+  }
+
+/* Responsive: 2 card trên tablet */
+@media (max-width: 1024px) {
+  .course-section-layout {
+    flex-direction: column;
+  }
+
+  .course-filter,
+  .course-listing {
+    width: 100%;
+  }
+
+  .course .grid-list {
+    grid-template-columns: repeat(2, 1fr) !important;
+    margin-block: 0 !important;
+    padding-block: 0 !important;
+  }
+}
+
+/* Responsive: 1 card trên mobile */
+@media (max-width: 600px) {
+  .grid-list {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+h6{
+    font-size: medium !important;
+}
+
+.card-meta-inlayout {
+  display: block !important;
+  align-items: center;
+}
+
+.title-sm span{
+    font-size: small !important;
+}
+
+/* Thanh tìm kiếm - nằm giữa, không nền, có hiệu ứng focus */
+.search-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2em;
+}
+
+.search-form {
+  display: flex;
+  width: 100%;
+  max-width: 600px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+/* Đổi màu viền khi focus */
+.search-form:focus-within {
+  border-color: hsl(356, 94%, 86%);
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 16px;
+  border: none;
+  outline: none;
+}
+
+.search-btn {
+  background: none;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 20px;
+  transition: color 0.2s ease;
+}
+
+.search-btn:hover {
+  color: hsl(357, 100%, 75%);
+}
+
+/* Filter bar layout */
+.filter-bar {
+  display: flex;
+  justify-content: space-between; /* căn sang phải */
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-inline: 16px;
+}
+
+
+/* Dropdown base */
+.dropdown {
+  position: relative;
+  margin: 0 2px;
+}
+
+.dropdown-toggle {
+  padding: 8px 16px;
+  font-size: 16px;
+  background-color: white;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.dropdown-toggle:focus {
+  outline: none;
+  border-color: hsl(356, 94%, 86%);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  z-index: 10;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  display: none;
+  min-width: 160px;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f0f0f0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  background-color: white;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(.active):not(:disabled) {
+  border-color: hsl(356, 94%, 86%);
+  color: hsl(357, 100%, 75%);
+}
+
+.page-btn.active {
+  background-color:hsl(357, 100%, 75%);
+  color: hsl(0, 0%, 100%);
+  border-color: hsl(357, 100%, 75%);
+  cursor: default;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-ellipsis {
+  padding: 8px 12px;
+  font-size: 15px;
+  color: #888;
+}
+.course-topbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.view-btn {
+  padding: 6px 10px;
+  font-size: 18px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.view-btn:hover {
+  border-color: hsl(356, 94%, 86%);
+  color: hsl(357, 100%, 75%);
+}
+
+.view-btn.active {
+  background-color:hsl(357, 100%, 75%);
+  color: hsl(0, 0%, 100%);
+  border-color: hsl(357, 100%, 75%);
+}
