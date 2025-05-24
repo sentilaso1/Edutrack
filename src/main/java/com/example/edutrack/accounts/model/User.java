@@ -9,6 +9,9 @@ import java.util.UUID;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
+    public static final String GENDER_MALE = "male";
+    public static final String GENDER_FEMALE = "female";
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,6 +28,12 @@ public class User {
     @Column(name = "phone", nullable = false)
     private String phone;
 
+    @Column(name = "gender", nullable = false)
+    private String gender;
+
+    @Column(name = "birth_date", nullable = false)
+    private Date birthDate;
+
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private byte[] avatar;
@@ -36,6 +45,14 @@ public class User {
     @CreatedDate
     private Date createdDate = new Date();
 
+    //field for lock user because of too many failed login attempts (security reasons)
+    @Column(name = "is_locked", nullable = false)
+    private Boolean isLocked = Boolean.FALSE;
+
+    //field for delete user
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = Boolean.TRUE;
+
     public User() {
     }
 
@@ -44,6 +61,21 @@ public class User {
         this.password = password;
         this.fullName = fullName;
         this.phone = phone;
+    }
+
+    public Boolean getIsLocked() {
+        return isLocked;
+    }
+
+    public void setIsLocked(Boolean isLocked) {
+        this.isLocked = isLocked;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     public UUID getId() {
@@ -86,6 +118,24 @@ public class User {
         this.phone = phone;
     }
 
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        if (gender != null && (gender.equals(GENDER_MALE) || gender.equals(GENDER_FEMALE))) {
+            this.gender = gender;
+        }
+    }
+
+    public Date getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
+    }
+
     public byte[] getAvatar() {
         return avatar;
     }
@@ -108,6 +158,22 @@ public class User {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public Boolean getLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(Boolean locked) {
+        isLocked = locked;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 
     @Override

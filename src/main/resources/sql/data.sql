@@ -1,44 +1,54 @@
--- USERS
-INSERT INTO users (id, email, password, full_name, phone, bio, avatar, created_date)
-VALUES
--- Mentees
-(UUID_TO_BIN('a1111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa'), 'alice@example.com', 'password123', 'Alice Johnson', '0123456789',
- 'Aspiring developer', NULL, NOW()),
-(UUID_TO_BIN('a2222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa'), 'ethan@example.com', 'password123', 'Ethan Tran', '0234567890',
- 'Loves algorithms', NULL, NOW()),
-(UUID_TO_BIN('a3333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa'), 'nina@example.com', 'password123', 'Nina Nguyen', '0345678901',
- 'Frontend enthusiast', NULL, NOW()),
+-- Mentor: Bob Smith
+INSERT INTO users (id, full_name, email, password, phone, is_active, is_locked, created_date, bio, gender,
+                   birth_date)
+VALUES (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'),
+        'Bob Smith',
+        'bob.smith@example.com',
+        'securepassword123',
+        '+1234567890',
+        1, 0, NOW(),
+        'Physics tutor who loves to teach complex topics in simple ways.',
+        'male',
+        '1985-04-10');
 
--- Mentors
-(UUID_TO_BIN('b1111111-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 'bob@example.com', 'password123', 'Bob Smith', '0987654321',
- 'Java backend enthusiast', NULL, NOW()),
-(UUID_TO_BIN('b2222222-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 'carol@example.com', 'password123', 'Carol White', '0112233445',
- 'Experienced mentor', NULL, NOW()),
-(UUID_TO_BIN('b3333333-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 'hassan@example.com', 'password123', 'Hassan Ali', '0456789012',
- 'Cloud specialist', NULL, NOW()),
+-- Mentor: Erin Black
+INSERT INTO users (id, full_name, email, password, phone, is_active, is_locked, created_date, bio, gender,
+                   birth_date)
+VALUES (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'),
+        'Erin Black',
+        'erin.black@example.com',
+        'anothersecurepass',
+        '+1234567891',
+        1, 0, NOW(),
+        'Passionate psychology mentor helping students find purpose.',
+        'female',
+        '1990-08-22');
 
--- Staff
-(UUID_TO_BIN('c1111111-cccc-cccc-cccc-cccccccccccc'), 'dave@example.com', 'password123', 'Dave Lee', '0998877665',
- 'Staff and admin', NULL, NOW()),
-(UUID_TO_BIN('c2222222-cccc-cccc-cccc-cccccccccccc'), 'sophia@example.com', 'password123', 'Sophia Lin', '0887766554',
- 'Manages users', NULL, NOW());
+-- Mentee: Frank Miller
+INSERT INTO users (id, full_name, email, password, phone, is_active, is_locked, created_date, bio, gender,
+                   birth_date)
+VALUES (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'),
+        'Frank Miller',
+        'frank.miller@example.com',
+        'frankpass2024',
+        '+1234567892',
+        1, 0, NOW(),
+        'Future software engineer, eager to learn.',
+        'male',
+        '2003-11-12');
 
--- MENTEES
-INSERT INTO mentees (user_id, total_sessions, interests)
-VALUES (UUID_TO_BIN('a1111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa'), 5, 'Web development, JavaScript'),
-       (UUID_TO_BIN('a2222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa'), 3, 'Competitive programming, C++'),
-       (UUID_TO_BIN('a3333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa'), 7, 'UI/UX Design, React');
-
--- MENTORS
-INSERT INTO mentors (user_id, is_available, total_sessions, expertise, rating, role)
-VALUES (UUID_TO_BIN('b1111111-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 1, 20, 'Spring Boot, Microservices', 4.5, 'Manager'),
-       (UUID_TO_BIN('b2222222-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 1, 50, 'Data Science, Machine Learning', 4.8, 'Admin'),
-       (UUID_TO_BIN('b3333333-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 0, 10, 'AWS, Docker, DevOps', 4.1, 'Manager');
-
--- STAFFS
-INSERT INTO staffs (user_id, role)
-VALUES (UUID_TO_BIN('c1111111-cccc-cccc-cccc-cccccccccccc'), 'Admin'),
-       (UUID_TO_BIN('c2222222-cccc-cccc-cccc-cccccccccccc'), 'Manager');
+-- Mentee: Harry Wilson
+INSERT INTO users (id, full_name, email, password, phone, is_active, is_locked, created_date, bio, gender,
+                   birth_date)
+VALUES (UUID_TO_BIN('88888888-8888-8888-8888-888888888888'),
+        'Harry Wilson',
+        'harry.wilson@example.com',
+        'harrysafe123',
+        '+1234567893',
+        1, 0, NOW(),
+        'Environmental science enthusiast exploring data science.',
+        'male',
+        '2001-06-03');
 
 
 -- COURSES
@@ -74,3 +84,64 @@ VALUES (UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'), 'Introduction to Ja
        (UUID_TO_BIN('d8888888-dddd-dddd-dddd-dddddddddddd'), 'Cybersecurity Essentials',
         'Understand the basics of securing systems and data, covering topics like encryption, firewalls, and ethical hacking.',
         1, 0, NOW());
+
+
+-- CV for Mentor: Bob Smith (UUID: 22222222-2222-2222-2222-222222222222)
+INSERT INTO cv (user_id, summary, experience_years, skills, education, experience,
+                certifications, languages, portfolio_url, status, updated_date)
+VALUES (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'),
+        'Experienced physics tutor with a passion for interactive teaching.',
+        5,
+        'Physics;Mathematics;Calculus;Problem Solving',
+        'BSc Physics;MSc Education',
+        'High School Physics Teacher;Private Tutor;Online Workshop Leader',
+        'Teaching Certificate;Cambridge International Certification',
+        'English;Spanish',
+        'https://www.linkedin.com/in/bobsmith',
+        'approved',
+        NOW());
+
+-- CV for Mentor: Erin Black (UUID: 55555555-5555-5555-5555-555555555555)
+INSERT INTO cv (user_id, summary, experience_years, skills, education, experience,
+                certifications, languages, portfolio_url, status, updated_date)
+VALUES (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'),
+        'Psychology mentor skilled in cognitive development and mentoring teens.',
+        4,
+        'Psychology;Mentoring;Active Listening;Conflict Resolution',
+        'BA Psychology;MA Child Development',
+        'Youth Counselor;School Guidance;Volunteer Mentor',
+        'Certified Mentor;Mental Health First Aid',
+        'English;French',
+        'https://www.linkedin.com/in/erinblack',
+        'approved',
+        NOW());
+
+-- CV for Mentee: Frank Miller (UUID: 66666666-6666-6666-6666-666666666666)
+INSERT INTO cv (user_id, summary, experience_years, skills, education, experience,
+                certifications, languages, portfolio_url, status, updated_date)
+VALUES (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'),
+        'Aspiring developer looking for mentorship in web and mobile development.',
+        1,
+        'HTML;CSS;JavaScript;Git',
+        'High School Diploma;Online Web Dev Bootcamp',
+        'Personal Projects;Hackathon Participant',
+        'Responsive Web Design Certification',
+        'English',
+        'https://github.com/frankmiller',
+        'pending',
+        NOW());
+
+-- CV for Mentee: Harry Wilson (UUID: 88888888-8888-8888-8888-888888888888)
+INSERT INTO cv (user_id, summary, experience_years, skills, education, experience,
+                certifications, languages, portfolio_url, status, updated_date)
+VALUES (UUID_TO_BIN('88888888-8888-8888-8888-888888888888'),
+        'Motivated student passionate about environmental science and data.',
+        2,
+        'Data Analysis;Python;Excel;Statistics',
+        'BSc Environmental Science',
+        'Field Data Collector;Research Intern',
+        'Data Science Certificate',
+        'English;German',
+        NULL,
+        'pending',
+        NOW());

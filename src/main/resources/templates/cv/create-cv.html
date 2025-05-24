@@ -1,0 +1,37 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduTrack - create-cv.html</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+</head>
+<body class="viewport">
+    <main>
+        <form th:action="@{/cv/create}" method="post">
+            <h2>Create Your CV</h2>
+
+            <label for="summary">Summary</label>
+            <input type="text" id="summary" name="summary" maxlength="256" required>
+
+            <label for="experienceYears">Years of Experience</label>
+            <input type="number" id="experienceYears" name="experienceYears" min="0" max="100" required>
+
+            <label for="skills">Skills</label>
+            <textarea id="skills" name="skills" maxlength="512" required></textarea>
+
+            <label for="education">Education</label>
+            <textarea id="education" name="education" maxlength="512" required></textarea>
+
+            <label for="certifications">Certifications</label>
+            <textarea id="certifications" name="certifications" maxlength="512" required></textarea>
+
+            <label for="languages">Languages</label>
+            <textarea id="languages" name="languages" maxlength="512" required></textarea>
+
+            <label for="portfolioUrl">Portfolio URL</label>
+            <input type="url" id="portfolioUrl" name="portfolioUrl" maxlength="1024" required>
+
+            <button type="submit">Submit</button>
+        </form>
+    </main>
+</body>
+</html>
