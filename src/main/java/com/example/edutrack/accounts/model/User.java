@@ -2,6 +2,8 @@ package com.example.edutrack.accounts.model;
 
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -32,6 +34,7 @@ public class User {
     private String gender;
 
     @Column(name = "birth_date", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
 
     @Lob
@@ -56,11 +59,13 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, String fullName, String phone) {
+    public User(String email, String password, String fullName, String phone, Date dob, String gender) {
         this.email = email;
         this.password = password;
         this.fullName = fullName;
         this.phone = phone;
+        this.birthDate = dob;
+        this.gender = gender;
     }
 
     public Boolean getIsLocked() {
@@ -188,4 +193,16 @@ public class User {
                 ", createdDate=" + createdDate +
                 '}';
     }
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
 }

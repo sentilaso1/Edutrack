@@ -25,7 +25,7 @@ public class Staff extends User {
     }
 
     public Staff(User user, Role role) {
-        super(user.getEmail(), user.getPassword(), user.getFullName(), user.getPhone());
+        super(user.getEmail(), user.getPassword(), user.getFullName(), user.getPhone(), user.getBirthDate(), user.getGender());
     }
 
     public Role getRole() {

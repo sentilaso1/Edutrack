@@ -28,7 +28,7 @@ public class Mentor extends User {
     }
 
     public Mentor(User user) {
-        super(user.getEmail(), user.getPassword(), user.getFullName(), user.getPhone());
+        super(user.getEmail(), user.getPassword(), user.getFullName(), user.getPhone(), user.getBirthDate(), user.getGender());
     }
 
     public boolean isAvailable() {

@@ -362,3 +362,30 @@ img {
     transform: translate(0rem, 0rem);
   }
 }
+
+
+.gender-option {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.gender-option input[type="radio"] {
+  display: none;
+}
+
+
+.gender-option span {
+  display: inline-block;
+  border: 2px solid #aaa;
+  padding: 0.5em;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /*user-select: none;*/
+}
+
+.gender-option input[type="radio"]:checked + span {
+  background-color: var(--first-color);
+  color: white;
+  border-color: var(--first-color);
+}
