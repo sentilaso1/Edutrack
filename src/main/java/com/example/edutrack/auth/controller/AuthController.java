@@ -33,15 +33,17 @@ public class AuthController {
                 }
             }
         }
-        model.addAttribute("user", new User());
-        return "login_signup";
+        User user = new User();
+        user.setGender("male");
+        model.addAttribute("user", user);
+        return "auth/login_signup";
     }
 
     @PostMapping("/signup")
     public String processSignup(@ModelAttribute("user") User user, Model model) {
         if (userService.isEmailExists(user.getEmail())) {
             model.addAttribute("error", "Email already exists");
-            return "login_signup";
+            return "auth/login_signup";
         }
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hashed = encoder.encode(user.getPassword());
@@ -80,7 +82,7 @@ public class AuthController {
         }
         model.addAttribute("error", "Invalid email or password");
         model.addAttribute("user", new User());
-        return "login_signup";
+        return "auth/login_signup";
     }
 
     // Logout
