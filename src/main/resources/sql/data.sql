@@ -88,7 +88,7 @@ VALUES (UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'), 'Introduction to Ja
 
 -- CV for Mentor: Bob Smith (UUID: 22222222-2222-2222-2222-222222222222)
 INSERT INTO cv (user_id, summary, experience_years, skills, education, experience,
-                certifications, languages, portfolio_url, status, updated_date)
+                certifications, languages, portfolio_url, status, created_date)
 VALUES (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'),
         'Experienced physics tutor with a passion for interactive teaching.',
         5,
@@ -103,7 +103,7 @@ VALUES (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'),
 
 -- CV for Mentor: Erin Black (UUID: 55555555-5555-5555-5555-555555555555)
 INSERT INTO cv (user_id, summary, experience_years, skills, education, experience,
-                certifications, languages, portfolio_url, status, updated_date)
+                certifications, languages, portfolio_url, status, created_date)
 VALUES (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'),
         'Psychology mentor skilled in cognitive development and mentoring teens.',
         4,
@@ -118,7 +118,7 @@ VALUES (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'),
 
 -- CV for Mentee: Frank Miller (UUID: 66666666-6666-6666-6666-666666666666)
 INSERT INTO cv (user_id, summary, experience_years, skills, education, experience,
-                certifications, languages, portfolio_url, status, updated_date)
+                certifications, languages, portfolio_url, status, created_date)
 VALUES (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'),
         'Aspiring developer looking for mentorship in web and mobile development.',
         1,
@@ -133,7 +133,7 @@ VALUES (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'),
 
 -- CV for Mentee: Harry Wilson (UUID: 88888888-8888-8888-8888-888888888888)
 INSERT INTO cv (user_id, summary, experience_years, skills, education, experience,
-                certifications, languages, portfolio_url, status, updated_date)
+                certifications, languages, portfolio_url, status, created_date)
 VALUES (UUID_TO_BIN('88888888-8888-8888-8888-888888888888'),
         'Motivated student passionate about environmental science and data.',
         2,
