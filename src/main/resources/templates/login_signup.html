@@ -8,7 +8,7 @@
     <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css}">
 
     <!--=============== CSS ===============-->
-    <link rel="stylesheet" th:href="@{/assets/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/login.css}">
 
     <title>Responsive login and registration form - Bedimcode</title>
 </head>
@@ -41,8 +41,9 @@
         <div class="login__area">
             <form th:action="@{/login}" method="post" class="login__form">
                 <div class="login__content grid">
+                    <div th:if="${error}" style="color: red;">[[${error}]]</div>
                     <div class="login__box">
-                        <input type="email" id="email" name="email" required placeholder=" " class="login__input">
+                        <input type="email" id="email" name="email" required th:value="${email != null} ? ${email} : ''"  placeholder=" " class="login__input">
                         <label for="email" class="login__label">Email</label>
                         <i class="ri-mail-fill login__icon"></i>
                     </div>
@@ -53,8 +54,12 @@
                         <i class="ri-eye-off-fill login__icon login__password" id="loginPassword"></i>
                     </div>
                 </div>
-
-                <a href="#" class="login__forgot">Forgot your password?</a>
+                <div style="display: flex">
+                    <label class="login__remember">
+                        <input type="checkbox" name="rememberMe"> Remember Me
+                    </label>
+                    <a href="#" class="login__forgot">Forgot your password?</a>
+                </div>
 
                 <button type="submit" class="login__button">Login</button>
             </form>
@@ -73,7 +78,6 @@
                     </a>
                 </div>
             </div>
-            <div th:if="${error}" style="color: red;">[[${error}]]</div>
             <p class="login__switch">
                 Don't have an account?
                 <button id="loginButtonRegister" type="button">Create Account</button>
@@ -127,6 +131,6 @@
 </div>
 
 <!--=============== MAIN JS ===============-->
-<script th:src="@{/assets/js/main.js}"></script>
+<script th:src="@{/assets/js/login.js}"></script>
 </body>
 </html>
