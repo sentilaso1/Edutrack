@@ -108,10 +108,45 @@
         .bg-pending {
             background-color: #F4B860;
         }
+
+        .view-more {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1em;
+        }
+
+        .filter-button {
+            border: none;
+            border-radius: 0.25em;
+            padding: 0.5em;
+            background-color: #86A788;
+            cursor: pointer;
+        }
+
+        .filter-button:hover {
+            background-color: #759976;
+        }
+
+        .visible {
+            visibility: visible;
+        }
+
+        .invisible {
+            visibility: hidden;
+        }
+
+        .pagination {
+            margin: 1em;
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1em;
+        }
     </style>
 </head>
 <body class="viewport">
-<h1 style="padding: 0.5em">CV Approval List</h1>
+<h1 style="padding: 0.5rem 0.5rem 0 0.5rem; margin-bottom: 1rem; font-size: 3em">CV Approval List</h1>
 <div class="main-grid">
     <aside class="sidebar">
         <form>
@@ -141,15 +176,17 @@
                 </label>
             </div>
 
-            <button type="submit">Filter</button>
+            <button type="submit" class="filter-button">Filter</button>
         </form>
     </aside>
 
-    <main class="cv-grid">
+    <main class="cv-grid" th:with="cvList = ${page.content}">
         <div th:each="cv : ${cvList}" class="cv-item">
-            <div class="status" th:classappend="${cv.status.equals('approved') ? 'bg-approved' : cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending'}">
+            <div class="status"
+                 th:classappend="${cv.status.equals('approved') ? 'bg-approved' : cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending'}">
                 <span th:text="${cv.status}"></span>
-                <time th:text="${cv.updatedDate.toLocaleString()}" th:datetime="${cv.updatedDate.toString()}"></time>
+                <time th:text="${cv.createdDate.toLocaleString()}" th:datetime="${cv.createdDate.toString()}"></time>
+                <a href="#" style="color: black">View More</a>
             </div>
 
             <div class="content">
@@ -165,17 +202,6 @@
                         <p th:text="${cv.user.fullName}"
                            style="font-size: 1.5em; font-weight: bold; margin-bottom: 0.25em"></p>
                         <p th:text="${cv.summary}"></p>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 style="margin-top: 1em; margin-bottom: 0.5em">Information</h3>
-                    <div>
-                        <p>Gender: <span th:text="${cv.user.gender}"></span></p>
-                        <p>Date of Birth:
-                            <time th:text="${cv.user.birthDate.toLocaleString()}"
-                                  th:datetime="${cv.user.birthDate.toString()}"></time>
-                        </p>
                     </div>
                 </div>
 
@@ -197,6 +223,28 @@
             </div>
         </div>
     </main>
+</div>
+
+<div class="pagination">
+    <a th:href="@{/admin/cv/list/1}"
+       th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
+        First
+    </a>
+    <a th:href="@{/admin/cv/list/{prev}(prev = ${pageNumber - 1})}"
+       th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
+        Previous
+    </a>
+
+    <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+
+    <a th:href="@{/admin/cv/list/{next}(next = ${pageNumber + 1})}"
+       th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
+        Next
+    </a>
+    <a th:href="@{/admin/cv/list/{last}(last = ${page.totalPages})}"
+       th:classappend="${(pageNumber < page.getTotalPages()) ? 'visible' : 'invisible'}">
+        Last
+    </a>
 </div>
 </body>
 </html>
