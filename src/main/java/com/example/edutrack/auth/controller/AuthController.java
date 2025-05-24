@@ -2,6 +2,9 @@ package com.example.edutrack.auth.controller;
 
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.auth.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,7 +20,19 @@ public class AuthController {
     private UserService userService;
 
     @GetMapping("/login")
-    public String showSignupForm(Model model) {
+    public String showSignupForm(HttpServletRequest request, Model model) {
+        String emailFromCookie = null;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("email".equals(cookie.getName())) {
+                    emailFromCookie = cookie.getValue();
+                    model.addAttribute("email", emailFromCookie);
+                    break;
+                }
+            }
+        }
         model.addAttribute("user", new User());
         return "login_signup";
     }
@@ -39,6 +54,8 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@RequestParam String email,
                         @RequestParam String password,
+                        @RequestParam(required = false) String rememberMe,
+                        HttpServletResponse response,
                         HttpSession session,
                         Model model) {
         Optional<User> userOpt = userService.findByEmail(email);
@@ -47,6 +64,17 @@ public class AuthController {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             if (encoder.matches(password, user.getPassword())) {
                 session.setAttribute("loggedInUser", user);
+                if ("on".equals(rememberMe)) {
+                    Cookie cookie = new Cookie("email", email);
+                    cookie.setMaxAge(7 * 24 * 60 * 60);
+                    cookie.setPath("/");
+                    response.addCookie(cookie);
+                } else {
+                    Cookie cookie = new Cookie("email", null);
+                    cookie.setMaxAge(0);
+                    cookie.setPath("/");
+                    response.addCookie(cookie);
+                }
                 return "redirect:/home";
             }
         }

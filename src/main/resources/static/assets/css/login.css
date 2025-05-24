@@ -159,6 +159,16 @@ img {
   transition: color .4s;
 }
 
+.login__remember{
+  display: block;
+  width: max-content;
+  margin: 1rem auto 0 0;
+  font-size: var(--small-font-size);
+  font-weight: var(--font-semi-bold);
+  color: var(--text-color);
+  transition: color .4s;
+}
+
 .login__forgot:hover {
   color: var(--first-color);
 }
