@@ -2,7 +2,7 @@ package com.example.edutrack.profiles.model;
 
 import com.example.edutrack.accounts.model.User;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,9 +49,9 @@ public class CV {
     @Column(name = "status", nullable = false)
     private String status = STATUS_PENDING;
 
-    @Column(name = "updated_date", nullable = false)
-    @LastModifiedDate
-    private Date updatedDate = new Date();
+    @Column(name = "created_date", nullable = false)
+    @CreatedDate
+    private Date createdDate = new Date();
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
@@ -165,12 +165,12 @@ public class CV {
         this.portfolioUrl = portfolioUrl;
     }
 
-    public Date getUpdatedDate() {
-        return updatedDate;
+    public Date getCreatedDate() {
+        return createdDate;
     }
 
-    public void setUpdatedDate(Date updatedDate) {
-        this.updatedDate = updatedDate;
+    public void setCreatedDate(Date updatedDate) {
+        this.createdDate = updatedDate;
     }
 
     public User getUser() {
@@ -225,7 +225,7 @@ public class CV {
                 ", languages='" + languages + '\'' +
                 ", portfolioUrl='" + portfolioUrl + '\'' +
                 ", status='" + status + '\'' +
-                ", updatedDate=" + updatedDate +
+                ", updatedDate=" + createdDate +
                 ", user=" + user +
                 '}';
     }
