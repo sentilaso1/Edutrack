@@ -1,13 +1,15 @@
 package com.example.edutrack.profiles.service.interfaces;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.example.edutrack.profiles.model.CV;
 
 import java.util.List;
 
 public interface CvService {
     List<CV> findAllCVs();
-    List<CV> findAllCVsDateAsc();
-    List<CV> findAllCVsDateDesc();
-    List<CV> findAllCVsByStatusDateAsc(String status);
-    List<CV> findAllCVsByStatusDateDesc(String status);
+    Page<CV> findAllCVsDateAsc(Pageable pageable);
+    Page<CV> findAllCVsDateDesc(Pageable pageable);
+    Page<CV> findAllCVsByStatusDateAsc(Pageable pageable, String status);
+    Page<CV> findAllCVsByStatusDateDesc(Pageable pageable, String status);
 }

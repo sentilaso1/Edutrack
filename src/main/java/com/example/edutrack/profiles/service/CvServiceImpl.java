@@ -4,9 +4,10 @@ import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.repository.CvRepository;
 import com.example.edutrack.profiles.service.interfaces.CvService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,28 +25,22 @@ public class CvServiceImpl implements CvService {
     }
 
     @Override
-    public List<CV> findAllCVsDateAsc() {
-        return cvRepository.findAllByOrderByUpdatedDateAsc();
+    public Page<CV> findAllCVsDateAsc(Pageable pageable) {
+        return cvRepository.findAllStatusDateAsc(pageable);
     }
 
     @Override
-    public List<CV> findAllCVsDateDesc() {
-        List<CV> list = new ArrayList<>();
-
-        list.addAll(cvRepository.findAllByStatusOrderByUpdatedDateDesc(CV.STATUS_PENDING));
-        list.addAll(cvRepository.findAllByStatusOrderByUpdatedDateDesc(CV.STATUS_APPROVED));
-        list.addAll(cvRepository.findAllByStatusOrderByUpdatedDateDesc(CV.STATUS_REJECTED));
-
-        return list;
+    public Page<CV> findAllCVsDateDesc(Pageable pageable) {
+        return cvRepository.findAllStatusDateDesc(pageable);
     }
 
     @Override
-    public List<CV> findAllCVsByStatusDateAsc(String status) {
-        return cvRepository.findAllByStatusOrderByUpdatedDateAsc(status);
+    public Page<CV> findAllCVsByStatusDateAsc(Pageable pageable, String status) {
+        return cvRepository.findAllByStatusOrderByCreatedDateAsc(pageable, status);
     }
 
     @Override
-    public List<CV> findAllCVsByStatusDateDesc(String status) {
-        return cvRepository.findAllByStatusOrderByUpdatedDateDesc(status);
+    public Page<CV> findAllCVsByStatusDateDesc(Pageable pageable, String status) {
+        return cvRepository.findAllByStatusOrderByCreatedDateDesc(pageable, status);
     }
 }
