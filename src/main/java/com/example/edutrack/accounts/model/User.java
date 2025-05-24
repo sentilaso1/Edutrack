@@ -56,6 +56,9 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = Boolean.TRUE;
 
+    @Column(name = "reset_token")
+    private String resetToken;
+
     public User() {
     }
 
@@ -193,9 +196,6 @@ public class User {
                 ", createdDate=" + createdDate +
                 '}';
     }
-
-    @Column(name = "reset_token")
-    private String resetToken;
 
     public String getResetToken() {
         return resetToken;
