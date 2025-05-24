@@ -15,11 +15,11 @@ public class CourseTag {
     @ManyToOne
     @MapsId("tagId")
     @JoinColumn(name = "tag_id")
-    private Tags tag;
+    private Tag tag;
 
     public CourseTag(){}
 
-    public CourseTag(Course course, Tags tag) {
+    public CourseTag(Course course, Tag tag) {
         this.course = course;
         this.tag = tag;
         this.id = new CourseTagId(course.getId(), tag.getId());
@@ -41,11 +41,11 @@ public class CourseTag {
         this.course = course;
     }
 
-    public Tags getTag() {
+    public Tag getTag() {
         return tag;
     }
 
-    public void setTag(Tags tag) {
+    public void setTag(Tag tag) {
         this.tag = tag;
     }
 

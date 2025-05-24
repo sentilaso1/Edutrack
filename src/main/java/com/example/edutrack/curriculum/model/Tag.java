@@ -8,8 +8,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "TAGS")
-public class Tags {
+@Table(name = "tags")
+public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +21,10 @@ public class Tags {
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 
-    public Tags() {
+    public Tag() {
     }
 
-    public Tags(Integer id, String title, String description) {
+    public Tag(Integer id, String title, String description) {
         this.id = id;
         this.title = title;
         this.description = description;
