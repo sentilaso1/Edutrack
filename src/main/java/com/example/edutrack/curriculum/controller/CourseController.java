@@ -31,10 +31,8 @@ public class CourseController {
     }
 
     @GetMapping("/courses")
-    public String courses(Model model) {
-        List<Course> courses = courseServiceImpl.findAll();
-        model.addAttribute("courses", courses);
-        return "course-box";
+    public String courses() {
+        return "courselist";
     }
 
     @GetMapping("/courses/{courseId}")
