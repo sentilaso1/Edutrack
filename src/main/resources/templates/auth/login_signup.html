@@ -58,7 +58,7 @@
                     <label class="login__remember">
                         <input type="checkbox" name="rememberMe"> Remember Me
                     </label>
-                    <a href="#" class="login__forgot">Forgot your password?</a>
+                    <a href="/forgot-password" class="login__forgot">Forgot your password?</a>
                 </div>
 
                 <button type="submit" class="login__button">Login</button>
@@ -92,20 +92,39 @@
         <div class="login__area">
             <form th:action="@{/signup}" method="post" th:object="${user}" class="login__form">
                 <div class="login__content grid">
-                    <div class="login__group grid">
-                        <div class="login__box">
-                            <input type="text" th:field="*{fullName}" required placeholder=" " class="login__input">
-                            <label class="login__label">Full Name</label>
-                            <i class="ri-id-card-fill login__icon"></i>
-                        </div>
-
-                        <div class="login__box">
-                            <input type="text" th:field="*{phone}" required placeholder=" " class="login__input">
-                            <label class="login__label">Phone</label>
-                            <i class="ri-id-card-fill login__icon"></i>
-                        </div>
+                    <div class="login__box">
+                        <input type="text" th:field="*{fullName}" required placeholder=" " class="login__input">
+                        <label class="login__label">Full Name</label>
+                        <i class="ri-mail-fill login__icon"></i>
                     </div>
 
+                    <div class="login__group grid">
+                        <div class="login__box">
+                            <div class="login__box">
+                                <input type="date" th:field="*{birthDate}" required placeholder=" " class="login__input" id="birthDateInput" style="color: #9c9b9b">
+                                <label class="login__label">Birth Date</label>
+                            </div>
+
+                        </div>
+
+                        <div class="login__box" style="justify-content: space-between; ">
+                            <label style="margin: 0 10px; font-weight: 600;">Gender</label>
+                            <label class="gender-option male">
+                                <input type="radio" th:field="*{gender}" value="male" hidden checked>
+                                <span>Male</span>
+                            </label>
+                            <label class="gender-option">
+                                <input type="radio" th:field="*{gender}" value="female" hidden>
+                                <span>Female</span>
+                            </label>
+                        </div>
+
+                    </div>
+                    <div class="login__box">
+                        <input type="text" th:field="*{phone}" required placeholder=" " class="login__input">
+                        <label class="login__label">Phone</label>
+                        <i class="ri-id-card-fill login__icon"></i>
+                    </div>
                     <div class="login__box">
                         <input type="email" th:field="*{email}" required placeholder=" " class="login__input">
                         <label class="login__label">Email</label>

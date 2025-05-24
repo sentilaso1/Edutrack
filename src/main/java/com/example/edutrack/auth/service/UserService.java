@@ -23,4 +23,9 @@ public class UserService {
     public User registerUser(User user) {
         return userRepository.save(user);
     }
+
+    public Optional<User> findByResetToken(String token){
+        return userRepository.findByResetToken(token);
+    }
+
 }
