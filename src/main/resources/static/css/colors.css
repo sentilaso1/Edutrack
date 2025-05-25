@@ -1,0 +1,21 @@
+:root {
+          /* Base Backgrounds */
+          --base-bg: #fff5f7;         /* Light pinkish cream for main background */
+          --card-bg: #ffc0cb;         /* Soft pink for containers or cards */
+          --highlight-bg: #f6d1c1;    /* Rose gold highlight for sections */
+          /* Primary Pinks */
+          --primary-pink: #ff7c96;    /* Primary buttons, CTAs, active elements */
+          --accent-pink: #ff0f65;     /* Hover, badges, notification alerts */
+          --deep-rose: #c84c5c;       /* Headings or strong text highlights */
+          /* Supporting Colors */
+          --soft-contrast: #864ad1;   /* Secondary CTAs or accent color */
+          --muted-accent: #bbafb1;    /* Borders, disabled elements */
+          --dusty-lavender: #d6a8c7;  /* Optional: gradient, nav hover */
+          /* Neutrals */
+          --neutral-text: #a7a7a7;    /* Secondary text */
+          --dark-text: #5d3e1d;       /* Main readable dark brown text */
+          --strong-contrast: #1e1e1e; /* For important text on light backgrounds */
+          /* Optional Warm Accents */
+          --blush-beige: #f5e3e0;     /* Modal backgrounds or soft areas */
+          --peach-blush: #ffcab1;     /* Toasts, alerts, welcome cards */
+        }
