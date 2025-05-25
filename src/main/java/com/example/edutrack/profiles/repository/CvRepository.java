@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CvRepository extends JpaRepository<CV, UUID> {
@@ -17,6 +18,8 @@ public interface CvRepository extends JpaRepository<CV, UUID> {
     Page<CV> findAllByStatusOrderByCreatedDateDesc(Pageable pageable, String status);
 
     Page<CV> findAllByStatusOrderByCreatedDateAsc(Pageable pageable, String status);
+
+    Optional<CV> findByUserId(UUID userId);
 
 
     @Query(value = """
