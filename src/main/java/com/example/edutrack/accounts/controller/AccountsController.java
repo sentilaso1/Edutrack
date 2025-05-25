@@ -1,7 +1,10 @@
 package com.example.edutrack.accounts.controller;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.UUID;
+import java.util.Date;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -78,12 +81,34 @@ public class AccountsController {
                 return phone.matches(phoneRegex);
         }
 
+        public boolean verifyBirthDate(String birthDateStr) {
+        if (birthDateStr == null || birthDateStr.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            sdf.setLenient(false); // Strict parsing
+            Date birthDate = sdf.parse(birthDateStr);
+            Date today = new Date();
+
+            // Check if birth date is in the future
+            if (!birthDate.before(today)) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            return false; // Invalid date format
+        }
+    }
+
         @PostMapping("/profile/{id}/edit")
         public String editProfile(@PathVariable String id,
                         @RequestParam String fullName,
                         @RequestParam String email,
                         @RequestParam String phone,
                         @RequestParam String bio,
+                        @RequestParam String birthDate,
                         @RequestParam(required = false) String expertise,
                         @RequestParam(required = false) String interests,
                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes)
@@ -98,6 +123,11 @@ public class AccountsController {
                 }
                 if (phone == null || phone.trim().isEmpty() || !verifyPhone(phone)) {
                         redirectAttributes.addFlashAttribute("error", "Phone number không hợp lệ");
+                        return "redirect:/profile/" + id + "#edit";
+                }
+                if (birthDate == null || birthDate.trim().isEmpty() || !verifyBirthDate(birthDate)) {
+                        redirectAttributes.addFlashAttribute("error",
+                                        "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng 'yyyy-MM-dd')");
                         return "redirect:/profile/" + id + "#edit";
                 }
 
