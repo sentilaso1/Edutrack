@@ -8,6 +8,8 @@
     <main>
         <form th:action="@{/cv/create}" method="post">
             <h2>Create Your CV</h2>
+            <label for="userId">User ID: (For testing only, will decease when Login is implemented)</label>
+            <input type="text" id="userId" name="userId" required>
 
             <label for="summary">Summary</label>
             <input type="text" id="summary" name="summary" maxlength="256" required>
