@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+        <meta charset="UTF-8">
+        <title>User Management</title>
+        <!-- Tailwind CSS CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- SweetAlert2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+        <div class="container mx-auto p-6">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">User Management</h2>
+
+                <!-- Filter Form -->
+                <form th:action="@{/admin/users}" method="get"
+                        class="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <input type="text" name="email" th:value="${filters.email}" placeholder="Email"
+                                class="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" name="fullName" th:value="${filters.fullName}" placeholder="Full Name"
+                                class="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select name="isLocked"
+                                class="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="" th:selected="${filters.isLocked == null}">All (Locked)</option>
+                                <option value="true" th:selected="${filters.isLocked == true}">Locked</option>
+                                <option value="false" th:selected="${filters.isLocked == false}">Unlocked</option>
+                        </select>
+                        <select name="isActive"
+                                class="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="" th:selected="${filters.isActive == null}">All (Active)</option>
+                                <option value="true" th:selected="${filters.isActive == true}">Active</option>
+                                <option value="false" th:selected="${filters.isActive == false}">Inactive</option>
+                        </select>
+                        <button type="submit"
+                                class="bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600 transition">Apply
+                                Filters</button>
+                </form>
+
+                <!-- User Table -->
+                <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-300 rounded-lg">
+                                <thead class="bg-gray-200">
+                                        <tr>
+                                                <th class="py-2 px-4 border-b text-left text-gray-600">ID</th>
+                                                <th class="py-2 px-4 border-b text-left text-gray-600">Email</th>
+                                                <th class="py-2 px-4 border-b text-left text-gray-600">Full Name</th>
+                                                <th class="py-2 px-4 border-b text-left text-gray-600">Role</th>
+                                                <th class="py-2 px-4 border-b text-left text-gray-600">Locked</th>
+                                                <th class="py-2 px-4 border-b text-left text-gray-600">Active</th>
+                                                <th class="py-2 px-4 border-b text-left text-gray-600">Actions</th>
+                                        </tr>
+                                </thead>
+                                <tbody>
+                                        <tr th:each="user : ${users}" class="hover:bg-gray-50">
+                                                <td class="py-2 px-4 border-b" th:text="${user.id}"></td>
+                                                <td class="py-2 px-4 border-b" th:text="${user.email}"></td>
+                                                <td class="py-2 px-4 border-b" th:text="${user.fullName}"></td>
+                                                <td class="py-2 px-4 border-b" th:text="${user.role}"></td>
+                                                <td class="py-2 px-4 border-b"
+                                                        th:text="${user.isLocked} ? 'Yes' : 'No'"></td>
+                                                <td class="py-2 px-4 border-b"
+                                                        th:text="${user.isActive} ? 'Yes' : 'No'"></td>
+                                                <td class="py-2 px-4 border-b flex flex-wrap gap-2">
+                                                        <form th:action="@{/admin/users/{id}/lock(id=${user.id})}"
+                                                                method="post" class="inline">
+                                                                <button type="submit"
+                                                                        class="w-24 text-center bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition"
+                                                                        th:text="${user.isLocked} ? 'Unlock' : 'Lock'"></button>
+                                                        </form>
+                                                        <form th:action="@{/admin/users/{id}/activate(id=${user.id})}"
+                                                                method="post" class="inline">
+                                                                <button type="submit"
+                                                                        class="w-24 text-center bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition"
+                                                                        th:text="${user.isActive} ? 'Deactivate' : 'Activate'"></button>
+                                                        </form>
+                                                        <form th:action="@{/admin/users/{id}/grant-staff(id=${user.id})}"
+                                                                method="post" class="inline flex gap-2">
+                                                                <select name="role"
+                                                                        class="w-24 border border-gray-300 rounded-lg p-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                                        <option value="">Role</option>
+                                                                        <option value="Admin">Admin</option>
+                                                                        <option value="Manager">Manager</option>
+                                                                </select>
+                                                                <button type="submit"
+                                                                        class="w-24 text-center bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition">Grant</button>
+                                                        </form>
+                                                        <form th:action="@{/admin/users/{id}/revoke-staff(id=${user.id})}"
+                                                                method="post" class="inline">
+                                                                <button type="submit"
+                                                                        class="w-24 text-center bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition">Revoke</button>
+                                                        </form>
+                                                </td>
+                                        </tr>
+                                </tbody>
+                        </table>
+                </div>
+        </div>
+
+        <!-- SweetAlert2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script th:inline="javascript">
+                // Display success message
+                const successMessage = /*[[${successMessage}]]*/ null;
+                if (successMessage) {
+                        Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công',
+                                text: successMessage,
+                                timer: 3000,
+                                showConfirmButton: false
+                        });
+                }
+
+                // Display error message
+                const errorMessage = /*[[${errorMessage}]]*/ null;
+                if (errorMessage) {
+                        Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: errorMessage,
+                                timer: 3000,
+                                showConfirmButton: false
+                        });
+                }
+        </script>
+</body>
+
+</html>
