@@ -1,4 +1,4 @@
 package com.example.edutrack.curriculum.service.interfaces;
 
-public interface MentorCourseService {
+public interface TeachingMaterialsService {
 }

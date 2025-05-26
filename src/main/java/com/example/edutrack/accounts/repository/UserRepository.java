@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.edutrack.accounts.model.User;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
         @Query("SELECT u FROM User u " +
            "WHERE (:email IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :email, '%'))) " +

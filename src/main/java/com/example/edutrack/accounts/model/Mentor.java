@@ -1,10 +1,12 @@
 package com.example.edutrack.accounts.model;
 
+import com.example.edutrack.curriculum.model.Course;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.management.relation.Role;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "mentors")
@@ -22,6 +24,9 @@ public class Mentor extends User {
 
     @Column(columnDefinition = "DECIMAL(2,1)")
     private Double rating;
+
+    @OneToMany(mappedBy = "mentor")
+    private List<Course> courses;
 
     public Mentor() {
         super();
