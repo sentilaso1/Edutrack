@@ -1,21 +1,292 @@
 :root {
-          /* Base Backgrounds */
-          --base-bg: #fff5f7;         /* Light pinkish cream for main background */
-          --card-bg: #ffc0cb;         /* Soft pink for containers or cards */
-          --highlight-bg: #f6d1c1;    /* Rose gold highlight for sections */
-          /* Primary Pinks */
-          --primary-pink: #ff7c96;    /* Primary buttons, CTAs, active elements */
-          --accent-pink: #ff0f65;     /* Hover, badges, notification alerts */
-          --deep-rose: #c84c5c;       /* Headings or strong text highlights */
-          /* Supporting Colors */
-          --soft-contrast: #864ad1;   /* Secondary CTAs or accent color */
-          --muted-accent: #bbafb1;    /* Borders, disabled elements */
-          --dusty-lavender: #d6a8c7;  /* Optional: gradient, nav hover */
-          /* Neutrals */
-          --neutral-text: #a7a7a7;    /* Secondary text */
-          --dark-text: #5d3e1d;       /* Main readable dark brown text */
-          --strong-contrast: #1e1e1e; /* For important text on light backgrounds */
-          /* Optional Warm Accents */
-          --blush-beige: #f5e3e0;     /* Modal backgrounds or soft areas */
-          --peach-blush: #ffcab1;     /* Toasts, alerts, welcome cards */
-        }
+    /* Base Colors - Change these to switch entire theme */
+    --bg-primary: #fff5f7;         /* Main page background */
+    --bg-secondary: #ffc0cb;       /* Cards, containers, panels */
+    --bg-tertiary: #f6d1c1;        /* Sections, highlights */
+    --bg-modal: #f5e3e0;           /* Modal backgrounds, overlays */
+    --bg-surface: #ffffff;         /* Input fields, nav bars */
+
+    /* Brand Colors */
+    --color-primary: #ff7c96;      /* Main brand color - buttons, links */
+    --color-primary-hover: #ff2a7a; /* Enhanced contrast hover color */
+    --color-secondary: #864ad1;     /* Secondary actions, accents */
+    --color-secondary-hover: #d6a8c7; /* Secondary hover states */
+
+    /* Text Colors */
+    --text-primary: #1e1e1e;       /* Main headings, important text */
+    --text-secondary: #3b2a20;     /* Slightly darker body text for readability */
+    --text-muted: #a7a7a7;         /* Captions, placeholders, meta text */
+    --text-accent: #c84c5c;        /* Highlighted text, headings */
+    --text-inverse: #ffffff;       /* Text on dark backgrounds */
+
+    /* Border & UI Colors */
+    --border-light: #dab9b1;       /* Slightly darker for better visibility */
+    --border-accent: #ff7c96;      /* Focused borders, highlights */
+
+    /* Status Colors */
+    --color-success: #a0d8b3;      /* Success messages, confirmations */
+    --color-warning: #ffe59e;      /* Warnings, cautions */
+    --color-error: #f7a8a8;        /* Errors, destructive actions */
+    --color-info: #d4c4f7;         /* Information, neutral alerts */
+}
+
+/* Base Layout Classes */
+.base-bg {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.container-bg {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.card-bg {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+}
+
+.section-bg {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.modal-bg {
+    background-color: var(--bg-modal);
+    color: var(--text-primary);
+}
+
+/* Button Styles */
+.button-bg {
+    background-color: var(--color-primary);
+    color: var(--text-inverse);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-bg:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.button-secondary {
+    background-color: var(--color-secondary);
+    color: var(--text-inverse);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-secondary:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.button-outline {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    padding: 10px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.button-outline:hover {
+    background-color: var(--color-primary);
+    color: var(--text-inverse);
+}
+
+/* Text Styles */
+.text-primary {
+    color: var(--text-primary);
+}
+
+.text-secondary {
+    color: var(--text-muted);
+}
+
+.text-accent {
+    color: var(--color-primary);
+}
+
+.text-heading {
+    color: var(--text-accent);
+    font-weight: bold;
+}
+
+.text-dark {
+    color: var(--text-secondary);
+}
+
+/* Navigation */
+.nav-bg {
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.nav-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-item:hover {
+    background-color: var(--color-secondary-hover);
+    color: var(--text-inverse);
+}
+
+.nav-item.active {
+    background-color: var(--color-primary);
+    color: var(--text-inverse);
+}
+
+/* Form Elements */
+.input-field {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    border: 2px solid var(--border-light);
+    padding: 12px;
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--border-accent);
+}
+
+.input-field::placeholder {
+    color: var(--text-muted);
+}
+
+/* Alert/Notification Styles */
+.alert-success {
+    background-color: var(--color-success);
+    color: var(--text-inverse);
+    padding: 12px 16px;
+    border-radius: 6px;
+    border-left: 4px solid var(--text-accent);
+}
+
+.alert-warning {
+    background-color: var(--color-warning);
+    color: var(--text-secondary);
+    padding: 12px 16px;
+    border-radius: 6px;
+    border-left: 4px solid var(--color-primary-hover);
+}
+
+.alert-error {
+    background-color: var(--color-error);
+    color: var(--text-inverse);
+    padding: 12px 16px;
+    border-radius: 6px;
+    border-left: 4px solid var(--text-accent);
+}
+
+.alert-info {
+    background-color: var(--color-info);
+    color: var(--text-secondary);
+    padding: 12px 16px;
+    border-radius: 6px;
+    border-left: 4px solid var(--color-secondary);
+}
+
+/* Borders and Dividers */
+.border-light {
+    border: 1px solid var(--border-light);
+}
+
+.border-accent {
+    border: 1px solid var(--border-accent);
+}
+
+.divider {
+    height: 1px;
+    background-color: var(--border-light);
+    margin: 20px 0;
+}
+
+/* Utility Classes */
+.shadow-soft {
+    box-shadow: 0 2px 8px rgba(255, 124, 150, 0.1);
+}
+
+.shadow-medium {
+    box-shadow: 0 4px 12px rgba(255, 124, 150, 0.15);
+}
+
+.gradient-pink {
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+}
+
+.gradient-accent {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+}
+
+/* Interactive Elements */
+.badge {
+    background-color: var(--color-primary-hover);
+    color: var(--text-inverse);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.badge-secondary {
+    background-color: var(--color-secondary);
+    color: var(--text-inverse);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.tag {
+    background-color: var(--color-secondary-hover);
+    color: var(--text-inverse);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* Loading and Disabled States */
+.disabled {
+    background-color: var(--border-light) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}
+
+.loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-light);
+    border-top: 2px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
