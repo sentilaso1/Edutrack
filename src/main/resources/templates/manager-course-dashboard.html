@@ -9,6 +9,77 @@
         .filters > * { margin-right: 10px; }
     </style>
 </head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .container {
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+    }
+
+    .filters, .create-form {
+        width: 300px;
+    }
+
+    .filters > div, .create-form > div {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    input[type="text"], input[type="date"], select {
+        width: 100%;
+        padding: 6px;
+        box-sizing: border-box;
+    }
+
+    button, .btn {
+        padding: 6px 12px;
+        margin-top: 5px;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f5f5f5;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+
+    .form-section {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        gap: 40px;
+    }
+</style>
 <body>
 
 <h2>📚 Quản lý khóa học</h2>
@@ -38,14 +109,6 @@
         <div class="flex flex-col">
             <label class="font-medium">Lọc theo trạng thái</label>
             <div class="flex space-x-4">
-                <select name="approved" class="form-select">
-                    <option value="" th:selected="${selectedApproved == null or selectedApproved == ''}">Tất cả trạng thái</option>
-                    <option value="PENDING" th:selected="${selectedApproved == 'PENDING'}">Chờ duyệt</option>
-                    <option value="APPROVED" th:selected="${selectedApproved == 'APPROVED'}">Đã duyệt</option>
-                    <option value="REJECTED" th:selected="${selectedApproved == 'REJECTED'}">Từ chối</option>
-                </select>
-
-
                 <select name="open" class="form-select">
                     <option value="">Tình trạng</option>
                     <option value="true">Đang mở</option>
@@ -82,6 +145,11 @@
 </form>
 
 
+<div style="margin: 10px 0;">
+    <a href="/courses/create" class="btn btn-success">➕ Tạo khóa học</a>
+</div>
+
+
 <table>
     <thead>
     <tr>
@@ -99,27 +167,14 @@
         <td th:text="${#dates.format(course.createdDate, 'yyyy-MM-dd')}">Ngày</td>
 
         <td>
-            <span th:switch="${course.approvalStatus}">
-                <span th:case="${PENDING}">⏳ Chờ duyệt</span>
-                <span th:case="${APPROVED}">✅ Duyệt</span>
-                <span th:case="${REJECTED}">❌ Từ chối</span>
-            </span>,
             <span th:text="${course.open ? '🟢 Mở' : '🔴 Đóng'}"></span>
         </td>
 
         <td>
-            <th:block th:if="${course.approvalStatus == PENDING}">
-                <a th:href="@{/manager/courses/review/{id}(id=${course.id})}">📝 Review</a>
-            </th:block>
-            <th:block th:if="${course.approvalStatus == APPROVED}">
-                <a th:href="@{/courses/edit/{id}(id=${course.id})}">Sửa</a> |
-                <a th:href="@{/courses/view-details/{id}(id=${course.id})}">Chi tiết</a> |
-                <a th:href="@{/manager/courses/toggle-open/{id}(id=${course.id})}"
-                   th:text="${course.open} ? '🔒 Đóng' : '🔓 Mở'">Mở/Đóng</a>
-            </th:block>
-            <th:block th:if="${course.approvalStatus == REJECTED}">
-                <span style="font-style: italic; color: #af4747">Đã từ chối</span>
-            </th:block>
+            <a th:href="@{/courses/edit/{id}(id=${course.id})}">Sửa</a> |
+            <a th:href="@{/courses/view-details/{id}(id=${course.id})}">Chi tiết</a> |
+            <a th:href="@{/manager/courses/toggle-open/{id}(id=${course.id})}"
+               th:text="${course.open} ? '🔒 Đóng' : '🔓 Mở'">Mở/Đóng</a>
             |
             <a th:href="@{/courses/delete/{id}(id=${course.id})}" onclick="return confirm('Xóa khóa học này?')">Xóa</a>
         </td>

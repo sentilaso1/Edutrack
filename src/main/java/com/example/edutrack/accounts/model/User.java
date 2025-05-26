@@ -33,9 +33,9 @@ public class User {
     @Column(name = "gender", nullable = false)
     private String gender;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date", nullable = true)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date birthDate;
+    private Date birthDate = new Date();
 
     @Lob
     @Column(columnDefinition = "LONGBLOB")

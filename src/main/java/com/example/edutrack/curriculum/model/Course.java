@@ -24,10 +24,6 @@ public class Course {
     @Column(nullable = false)
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "approval_status", nullable = false)
-    private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
-
     @Column(name = "is_open", nullable = false)
     private Boolean isOpen = Boolean.FALSE;
 
@@ -76,14 +72,6 @@ public class Course {
         this.description = description;
     }
 
-    public ApprovalStatus getApprovalStatus() {
-        return approvalStatus;
-    }
-
-    public void setApprovalStatus(ApprovalStatus approvalStatus) {
-        this.approvalStatus = approvalStatus;
-    }
-
     public Boolean getOpen() {
         return isOpen;
     }
@@ -122,7 +110,6 @@ public class Course {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", approvalStatus=" + approvalStatus +
                 ", isOpen=" + isOpen +
                 ", createdDate=" + createdDate +
                 '}';
