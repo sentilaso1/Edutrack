@@ -1,6 +1,6 @@
 package com.example.edutrack.curriculum.service.implementation;
 
-import com.example.edutrack.curriculum.model.TeachingMaterials;
+import com.example.edutrack.curriculum.model.TeachingMaterial;
 import com.example.edutrack.curriculum.repository.TeachingMaterialsRepository;
 import com.example.edutrack.curriculum.service.interfaces.TeachingMaterialsService;
 import org.springframework.stereotype.Service;
@@ -15,11 +15,11 @@ public class TeachingMaterialsImpl implements TeachingMaterialsService {
         this.teachingMaterialsRepository = repository;
     }
 
-    public List<TeachingMaterials> findByCourseId(UUID courseId) {
+    public List<TeachingMaterial> findByCourseId(UUID courseId) {
         return teachingMaterialsRepository.findByCourseId(courseId);
     }
 
-    public TeachingMaterials findById(int id) {
+    public TeachingMaterial findById(int id) {
         return teachingMaterialsRepository.findById(id).orElseThrow(() -> new RuntimeException("File không tồn tại"));
     }
 }

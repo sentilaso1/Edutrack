@@ -124,12 +124,10 @@
     <div id="courseList" th:if="${!#lists.isEmpty(mentorCourses)}">
         <div th:each="course : ${mentorCourses}" class="fanbox">
             <div class="course-title" th:text="${course.name}">Tên khóa học</div>
-            <div class="status"
-                 th:classappend="|${course.approvalStatus == T(com.example.edutrack.curriculum.model.ApprovalStatus).APPROVED ? 'approved' :
-                      (course.approvalStatus == T(com.example.edutrack.curriculum.model.ApprovalStatus).PENDING ? 'pending' : 'rejected')}|"
-                 th:text="|${course.approvalStatus == T(com.example.edutrack.curriculum.model.ApprovalStatus).APPROVED ? '✅ Đã duyệt' :
-               (course.approvalStatus == T(com.example.edutrack.curriculum.model.ApprovalStatus).PENDING ? '⏳ Chờ duyệt' : '❌ Đã bị từ chối')}|">
-                Trạng thái
+
+<!--            open hay chưa-->
+            <div>
+
             </div>
 
             <a th:href="@{'/courses/edit/' + ${course.id}}"
