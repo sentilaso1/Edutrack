@@ -5,7 +5,6 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,7 +90,7 @@ public class Course {
     }
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<TeachingMaterials> materials = new ArrayList<>();
+    private List<TeachingMaterial> materials = new ArrayList<>();
 
     @Override
     public String toString() {

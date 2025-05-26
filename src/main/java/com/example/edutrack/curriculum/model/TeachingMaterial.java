@@ -2,12 +2,11 @@ package com.example.edutrack.curriculum.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
-@Table(name = "TEACHING_MATERIALS")
-public class TeachingMaterials {
+@Table(name = "teaching_materials")
+public class TeachingMaterial {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -22,8 +21,8 @@ public class TeachingMaterials {
     @Column(name = "upload_date")
     private Date uploadDate = new Date();
 
-    public TeachingMaterials() {}
-    public TeachingMaterials(byte[] file, Course course) {
+    public TeachingMaterial() {}
+    public TeachingMaterial(byte[] file, Course course) {
         this.file = file;
         this.course = course;
     }

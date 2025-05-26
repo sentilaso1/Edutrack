@@ -1,13 +1,12 @@
 package com.example.edutrack.curriculum.model;
 
 import jakarta.persistence.*;
-import org.aspectj.weaver.patterns.ConcreteCflowPointcut;
 
 import java.time.DayOfWeek;
 import java.util.UUID;
 
 @Entity
-@Table(name = "MENTOR_AVAILABLE_TIME")
+@Table(name = "mentor_available_time")
 @IdClass(MentorAvailableTimeId.class)
 public class MentorAvailableTime {
     @Id
@@ -22,7 +21,7 @@ public class MentorAvailableTime {
 
     @ManyToOne
     @JoinColumn(name = "slotId", insertable = false, updatable = false)
-    private Slots slot;
+    private Slot slot;
 
 
     public UUID getMentorId() {
@@ -32,7 +31,7 @@ public class MentorAvailableTime {
         this.mentorId = mentorId;
     }
 
-    public Slots getSlot() {
+    public Slot getSlot() {
         return slot;
     }
 

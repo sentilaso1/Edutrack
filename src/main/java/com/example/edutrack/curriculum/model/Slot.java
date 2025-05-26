@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "SLOTS")
-public class Slots {
+@Table(name = "slots")
+public class Slot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -14,9 +14,9 @@ public class Slots {
     private LocalTime startTime;
     private LocalTime endTime;
 
-    public Slots() {}
+    public Slot() {}
 
-    public Slots(LocalTime startTime, LocalTime endTime) {
+    public Slot(LocalTime startTime, LocalTime endTime) {
         this.startTime = startTime;
         this.endTime = endTime;
     }

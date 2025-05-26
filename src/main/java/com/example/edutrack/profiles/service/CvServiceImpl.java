@@ -1,5 +1,8 @@
 package com.example.edutrack.profiles.service;
 
+import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.repository.UserRepository;
+import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.repository.CvRepository;
 import com.example.edutrack.profiles.service.interfaces.CvService;
@@ -13,10 +16,12 @@ import java.util.List;
 @Service
 public class CvServiceImpl implements CvService {
     private final CvRepository cvRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public CvServiceImpl(CvRepository cvRepository) {
+    public CvServiceImpl(CvRepository cvRepository, UserRepository userRepository) {
         this.cvRepository = cvRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -42,5 +47,26 @@ public class CvServiceImpl implements CvService {
     @Override
     public Page<CV> findAllCVsByStatusDateDesc(Pageable pageable, String status) {
         return cvRepository.findAllByStatusOrderByCreatedDateDesc(pageable, status);
+    }
+
+    @Override
+    public CV createCV(CVForm cvRequest) {
+        User user = userRepository.findById(cvRequest.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        CV cv = new CV(
+                cvRequest.getSummary(),
+                cvRequest.getExperienceYears(),
+                cvRequest.getSkills(),
+                cvRequest.getEducation(),
+                user
+        );
+        cv.setId(user.getId());
+        cv.setExperience(cvRequest.getExperience());
+        cv.setCertifications(cvRequest.getCertifications());
+        cv.setLanguages(cvRequest.getLanguages());
+        cv.setPortfolioUrl(cvRequest.getPortfolioUrl());
+
+        return cvRepository.save(cv);
     }
 }

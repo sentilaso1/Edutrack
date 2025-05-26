@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "staffs")
@@ -24,8 +25,10 @@ public class Staff extends User {
         super();
     }
 
-    public Staff(User user, Role role) {
-        super(user.getEmail(), user.getPassword(), user.getFullName(), user.getPhone(), user.getBirthDate(), user.getGender());
+    public Staff(UUID id ,Role role) {
+        this.setId(id);
+        this.role = role;
+        this.createdDate = new Date();
     }
 
     public Role getRole() {

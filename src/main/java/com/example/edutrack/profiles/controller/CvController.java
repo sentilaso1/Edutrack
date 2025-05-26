@@ -2,6 +2,7 @@ package com.example.edutrack.profiles.controller;
 
 import com.example.edutrack.auth.service.UserService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
+import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.service.interfaces.CvService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,5 +66,20 @@ public class CvController {
     @GetMapping("/admin/cv/list")
     public String redirectToListCVs() {
         return "redirect:/admin/cv/list/1";
+    }
+
+    @GetMapping("cv/create")
+    // Show the CV form
+    public String showCVForm(Model model) {
+        model.addAttribute("cv", new CVForm());
+        return "cv/create-cv";
+    }
+
+    // Handle the form submit
+    @PostMapping("cv/create")
+    public String handleCVFormSubmission(@ModelAttribute("cv") CVForm request, Model model) {
+            CV saved = cvService.createCV(request);
+            model.addAttribute("message", "CV created successfully!");
+            return "redirect:/cv/mainpage";
     }
 }

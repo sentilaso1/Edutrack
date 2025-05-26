@@ -50,6 +50,30 @@ VALUES (UUID_TO_BIN('88888888-8888-8888-8888-888888888888'),
         'male',
         '2001-06-03');
 
+-- User: Alice Johnson (UUID 1111...)
+INSERT INTO users (id, full_name, email, password, phone, is_active, is_locked, created_date, bio, gender, birth_date)
+VALUES (UUID_TO_BIN('11111111-1111-1111-1111-111111111111'),
+        'Alice Johnson',
+        'alice.johnson@example.com',
+        'alicepass2024',
+        '+1234567894',
+        1, 0, NOW(),
+        'Computer science student and tech enthusiast.',
+        'female',
+        '2002-02-15');
+
+-- User: Carol Davis (UUID 3333...)
+INSERT INTO users (id, full_name, email, password, phone, is_active, is_locked, created_date, bio, gender, birth_date)
+VALUES (UUID_TO_BIN('33333333-3333-3333-3333-333333333333'),
+        'Carol Davis',
+        'carol.davis@example.com',
+        'carolsecure123',
+        '+1234567895',
+        1, 0, NOW(),
+        'Aspiring data analyst with a love for numbers.',
+        'female',
+        '1999-09-25');
+
 
 -- COURSES
 INSERT INTO courses (id, name, description, is_approved, is_open, created_date)
@@ -145,3 +169,99 @@ VALUES (UUID_TO_BIN('88888888-8888-8888-8888-888888888888'),
         NULL,
         'pending',
         NOW());
+
+
+-- Bob Smith bookmarks "Introduction to Java" and "Database Systems"
+INSERT INTO bookmarks (created_date, course_id, user_id)
+VALUES (NOW(), UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('22222222-2222-2222-2222-222222222222')),
+       (NOW(), UUID_TO_BIN('d6666666-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('22222222-2222-2222-2222-222222222222'));
+
+-- Erin Black bookmarks "Machine Learning Basics" and "Cloud Computing with AWS"
+INSERT INTO bookmarks (created_date, course_id, user_id)
+VALUES (NOW(), UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('55555555-5555-5555-5555-555555555555')),
+       (NOW(), UUID_TO_BIN('d5555555-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('55555555-5555-5555-5555-555555555555'));
+
+-- Frank Miller bookmarks "Web Development with React", "Cybersecurity Essentials", and "Introduction to Java"
+INSERT INTO bookmarks (created_date, course_id, user_id)
+VALUES (NOW(), UUID_TO_BIN('d2222222-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('66666666-6666-6666-6666-666666666666')),
+       (NOW(), UUID_TO_BIN('d8888888-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('66666666-6666-6666-6666-666666666666')),
+       (NOW(), UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('66666666-6666-6666-6666-666666666666'));
+
+-- Harry Wilson bookmarks "DevOps Fundamentals" (not approved) and "Data Structures and Algorithms"
+INSERT INTO bookmarks (created_date, course_id, user_id)
+VALUES (NOW(), UUID_TO_BIN('d4444444-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('88888888-8888-8888-8888-888888888888')),
+       (NOW(), UUID_TO_BIN('d3333333-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('88888888-8888-8888-8888-888888888888'));
+
+
+INSERT INTO tags (title, description)
+VALUES ('Java', 'Covers topics related to Java programming and its ecosystem.'),
+       ('Web Development', 'Topics related to building web applications and sites.'),
+       ('Algorithms', 'Focus on problem solving, logic, and algorithm design.'),
+       ('DevOps', 'Covers CI/CD, Docker, Kubernetes, and cloud infrastructure.'),
+       ('Cloud', 'Topics related to cloud computing platforms like AWS.'),
+       ('Databases', 'Covers relational databases, SQL, and data modeling.'),
+       ('Machine Learning', 'Basics of supervised/unsupervised learning and AI.'),
+       ('Cybersecurity', 'Focus on securing digital systems and information.');
+
+
+-- "Introduction to Java" -> Java
+INSERT INTO course_tags (tag_id, course_id)
+VALUES (1, UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'));
+
+-- "Web Development with React" -> Web Development
+INSERT INTO course_tags (tag_id, course_id)
+VALUES (2, UUID_TO_BIN('d2222222-dddd-dddd-dddd-dddddddddddd'));
+
+-- "Data Structures and Algorithms" -> Algorithms, Java
+INSERT INTO course_tags (tag_id, course_id)
+VALUES (3, UUID_TO_BIN('d3333333-dddd-dddd-dddd-dddddddddddd')),
+       (1, UUID_TO_BIN('d3333333-dddd-dddd-dddd-dddddddddddd'));
+
+-- "DevOps Fundamentals" -> DevOps, Cloud
+INSERT INTO course_tags (tag_id, course_id)
+VALUES (4, UUID_TO_BIN('d4444444-dddd-dddd-dddd-dddddddddddd')),
+       (5, UUID_TO_BIN('d4444444-dddd-dddd-dddd-dddddddddddd'));
+
+-- "Cloud Computing with AWS" -> Cloud, DevOps
+INSERT INTO course_tags (tag_id, course_id)
+VALUES (5, UUID_TO_BIN('d5555555-dddd-dddd-dddd-dddddddddddd')),
+       (4, UUID_TO_BIN('d5555555-dddd-dddd-dddd-dddddddddddd'));
+
+-- "Database Systems" -> Databases, Java
+INSERT INTO course_tags (tag_id, course_id)
+VALUES (6, UUID_TO_BIN('d6666666-dddd-dddd-dddd-dddddddddddd')),
+       (1, UUID_TO_BIN('d6666666-dddd-dddd-dddd-dddddddddddd'));
+
+-- "Machine Learning Basics" -> Machine Learning, Algorithms
+INSERT INTO course_tags (tag_id, course_id)
+VALUES (7, UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd')),
+       (3, UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'));
+
+-- "Cybersecurity Essentials" -> Cybersecurity, Cloud
+INSERT INTO course_tags (tag_id, course_id)
+VALUES (8, UUID_TO_BIN('d8888888-dddd-dddd-dddd-dddddddddddd')),
+       (5, UUID_TO_BIN('d8888888-dddd-dddd-dddd-dddddddddddd'));
+
+
+INSERT INTO bookmarks (created_date, course_id, user_id)
+VALUES ('2024-05-01 10:15:00.000000', UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('11111111-1111-1111-1111-111111111111')),
+       ('2024-05-03 08:30:00.000000', UUID_TO_BIN('d2222222-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('11111111-1111-1111-1111-111111111111')),
+       ('2024-05-04 11:45:00.000000', UUID_TO_BIN('d3333333-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('22222222-2222-2222-2222-222222222222')),
+       ('2024-05-06 15:20:00.000000', UUID_TO_BIN('d4444444-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('33333333-3333-3333-3333-333333333333')),
+       ('2024-05-07 17:00:00.000000', UUID_TO_BIN('d2222222-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('33333333-3333-3333-3333-333333333333')),
+       ('2024-05-08 19:40:00.000000', UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'),
+        UUID_TO_BIN('22222222-2222-2222-2222-222222222222'));

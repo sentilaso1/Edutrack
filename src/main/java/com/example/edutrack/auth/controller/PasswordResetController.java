@@ -17,12 +17,14 @@ import java.util.UUID;
 
 @Controller
 public class PasswordResetController {
+    private final UserService userService;
+    private final JavaMailSender mailSender;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private JavaMailSender mailSender;
+    public PasswordResetController(UserService userService, JavaMailSender mailSender) {
+        this.userService = userService;
+        this.mailSender = mailSender;
+    }
 
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
