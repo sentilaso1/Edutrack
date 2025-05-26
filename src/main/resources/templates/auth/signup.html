@@ -10,7 +10,7 @@
     <!--=============== CSS ===============-->
     <link rel="stylesheet" th:href="@{/assets/css/login.css}">
 
-    <title>Responsive login and registration form - Bedimcode</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 <!--=============== LOGIN IMAGE ===============-->
@@ -41,6 +41,7 @@
         <div class="login__area">
             <form th:action="@{/signup}" method="post" th:object="${user}" class="login__form">
                 <div class="login__content grid">
+                    <div th:if="${error}" style="color: red;">[[${error}]]</div>
                     <div class="login__box">
                         <input type="text" th:field="*{fullName}" required placeholder=" " class="login__input">
                         <label class="login__label">Full Name</label>
@@ -92,7 +93,7 @@
                             <label class="login__label">Repeat Password</label>
                         </div>
                     </div>
-
+                    <div class="g-recaptcha" data-sitekey="6Ld2SkkrAAAAAPiQ0oOFQp1QvEd07wsehI43ObCR"></div>
                 </div>
 
                 <button type="submit" class="login__button">Create account</button>
@@ -107,6 +108,11 @@
 </div>
 
 <!--=============== MAIN JS ===============-->
+<script>
+    setInterval(function () {
+        grecaptcha.reset();
+    }, 120000);
+</script>
 <script th:src="@{/assets/js/login.js}"></script>
 </body>
 </html>
