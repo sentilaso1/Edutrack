@@ -1,10 +1,11 @@
 package com.example.edutrack.curriculum.model;
 
+import com.example.edutrack.accounts.model.Mentor;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,23 +24,33 @@ public class Course {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "is_approved", nullable = false)
-    private Boolean isApproved = Boolean.FALSE;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", nullable = false)
+    private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
 
     @Column(name = "is_open", nullable = false)
     private Boolean isOpen = Boolean.FALSE;
 
     @Column(name = "created_date", nullable = false)
     @CreatedDate
-    private LocalDateTime createdDate = LocalDateTime.now();
+    private Date createdDate = new Date();
 
-    public Course(){}
-    public Course(String name, String description, Boolean isOpen, Boolean isOpen1) {
+    @ManyToOne
+    @JoinColumn(name = "mentor_id")
+    private Mentor mentor;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    private List<TeachingMaterials> materials = new ArrayList<>();
+
+    public Course() {}
+
+    public Course(String name, String description, Boolean isOpen) {
         this.name = name;
         this.description = description;
         this.isOpen = isOpen;
-        this.isOpen = isOpen1;
     }
+
+    // Getters and Setters
 
     public UUID getId() {
         return id;
@@ -65,12 +76,12 @@ public class Course {
         this.description = description;
     }
 
-    public Boolean getApproved() {
-        return isApproved;
+    public ApprovalStatus getApprovalStatus() {
+        return approvalStatus;
     }
 
-    public void setApproved(Boolean approved) {
-        isApproved = approved;
+    public void setApprovalStatus(ApprovalStatus approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
 
     public Boolean getOpen() {
@@ -81,16 +92,29 @@ public class Course {
         isOpen = open;
     }
 
-    public LocalDateTime getCreatedDate() {
+    public Date getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
+    public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<TeachingMaterial> materials = new ArrayList<>();
+    public Mentor getMentor() {
+        return mentor;
+    }
+
+    public void setMentor(Mentor mentor) {
+        this.mentor = mentor;
+    }
+
+    public List<TeachingMaterials> getMaterials() {
+        return materials;
+    }
+
+    public void setMaterials(List<TeachingMaterials> materials) {
+        this.materials = materials;
+    }
 
     @Override
     public String toString() {
@@ -98,7 +122,7 @@ public class Course {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", isOpen=" + isOpen +
+                ", approvalStatus=" + approvalStatus +
                 ", isOpen=" + isOpen +
                 ", createdDate=" + createdDate +
                 '}';
