@@ -69,13 +69,13 @@ public class CourseServiceImpl implements CourseService {
             for (MultipartFile file : courseFormDTO.getFiles()) {
                 if (!file.isEmpty()) {
                     try {
-                        TeachingMaterials teachingMaterials = new TeachingMaterials();
-                        teachingMaterials.setCourse(course);
-                        teachingMaterials.setFile(file.getBytes());
-                        teachingMaterials.setName(file.getOriginalFilename());
-                        teachingMaterials.setFileType(file.getContentType());
+                        TeachingMaterial teachingMaterial = new TeachingMaterial();
+                        teachingMaterial.setCourse(course);
+                        teachingMaterial.setFile(file.getBytes());
+                        teachingMaterial.setName(file.getOriginalFilename());
+                        teachingMaterial.setFileType(file.getContentType());
 
-                        teachingMaterialsRepository.save(teachingMaterials);
+                        teachingMaterialsRepository.save(teachingMaterial);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -106,16 +106,16 @@ public class CourseServiceImpl implements CourseService {
                 }
             }
         }
-        List<TeachingMaterials> oldMaterials = teachingMaterialsRepository.findByCourseId(course.getId());
+        List<TeachingMaterial> oldMaterials = teachingMaterialsRepository.findByCourseId(course.getId());
         teachingMaterialsRepository.deleteAll(oldMaterials);
         if (courseFormDTO.getFiles() != null) {
             for (MultipartFile file : courseFormDTO.getFiles()) {
                 if(!file.isEmpty()) {
                     try {
-                        TeachingMaterials teachingMaterials = new TeachingMaterials();
-                        teachingMaterials.setCourse(course);
-                        teachingMaterials.setFile(file.getBytes());
-                        teachingMaterialsRepository.save(teachingMaterials);
+                        TeachingMaterial teachingMaterial = new TeachingMaterial();
+                        teachingMaterial.setCourse(course);
+                        teachingMaterial.setFile(file.getBytes());
+                        teachingMaterialsRepository.save(teachingMaterial);
                     }catch (IOException e){
                         e.printStackTrace();
                     }
