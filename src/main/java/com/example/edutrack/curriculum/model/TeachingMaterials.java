@@ -5,14 +5,18 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "teaching_materials")
-public class TeachingMaterial {
+@Table(name = "TEACHING_MATERIALS")
+public class TeachingMaterials {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Lob
+    @Column(name = "file", columnDefinition = "LONGBLOB")
     private byte[] file;
+
+    private String name;
+    private String fileType;
 
     @ManyToOne
     @JoinColumn(name = "course_id")
@@ -21,11 +25,20 @@ public class TeachingMaterial {
     @Column(name = "upload_date")
     private Date uploadDate = new Date();
 
-    public TeachingMaterial() {}
-    public TeachingMaterial(byte[] file, Course course) {
+    public TeachingMaterials() {}
+    public TeachingMaterials(String name, String fileType, byte[] file, Course course) {
+        this.name = name;
+        this.fileType = fileType;
         this.file = file;
         this.course = course;
     }
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
+
+    public String getFileType() { return fileType; }
+
+    public void setFileType(String fileType) { this.fileType = fileType; }
 
     public Integer getId() {
         return id;

@@ -1,7 +1,9 @@
 package com.example.edutrack.accounts.service.implementations;
 
+import java.util.List;
 import java.util.UUID;
 
+import com.example.edutrack.curriculum.model.Course;
 import org.springframework.stereotype.Service;
 
 import com.example.edutrack.accounts.model.Mentor;
@@ -23,6 +25,18 @@ public class MentorServiceImpl implements com.example.edutrack.accounts.service.
                         return null;
                 }
 
+        }
+
+        public List<Course> getCoursesByMentor(UUID id) {
+                return mentorRepository.findCoursesByMentorId(id);
+        }
+
+        public List<Mentor> getAllMentors() {
+                return mentorRepository.findAll();
+        }
+
+        public Mentor findByCourseId(UUID id) {
+                return mentorRepository.findByCourses_Id(id);
         }
         
 }

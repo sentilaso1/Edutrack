@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Quản lý khóa học</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        td, th { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        .filters { margin-bottom: 20px; }
+        .filters > * { margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>📚 Quản lý khóa học</h2>
+
+
+<form method="GET" action="/manager/view">
+
+    <div class="filter-container space-y-4">
+
+        <div class="flex flex-col">
+            <label for="search" class="font-medium">Tìm kiếm theo tên khóa học</label>
+            <input type="text" id="search" name="search" class="form-input w-full" placeholder="Nhập từ khóa...">
+        </div>
+
+        <div class="flex flex-col">
+            <label for="mentorId" class="font-medium">Lọc theo giảng viên</label>
+            <select id="mentorId" name="mentorId" class="form-select">
+                <option value="">-- Tất cả --</option>
+                <option th:each="mentor : ${mentors}"
+                        th:value="${mentor.id}"
+                        th:text="${mentor.fullName}"
+                        th:selected="${mentor.id == selectedMentorId}">
+                </option>
+            </select>
+        </div>
+
+        <div class="flex flex-col">
+            <label class="font-medium">Lọc theo trạng thái</label>
+            <div class="flex space-x-4">
+                <select name="approved" class="form-select">
+                    <option value="" th:selected="${selectedApproved == null or selectedApproved == ''}">Tất cả trạng thái</option>
+                    <option value="PENDING" th:selected="${selectedApproved == 'PENDING'}">Chờ duyệt</option>
+                    <option value="APPROVED" th:selected="${selectedApproved == 'APPROVED'}">Đã duyệt</option>
+                    <option value="REJECTED" th:selected="${selectedApproved == 'REJECTED'}">Từ chối</option>
+                </select>
+
+
+                <select name="open" class="form-select">
+                    <option value="">Tình trạng</option>
+                    <option value="true">Đang mở</option>
+                    <option value="false">Đã đóng</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex flex-col">
+            <label class="font-medium">Lọc theo ngày tạo</label>
+            <div class="flex space-x-2">
+                <input type="date" name="fromDate" class="form-input">
+                <span>đến</span>
+                <input type="date" name="toDate" class="form-input">
+            </div>
+        </div>
+
+        <div class="flex flex-col">
+            <label for="sortBy" class="font-medium">Sắp xếp theo</label>
+            <select id="sortBy" name="sortBy" class="form-select">
+                <option value="">-- Không sắp xếp --</option>
+                <option value="name">Tên A-Z</option>
+                <option value="createdDate">Ngày tạo mới nhất</option>
+            </select>
+        </div>
+
+        <div class="flex space-x-2">
+            <button type="submit" class="btn btn-success">Áp dụng</button>
+            <a href="/courses-manager" class="btn btn-secondary">Đặt lại</a>
+        </div>
+
+    </div>
+
+</form>
+
+
+<table>
+    <thead>
+    <tr>
+        <th>Tên khóa học</th>
+        <th>Mentor</th>
+        <th>Ngày tạo</th>
+        <th>Trạng thái</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="course : ${courses}">
+        <td th:text="${course.name}">Tên</td>
+        <td th:text="${course.mentor.fullName}">Mentor</td>
+        <td th:text="${#dates.format(course.createdDate, 'yyyy-MM-dd')}">Ngày</td>
+
+        <td>
+            <span th:switch="${course.approvalStatus}">
+                <span th:case="${PENDING}">⏳ Chờ duyệt</span>
+                <span th:case="${APPROVED}">✅ Duyệt</span>
+                <span th:case="${REJECTED}">❌ Từ chối</span>
+            </span>,
+            <span th:text="${course.open ? '🟢 Mở' : '🔴 Đóng'}"></span>
+        </td>
+
+        <td>
+            <th:block th:if="${course.approvalStatus == PENDING}">
+                <a th:href="@{/manager/courses/review/{id}(id=${course.id})}">📝 Review</a>
+            </th:block>
+            <th:block th:if="${course.approvalStatus == APPROVED}">
+                <a th:href="@{/courses/edit/{id}(id=${course.id})}">Sửa</a> |
+                <a th:href="@{/courses/view-details/{id}(id=${course.id})}">Chi tiết</a> |
+                <a th:href="@{/manager/courses/toggle-open/{id}(id=${course.id})}"
+                   th:text="${course.open} ? '🔒 Đóng' : '🔓 Mở'">Mở/Đóng</a>
+            </th:block>
+            <th:block th:if="${course.approvalStatus == REJECTED}">
+                <span style="font-style: italic; color: #af4747">Đã từ chối</span>
+            </th:block>
+            |
+            <a th:href="@{/courses/delete/{id}(id=${course.id})}" onclick="return confirm('Xóa khóa học này?')">Xóa</a>
+        </td>
+    </tr>
+    </tbody>
+
+</table>
+
+</body>
+</html>
