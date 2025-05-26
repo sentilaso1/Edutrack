@@ -131,7 +131,6 @@ public class CourseServiceImpl implements CourseService {
 
     public List<Course> getFilteredCourses(String search,
                                            UUID mentorId,
-                                           ApprovalStatus approvalStatus,
                                            Boolean open,
                                            Date fromDate,
                                            Date toDate,
@@ -139,7 +138,6 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findFilteredCourses(
                 (search == null || search.isEmpty()) ? null : search,
                 mentorId,
-                approvalStatus,
                 open,
                 fromDate,
                 toDate,
