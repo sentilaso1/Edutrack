@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Chỉnh Sửa Khóa Học</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        /* Giữ nguyên style từ file tạo khóa học */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #FFFCFC;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #86A788;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea,
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #FFE2E2;
+            border-radius: 6px;
+            background-color: #FFE2E2;
+            font-size: 14px;
+            outline: none;
+            resize: vertical;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        button {
+            margin-top: 25px;
+            width: 100%;
+            background-color: #86A788;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #759976;
+        }
+
+        /* Style cho tag động */
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0px 10px 0px;
+            min-height: 38px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 4px 8px;
+            background: white;
+        }
+
+        .tag {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: default;
+            user-select: none;
+        }
+
+        .tag button {
+            background: transparent;
+            border: none;
+            color: white;
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .tag-input-wrapper {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tag-input-wrapper input[type="text"] {
+            flex-grow: 1;
+            padding: 8px 12px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .tag-input-wrapper button.add-btn {
+            padding: 8px 20px;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .tag-input-wrapper button.add-btn:hover {
+            background-color: #45a049;
+        }
+        #filePreview {
+            margin-top: 10px;
+            list-style-type: disc;
+            padding-left: 20px;
+            color: #555;
+        }
+        /* Style cho tooltip */
+        .tooltip {
+            cursor: help;
+            color: #86A788;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+        /* Style loading button */
+        button.loading {
+            background-color: #759976 !important;
+            cursor: not-allowed;
+        }
+        /* Style autocomplete dropdown */
+        #tagInput {
+            position: relative;
+        }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0 0 6px 6px;
+        }
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+        }
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Chỉnh Sửa Khóa Học</h2>
+
+    <form th:action="@{/courses/edit/{id}(id=${courseId})}" method="post" enctype="multipart/form-data" th:object="${courseForm}" id="courseForm">
+        <label for="name">Tên Khóa Học <span class="tooltip" title="Nhập tên khóa học, tối thiểu 3 ký tự">❓</span></label>
+        <input type="text" id="name" th:field="*{name}" placeholder="Tên khóa học" required />
+
+        <label for="description">Mô Tả <span class="tooltip" title="Mô tả chi tiết về khóa học (tối đa 500 ký tự)">❓</span></label>
+        <textarea id="description" th:field="*{description}" placeholder="Mô tả khóa học" maxlength="500"></textarea>
+
+        <label>Kỹ năng / Nội dung (Tags) <span class="tooltip" title="Thêm kỹ năng hoặc nội dung liên quan tới khóa học">❓</span></label>
+
+        <div class="tag-container" id="tagContainer"></div>
+        <div class="tag-input-wrapper" style="position:relative;">
+            <input type="text" id="tagInput" placeholder="Nhấn Enter hoặc Add" autocomplete="off" />
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+            <button class="add-btn" type="button" onclick="addTag()">Add</button>
+        </div>
+        <div id="hiddenInput"></div>
+
+        <label for="files">Tài liệu giảng dạy
+            <span class="tooltip" title="Chọn tài liệu giảng dạy (PDF, DOC, PPT) có thể chọn nhiều file">❓</span>
+        </label>
+        <input type="file" id="files" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx" />
+        <ul id="filePreview"></ul>
+
+        <button type="submit" id="submitBtn">Cập Nhật Khóa Học</button>
+        <button type="reset" style="background-color:#f44336; margin-top:10px;">Xóa dữ liệu</button>
+        <button type="button" onclick="history.back()" style="margin-top: 10px; width: 100%; background-color: #ccc; color: #333; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer;">
+            Quay Lại
+        </button>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    const initialTags = /*[[${courseForm.tagTexts}]]*/ [];
+</script>
+<script>
+    const tags = [];
+    const availableTags = ["JavaScript", "Java", "Python", "Spring", "React", "Angular", "HTML", "CSS", "Docker", "DevOps", "Machine Learning", "Data Science", "SQL", "NoSQL", "Kubernetes", "AWS", "Azure", "Git", "Agile"];
+
+    function randomColor() {
+        const r = Math.floor(150 + Math.random() * 100);
+        const g = Math.floor(150 + Math.random() * 100);
+        const b = Math.floor(150 + Math.random() * 100);
+        return `rgb(${r},${g},${b})`;
+    }
+
+    function addTag() {
+        const tagInput = document.getElementById("tagInput");
+        const tagValue = tagInput.value.trim();
+        if (!tagValue) return;
+        if (tags.some(t => t.value.toLowerCase() === tagValue.toLowerCase())) {
+            alert("Tag đã tồn tại!");
+            return;
+        }
+        tags.push({ value: tagValue, color: randomColor() });
+        renderTags();
+        tagInput.value = '';
+        tagInput.focus();
+        closeAllLists();
+    }
+
+    function removeTag(index) {
+        tags.splice(index, 1);
+        renderTags();
+    }
+
+    function renderTags() {
+        const tagContainer = document.getElementById("tagContainer");
+        tagContainer.innerHTML = "";
+        const hiddenInput = document.getElementById("hiddenInput");
+        hiddenInput.innerHTML = "";
+
+        tags.forEach((tag, index) => {
+            const tagElement = document.createElement("div");
+            tagElement.className = "tag";
+            tagElement.style.backgroundColor = tag.color;
+
+            const tagValue = document.createElement("span");
+            tagValue.textContent = tag.value;
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.type = "button";
+            deleteBtn.textContent = "×";
+            deleteBtn.onclick = () => removeTag(index);
+
+            tagElement.appendChild(tagValue);
+            tagElement.appendChild(deleteBtn);
+            tagContainer.appendChild(tagElement);
+
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "tagTexts";
+            input.value = tag.value;
+            hiddenInput.appendChild(input);
+        });
+    }
+
+    if (initialTags && initialTags.length) {
+        initialTags.forEach(t => tags.push({ value: t, color: randomColor() }));
+        renderTags();
+    }
+
+
+    const fileInput = document.getElementById('files');
+    const filePreview = document.getElementById('filePreview');
+    fileInput.addEventListener('change', () => {
+        filePreview.innerHTML = '';
+        const files = fileInput.files;
+        for (const file of files) {
+            const li = document.createElement('li');
+            li.textContent = file.name;
+            filePreview.appendChild(li);
+        }
+    });
+
+    document.getElementById("tagInput").addEventListener("keydown", function (event){
+        if (event.key === "Enter"){
+            event.preventDefault();
+            addTag();
+        }
+    });
+
+    document.getElementById('courseForm').addEventListener('submit', e => {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+        submitBtn.textContent = 'Đang gửi...';
+    });
+
+    function closeAllLists() {
+        const items = document.getElementsByClassName("autocomplete-items");
+        for (let i = 0; i < items.length; i++) {
+            items[i].innerHTML = '';
+        }
+    }
+</script>
+</body>
+</html>
