@@ -1,11 +1,13 @@
 package com.example.edutrack.auth.controller;
 
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.auth.service.RecaptchaService;
 import com.example.edutrack.auth.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,9 @@ import java.util.Optional;
 @Controller
 public class AuthController {
     private final UserService userService;
+
+    @Autowired
+    private RecaptchaService recaptchaService;
 
     public AuthController(UserService userService) {
         this.userService = userService;
@@ -46,7 +51,22 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public String processSignup(@ModelAttribute("user") User user, @RequestParam String confirm_password,Model model) {
+    public String processSignup(@ModelAttribute("user") User user,
+                                @RequestParam("g-recaptcha-response") String recaptchaResponse,
+                                @RequestParam String confirm_password,
+                                HttpServletRequest request,
+                                Model model) {
+        System.out.println("g-recaptcha-response: " + recaptchaResponse);
+        if (recaptchaResponse == null || recaptchaResponse.isEmpty()) {
+            model.addAttribute("error", "captcha null");
+            return "auth/signup";
+        }
+        String clientIp = request.getRemoteAddr();
+        if (!recaptchaService.verify(recaptchaResponse, clientIp)) {
+            model.addAttribute("error", "Please verify you are not a robot");
+            return "auth/signup";
+        }
+
         if (userService.isEmailExists(user.getEmail())) {
             model.addAttribute("error", "Email already exists");
             return "auth/signup";
