@@ -6,7 +6,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +15,15 @@ import java.util.Optional;
 
 @Controller
 public class AuthController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/login")
-    public String showSignupForm(HttpServletRequest request, Model model) {
-        String emailFromCookie = null;
-
+    public String showLoginForm(HttpServletRequest request, Model model) {
+        String emailFromCookie;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -33,18 +34,29 @@ public class AuthController {
                 }
             }
         }
+        return "auth/login";
+    }
+
+    @GetMapping("/signup")
+    public String showSignupForm(HttpServletRequest request, Model model) {
         User user = new User();
         user.setGender("male");
         model.addAttribute("user", user);
-        return "auth/login_signup";
+        return "auth/signup";
     }
 
     @PostMapping("/signup")
-    public String processSignup(@ModelAttribute("user") User user, Model model) {
+    public String processSignup(@ModelAttribute("user") User user, @RequestParam String confirm_password,Model model) {
         if (userService.isEmailExists(user.getEmail())) {
             model.addAttribute("error", "Email already exists");
-            return "auth/login_signup";
+            return "auth/signup";
         }
+
+        if(!confirm_password.equals(user.getPassword())) {
+            model.addAttribute("error", "Repeated password does not match original password");
+            return "auth/signup";
+        }
+
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hashed = encoder.encode(user.getPassword());
         user.setPassword(hashed);
@@ -82,7 +94,7 @@ public class AuthController {
         }
         model.addAttribute("error", "Invalid email or password");
         model.addAttribute("user", new User());
-        return "auth/login_signup";
+        return "auth/login";
     }
 
     // Logout

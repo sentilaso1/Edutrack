@@ -1,6 +1,7 @@
 package com.example.edutrack.accounts.repository;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.curriculum.model.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +27,9 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
             @Param("totalSessions") Integer totalSessions,
             @Param("isAvailable") Boolean isAvailable
     );
+
+    @Query("SELECT c FROM Course c WHERE c.mentor.id = :mentorId")
+    List<Course> findCoursesByMentorId(@Param("mentorId") UUID mentorId);
+
+    Mentor findByCourses_Id(UUID courseId);
 }
