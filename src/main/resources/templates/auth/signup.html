@@ -34,59 +34,8 @@
 
 <!--=============== LOGIN ===============-->
 <div class="login container grid" id="loginAccessRegister">
-    <!--===== LOGIN ACCESS =====-->
-    <div class="login__access">
-        <h1 class="login__title">Log in to your account.</h1>
-
-        <div class="login__area">
-            <form th:action="@{/login}" method="post" class="login__form">
-                <div class="login__content grid">
-                    <div th:if="${error}" style="color: red;">[[${error}]]</div>
-                    <div class="login__box">
-                        <input type="email" id="email" name="email" required th:value="${email != null} ? ${email} : ''"  placeholder=" " class="login__input">
-                        <label for="email" class="login__label">Email</label>
-                        <i class="ri-mail-fill login__icon"></i>
-                    </div>
-
-                    <div class="login__box">
-                        <input type="password" id="password" name="password" required placeholder=" " class="login__input">
-                        <label for="password" class="login__label">Password</label>
-                        <i class="ri-eye-off-fill login__icon login__password" id="loginPassword"></i>
-                    </div>
-                </div>
-                <div style="display: flex">
-                    <label class="login__remember">
-                        <input type="checkbox" name="rememberMe"> Remember Me
-                    </label>
-                    <a href="/forgot-password" class="login__forgot">Forgot your password?</a>
-                </div>
-
-                <button type="submit" class="login__button">Login</button>
-            </form>
-
-            <div class="login__social">
-                <p class="login__social-title">Or login with</p>
-                <div class="login__social-links">
-                    <a href="#" class="login__social-link">
-                        <img th:src="@{/assets/img/icon-google.svg}" alt="image" class="login__social-img">
-                    </a>
-                    <a href="#" class="login__social-link">
-                        <img th:src="@{/assets/img/icon-facebook.svg}" alt="image" class="login__social-img">
-                    </a>
-                    <a href="#" class="login__social-link">
-                        <img th:src="@{/assets/img/icon-apple.svg}" alt="image" class="login__social-img">
-                    </a>
-                </div>
-            </div>
-            <p class="login__switch">
-                Don't have an account?
-                <button id="loginButtonRegister" type="button">Create Account</button>
-            </p>
-        </div>
-    </div>
-
     <!--===== LOGIN REGISTER =====-->
-    <div class="login__register">
+    <div class="login__access">
         <h1 class="login__title">Create new account.</h1>
 
         <div class="login__area">
@@ -131,11 +80,19 @@
                         <i class="ri-mail-fill login__icon"></i>
                     </div>
 
-                    <div class="login__box">
-                        <input type="password" th:field="*{password}" required placeholder=" " class="login__input">
-                        <label class="login__label">Password</label>
-                        <i class="ri-eye-off-fill login__icon login__password" id="loginPasswordCreate"></i>
+                    <div class="login__group grid">
+                        <div class="login__box">
+                            <input type="password" th:field="*{password}" required placeholder=" " class="login__input">
+                            <label class="login__label">Password</label>
+                            <i class="ri-eye-off-fill login__icon login__password" id="loginPassword"></i>
+                        </div>
+                        <div class="login__box">
+                            <input type="password" name="confirm_password" id="confirm_password" required
+                                   placeholder=" " class="login__input">
+                            <label class="login__label">Repeat Password</label>
+                        </div>
                     </div>
+
                 </div>
 
                 <button type="submit" class="login__button">Create account</button>
@@ -143,7 +100,7 @@
 
             <p class="login__switch">
                 Already have an account?
-                <button id="loginButtonAccess" type="button">Log In</button>
+                <button id="loginButtonAccess" type="button"><a style="text-decoration: inherit" href="/login">Log In</a></button>
             </p>
         </div>
     </div>
