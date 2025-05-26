@@ -36,7 +36,7 @@ public class Course {
     private Mentor mentor;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<TeachingMaterials> materials = new ArrayList<>();
+    private List<TeachingMaterial> materials = new ArrayList<>();
 
     public Course() {}
 
@@ -96,11 +96,11 @@ public class Course {
         this.mentor = mentor;
     }
 
-    public List<TeachingMaterials> getMaterials() {
+    public List<TeachingMaterial> getMaterials() {
         return materials;
     }
 
-    public void setMaterials(List<TeachingMaterials> materials) {
+    public void setMaterials(List<TeachingMaterial> materials) {
         this.materials = materials;
     }
 

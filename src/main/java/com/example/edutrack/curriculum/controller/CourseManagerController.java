@@ -4,7 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.TagDTO;
 import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.TeachingMaterials;
+import com.example.edutrack.curriculum.model.TeachingMaterial;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseServiceImpl;
 import com.example.edutrack.curriculum.service.implementation.CourseTagServiceImpl;
@@ -75,7 +75,7 @@ public class CourseManagerController {
         Mentor mentor = mentorServiceImpl.findByCourseId(id);
         Course course = courseServiceImpl.findById(id);
         List<TagDTO> tagsList = courseTagServiceImpl.findTagsByCourseId(id);
-        List<TeachingMaterials> materials = teachingMaterialsImpl.findByCourseId(id);
+        List<TeachingMaterial> materials = teachingMaterialsImpl.findByCourseId(id);
         model.addAttribute("materials", materials);
         model.addAttribute("tagList", tagsList);
         model.addAttribute("mentor", mentor);
@@ -85,7 +85,7 @@ public class CourseManagerController {
 
     @GetMapping("/materials/download/{id}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable int id) {
-        TeachingMaterials material = teachingMaterialsImpl.findById(id);
+        TeachingMaterial material = teachingMaterialsImpl.findById(id);
         if (material == null) return ResponseEntity.notFound().build();
 
         HttpHeaders headers = new HttpHeaders();
