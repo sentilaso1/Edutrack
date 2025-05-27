@@ -1,8 +1,6 @@
 package com.example.edutrack.accounts.dto;
 
 import com.example.edutrack.accounts.model.Bookmark;
-import com.example.edutrack.curriculum.dto.TagDTO;
-import com.example.edutrack.curriculum.model.CourseTag;
 import com.example.edutrack.curriculum.model.Tag;
 
 import java.util.List;
@@ -36,5 +34,11 @@ public class BookmarkDTO {
         this.tags = tags;
     }
 
-
+    @Override
+    public String toString() {
+        return "BookmarkDTO{" +
+                "bookmark=" + bookmark +
+                ", tags=" + tags +
+                '}';
+    }
 }
