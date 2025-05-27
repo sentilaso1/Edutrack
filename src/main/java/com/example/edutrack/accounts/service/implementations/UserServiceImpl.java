@@ -17,6 +17,9 @@ import java.util.UUID;
 import java.util.List;
 import java.util.Date;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Service
 public class UserServiceImpl implements UserService{
         private final UserRepository userRepository;
@@ -99,8 +102,9 @@ public class UserServiceImpl implements UserService{
         }
 
         @Override
-        public List<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive) {
-                return userRepository.searchUsers(email, fullName, isLocked, isActive);
+        public Page<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive, 
+                        Pageable pageable) {
+                return userRepository.searchUsers(email, fullName, isLocked, isActive, pageable);
         }
 
         @Override
