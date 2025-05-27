@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CourseTagService {
-    List<CourseTag> findTagsByCourseId(UUID courseId);
-
     boolean existsByCourseAndTag(UUID courseId, int tagId);
-
     void addCourseTag(UUID courseId, int tagId);
 }

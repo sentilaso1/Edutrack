@@ -4,6 +4,9 @@ import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.model.User;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface UserService {
         User getUserById(String id);
         void saveUser(User user);
@@ -14,5 +17,5 @@ public interface UserService {
         void grantStaffRole(String id, Staff.Role role);
         void revokeStaffRole(String id);
         Staff getStaffByUserId(String userId);
-        List<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive);
+        Page<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive, Pageable pageable);
 }

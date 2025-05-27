@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>CV Detail</title>
+    <link rel="stylesheet" href="/css/colors.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            border-radius: 16px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .cv-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .cv-item {
+            padding: 20px;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .cv-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .cv-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .cv-value {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .portfolio-link {
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            word-break: break-all;
+        }
+
+        .portfolio-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .date-info {
+            font-style: italic;
+        }
+
+        .summary-section {
+            margin-bottom: 25px;
+        }
+
+        .skills-section {
+            margin-bottom: 25px;
+        }
+
+        .experience-section {
+            margin-bottom: 25px;
+        }
+
+        .footer-info {
+            border-top: 2px solid;
+            padding-top: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .cv-item {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body class="base-bg">
+<div class="container card-bg shadow-medium">
+    <div class="header">
+        <h1 class="text-heading gradient-accent" style="background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">CV Detail</h1>
+        <div class="divider"></div>
+    </div>
+
+    <div class="cv-grid">
+        <!-- Summary Section -->
+        <div class="cv-item section-bg shadow-soft summary-section">
+            <span class="cv-label text-heading"> Avatar</span>
+            <img th:src="@{/avatar/{id}(id=${cv.user.id})}" alt="Avatar"
+                 class="w-16 h-16 rounded-full object-cover border-2 border-gray-200">
+            <span class="cv-label text-heading"> Email</span>
+            <div class="cv-value text-dark" th:text="${cv.user.email}"></div>
+            <span class="cv-label text-heading"> Full name</span>
+            <div class="cv-value text-dark" th:text="${cv.user.fullName}"></div>
+            <span class="cv-label text-heading"> Phone</span>
+            <div class="cv-value text-dark" th:text="${cv.user.phone}"></div>
+            <span class="cv-label text-heading"> Gender</span>
+            <div class="cv-value text-dark" th:text="${cv.user.gender}"></div>
+            <span class="cv-label text-heading"> Birth date</span>
+            <div class="cv-value text-dark" th:text="${cv.user.birthDate}"></div>
+            <span class="cv-label text-heading"> Bio</span>
+            <div class="cv-value text-dark" th:text="${cv.user.bio}"></div>
+            <span class="cv-label text-heading"> Summary</span>
+            <div class="cv-value text-dark" th:text="${cv.summary}">Professional summary and overview of qualifications</div>
+        </div>
+
+        <!-- Experience Years -->
+        <div class="cv-item container-bg shadow-soft">
+            <span class="cv-label text-heading"> Experience Years</span>
+            <div class="cv-value text-dark">
+                <span class="badge" th:text="${cv.experienceYears} + ' years'">5 years</span>
+            </div>
+        </div>
+
+        <!-- Skills Section -->
+        <div class="cv-item section-bg shadow-soft skills-section">
+            <span class="cv-label text-heading"> Skills</span>
+            <div class="cv-value text-dark" th:text="${cv.skills}">Technical skills and competencies</div>
+        </div>
+
+        <!-- Education -->
+        <div class="cv-item container-bg shadow-soft">
+            <span class="cv-label text-heading"> Education</span>
+            <div class="cv-value text-dark" th:text="${cv.education}">Educational background and qualifications</div>
+        </div>
+
+        <!-- Experience Section -->
+        <div class="cv-item section-bg shadow-soft experience-section">
+            <span class="cv-label text-heading"> Professional Experience</span>
+            <div class="cv-value text-dark" th:text="${cv.experience}">Work experience and professional history</div>
+        </div>
+
+        <!-- Certifications -->
+        <div class="cv-item container-bg shadow-soft">
+            <span class="cv-label text-heading"> Certifications</span>
+            <div class="cv-value text-dark" th:text="${cv.certifications}">Professional certifications and achievements</div>
+        </div>
+
+        <!-- Languages -->
+        <div class="cv-item section-bg shadow-soft">
+            <span class="cv-label text-heading">Languages</span>
+            <div class="cv-value text-dark" th:text="${cv.languages}">Language proficiencies</div>
+        </div>
+
+        <!-- Portfolio -->
+        <div class="cv-item container-bg shadow-soft">
+            <span class="cv-label text-heading">Portfolio</span>
+            <div class="cv-value">
+                <a class="portfolio-link text-accent" th:href="${cv.portfolioUrl}" th:text="${cv.portfolioUrl}" target="_blank">
+                    https://portfolio-example.com
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Information -->
+    <div class="footer-info border-accent">
+        <div class="cv-item modal-bg shadow-soft" style="margin-bottom: 15px;">
+            <span class="cv-label text-heading">Status</span>
+            <div class="cv-value">
+                <span class="badge-secondary status-badge" th:text="${cv.status}">Active</span>
+            </div>
+        </div>
+
+        <div class="cv-item modal-bg shadow-soft">
+            <span class="cv-label text-heading">Created Date</span>
+            <div class="cv-value text-secondary date-info" th:text="${#dates.format(cv.createdDate, 'MMMM dd, yyyy ''at'' HH:mm')}">
+                January 15, 2024 at 14:30
+            </div>
+        </div>
+
+        <div th:if="${cv.status == 'pending'}">
+            <form th:action="@{/cv/accept/{id}(id=${cv.id})}" method="post">
+                <button type="submit" class="btn btn-success">Accept</button>
+            </form>
+            <form th:action="@{/cv/reject/{id}(id=${cv.id})}" method="post" style="margin-top: 10px;">
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

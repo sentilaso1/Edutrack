@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CvServiceImpl implements CvService {
@@ -68,5 +70,39 @@ public class CvServiceImpl implements CvService {
         cv.setPortfolioUrl(cvRequest.getPortfolioUrl());
 
         return cvRepository.save(cv);
+    }
+
+    @Override
+    public CV getCVById(UUID id) {
+        return cvRepository.findByUserId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cv not found with ID: " + id));
+    }
+
+    @Override
+    public boolean acceptCV(UUID id) {
+        Optional<CV> optionalCv = cvRepository.findById(id);
+        if (optionalCv.isPresent()) {
+            CV cv = optionalCv.get();
+            if (cv.getStatus().equals("pending")) {
+                cv.setStatus("approved");
+                cvRepository.save(cv);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean rejectCV(UUID id) {
+        Optional<CV> optionalCv = cvRepository.findById(id);
+        if (optionalCv.isPresent()) {
+            CV cv = optionalCv.get();
+            if (cv.getStatus().equals("pending")) {
+                cv.setStatus("rejected");
+                cvRepository.save(cv);
+                return true;
+            }
+        }
+        return false;
     }
 }
