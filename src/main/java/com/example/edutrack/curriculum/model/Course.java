@@ -104,6 +104,17 @@ public class Course {
         this.materials = materials;
     }
 
+    @OneToMany(mappedBy = "course")
+    private List<CourseMentor> applications;
+
+    public List<CourseMentor> getApplications() {
+        return applications;
+    }
+    public void setApplications(List<CourseMentor> applications) {
+        this.applications = applications;
+    }
+
+
     @Override
     public String toString() {
         return "Course{" +

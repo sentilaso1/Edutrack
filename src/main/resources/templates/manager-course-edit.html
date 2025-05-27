@@ -186,7 +186,7 @@
 <div class="container">
     <h2>Chỉnh Sửa Khóa Học</h2>
 
-    <form th:action="@{/courses/edit/{id}(id=${courseId})}" method="post" enctype="multipart/form-data" th:object="${courseForm}" id="courseForm">
+    <form th:action="@{/manager/courses/edit/{id}(id=${courseId})}" method="post" enctype="multipart/form-data" th:object="${courseForm}" id="courseForm">
         <label for="name">Tên Khóa Học <span class="tooltip" title="Nhập tên khóa học, tối thiểu 3 ký tự">❓</span></label>
         <input type="text" id="name" th:field="*{name}" placeholder="Tên khóa học" required />
 
@@ -203,11 +203,21 @@
         </div>
         <div id="hiddenInput"></div>
 
-        <label for="files">Tài liệu giảng dạy
-            <span class="tooltip" title="Chọn tài liệu giảng dạy (PDF, DOC, PPT) có thể chọn nhiều file">❓</span>
-        </label>
-        <input type="file" id="files" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx" />
-        <ul id="filePreview"></ul>
+        <!-- Tài liệu hiện tại -->
+        <div class="label">Tài liệu giảng dạy</div>
+        <ul class="file-list" th:if="${materials != null}">
+            <li th:each="material : ${materials}">
+                <span th:text="${material.name}">Tên file</span>
+                &nbsp;|&nbsp;
+                <a th:href="@{'/manager/materials/download/' + ${material.id}}">Download</a>
+                &nbsp;|&nbsp;
+                <a th:href="@{'/manager/materials/delete/' + ${material.id}}"
+                   onclick="return confirm('Bạn có chắc chắn muốn xóa tài liệu này?')">Xoá</a>
+            </li>
+        </ul>
+
+        <label>Tải tài liệu mới (có thể chọn nhiều):</label>
+        <input type="file" name="newFiles" multiple accept=".pdf,.doc,.docx,.ppt,.pptx" />
 
         <button type="submit" id="submitBtn">Cập Nhật Khóa Học</button>
         <button type="reset" style="background-color:#f44336; margin-top:10px;">Xóa dữ liệu</button>
@@ -217,6 +227,7 @@
     </form>
 </div>
 
+
 <script th:inline="javascript">
     const initialTags = /*[[${courseForm.tagTexts}]]*/ [];
 </script>
@@ -224,6 +235,13 @@
     const tags = [];
     const availableTags = ["JavaScript", "Java", "Python", "Spring", "React", "Angular", "HTML", "CSS", "Docker", "DevOps", "Machine Learning", "Data Science", "SQL", "NoSQL", "Kubernetes", "AWS", "Azure", "Git", "Agile"];
 
+    document.getElementById("tagInput").addEventListener("keydown", function (event){
+        if (event.key === "Enter"){
+            event.preventDefault();
+            addTag();
+        }
+    });
+    
     function randomColor() {
         const r = Math.floor(150 + Math.random() * 100);
         const g = Math.floor(150 + Math.random() * 100);
@@ -320,6 +338,8 @@
             items[i].innerHTML = '';
         }
     }
+
 </script>
+
 </body>
 </html>

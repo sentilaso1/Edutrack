@@ -11,6 +11,8 @@ public interface CourseService {
 
     List<Course> findAll();
 
+    void save(Course course);
+
     Course findById(UUID id);
 
     UUID create(CourseFormDTO courseFormDTO);
