@@ -14,6 +14,8 @@ public interface CourseService {
     Page<Course> findAll(Pageable pageable);
 
 
+    void save(Course course);
+
     Course findById(UUID id);
 
     UUID create(CourseFormDTO courseFormDTO);
