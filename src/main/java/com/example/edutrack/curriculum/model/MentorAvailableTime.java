@@ -23,6 +23,8 @@ public class MentorAvailableTime {
     @JoinColumn(name = "slotId", insertable = false, updatable = false)
     private Slot slot;
 
+    public MentorAvailableTime() {}
+
 
     public UUID getMentorId() {
         return mentorId;

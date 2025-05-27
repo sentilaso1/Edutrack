@@ -1,6 +1,7 @@
 package com.example.edutrack.auth.controller;
 
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.auth.service.RecaptchaService;
 import com.example.edutrack.auth.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,13 +17,18 @@ import java.util.Optional;
 
 @Controller
 public class AuthController {
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    private RecaptchaService recaptchaService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/login")
-    public String showSignupForm(HttpServletRequest request, Model model) {
-        String emailFromCookie = null;
-
+    public String showLoginForm(HttpServletRequest request, Model model) {
+        String emailFromCookie;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -33,18 +39,44 @@ public class AuthController {
                 }
             }
         }
+        return "auth/login";
+    }
+
+    @GetMapping("/signup")
+    public String showSignupForm(HttpServletRequest request, Model model) {
         User user = new User();
         user.setGender("male");
         model.addAttribute("user", user);
-        return "auth/login_signup";
+        return "auth/signup";
     }
 
     @PostMapping("/signup")
-    public String processSignup(@ModelAttribute("user") User user, Model model) {
+    public String processSignup(@ModelAttribute("user") User user,
+                                @RequestParam("g-recaptcha-response") String recaptchaResponse,
+                                @RequestParam String confirm_password,
+                                HttpServletRequest request,
+                                Model model) {
+        System.out.println("g-recaptcha-response: " + recaptchaResponse);
+        if (recaptchaResponse == null || recaptchaResponse.isEmpty()) {
+            model.addAttribute("error", "captcha null");
+            return "auth/signup";
+        }
+        String clientIp = request.getRemoteAddr();
+        if (!recaptchaService.verify(recaptchaResponse, clientIp)) {
+            model.addAttribute("error", "Please verify you are not a robot");
+            return "auth/signup";
+        }
+
         if (userService.isEmailExists(user.getEmail())) {
             model.addAttribute("error", "Email already exists");
-            return "auth/login_signup";
+            return "auth/signup";
         }
+
+        if(!confirm_password.equals(user.getPassword())) {
+            model.addAttribute("error", "Repeated password does not match original password");
+            return "auth/signup";
+        }
+
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hashed = encoder.encode(user.getPassword());
         user.setPassword(hashed);
@@ -82,7 +114,7 @@ public class AuthController {
         }
         model.addAttribute("error", "Invalid email or password");
         model.addAttribute("user", new User());
-        return "auth/login_signup";
+        return "auth/login";
     }
 
     // Logout

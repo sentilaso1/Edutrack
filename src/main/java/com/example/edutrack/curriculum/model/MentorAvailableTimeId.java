@@ -9,6 +9,8 @@ public class MentorAvailableTimeId implements Serializable {
     private Integer slotId;
     private DayOfWeek day;
 
+    public MentorAvailableTimeId() {}
+
     public MentorAvailableTimeId(UUID mentorId, Integer slotId, DayOfWeek day) {
         this.mentorId = mentorId;
         this.slotId = slotId;
