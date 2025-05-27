@@ -6,8 +6,10 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.BookmarkRepository;
 import com.example.edutrack.accounts.service.interfaces.BookmarkService;
 import com.example.edutrack.curriculum.dto.TagDTO;
+import com.example.edutrack.curriculum.model.CourseTag;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.CourseTagServiceImpl;
+import com.example.edutrack.curriculum.service.implementation.TagServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,12 +21,12 @@ import java.util.List;
 @Service
 public class BookmarkServiceImpl implements BookmarkService {
     private final BookmarkRepository bookmarkRepository;
-    private final CourseTagServiceImpl courseTagService;
+    private final TagServiceImpl tagServiceImpl;
 
     @Autowired
-    public BookmarkServiceImpl(BookmarkRepository bookmarkRepository, CourseTagServiceImpl courseTagService) {
+    public BookmarkServiceImpl(BookmarkRepository bookmarkRepository, TagServiceImpl tagServiceImpl) {
         this.bookmarkRepository = bookmarkRepository;
-        this.courseTagService = courseTagService;
+        this.tagServiceImpl = tagServiceImpl;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class BookmarkServiceImpl implements BookmarkService {
             BookmarkDTO bookmarkDTO = new BookmarkDTO();
             bookmarkDTO.setBookmark(bookmark);
 
-            List<TagDTO> tagDtos = courseTagService.findTagsByCourseId(bookmark.getCourse().getId());
+            List<Tag> tagDtos = tagServiceImpl.findTagsByCourseId(bookmark.getCourse().getId());
             bookmarkDTO.setTags(tagDtos);
 
             return bookmarkDTO;

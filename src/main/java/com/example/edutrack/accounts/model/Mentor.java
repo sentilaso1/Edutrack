@@ -1,11 +1,9 @@
 package com.example.edutrack.accounts.model;
 
 import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.model.CourseMentor;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
 
-import javax.management.relation.Role;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -65,6 +63,16 @@ public class Mentor extends User {
 
     public void setRating(Double rating) {
         this.rating = rating;
+    }
+
+    @OneToMany(mappedBy = "mentor")
+    private List<CourseMentor> applications;
+
+    public List<CourseMentor> getApplications() {
+        return applications;
+    }
+    public void setApplications(List<CourseMentor> applications) {
+        this.applications = applications;
     }
 
     @Override
