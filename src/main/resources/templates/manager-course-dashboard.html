@@ -81,7 +81,19 @@
     }
 </style>
 <body>
+<div id="successOverlay" th:if="${successMessage}"
+     style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;">
+    <div style="background: #d4edda; color: #155724; padding: 20px 30px; border-radius: 8px; box-shadow: 0 0 10px #155724;
+              max-width: 400px; width: 90%; text-align: center; position: relative; display: flex; align-items: center; gap: 10px;">
+        <!-- Icon success -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#155724" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07.02l3.992-4.99a.75.75 0 1 0-1.14-.98L7.477 9.417 5.383 7.323a.75.75 0 0 0-1.06 1.06l2.647 2.647z"/>
+        </svg>
 
+        <p style="margin: 0; font-weight: 600; font-size: 18px;" th:text="${successMessage}"></p>
+    </div>
+</div>
 <h2>📚 Quản lý khóa học</h2>
 
 
@@ -146,7 +158,7 @@
 
 
 <div style="margin: 10px 0;">
-    <a href="/courses/create" class="btn btn-success">➕ Tạo khóa học</a>
+    <a href="/manager/courses/create" class="btn btn-success">➕ Tạo khóa học</a>
 </div>
 
 
@@ -163,7 +175,19 @@
     <tbody>
     <tr th:each="course : ${courses}">
         <td th:text="${course.name}">Tên</td>
-        <td th:text="${course.mentor.fullName}">Mentor</td>
+        <td>
+            <span th:if="${course.mentor != null}"
+                  th:text="${course.mentor.fullName}">Tên mentor</span>
+
+                    <span th:if="${course.mentor == null}">
+                <span th:if="${#lists.size(course.applications) > 0}"
+                      th:text="|Có ${#lists.size(course.applications)} ứng viên|">
+                </span>
+                <span th:if="${#lists.size(course.applications) == 0}">
+                    Chưa có ứng viên
+                </span>
+            </span>
+        </td>
         <td th:text="${#dates.format(course.createdDate, 'yyyy-MM-dd')}">Ngày</td>
 
         <td>
@@ -171,17 +195,40 @@
         </td>
 
         <td>
-            <a th:href="@{/courses/edit/{id}(id=${course.id})}">Sửa</a> |
+            <a th:href="@{/manager/courses/edit/{id}(id=${course.id})}">Sửa</a> |
             <a th:href="@{/courses/view-details/{id}(id=${course.id})}">Chi tiết</a> |
+
             <a th:href="@{/manager/courses/toggle-open/{id}(id=${course.id})}"
-               th:text="${course.open} ? '🔒 Đóng' : '🔓 Mở'">Mở/Đóng</a>
-            |
+               th:text="${course.open} ? '🔒 Đóng' : '🔓 Mở'">Mở/Đóng</a> |
+
+            <span th:if="${course.mentor == null and #lists.size(course.applications) > 0}">
+        <a th:href="@{/manager/courses/applicants/{id}(id=${course.id})}"><strong>Xem các ứng viên</strong></a> |
+    </span>
+
             <a th:href="@{/courses/delete/{id}(id=${course.id})}" onclick="return confirm('Xóa khóa học này?')">Xóa</a>
         </td>
     </tr>
     </tbody>
 
 </table>
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        const overlay = document.getElementById('successOverlay');
+        if (overlay) {
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 3000);
+        }
+    });
 
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Enter") {
+            const overlay = document.getElementById('successOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+    });
+</script>
 </body>
 </html>
