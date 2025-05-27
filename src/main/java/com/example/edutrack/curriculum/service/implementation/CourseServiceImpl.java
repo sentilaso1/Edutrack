@@ -9,6 +9,8 @@ import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.repository.TeachingMaterialsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,9 +38,10 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<Course> findAll() {
-        return courseRepository.findAll();
+    public Page<Course> findAll(Pageable pageable) {
+        return courseRepository.findAll(pageable);
     }
+
 
     @Override
     public Course findById(UUID id) {

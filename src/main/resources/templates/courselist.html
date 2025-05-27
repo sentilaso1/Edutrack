@@ -96,7 +96,7 @@
 
         <div style="display: flex;">
             <a th:href="@{/login}" class="btn btn-secondary">Sign In</a>
-            <a th:href="@{/register}" class="btn btn-signup">Sign Up</a>
+            <a th:href="@{/signup}" class="btn btn-signup">Sign Up</a>
         </div>
 
         <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
@@ -143,7 +143,8 @@
                             <h4 class="filter-subtitle">Tags</h4>
                             <ul class="price-filter">
                                 <li><label><input type="checkbox" name="price" value="all" checked> All</label></li>
-                                <li><label><input type="checkbox" name="price" value="under-20"> Information Technology</label></li>
+                                <li><label><input type="checkbox" name="price" value="under-20"> Information Technology</label>
+                                </li>
                                 <li><label><input type="checkbox" name="price" value="20-50"> Economy</label></li>
                                 <li><label><input type="checkbox" name="price" value="50-100"> Community</label></li>
                                 <li><label><input type="checkbox" name="price" value="over-100"> Society</label></li>
@@ -168,8 +169,11 @@
                         <div class="filter-bar">
                             <div class="course-topbar">
                                 <div class="view-toggle">
-                                    <button class="view-btn active" id="gridView" aria-label="Grid view"><i class="fa fa-list" aria-hidden="true"></i></button>
-                                    <button class="view-btn" id="listView" aria-label="List view"><i class="fa fa-th" aria-hidden="true"></i></button>
+                                    <button class="view-btn active" id="gridView" aria-label="Grid view"><i
+                                            class="fa fa-list" aria-hidden="true"></i></button>
+                                    <button class="view-btn" id="listView" aria-label="List view"><i class="fa fa-th"
+                                                                                                     aria-hidden="true"></i>
+                                    </button>
                                 </div>
                             </div>
                             <div style="display: flex">
@@ -211,79 +215,63 @@
                             </div>
 
                         </div>
-                        <ul class="grid-list">
-                            <li class="card-container">
+                        <ul class="grid-list" th:with="courses = ${coursePage.content}">
+                            <li class="card-container" th:each="course : ${courses}">
                                 <div class="card course-card">
                                     <figure class="card-banner">
                                         <img
-                                                th:src="@{/assets/images/course-1.png}"
+                                                th:if="${course.mentor != null}"
+                                                th:src="@{/mentors/{id}/avatar(id=${course.mentor.id})}"
                                                 width="370"
                                                 height="248"
                                                 loading="lazy"
-                                                alt="Basic Fundamentals of Interior & Graphics Design"
+                                                alt="Mentor Avatar"
                                                 class="img-cover"
                                         />
+
+                                        <img
+                                                th:unless="${course.mentor != null}"
+                                                th:src="@{/assets/images/default-avatar.jpg}"
+                                                width="370"
+                                                height="248"
+                                                loading="lazy"
+                                                alt="Default Avatar"
+                                                class="img-cover"
+                                        />
+
                                     </figure>
 
                                     <div class="card-content">
                                         <div class="wrapper">
                                             <p class="title-lg card-price">$29.28</p>
                                             <div class="rating-wrapper">
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
+                                                     loading="lazy" alt=""/>
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
+                                                     loading="lazy" alt=""/>
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
+                                                     loading="lazy" alt=""/>
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
+                                                     loading="lazy" alt=""/>
                                             </div>
                                         </div>
 
-                                        <h6 class="title-lg card-title">
-                                            Basic Fundamentals of Interior & Graphics Design
-                                        </h6>
+                                        <h6 class="title-lg card-title" th:text="${course.name}">Course Name</h6>
 
                                         <div class="card-meta wrapper card-meta-inlayout">
                                             <p class="title-sm">
-                                                <img
-                                                        th:src="@{/assets/images/file-outline.svg}"
-                                                        width="20"
-                                                        height="20"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <span class="span">2 Lessons</span>
+                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20"
+                                                     loading="lazy" alt=""/>
+                                                <span class="span"
+                                                      th:text="${#lists.size(course.materials)} + ' Lessons'">0 Lessons</span>
                                             </p>
                                             <p class="title-sm">
-                                                <img
-                                                        th:src="@{/assets/images/user-outline.svg}"
-                                                        width="20"
-                                                        height="20"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <span class="span">4k Students</span>
+                                                <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
+                                                     loading="lazy" alt=""/>
+                                                <span class="span">
+                           <span th:text="${course.mentor != null ? course.mentor.fullName : 'No Mentor'}">Mentor Name</span>
+
+                        </span>
                                             </p>
                                         </div>
                                     </div>
@@ -291,195 +279,29 @@
                                     <a
                                             href="#"
                                             class="layer-link"
-                                            aria-label="Course Details, Basic Fundamentals of Interior & Graphics Design"
+                                            th:aria-label="'Course Details, ' + ${course.name}"
                                     ></a>
                                 </div>
                             </li>
 
-                            <!-- Lặp lại 2 block dưới tương tự với src hình ảnh, icon dùng th:src -->
-                            <li class="card-container">
-                                <div class="card course-card">
-                                    <figure class="card-banner">
-                                        <img
-                                                th:src="@{/assets/images/course-1.png}"
-                                                width="370"
-                                                height="248"
-                                                loading="lazy"
-                                                alt="Basic Fundamentals of Interior & Graphics Design"
-                                                class="img-cover"
-                                        />
-                                    </figure>
-
-                                    <div class="card-content">
-                                        <div class="wrapper">
-                                            <p class="title-lg card-price">$29.28</p>
-                                            <div class="rating-wrapper">
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <h6 class="title-lg card-title">
-                                            Basic Fundamentals of Interior & Graphics Design
-                                        </h6>
-
-                                        <div class="card-meta wrapper card-meta-inlayout">
-                                            <p class="title-sm">
-                                                <img
-                                                        th:src="@{/assets/images/file-outline.svg}"
-                                                        width="20"
-                                                        height="20"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <span class="span">2 Lessons</span>
-                                            </p>
-                                            <p class="title-sm">
-                                                <img
-                                                        th:src="@{/assets/images/user-outline.svg}"
-                                                        width="20"
-                                                        height="20"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <span class="span">4k Students</span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <a
-                                            href="#"
-                                            class="layer-link"
-                                            aria-label="Course Details, Basic Fundamentals of Interior & Graphics Design"
-                                    ></a>
-                                </div>
-                            </li>
-
-                            <li class="card-container">
-                                <div class="card course-card">
-                                    <figure class="card-banner">
-                                        <img
-                                                th:src="@{/assets/images/course-1.png}"
-                                                width="370"
-                                                height="248"
-                                                loading="lazy"
-                                                alt="Basic Fundamentals of Interior & Graphics Design"
-                                                class="img-cover"
-                                        />
-                                    </figure>
-
-                                    <div class="card-content">
-                                        <div class="wrapper">
-                                            <p class="title-lg card-price">$29.28</p>
-                                            <div class="rating-wrapper">
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <img
-                                                        th:src="@{/assets/images/star-fill.svg}"
-                                                        width="16"
-                                                        height="16"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <h6 class="title-lg card-title">
-                                            Basic Fundamentals of Interior & Graphics Design
-                                        </h6>
-
-                                        <div class="card-meta wrapper card-meta-inlayout">
-                                            <p class="title-sm">
-                                                <img
-                                                        th:src="@{/assets/images/file-outline.svg}"
-                                                        width="20"
-                                                        height="20"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <span class="span">2 Lessons</span>
-                                            </p>
-                                            <p class="title-sm">
-                                                <img
-                                                        th:src="@{/assets/images/user-outline.svg}"
-                                                        width="20"
-                                                        height="20"
-                                                        loading="lazy"
-                                                        alt=""
-                                                />
-                                                <span class="span">4k Students</span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <a
-                                            href="#"
-                                            class="layer-link"
-                                            aria-label="Course Details, Basic Fundamentals of Interior & Graphics Design"
-                                    ></a>
-                                </div>
-                            </li>
                         </ul>
-
-                        <nav class="pagination">
-                            <button class="page-btn" disabled>&laquo;</button>
-
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
-                            <span class="page-ellipsis">...</span>
-                            <button class="page-btn">10</button>
-
-                            <button class="page-btn">&raquo;</button>
-                        </nav>
 
                     </div>
                 </div>
+                <nav class="pagination">
+                    <button class="page-btn" th:disabled="${coursePage.first}"
+                            th:href="@{/courses(page=${coursePage.number})}">&laquo;</button>
+
+                    <th:block th:each="i : ${#numbers.sequence(1, coursePage.totalPages)}">
+                        <a th:href="@{/courses(page=${i})}"
+                           th:classappend="${i == coursePage.number + 1} ? 'page-btn active' : 'page-btn'"
+                           th:text="${i}">1</a>
+                    </th:block>
+
+                    <button class="page-btn" th:disabled="${coursePage.last}"
+                            th:href="@{/courses(page=${coursePage.number + 2})}">&raquo;</button>
+                </nav>
+
                 <!-- Kết thúc bố cục 2 cột -->
             </div>
         </section>

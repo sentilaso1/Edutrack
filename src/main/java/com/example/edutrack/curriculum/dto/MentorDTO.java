@@ -1,34 +1,37 @@
 package com.example.edutrack.curriculum.dto;
 
-import java.util.Base64;
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.UUID;
 
 public class MentorDTO {
     private UUID id;
     private String name;
-    private String avatarBase64;
+    private byte[] avatar;
 
     public MentorDTO(UUID id, String name, byte[] avatar) {
         this.id = id;
         this.name = name;
         if (avatar != null) {
-            this.avatarBase64 = Base64.getEncoder().encodeToString(avatar);
+            this.avatar = avatar;
         }
     }
 
     public UUID getId() {
         return id;
     }
+
+    public void setAvatar(MultipartFile banner) throws IOException {
+        this.avatar = banner.getBytes();
+    }
+
     public String getName() {
         return name;
-    }
-    public String getAvatarBase64() {
-        return avatarBase64;
     }
 
     @Override
     public String toString() {
-        return "MentorDTO {id=" + id + ", name=" + name + ", avatarBase64=" + avatarBase64 + "}";
+        return "MentorDTO {id=" + id + ", name=" + name + ", avatarBase64=" + avatar + "}";
     }
 }
