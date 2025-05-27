@@ -15,10 +15,12 @@ public class TeachingMaterialsImpl implements TeachingMaterialsService {
         this.teachingMaterialsRepository = repository;
     }
 
+    @Override
     public List<TeachingMaterial> findByCourseId(UUID courseId) {
         return teachingMaterialsRepository.findByCourseId(courseId);
     }
 
+    @Override
     public TeachingMaterial findById(int id) {
         return teachingMaterialsRepository.findById(id).orElseThrow(() -> new RuntimeException("File không tồn tại"));
     }
