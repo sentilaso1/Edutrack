@@ -6,6 +6,8 @@ import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
 import com.example.edutrack.curriculum.dto.TagDTO;
+import com.example.edutrack.curriculum.model.CourseTag;
+import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,7 +49,7 @@ public class CourseController {
     @GetMapping("/courses/{courseId}")
     public String courseDetail(@PathVariable("courseId") UUID courseId, Model model) {
         Course course = courseServiceImpl.findById(courseId);
-        List<TagDTO> tagList = courseTagServiceImpl.findTagsByCourseId(courseId);
+        List<Tag> tagList = tagServiceImpl.findTagsByCourseId(courseId);
 
         Mentor mentor = course.getMentor();
         MentorDTO mentorDTO = null;
@@ -73,20 +75,6 @@ public class CourseController {
         return "mentor-availability";
     }
 
-    @GetMapping("/courses/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("courseForm", new CourseFormDTO());
-        return "course-form";
-    }
-
-    @PostMapping("/courses/create")
-    public String createCourse(@ModelAttribute("courseForm") CourseFormDTO courseFormDTO, Model model, RedirectAttributes redirectAttributes) {
-        UUID courseID = courseServiceImpl.create(courseFormDTO);
-        redirectAttributes.addFlashAttribute("successMessage", "Tạo khoá học thành công");
-        redirectAttributes.addFlashAttribute("createdCourseId", courseID);
-        return "redirect:/course-mentor/view";
-    }
-
     @GetMapping("/course-mentor/view")
     public String viewMentorAvailableTimes(Model model) {
         List<Course> mentorCourses = mentorServiceImpl.getCoursesByMentor(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
@@ -95,27 +83,9 @@ public class CourseController {
 
     }
 
-    @GetMapping("/courses/edit/{id}")
-    public String showEditForm(@PathVariable UUID id, Model model) {
-        Course course = courseServiceImpl.findById(id);
-        CourseFormDTO form = new CourseFormDTO();
-        form.setName(course.getName());
-        form.setDescription(course.getDescription());
-        List<String> tagTexts = courseTagServiceImpl.findTagsByCourseId(id).stream()
-                .map(TagDTO::getTitle)
-                .collect(Collectors.toList());
-        form.setTagTexts(tagTexts);
-        model.addAttribute("courseForm", form);
-        model.addAttribute("courseId", id);
-        return "course-edit";
-    }
 
-    @PostMapping("/courses/edit/{id}")
-    public String editCourse(@PathVariable UUID id, @ModelAttribute("courseForm") CourseFormDTO courseFormDTO, Model model, RedirectAttributes redirectAttributes) {
-        courseServiceImpl.update(id, courseFormDTO);
-        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật khoá học thành công");
-        return "redirect:/course-mentor/view";
-    }
+
+
 
 
 

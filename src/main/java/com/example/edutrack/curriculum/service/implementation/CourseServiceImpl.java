@@ -41,6 +41,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public void save(Course course){
+        courseRepository.save(course);
+    }
+
+    @Override
     public Course findById(UUID id) {
         return courseRepository.findById(id).orElseThrow(() -> new RuntimeException("Course Not Found"));
     }
@@ -111,15 +116,14 @@ public class CourseServiceImpl implements CourseService {
             }
         }
 
-        // Xóa hết teaching materials cũ rồi thêm mới
-        List<TeachingMaterial> oldMaterials = teachingMaterialsRepository.findByCourseId(course.getId());
-        teachingMaterialsRepository.deleteAll(oldMaterials);
+
         if (courseFormDTO.getFiles() != null) {
             for (MultipartFile file : courseFormDTO.getFiles()) {
                 if (!file.isEmpty()) {
                     try {
                         TeachingMaterial teachingMaterial = new TeachingMaterial();
                         teachingMaterial.setCourse(course);
+                        teachingMaterial.setName(file.getOriginalFilename());
                         teachingMaterial.setFile(file.getBytes());
                         teachingMaterialsRepository.save(teachingMaterial);
                     } catch (IOException e) {
