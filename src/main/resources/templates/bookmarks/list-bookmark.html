@@ -19,6 +19,7 @@
             flex-direction: column;
             position: sticky;
             top: 0.5em;
+            gap: 0.5em;
         }
 
         .bookmark-grid {
@@ -79,14 +80,67 @@
         .course-desc {
             font-size: 0.9em;
         }
+
+        .visible {
+            visibility: visible;
+        }
+
+        .invisible {
+            visibility: hidden;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0.5em;
+        }
+
+        .filter-button {
+            border: none;
+            border-radius: 0.25em;
+            padding: 0.5em;
+            background-color: var(--bg);
+            cursor: pointer;
+        }
+
+        .filter-button:hover {
+            background-color: #759976;
+        }
+
+        .pagination {
+            margin: 1em;
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1em;
+        }
     </style>
 </head>
 <body class="viewport">
-<h1>Bookmark List</h1>
+<h1 style="padding: 0.5rem 0.5rem 0 0.5rem; margin-bottom: 1rem; font-size: 3em">Bookmark List</h1>
 <div class="main-grid">
     <aside class="sidebar">
         <form>
+            <h3 class="small-heading">
+                <label for="sort">Sorting Order:</label>
+            </h3>
+            <select name="sort" id="sort" style="margin-bottom: 1em">
+                <option value="date-desc" selected>Date descending</option>
+                <option value="date-asc">Date ascending</option>
+            </select>
 
+            <h3>Filter Options</h3>
+            <div class="filter-options">
+                <label th:each="tag : ${tags}">
+                    <input type="checkbox" name="tags" th:value="${tag.id}" />
+                    <span th:text="${tag.title}"></span>
+                </label>
+            </div>
+
+            <button type="submit" class="">
+                Filter
+            </button>
         </form>
     </aside>
 
@@ -111,10 +165,34 @@
             </div>
 
             <div class="bookmark-tags">
-                    <span th:each="tag : ${bookmarkDTO.tags}" th:text="${tag.title}" class="tag-item modal-bg"></span>
+                    <th:block th:each="tag : ${bookmarkDTO.tags}">
+                        <span th:text="${tag.title}" class="tag-item modal-bg"></span>
+                    </th:block>
             </div>
         </div>
     </main>
+</div>
+
+<div class="pagination">
+    <a th:href="@{/bookmark/list/1}"
+       th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
+        First
+    </a>
+    <a th:href="@{/bookmark/list/{prev}(prev = ${pageNumber - 1})}"
+       th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
+        Previous
+    </a>
+
+    <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+
+    <a th:href="@{/bookmark/list/{next}(next = ${pageNumber + 1})}"
+       th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
+        Next
+    </a>
+    <a th:href="@{/bookmark/list/{last}(last = ${page.totalPages})}"
+       th:classappend="${(pageNumber < page.getTotalPages()) ? 'visible' : 'invisible'}">
+        Last
+    </a>
 </div>
 </body>
 </html>
