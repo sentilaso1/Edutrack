@@ -1,39 +1,276 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EduTrack - create-cv.html</title>
-    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <title>EduTrack - Create CV</title>
+    <link rel="stylesheet" href="/css/colors.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            border-radius: 16px;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+        }
+
+        .form-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .form-subtitle {
+            font-size: 1.1rem;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        form {
+            display: grid;
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-radius: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .form-group:hover {
+            transform: translateY(-1px);
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            max-height: 200px;
+        }
+
+        .form-group.experience-group input {
+            max-width: 200px;
+        }
+
+        .submit-section {
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .submit-btn {
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 16px 40px;
+            border-radius: 10px;
+            min-width: 200px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .helper-text {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .testing-notice {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .char-limit {
+            font-size: 0.8rem;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .form-header h2 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group {
+                padding: 15px;
+            }
+        }
+
+        /* Custom styling for specific form elements */
+        .url-input {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        .number-input {
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+    </style>
 </head>
-<body class="viewport">
-    <main>
-        <form th:action="@{/cv/create}" method="post">
-            <h2>Create Your CV</h2>
-            <label for="userId">User ID: (For testing only, will decease when Login is implemented)</label>
-            <input type="text" id="userId" name="userId" required>
+<body class="base-bg">
+<main class="card-bg shadow-medium">
+    <div class="form-header">
+        <h2 class="text-heading" style="background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            Create Your CV
+        </h2>
+        <p class="form-subtitle text-secondary">Create CV</p>
+        <div class="divider"></div>
+    </div>
 
-            <label for="summary">Summary</label>
-            <input type="text" id="summary" name="summary" maxlength="256" required>
+    <form th:action="@{/cv/create}" method="post">
+        <!-- User ID Section (Testing) -->
+        <div class="form-group alert-warning">
+            <div class="testing-notice">
+                <strong>⚠️ Testing Mode:</strong> User ID field is temporary and will be removed when login is implemented.
+            </div>
+            <label for="userId" class="text-accent">
+                User ID
+            </label>
+            <input type="text" id="userId" name="userId" class="input-field" required placeholder="Enter your user ID">
+        </div>
 
-            <label for="experienceYears">Years of Experience</label>
-            <input type="number" id="experienceYears" name="experienceYears" min="0" max="100" required>
+        <!-- Summary Section -->
+        <div class="form-group section-bg shadow-soft">
+            <label for="summary" class="text-heading">
+                Professional Summary
+            </label>
+            <input type="text" id="summary" name="summary" class="input-field" maxlength="256" required
+                   placeholder="Brief overview of your professional background and goals">
+            <div class="char-limit text-muted">Max 256 characters</div>
+        </div>
 
-            <label for="skills">Skills</label>
-            <textarea id="skills" name="skills" maxlength="512" required></textarea>
+        <!-- Experience Years -->
+        <div class="form-group container-bg shadow-soft experience-group">
+            <label for="experienceYears" class="text-heading">
+                Years of Experience
+            </label>
+            <input type="number" id="experienceYears" name="experienceYears" class="input-field number-input"
+                   min="0" max="100" required placeholder="0">
+            <div class="helper-text text-secondary">Enter total years of professional experience</div>
+        </div>
 
-            <label for="education">Education</label>
-            <textarea id="education" name="education" maxlength="512" required></textarea>
+        <!-- Skills and Education Row -->
+        <div class="form-row">
+            <div class="form-group section-bg shadow-soft">
+                <label for="skills" class="text-heading">
+                    Skills & Technologies
+                </label>
+                <textarea id="skills" name="skills" class="input-field" maxlength="512" required
+                          placeholder="List your technical skills, programming languages, frameworks, tools..."></textarea>
+                <div class="char-limit text-muted">Max 512 characters</div>
+            </div>
 
-            <label for="certifications">Certifications</label>
-            <textarea id="certifications" name="certifications" maxlength="512" required></textarea>
+            <div class="form-group container-bg shadow-soft">
+                <label for="education" class="text-heading">
+                     Education
+                </label>
+                <textarea id="education" name="education" class="input-field" maxlength="512" required
+                          placeholder="Degrees, institutions, graduation dates, relevant coursework..."></textarea>
+                <div class="char-limit text-muted">Max 512 characters</div>
+            </div>
+        </div>
 
-            <label for="languages">Languages</label>
-            <textarea id="languages" name="languages" maxlength="512" required></textarea>
+        <!-- Certifications and Languages Row -->
+        <div class="form-row">
+            <div class="form-group section-bg shadow-soft">
+                <label for="certifications" class="text-heading">
+                     Certifications
+                </label>
+                <textarea id="certifications" name="certifications" class="input-field" maxlength="512" required
+                          placeholder="Professional certifications, licenses, achievements..."></textarea>
+                <div class="char-limit text-muted">Max 512 characters</div>
+            </div>
 
-            <label for="portfolioUrl">Portfolio URL</label>
-            <input type="url" id="portfolioUrl" name="portfolioUrl" maxlength="1024" required>
+            <div class="form-group container-bg shadow-soft">
+                <label for="languages" class="text-heading">
+                     Languages
+                </label>
+                <textarea id="languages" name="languages" class="input-field" maxlength="512" required
+                          placeholder="Languages spoken and proficiency levels..."></textarea>
+                <div class="char-limit text-muted">Max 512 characters</div>
+            </div>
+        </div>
 
-            <button type="submit">Submit</button>
-        </form>
-    </main>
+        <!-- Portfolio URL -->
+        <div class="form-group section-bg shadow-soft">
+            <div class="form-group container-bg shadow-soft">
+                <label for="experience" class="text-heading">
+                    Experience
+                </label>
+                <textarea id="experience" name="experience" class="input-field" maxlength="512" required
+                          placeholder="List of experiences..."></textarea>
+                <div class="char-limit text-muted">Max 512 characters</div>
+            </div>
+            <label for="portfolioUrl" class="text-heading">
+                Portfolio URL
+            </label>
+            <input type="url" id="portfolioUrl" name="portfolioUrl" class="input-field url-input"
+                   maxlength="1024" required placeholder="https://your-portfolio-website.com">
+            <div class="helper-text text-secondary">Link to your online portfolio, GitHub, or professional website</div>
+            <div class="char-limit text-muted">Max 1024 characters</div>
+        </div>
+
+        <!-- Submit Section -->
+        <div class="submit-section modal-bg shadow-medium">
+            <button type="submit" class="button-bg submit-btn shadow-soft">
+                Create My CV
+            </button>
+            <p class="helper-text text-secondary" style="margin-top: 15px;">
+            </p>
+        </div>
+    </form>
+</main>
 </body>
 </html>

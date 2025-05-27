@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import com.example.edutrack.profiles.model.CV;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CvService {
     List<CV> findAllCVs();
@@ -14,4 +15,7 @@ public interface CvService {
     Page<CV> findAllCVsByStatusDateAsc(Pageable pageable, String status);
     Page<CV> findAllCVsByStatusDateDesc(Pageable pageable, String status);
     CV createCV(CVForm form);
+    CV getCVById(UUID id);
+    boolean acceptCV(UUID id);
+    boolean rejectCV(UUID id);
 }

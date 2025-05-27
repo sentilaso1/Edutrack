@@ -3,8 +3,118 @@
     <meta charset="UTF-8">
     <title>EduTrack - list-bookmark.html</title>
     <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+
+    <style>
+        .main-grid {
+            max-width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 1.5em;
+            padding: 0.5em;
+        }
+
+        .sidebar > form {
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0.5em;
+        }
+
+        .bookmark-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5em;
+        }
+
+        .bookmark-item {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.25em;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bookmark-header {
+            border-radius: 0.25em 0.25em 0 0;
+            padding: 0.5em;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+        }
+
+        .bookmark-image {
+            width: 100%;
+            aspect-ratio: 16/9;
+            margin-bottom: 0.5em;
+        }
+
+        .bookmark-content {
+            padding: 0.5em;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+            flex-grow: 1;
+        }
+
+        .bookmark-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            padding: 0.5rem;
+        }
+
+        .tag-item {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.8em;
+        }
+
+        .course-title {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .course-desc {
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body class="viewport">
+<h1>Bookmark List</h1>
+<div class="main-grid">
+    <aside class="sidebar">
+        <form>
 
+        </form>
+    </aside>
+
+    <main th:with="bookmarkDTOs = ${page.content}" class="bookmark-grid">
+        <div th:each="bookmarkDTO : ${bookmarkDTOs}" th:with="bookmark = ${bookmarkDTO.bookmark}, course = ${bookmarkDTO.bookmark.course}, tags = ${bookmarkDTO.tags}" class="bookmark-item container-bg">
+            <div class="bookmark-header section-bg">
+                <span th:text="${'Bookmarked on ' + bookmark.getCreatedDate().toLocaleString()}"></span>
+            </div>
+
+            <div class="bookmark-image modal-bg">
+            </div>
+
+            <div class="bookmark-content">
+                <span>
+                    <span th:text="${course.name}" class="course-title"></span>
+                    (
+                    <span th:text="${course.getOpen() ? 'Open' : 'Closed'}"></span>
+                    )
+                </span>
+                <span th:text="${course.mentor == null ? 'By unknown mentor' : 'By ' + course.getMentor().getFullName()}"></span>
+                <span th:text="${course.description}" class="course-desc"></span>
+            </div>
+
+            <div class="bookmark-tags">
+                    <span th:each="tag : ${bookmarkDTO.tags}" th:text="${tag.title}" class="tag-item modal-bg"></span>
+            </div>
+        </div>
+    </main>
+</div>
 </body>
 </html>

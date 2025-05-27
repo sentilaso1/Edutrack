@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,32 +32,39 @@ public class UserController {
 
         @GetMapping
         public String showUserManagement(Model model,
-                        @RequestParam(required = false) String email,
-                        @RequestParam(required = false) String fullName,
-                        @RequestParam(required = false) Boolean isLocked,
-                        @RequestParam(required = false) Boolean isActive) {
-                List<User> users = userService.searchUsers(email, fullName, isLocked, isActive);
+                                        @RequestParam(required = false) String email,
+                                        @RequestParam(required = false) String fullName,
+                                        @RequestParam(required = false) Boolean isLocked,
+                                        @RequestParam(required = false) Boolean isActive,
+                                        @RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10") int size) {
+                Pageable pageable = PageRequest.of(page, size);
+                Page<User> userPage = userService.searchUsers(email, fullName, isLocked, isActive, pageable);
                 List<UserWithRoleDTO> userDtos = new ArrayList<>();
 
-                for (User user : users) {
-                        String role = "USER";
-                        if (user.getId() != null) {
-                                Staff staff = userService.getStaffByUserId(user.getId().toString());
-                                if (staff != null) {
-                                        role = staff.getRole().toString();
-                                }
+                for (User user : userPage.getContent()) {
+                String role = "USER";
+                if (user.getId() != null) {
+                        Staff staff = userService.getStaffByUserId(user.getId().toString());
+                        if (staff != null) {
+                        role = staff.getRole().toString();
                         }
-                        userDtos.add(new UserWithRoleDTO(
-                                        user.getId(),
-                                        user.getEmail(),
-                                        user.getFullName(),
-                                        role,
-                                        user.getIsLocked(),
-                                        user.getIsActive()));
+                }
+                userDtos.add(new UserWithRoleDTO(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFullName(),
+                        role,
+                        user.getIsLocked(),
+                        user.getIsActive()));
                 }
 
                 model.addAttribute("users", userDtos);
                 model.addAttribute("filters", new UserFilter(email, fullName, isLocked, isActive));
+                model.addAttribute("currentPage", page);
+                model.addAttribute("totalPages", userPage.getTotalPages());
+                model.addAttribute("totalItems", userPage.getTotalElements());
+                model.addAttribute("pageSize", size);
                 return "accounts/html/user-management";
         }
 

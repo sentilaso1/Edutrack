@@ -186,7 +186,7 @@
                  th:classappend="${cv.status.equals('approved') ? 'bg-approved' : cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending'}">
                 <span th:text="${cv.status}"></span>
                 <time th:text="${cv.createdDate.toLocaleString()}" th:datetime="${cv.createdDate.toString()}"></time>
-                <a href="#" style="color: black">View More</a>
+                <a th:href="@{'/admin/cv/detail/' + ${cv.user.id}}" style="color: black">View More</a>
             </div>
 
             <div class="content">

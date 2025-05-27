@@ -95,6 +95,30 @@
                                         </tr>
                                 </tbody>
                         </table>
+                        <div class="mt-6 flex justify-between items-center">
+                                <div>
+                                        <p>Total Items: <span th:text="${totalItems}"></span></p>
+                                </div>
+                                <nav>
+                                        <ul class="flex gap-2">
+                                                <li th:class="${currentPage == 0} ? 'opacity-50 cursor-not-allowed' : ''">
+                                                        <a th:href="@{/admin/users(page=${currentPage - 1}, size=${pageSize}, email=${filters.email}, fullName=${filters.fullName}, isLocked=${filters.isLocked}, isActive=${filters.isActive})}"
+                                                                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                                                th:classappend="${currentPage == 0} ? 'pointer-events-none' : ''">Previous</a>
+                                                </li>
+                                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                        th:class="${i == currentPage} ? 'bg-blue-700 text-white' : 'bg-blue-500 text-white'">
+                                                        <a th:href="@{/admin/users(page=${i}, size=${pageSize}, email=${filters.email}, fullName=${filters.fullName}, isLocked=${filters.isLocked}, isActive=${filters.isActive})}"
+                                                                class="px-3 py-1 rounded hover:bg-blue-600" th:text="${i + 1}"></a>
+                                                </li>
+                                                <li th:class="${currentPage == totalPages - 1} ? 'opacity-50 cursor-not-allowed' : ''">
+                                                        <a th:href="@{/admin/users(page=${currentPage + 1}, size=${pageSize}, email=${filters.email}, fullName=${filters.fullName}, isLocked=${filters.isLocked}, isActive=${filters.isActive})}"
+                                                                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                                                th:classappend="${currentPage == totalPages - 1} ? 'pointer-events-none' : ''">Next</a>
+                                                </li>
+                                        </ul>
+                                </nav>
+                        </div>
                 </div>
         </div>
 
