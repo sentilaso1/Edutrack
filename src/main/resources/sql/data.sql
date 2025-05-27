@@ -76,38 +76,38 @@ VALUES (UUID_TO_BIN('33333333-3333-3333-3333-333333333333'),
 
 
 -- COURSES
-INSERT INTO courses (id, name, description, is_approved, is_open, created_date)
+INSERT INTO courses (id, name, description, is_open, created_date)
 VALUES (UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'), 'Introduction to Java',
         'This course covers the basics of Java programming including syntax, OOP principles, and standard libraries.',
-        1, 1, NOW()),
+        1, NOW()),
 
        (UUID_TO_BIN('d2222222-dddd-dddd-dddd-dddddddddddd'), 'Web Development with React',
         'A hands-on course teaching modern frontend development using React, JSX, hooks, and component-based architecture.',
-        1, 1, NOW()),
+        1, NOW()),
 
        (UUID_TO_BIN('d3333333-dddd-dddd-dddd-dddddddddddd'), 'Data Structures and Algorithms',
         'Explore common data structures and algorithms with a focus on problem solving and coding interviews.',
-        1, 0, NOW()),
+        0, NOW()),
 
        (UUID_TO_BIN('d4444444-dddd-dddd-dddd-dddddddddddd'), 'DevOps Fundamentals',
         'Learn CI/CD, containerization with Docker, orchestration with Kubernetes, and infrastructure as code.',
-        0, 0, NOW()),
+        0, NOW()),
 
        (UUID_TO_BIN('d5555555-dddd-dddd-dddd-dddddddddddd'), 'Cloud Computing with AWS',
         'An introductory course to AWS services including EC2, S3, Lambda, and IAM roles.',
-        1, 1, NOW()),
+        1, NOW()),
 
        (UUID_TO_BIN('d6666666-dddd-dddd-dddd-dddddddddddd'), 'Database Systems',
         'Covers relational database concepts, normalization, SQL queries, and JDBC integration with Java.',
-        1, 1, NOW()),
+        1, NOW()),
 
        (UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'), 'Machine Learning Basics',
         'A gentle introduction to machine learning concepts including supervised learning, regression, and classification.',
-        0, 1, NOW()),
+        1, NOW()),
 
        (UUID_TO_BIN('d8888888-dddd-dddd-dddd-dddddddddddd'), 'Cybersecurity Essentials',
         'Understand the basics of securing systems and data, covering topics like encryption, firewalls, and ethical hacking.',
-        1, 0, NOW());
+        0, NOW());
 
 
 -- CV for Mentor: Bob Smith (UUID: 22222222-2222-2222-2222-222222222222)

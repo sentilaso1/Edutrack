@@ -21,6 +21,8 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
     public MentorAvailableTimeServiceImpl(MentorAvailableTimeRepository mentorAvailableTimeRepository) {
         this.mentorAvailableTimeRepository = mentorAvailableTimeRepository;
     }
+
+    @Override
     public List<MentorAvailableTimeDTO> getMentorAvailableTime(UUID mentorId) {
         List<MentorAvailableTime> mentorAvailableTimeList = mentorAvailableTimeRepository.findByMentorId(mentorId);
 
