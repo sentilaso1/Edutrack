@@ -31,11 +31,6 @@ public class CourseTagServiceImpl implements CourseTagService {
     }
 
     @Override
-    public List<CourseTag> findTagsByCourseId(UUID courseId) {
-        return courseTagsRepository.findByCourseId(courseId);
-    }
-
-    @Override
     public boolean existsByCourseAndTag(UUID courseId, int tagId) {
         Course course = courseRepository.findById(courseId).orElse(null);
         Tag tag = tagRepository.findById(tagId).orElse(null);

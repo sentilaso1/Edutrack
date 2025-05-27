@@ -12,6 +12,5 @@ import java.util.UUID;
 
 @Repository
 public interface CourseTagsRepository extends JpaRepository<CourseTag, CourseTagId> {
-    List<CourseTag> findByCourseId(UUID courseId);
     boolean existsByCourseAndTag(Course course, Tag tag);
 }
