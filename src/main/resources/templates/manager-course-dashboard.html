@@ -3,128 +3,195 @@
 <head>
     <title>Quản lý khóa học</title>
     <style>
-        table { border-collapse: collapse; width: 100%; }
-        td, th { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        .filters { margin-bottom: 20px; }
-        .filters > * { margin-right: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .filters, .create-form {
+            width: 300px;
+        }
+
+        .filters > div, .create-form > div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input[type="text"], input[type="date"], select {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
+        }
+
+        a{
+            text-decoration: none;
+        }
+
+        button, .btn {
+            padding: 6px 12px;
+            margin-top: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+
+        .form-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 40px;
+        }
+
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification-content {
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .notification-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .notification-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
     </style>
 </head>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-    }
-
-    .container {
-        display: flex;
-        gap: 40px;
-        align-items: flex-start;
-    }
-
-    .filters, .create-form {
-        width: 300px;
-    }
-
-    .filters > div, .create-form > div {
-        margin-bottom: 15px;
-    }
-
-    label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        display: block;
-    }
-
-    input[type="text"], input[type="date"], select {
-        width: 100%;
-        padding: 6px;
-        box-sizing: border-box;
-    }
-
-    button, .btn {
-        padding: 6px 12px;
-        margin-top: 5px;
-    }
-
-    table {
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    th, td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #f5f5f5;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        color: white;
-        border: none;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        border: none;
-    }
-
-    .form-section {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        gap: 40px;
-    }
-</style>
 <body>
-<div id="successOverlay" th:if="${successMessage}"
-     style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.5);
-            display: flex; justify-content: center; align-items: center; z-index: 9999;">
-    <div style="background: #d4edda; color: #155724; padding: 20px 30px; border-radius: 8px; box-shadow: 0 0 10px #155724;
-              max-width: 400px; width: 90%; text-align: center; position: relative; display: flex; align-items: center; gap: 10px;">
-        <!-- Icon success -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#155724" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+
+<!-- Success Message Overlay -->
+<div id="successOverlay" th:if="${successMessage}" class="notification-overlay">
+    <div class="notification-content notification-success">
+        <button class="close-btn" onclick="closeNotification('successOverlay')">&times;</button>
+
+        <!-- Success Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07.02l3.992-4.99a.75.75 0 1 0-1.14-.98L7.477 9.417 5.383 7.323a.75.75 0 0 0-1.06 1.06l2.647 2.647z"/>
         </svg>
 
-        <p style="margin: 0; font-weight: 600; font-size: 18px;" th:text="${successMessage}"></p>
+        <p style="margin: 0;" th:text="${successMessage}"></p>
     </div>
 </div>
+
+<!-- Error Message Overlay -->
+<div id="errorOverlay" th:if="${errorMessage}" class="notification-overlay">
+    <div class="notification-content notification-error">
+        <button class="close-btn" onclick="closeNotification('errorOverlay')">&times;</button>
+
+        <!-- Error Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+        </svg>
+
+        <p style="margin: 0;" th:text="${errorMessage}"></p>
+    </div>
+</div>
+
 <h2>📚 Quản lý khóa học</h2>
 
-
 <form method="GET" action="/manager/view">
-
     <div class="filter-container space-y-4">
 
         <div class="flex flex-col">
             <label for="search" class="font-medium">Tìm kiếm theo tên khóa học</label>
-            <input type="text" id="search" name="search" class="form-input w-full" placeholder="Nhập từ khóa...">
+            <input type="text" id="search" name="search" class="form-input w-full"
+                   placeholder="Nhập từ khóa..."
+                   th:value="${search}">
         </div>
 
         <div class="flex flex-col">
-            <label for="mentorId" class="font-medium">Lọc theo giảng viên</label>
-            <select id="mentorId" name="mentorId" class="form-select">
-                <option value="">-- Tất cả --</option>
-                <option th:each="mentor : ${mentors}"
-                        th:value="${mentor.id}"
-                        th:text="${mentor.fullName}"
-                        th:selected="${mentor.id == selectedMentorId}">
-                </option>
-            </select>
+            <label for="mentorSearch" class="font-medium">Tìm kiếm theo tên giảng viên</label>
+            <input type="text" id="mentorSearch" name="mentorSearch" class="form-input w-full"
+                   placeholder="Nhập tên giảng viên..."
+                   th:value="${mentorSearch}">
         </div>
 
         <div class="flex flex-col">
             <label class="font-medium">Lọc theo trạng thái</label>
             <div class="flex space-x-4">
-                <select name="open" class="form-select">
+                <select name="open" class="form-select" th:value="${selectedOpen}">
                     <option value="">Tình trạng</option>
-                    <option value="true">Đang mở</option>
-                    <option value="false">Đã đóng</option>
+                    <option value="true" th:selected="${selectedOpen == 'true'}">Đang mở</option>
+                    <option value="false" th:selected="${selectedOpen == 'false'}">Đã đóng</option>
                 </select>
             </div>
         </div>
@@ -132,9 +199,9 @@
         <div class="flex flex-col">
             <label class="font-medium">Lọc theo ngày tạo</label>
             <div class="flex space-x-2">
-                <input type="date" name="fromDate" class="form-input">
+                <input type="date" name="fromDate" class="form-input" th:value="${fromDate}">
                 <span>đến</span>
-                <input type="date" name="toDate" class="form-input">
+                <input type="date" name="toDate" class="form-input" th:value="${toDate}">
             </div>
         </div>
 
@@ -142,25 +209,23 @@
             <label for="sortBy" class="font-medium">Sắp xếp theo</label>
             <select id="sortBy" name="sortBy" class="form-select">
                 <option value="">-- Không sắp xếp --</option>
-                <option value="name">Tên A-Z</option>
-                <option value="createdDate">Ngày tạo mới nhất</option>
+                <option value="name" th:selected="${sortBy == 'name'}">Tên A-Z</option>
+                <option value="createdDate" th:selected="${sortBy == 'createdDate'}">Ngày tạo mới nhất</option>
+                <option value="mentorName" th:selected="${sortBy == 'mentorName'}">Tên giảng viên A-Z</option>
             </select>
         </div>
 
         <div class="flex space-x-2">
-            <button type="submit" class="btn btn-success">Áp dụng</button>
-            <a href="/courses-manager" class="btn btn-secondary">Đặt lại</a>
+            <button type="submit" class="btn btn-success">🔍 Tìm kiếm</button>
+            <a href="/manager/view" class="btn btn-secondary">🔄 Đặt lại</a>
         </div>
 
     </div>
-
 </form>
-
 
 <div style="margin: 10px 0;">
     <a href="/manager/courses/create" class="btn btn-success">➕ Tạo khóa học</a>
 </div>
-
 
 <table>
     <thead>
@@ -179,7 +244,7 @@
             <span th:if="${course.mentor != null}"
                   th:text="${course.mentor.fullName}">Tên mentor</span>
 
-                    <span th:if="${course.mentor == null}">
+            <span th:if="${course.mentor == null}">
                 <span th:if="${#lists.size(course.applications) > 0}"
                       th:text="|Có ${#lists.size(course.applications)} ứng viên|">
                 </span>
@@ -202,33 +267,74 @@
                th:text="${course.open} ? '🔒 Đóng' : '🔓 Mở'">Mở/Đóng</a> |
 
             <span th:if="${course.mentor == null and #lists.size(course.applications) > 0}">
-        <a th:href="@{/manager/courses/applicants/{id}(id=${course.id})}"><strong>Xem các ứng viên</strong></a> |
-    </span>
+                <a th:href="@{/manager/courses/applicants/{id}(id=${course.id})}"><strong>Xem các ứng viên</strong></a> |
+            </span>
 
-            <a th:href="@{/courses/delete/{id}(id=${course.id})}" onclick="return confirm('Xóa khóa học này?')">Xóa</a>
+            <form th:action="@{/manager/courses/delete/{id}(id=${course.id})}" method="post"
+                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn tác.')"
+                  style="display: inline;">
+                <button type="submit" style="color: red; background: none; border: none; cursor: pointer; text-decoration: underline;">Xóa</button>
+            </form>
         </td>
     </tr>
     </tbody>
-
 </table>
+
 <script>
+
     window.addEventListener('DOMContentLoaded', function () {
-        const overlay = document.getElementById('successOverlay');
-        if (overlay) {
+        const successOverlay = document.getElementById('successOverlay');
+        const errorOverlay = document.getElementById('errorOverlay');
+
+        if (successOverlay) {
             setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 3000);
+                closeNotification('successOverlay');
+            }, 4000);
+        }
+
+        if (errorOverlay) {
+            setTimeout(() => {
+                closeNotification('errorOverlay');
+            }, 5000); // Error message hiển thị lâu hơn một chút
         }
     });
 
+    // Đóng notification khi nhấn Enter hoặc Escape
     document.addEventListener('keydown', function(event) {
-        if (event.key === "Enter") {
-            const overlay = document.getElementById('successOverlay');
-            if (overlay) {
+        if (event.key === "Enter" || event.key === "Escape") {
+            const successOverlay = document.getElementById('successOverlay');
+            const errorOverlay = document.getElementById('errorOverlay');
+
+            if (successOverlay) closeNotification('successOverlay');
+            if (errorOverlay) closeNotification('errorOverlay');
+        }
+    });
+
+    // Hàm đóng notification với hiệu ứng fade
+    function closeNotification(overlayId) {
+        const overlay = document.getElementById(overlayId);
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => {
                 overlay.style.display = 'none';
-            }
+            }, 300);
+        }
+    }
+
+    // Đóng notification khi click bên ngoài
+    document.addEventListener('click', function(event) {
+        const successOverlay = document.getElementById('successOverlay');
+        const errorOverlay = document.getElementById('errorOverlay');
+
+        if (successOverlay && event.target === successOverlay) {
+            closeNotification('successOverlay');
+        }
+
+        if (errorOverlay && event.target === errorOverlay) {
+            closeNotification('errorOverlay');
         }
     });
 </script>
+
 </body>
 </html>

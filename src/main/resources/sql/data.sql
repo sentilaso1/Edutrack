@@ -75,6 +75,15 @@ VALUES (UUID_TO_BIN('33333333-3333-3333-3333-333333333333'),
         '1999-09-25');
 
 
+-- Insert Bob Smith into mentors table
+INSERT INTO mentors (expertise, is_available, rating, total_sessions, user_id)
+VALUES ('Physics;Mathematics;Calculus', 1, 4.8, 120, UUID_TO_BIN('22222222-2222-2222-2222-222222222222'));
+
+-- Insert Erin Black into mentors table
+INSERT INTO mentors (expertise, is_available, rating, total_sessions, user_id)
+VALUES ('Psychology;Mentoring;Conflict Resolution', 1, 4.5, 95, UUID_TO_BIN('55555555-5555-5555-5555-555555555555'));
+
+
 -- COURSES
 INSERT INTO courses (id, name, description, is_open, created_date)
 VALUES (UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'), 'Introduction to Java',
@@ -265,3 +274,20 @@ VALUES ('2024-05-01 10:15:00.000000', UUID_TO_BIN('d1111111-dddd-dddd-dddd-ddddd
         UUID_TO_BIN('33333333-3333-3333-3333-333333333333')),
        ('2024-05-08 19:40:00.000000', UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'),
         UUID_TO_BIN('22222222-2222-2222-2222-222222222222'));
+
+INSERT INTO course_mentor (id, applied_date, status, course_id, mentor_user_id)
+VALUES
+    (UUID_TO_BIN('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1'), '2024-05-01 09:00:00.000000', 'PENDING',
+     UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222')),
+
+    (UUID_TO_BIN('aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2'), '2024-05-02 14:30:00.000000', 'ACCEPTED',
+     UUID_TO_BIN('d2222222-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222')),
+
+    (UUID_TO_BIN('aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3'), '2024-05-03 11:15:00.000000', 'REJECTED',
+     UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222')),
+
+    (UUID_TO_BIN('aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4'), '2024-05-01 10:00:00.000000', 'PENDING',
+     UUID_TO_BIN('d5555555-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('55555555-5555-5555-5555-555555555555')),
+
+    (UUID_TO_BIN('aaaaaaa5-aaaa-aaaa-aaaa-aaaaaaaaaaa5'), '2024-05-05 16:00:00.000000', 'ACCEPTED',
+     UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('55555555-5555-5555-5555-555555555555'));

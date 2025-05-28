@@ -1,15 +1,13 @@
 package com.example.edutrack.curriculum.controller;
 
-import com.example.edutrack.accounts.dto.BookmarkDTO;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
-import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
-import com.example.edutrack.curriculum.dto.TagDTO;
-import com.example.edutrack.curriculum.model.CourseTag;
+import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
+import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +18,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.example.edutrack.curriculum.model.Course;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Controller
 public class CourseController {
@@ -34,32 +31,58 @@ public class CourseController {
     private final CourseTagServiceImpl courseTagServiceImpl;
     private final MentorServiceImpl mentorServiceImpl;
     private final TagServiceImpl tagServiceImpl;
+    private final CourseMentorService courseMentorService;
+    private final CourseMentorServiceImpl courseMentorServiceImpl;
 
     public CourseController(CourseServiceImpl courseServiceImpl,
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorAvailableTimeServiceImpl mentorAvailableTimeServiceImpl,
-                            MentorServiceImpl mentorServiceImpl, TagServiceImpl tagServiceImpl) {
+                            MentorServiceImpl mentorServiceImpl,
+                            TagServiceImpl tagServiceImpl,
+                            CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl) {
         this.courseServiceImpl = courseServiceImpl;
         this.mentorAvailableTimeServiceImpl = mentorAvailableTimeServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
         this.tagServiceImpl = tagServiceImpl;
+        this.courseMentorService = courseMentorService;
+        this.courseMentorServiceImpl = courseMentorServiceImpl;
     }
 
     @GetMapping("/courses")
     public String courses(Model model,
                           @RequestParam(defaultValue = "1") int page,
-                          @RequestParam(defaultValue = "6") int size
+                          @RequestParam(defaultValue = "6") int size_page,
+                          @RequestParam(required = false) Integer[] subject,
+                          @RequestParam(required = false) String[] skill
                             ) {
         if (page - 1 < 0) {
             return "redirect:/404";
         }
+        model.addAttribute("selectedSubjects", subject);
+        model.addAttribute("selectedSkills", skill);
         model.addAttribute("pageNumber", page);
-        Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Course> coursePage = courseServiceImpl.findAll(pageable);
-        System.out.println("DEBUG: " + coursePage.getContent().get(0));
+        Pageable pageable = PageRequest.of(page - 1, size_page);
+        List<Integer> subjectIds = subject != null ? Arrays.asList(subject) : null;
+        List<UUID> skillIds = null;
+        if (skill != null) {
+            skillIds = Arrays.stream(skill)
+                    .map(UUID::fromString)
+                    .toList();
+        }
+
+        Page<CourseMentor> coursePage = courseMentorServiceImpl.findFilteredCourseMentors(
+                skillIds,
+                subjectIds,
+                pageable
+        );
+
+        model.addAttribute("subjectList", courseMentorServiceImpl.findAllTags());
+        model.addAttribute("skillList", courseMentorServiceImpl.findAllCourses());
         model.addAttribute("coursePage", coursePage);
+        model.addAttribute("selectedSkills", skill);
+        model.addAttribute("selectedSubjects", subject);
         return "courselist";
     }
 

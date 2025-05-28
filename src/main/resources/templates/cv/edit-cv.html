@@ -1,0 +1,71 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduTrack - list-bookmark.html</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+
+    <style>
+        .cv-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5em;
+            max-width: 38em;
+            margin: 4vh auto;
+            padding: 3em;
+            border-radius: 0.5em;
+        }
+        .cv-form label {
+            font-weight: bold;
+            margin-bottom: 0.2em;
+        }
+        .cv-form input,
+        .cv-form textarea {
+            padding: 0.5em;
+            border: 0.07em solid #ccc;
+            border-radius: 0.3em;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .cv-form button[type="submit"] {
+            align-self: flex-end;
+            padding: 0.7em 2em;
+            border: none;
+            border-radius: 0.3em;
+            font-size: 1em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="viewport">
+<form method="post" class="cv-form container-bg">
+    <h2>Create Your CV</h2>
+
+    <label for="summary">Summary</label>
+    <textarea id="summary" name="summary" maxlength="256" required th:text="${cv.summary}"></textarea>
+
+    <label for="experienceYears">Years of Experience</label>
+    <input type="number" id="experienceYears" name="experienceYears" min="0" max="100" required
+           th:value="${cv.experienceYears}">
+
+    <label for="skills">Skills</label>
+    <textarea id="skills" name="skills" maxlength="512" required th:text="${cv.skills}"></textarea>
+
+    <label for="education">Education</label>
+    <textarea id="education" name="education" maxlength="513" required th:text="${cv.education}"></textarea>
+
+    <label for="certifications">Certifications</label>
+    <textarea id="certifications" name="certifications" maxlength="513" required
+              th:text="${cv.certifications}"></textarea>
+
+    <label for="languages">Languages</label>
+    <textarea id="languages" name="languages" maxlength="513" required th:text="${cv.languages}"></textarea>
+
+    <label for="portfolioUrl">Portfolio URL</label>
+    <input type="url" id="portfolioUrl" name="portfolioUrl" maxlength="1025" required th:value="${cv.portfolioUrl}">
+
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>

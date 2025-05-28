@@ -13,4 +13,5 @@ import java.util.UUID;
 @Repository
 public interface CourseTagsRepository extends JpaRepository<CourseTag, CourseTagId> {
     boolean existsByCourseAndTag(Course course, Tag tag);
+    void deleteByCourseIdAndTagId(UUID courseId, int tagId);
 }

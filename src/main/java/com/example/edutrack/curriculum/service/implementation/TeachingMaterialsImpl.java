@@ -31,6 +31,6 @@ public class TeachingMaterialsImpl implements TeachingMaterialsService {
     }
 
     public Course findCourseByMaterialId(int id) {
-        return teachingMaterialsRepository.findCourseById(id);
+        return teachingMaterialsRepository.findCourseByTeachingMaterialId(id);
     }
 }

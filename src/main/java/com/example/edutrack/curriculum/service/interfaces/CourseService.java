@@ -14,6 +14,8 @@ public interface CourseService {
     Page<Course> findAll(Pageable pageable);
 
 
+    List<Course> findAll();
+
     void save(Course course);
 
     Course findById(UUID id);
@@ -30,4 +32,13 @@ public interface CourseService {
                                     Date fromDate,
                                     Date toDate,
                                     String sortBy);
+
+    List<Course> getFilteredCourses(String search,
+                                    String mentorSearch,
+                                    Boolean open,
+                                    Date fromDate,
+                                    Date toDate,
+                                    String sortBy);
+
+    void delete(UUID id);
 }
