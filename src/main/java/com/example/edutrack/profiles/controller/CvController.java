@@ -1,12 +1,9 @@
 package com.example.edutrack.profiles.controller;
 
-import com.example.edutrack.accounts.model.User;
-import com.example.edutrack.accounts.service.implementations.UserServiceImpl;
 import com.example.edutrack.auth.service.UserService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
-import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.profiles.service.interfaces.CvService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,19 +17,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Controller
 public class CvController {
     public static final int PAGE_SIZE = 15;
 
-    private final CvServiceImpl cvService;
-    private final UserServiceImpl userService;
+    private final CvService cvService;
+    private final UserService userService;
 
     @Autowired
-    public CvController(CvServiceImpl cvService, UserServiceImpl userService) {
+    public CvController(CvService cvService, UserService userService) {
         this.cvService = cvService;
         this.userService = userService;
     }
@@ -86,6 +81,32 @@ public class CvController {
             CV saved = cvService.createCV(request);
             model.addAttribute("message", "CV created successfully!");
             return "redirect:/cv/mainpage";
+    }
+
+    @GetMapping("/cv/edit/{id}")
+    public String editCV(@PathVariable("id") UUID id, Model model) {
+        CV cv = null;
+        try {
+            cv = cvService.getCVById(id);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", "CV not found.");
+            return "redirect:/404";
+        }
+        model.addAttribute("cv", cv);
+        return "cv/edit-cv";
+    }
+
+    @PostMapping("/cv/edit/{id}")
+    public String handleEditCV(@PathVariable("id") UUID id, @ModelAttribute("cv") CVForm cvForm, RedirectAttributes redirectAttributes) {
+        try {
+            cvForm.setUserId(id);
+            CV updatedCV = cvService.createCV(cvForm);
+            redirectAttributes.addFlashAttribute("success", "CV updated successfully.");
+            return "redirect:/cv/edit/" + id;
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", "Error updating CV: " + e.getMessage());
+            return "redirect:/cv/edit/" + id;
+        }
     }
 
     @GetMapping("/admin/cv/detail/{id}")
