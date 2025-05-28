@@ -40,4 +40,9 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     public Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable) {
         return courseMentorRepository.findFilteredCourseMentors(skillIds, subjectIds, pageable);
     }
+
+    public List<CourseMentor> findByCourseId(UUID courseMentorId) {
+        return courseMentorRepository.findByCourseId(courseMentorId);
+    }
+
 }

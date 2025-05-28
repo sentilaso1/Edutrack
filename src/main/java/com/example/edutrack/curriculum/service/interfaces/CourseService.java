@@ -26,12 +26,6 @@ public interface CourseService {
 
     List<Course> getAll();
 
-    List<Course> getFilteredCourses(String search,
-                                    UUID mentorId,
-                                    Boolean open,
-                                    Date fromDate,
-                                    Date toDate,
-                                    String sortBy);
 
     List<Course> getFilteredCourses(String search,
                                     String mentorSearch,

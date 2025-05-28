@@ -34,4 +34,6 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
             Pageable pageable
     );
 
+    List<CourseMentor> findByCourseId(UUID courseId);
+
 }

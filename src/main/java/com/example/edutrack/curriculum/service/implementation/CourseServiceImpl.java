@@ -5,6 +5,7 @@ import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.model.TeachingMaterial;
+import com.example.edutrack.curriculum.repository.ApplicantsRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
@@ -31,12 +32,13 @@ public class CourseServiceImpl implements CourseService {
     private final TagServiceImpl tagServiceImpl;
     private final CourseTagServiceImpl courseTagServiceImpl;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
+    private final ApplicantsRepository applicantsRepository;
 
     @Autowired
     public CourseServiceImpl(CourseRepository courseRepository,
                              TeachingMaterialsRepository teachingMaterialsRepository,
                              TagRepository tagRepository,
-                             CourseTagServiceImpl courseTagService, TeachingMaterialsImpl teachingMaterialsImpl, TagServiceImpl tagServiceImpl, CourseTagServiceImpl courseTagServiceImpl, CourseMentorServiceImpl courseMentorServiceImpl) {
+                             CourseTagServiceImpl courseTagService, TeachingMaterialsImpl teachingMaterialsImpl, TagServiceImpl tagServiceImpl, CourseTagServiceImpl courseTagServiceImpl, CourseMentorServiceImpl courseMentorServiceImpl, ApplicantsRepository applicantsRepository) {
         this.courseRepository = courseRepository;
         this.teachingMaterialsRepository = teachingMaterialsRepository;
         this.tagRepository = tagRepository;
@@ -45,6 +47,7 @@ public class CourseServiceImpl implements CourseService {
         this.tagServiceImpl = tagServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
+        this.applicantsRepository = applicantsRepository;
     }
 
     @Override
@@ -163,10 +166,6 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findAll();
     }
 
-    @Override
-    public List<Course> getFilteredCourses(String search, UUID mentorId, Boolean open, Date fromDate, Date toDate, String sortBy) {
-        return List.of();
-    }
 
     @Override
     public List<Course> getFilteredCourses(String search,
@@ -223,7 +222,7 @@ public class CourseServiceImpl implements CourseService {
         }
         List<CourseMentor> applicants = courseMentorServiceImpl.findByCourseId(courseId);
         for (CourseMentor courseMentor : applicants) {
-            courseMentorServiceImpl.deleteById(courseMentor.getId());
+            applicantsRepository.deleteById(courseMentor.getId());
         }
         this.delete(courseId);
     }
