@@ -69,6 +69,59 @@
             background-color: #759976;
         }
 
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background-color: #d4edda;
+            padding: 25px 30px;
+            border-radius: 10px;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content p{
+            font-weight: bold;
+            font-size: 25px;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            background-color: #86A788;
+            width: 200px;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .modal-button:hover {
+            background-color: #759976;
+        }
+
+        .modal-button.secondary {
+            background-color: #6c757d;
+        }
+
+        .modal-button.secondary:hover {
+            background-color: #5a6268;
+        }
+
         /* Style cho tag động */
         .tag-container {
             display: flex;
@@ -183,6 +236,15 @@
 </head>
 <body>
 <div class="container">
+    <div th:if="${successMessage}" class="modal-overlay">
+        <div class="modal-content">
+            <p th:text="${successMessage}"></p>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <a th:href="@{/manager/view}" class="modal-button">Về Trang Chủ</a>
+                <a th:href="@{/manager/courses/create}" class="modal-button secondary">Tiếp tục tạo</a>
+            </div>
+        </div>
+    </div>
     <h2>Tạo Khóa Học</h2>
 
 
@@ -218,9 +280,9 @@
 
         <button type="submit" id="submitBtn">Tạo Khóa Học</button>
         <button type="reset" style="background-color:#f44336; margin-top:10px;">Xóa dữ liệu</button>
-        <button type="button" onclick="history.back()" style="margin-top: 10px; width: 100%; background-color: #ccc; color: #333; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer;">
+        <a href="/manager/view" style="display: inline-block; margin-top: 10px; width: 100%; background-color: #ccc; color: #333; font-weight: bold; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px;">
             Quay Lại
-        </button>
+        </a>
     </form>
 </div>
 
