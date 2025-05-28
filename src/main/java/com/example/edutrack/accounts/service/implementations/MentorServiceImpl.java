@@ -1,6 +1,7 @@
 package com.example.edutrack.accounts.service.implementations;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.example.edutrack.curriculum.model.Course;
@@ -38,5 +39,8 @@ public class MentorServiceImpl implements com.example.edutrack.accounts.service.
         public Mentor findByCourseId(UUID id) {
                 return mentorRepository.findByCourses_Id(id);
         }
-        
+
+    public Optional<Mentor> findById(UUID id) {
+                return mentorRepository.findById(id);
+    }
 }
