@@ -275,19 +275,22 @@
     </div>
     <div class="container-bg shadow-soft" style="padding: 20px; border-radius: 12px; height: fit-content;">
         <h3 class="text-heading" style="margin-bottom: 20px;">Available Courses</h3>
-
-        <ul style="list-style: none; padding-left: 0;">
-            <li th:each="course : ${coursePage.content}" style="margin-bottom: 10px; padding: 10px; border-radius: 8px; color: var(--text-color);">
-                <strong th:text="${course.name}">Course Name</strong><br/>
-                <span th:text="${course.description}">Course Description</span>
-            </li>
-        </ul>
-
-        <!-- Pagination controls -->
-        <div style="margin-top: 20px; text-align: center;">
-            <a th:href="@{/cv/create(page=${pageNumber - 1}, size=6)}" th:if="${coursePage.hasPrevious()}" style="margin-right: 10px;">&laquo; Prev</a>
-            <span>Page <span th:text="${pageNumber}"></span></span>
-            <a th:href="@{/cv/create(page=${pageNumber + 1}, size=6)}" th:if="${coursePage.hasNext()}" style="margin-left: 10px;">Next &raquo;</a>
+        <div th:if="${coursePage != null}">
+            <ul style="list-style: none; padding-left: 0;">
+                <li th:each="course : ${coursePage.content}" style="margin-bottom: 10px; padding: 10px; border-radius: 8px; color: var(--text-color);">
+                    <strong th:text="${course.name}">Course Name</strong><br/>
+                    <span th:text="${course.description}">Course Description</span>
+                </li>
+            </ul>
+            <!-- Pagination controls -->
+            <div style="margin-top: 20px; text-align: center;">
+                <a th:href="@{/cv/create(page=${pageNumber - 1}, size=6)}" th:if="${coursePage.hasPrevious()}" style="margin-right: 10px;">« Prev</a>
+                <span>Page <span th:text="${pageNumber}"></span></span>
+                <a th:href="@{/cv/create(page=${pageNumber + 1}, size=6)}" th:if="${coursePage.hasNext()}" style="margin-left: 10px;">Next »</a>
+            </div>
+        </div>
+        <div th:if="${coursePage == null}">
+            <p>No courses available at the moment.</p>
         </div>
     </div>
 
