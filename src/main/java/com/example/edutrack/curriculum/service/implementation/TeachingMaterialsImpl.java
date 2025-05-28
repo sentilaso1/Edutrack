@@ -1,5 +1,6 @@
 package com.example.edutrack.curriculum.service.implementation;
 
+import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.TeachingMaterial;
 import com.example.edutrack.curriculum.repository.TeachingMaterialsRepository;
 import com.example.edutrack.curriculum.service.interfaces.TeachingMaterialsService;
@@ -23,5 +24,13 @@ public class TeachingMaterialsImpl implements TeachingMaterialsService {
     @Override
     public TeachingMaterial findById(int id) {
         return teachingMaterialsRepository.findById(id).orElseThrow(() -> new RuntimeException("File không tồn tại"));
+    }
+
+    public void deleteById(int id) {
+        teachingMaterialsRepository.deleteById(id);
+    }
+
+    public Course findCourseByMaterialId(int id) {
+        return teachingMaterialsRepository.findCourseById(id);
     }
 }

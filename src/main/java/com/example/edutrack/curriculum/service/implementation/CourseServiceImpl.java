@@ -9,6 +9,8 @@ import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.repository.TeachingMaterialsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,8 +38,13 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<Course> findAll() {
-        return courseRepository.findAll();
+    public Page<Course> findAll(Pageable pageable) {
+        return courseRepository.findAll(pageable);
+    }
+
+    @Override
+    public void save(Course course){
+        courseRepository.save(course);
     }
 
     @Override
@@ -111,15 +118,14 @@ public class CourseServiceImpl implements CourseService {
             }
         }
 
-        // Xóa hết teaching materials cũ rồi thêm mới
-        List<TeachingMaterial> oldMaterials = teachingMaterialsRepository.findByCourseId(course.getId());
-        teachingMaterialsRepository.deleteAll(oldMaterials);
+
         if (courseFormDTO.getFiles() != null) {
             for (MultipartFile file : courseFormDTO.getFiles()) {
                 if (!file.isEmpty()) {
                     try {
                         TeachingMaterial teachingMaterial = new TeachingMaterial();
                         teachingMaterial.setCourse(course);
+                        teachingMaterial.setName(file.getOriginalFilename());
                         teachingMaterial.setFile(file.getBytes());
                         teachingMaterialsRepository.save(teachingMaterial);
                     } catch (IOException e) {

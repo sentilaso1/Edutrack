@@ -292,3 +292,9 @@ h6{
   color: hsl(0, 0%, 100%);
   border-color: hsl(357, 100%, 75%);
 }
+
+@media (min-width: 575px) {
+  .card {
+    height: 100%;
+  }
+}

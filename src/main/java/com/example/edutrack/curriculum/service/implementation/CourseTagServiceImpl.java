@@ -31,14 +31,6 @@ public class CourseTagServiceImpl implements CourseTagService {
     }
 
     @Override
-    public List<TagDTO> findTagsByCourseId(UUID courseId) {
-        List<CourseTag> courseTagList = courseTagsRepository.findByCourseId(courseId);
-        return courseTagList.stream()
-                .map(ct -> new TagDTO(ct.getTag().getTitle(), ct.getTag().getDescription()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public boolean existsByCourseAndTag(UUID courseId, int tagId) {
         Course course = courseRepository.findById(courseId).orElse(null);
         Tag tag = tagRepository.findById(tagId).orElse(null);
