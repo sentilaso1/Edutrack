@@ -54,6 +54,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public void save(Course course){
+        courseRepository.save(course);
+    }
+
+    @Override
     public Course findById(UUID id) {
         return courseRepository.findById(id).orElseThrow(() -> new RuntimeException("Course Not Found"));
     }

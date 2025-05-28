@@ -18,6 +18,8 @@ public interface CourseService {
 
     void save(Course course);
 
+    void save(Course course);
+
     Course findById(UUID id);
 
     UUID create(CourseFormDTO courseFormDTO);
