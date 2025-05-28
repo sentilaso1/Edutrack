@@ -33,15 +33,17 @@ public class CourseController {
     private final MentorAvailableTimeServiceImpl mentorAvailableTimeServiceImpl;
     private final CourseTagServiceImpl courseTagServiceImpl;
     private final MentorServiceImpl mentorServiceImpl;
+    private final TagServiceImpl tagServiceImpl;
 
     public CourseController(CourseServiceImpl courseServiceImpl,
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorAvailableTimeServiceImpl mentorAvailableTimeServiceImpl,
-                            MentorServiceImpl mentorServiceImpl) {
+                            MentorServiceImpl mentorServiceImpl, TagServiceImpl tagServiceImpl) {
         this.courseServiceImpl = courseServiceImpl;
         this.mentorAvailableTimeServiceImpl = mentorAvailableTimeServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
+        this.tagServiceImpl = tagServiceImpl;
     }
 
     @GetMapping("/courses")

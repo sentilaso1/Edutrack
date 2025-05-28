@@ -42,17 +42,6 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findAll(pageable);
     }
 
-
-    @Override
-    public void save(Course course){
-        courseRepository.save(course);
-    }
-
-    @Override
-    public void save(Course course){
-        courseRepository.save(course);
-    }
-
     @Override
     public void save(Course course){
         courseRepository.save(course);
