@@ -163,10 +163,6 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findAll();
     }
 
-    @Override
-    public List<Course> getFilteredCourses(String search, UUID mentorId, Boolean open, Date fromDate, Date toDate, String sortBy) {
-        return List.of();
-    }
 
     @Override
     public List<Course> getFilteredCourses(String search,
@@ -209,6 +205,8 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.deleteById(id);
     }
 
+
+    @Override
     @Transactional
     public void deleteCourseWithRelatedData(UUID courseId) {
 

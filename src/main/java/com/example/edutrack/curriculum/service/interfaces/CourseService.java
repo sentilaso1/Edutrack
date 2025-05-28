@@ -4,6 +4,7 @@ import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.model.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -27,13 +28,6 @@ public interface CourseService {
     List<Course> getAll();
 
     List<Course> getFilteredCourses(String search,
-                                    UUID mentorId,
-                                    Boolean open,
-                                    Date fromDate,
-                                    Date toDate,
-                                    String sortBy);
-
-    List<Course> getFilteredCourses(String search,
                                     String mentorSearch,
                                     Boolean open,
                                     Date fromDate,
@@ -41,4 +35,7 @@ public interface CourseService {
                                     String sortBy);
 
     void delete(UUID id);
+
+    @Transactional
+    void deleteCourseWithRelatedData(UUID courseId);
 }

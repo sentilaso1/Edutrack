@@ -1,7 +1,5 @@
 package com.example.edutrack.curriculum.controller;
 
-import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -10,6 +8,7 @@ import com.example.edutrack.curriculum.model.TeachingMaterial;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.service.implementation.*;
+import com.example.edutrack.curriculum.service.interfaces.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
@@ -30,20 +29,20 @@ import java.util.stream.Collectors;
 @RequestMapping("/manager")
 @Controller
 public class CourseManagerController {
-    private final CourseServiceImpl courseServiceImpl;
-    private final CourseTagServiceImpl courseTagServiceImpl;
-    private final TeachingMaterialsImpl teachingMaterialsImpl;
-    private final TagServiceImpl tagServiceImpl;
-    private final CourseMentorServiceImpl courseMentorServiceImpl;
+    private final CourseService courseService;
+    private final CourseTagService courseTagService;
+    private final TeachingMaterialsService teachingMaterials;
+    private final TagService tagService;
+    private final CourseMentorService courseMentorService;
 
 
     @Autowired
-    public CourseManagerController(CourseServiceImpl courseServiceImpl, CourseTagServiceImpl courseTagServiceImpl, TeachingMaterialsImpl teachingMaterialsImpl, TagServiceImpl tagServiceImpl, CourseMentorServiceImpl courseMentorServiceImpl) {
-        this.courseServiceImpl = courseServiceImpl;
-        this.courseTagServiceImpl = courseTagServiceImpl;
-        this.teachingMaterialsImpl = teachingMaterialsImpl;
-        this.tagServiceImpl = tagServiceImpl;
-        this.courseMentorServiceImpl = courseMentorServiceImpl;
+    public CourseManagerController(CourseService courseService, CourseTagService courseTagService, TeachingMaterialsService teachingMaterials, TagService tagService, CourseMentorService courseMentorService) {
+        this.courseService = courseService;
+        this.courseTagService = courseTagService;
+        this.teachingMaterials = teachingMaterials;
+        this.tagService = tagService;
+        this.courseMentorService = courseMentorService;
     }
 
     @GetMapping("/view")
@@ -65,7 +64,7 @@ public class CourseManagerController {
             isOpen = Boolean.parseBoolean(open);
         }
 
-        List<Course> courses = courseServiceImpl.getFilteredCourses(search, mentorSearch, isOpen, fromDate, toDate, sortBy);
+        List<Course> courses = courseService.getFilteredCourses(search, mentorSearch, isOpen, fromDate, toDate, sortBy);
 
         System.out.println("search=" + search + ", mentorSearch=" + mentorSearch + ", open=" + open + ", fromDate=" + fromDate + ", toDate=" + toDate + ", sortBy=" + sortBy);
 
@@ -83,7 +82,7 @@ public class CourseManagerController {
 
     @GetMapping("/materials/download/{id}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable int id) {
-        TeachingMaterial material = teachingMaterialsImpl.findById(id);
+        TeachingMaterial material = teachingMaterials.findById(id);
         if (material == null) return ResponseEntity.notFound().build();
 
         HttpHeaders headers = new HttpHeaders();
@@ -94,10 +93,10 @@ public class CourseManagerController {
 
     @GetMapping("/courses/toggle-open/{id}")
     public String toggleOpen(@PathVariable UUID id) {
-        Course course = courseServiceImpl.findById(id);
+        Course course = courseService.findById(id);
         if (course != null) {
             course.setOpen(!course.getOpen());
-            courseServiceImpl.save(course);
+            courseService.save(course);
         }
         return "redirect:/manager/view";
     }
@@ -112,7 +111,7 @@ public class CourseManagerController {
     public String createCourse(@ModelAttribute("courseForm") CourseFormDTO courseFormDTO,
                                Model model, RedirectAttributes redirectAttributes) {
         try {
-            UUID courseID = courseServiceImpl.create(courseFormDTO);
+            UUID courseID = courseService.create(courseFormDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo khóa học thành công");
             redirectAttributes.addFlashAttribute("createdCourseId", courseID);
         } catch (Exception e) {
@@ -123,7 +122,7 @@ public class CourseManagerController {
 
     @GetMapping("/courses/edit/{id}")
     public String showEditForm(@PathVariable UUID id, Model model) {
-        Course course = courseServiceImpl.findById(id);
+        Course course = courseService.findById(id);
         if (course == null) {
             return "redirect:/manager/view";
         }
@@ -131,11 +130,11 @@ public class CourseManagerController {
         CourseFormDTO form = new CourseFormDTO();
         form.setName(course.getName());
         form.setDescription(course.getDescription());
-        List<String> tagTexts = tagServiceImpl.findTagsByCourseId(id).stream()
+        List<String> tagTexts = tagService.findTagsByCourseId(id).stream()
                 .map(Tag::getTitle)
                 .collect(Collectors.toList());
         form.setTagTexts(tagTexts);
-        List<TeachingMaterial> materials = teachingMaterialsImpl.findByCourseId(id);
+        List<TeachingMaterial> materials = teachingMaterials.findByCourseId(id);
 
         model.addAttribute("materials", materials);
         model.addAttribute("courseForm", form);
@@ -155,7 +154,7 @@ public class CourseManagerController {
             }
         }
         try {
-            courseServiceImpl.update(id, courseFormDTO);
+            courseService.update(id, courseFormDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật khóa học thành công");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật khóa học: " + e.getMessage());
@@ -166,8 +165,8 @@ public class CourseManagerController {
     @GetMapping("/materials/delete/{id}")
     public String deleteMaterial(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
-            UUID courseId = teachingMaterialsImpl.findCourseByMaterialId(id).getId();
-            teachingMaterialsImpl.deleteById(id);
+            UUID courseId = teachingMaterials.findCourseByMaterialId(id).getId();
+            teachingMaterials.deleteById(id);
             return "redirect:/manager/courses/edit/" + courseId;
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa tài liệu: " + e.getMessage());
@@ -178,7 +177,7 @@ public class CourseManagerController {
     @PostMapping("/courses/delete/{id}")
     public String deleteCourse(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         try {
-            courseServiceImpl.deleteCourseWithRelatedData(id);
+            courseService.deleteCourseWithRelatedData(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa khóa học thành công");
 
         } catch (Exception e) {
