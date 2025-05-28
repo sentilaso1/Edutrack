@@ -49,4 +49,8 @@ public class CourseTagServiceImpl implements CourseTagService {
             courseTagsRepository.save(courseTag);
         }
     }
+
+    public void deleteCourseTag(UUID courseId, int tagId) {
+        courseTagsRepository.deleteByCourseIdAndTagId(courseId, tagId);
+    }
 }
