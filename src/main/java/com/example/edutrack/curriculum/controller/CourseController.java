@@ -54,29 +54,44 @@ public class CourseController {
                           @RequestParam(defaultValue = "1") int page,
                           @RequestParam(defaultValue = "6") int size_page,
                           @RequestParam(required = false) Integer[] subject,
-                          @RequestParam(required = false) String[] skill
-                            ) {
+                          @RequestParam(required = false) String[] skill,
+                          @RequestParam(required = false) String order_by
+    ) {
         if (page - 1 < 0) {
             return "redirect:/404";
         }
+        Page<CourseMentor> coursePage;
         model.addAttribute("selectedSubjects", subject);
         model.addAttribute("selectedSkills", skill);
         model.addAttribute("pageNumber", page);
 
         Pageable pageable = PageRequest.of(page - 1, size_page);
-        List<Integer> subjectIds = subject != null ? Arrays.asList(subject) : null;
-        List<UUID> skillIds = null;
-        if (skill != null) {
-            skillIds = Arrays.stream(skill)
-                    .map(UUID::fromString)
-                    .toList();
-        }
 
-        Page<CourseMentor> coursePage = courseMentorServiceImpl.findFilteredCourseMentors(
-                skillIds,
-                subjectIds,
-                pageable
-        );
+        if (order_by != null && order_by.equalsIgnoreCase("newest")) {
+            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateDesc(pageable);
+        } else if (order_by != null &&  order_by.equalsIgnoreCase("oldest")) {
+            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateAsc(pageable);
+        } else if (order_by != null &&  order_by.equalsIgnoreCase("title_asc")) {
+            coursePage = courseMentorServiceImpl.findAlByOrderByTitleAsc(pageable);
+        } else if (order_by != null &&  order_by.equalsIgnoreCase("title_desc")) {
+            coursePage = courseMentorServiceImpl.findAlByOrderByTitleDesc(pageable);
+        } else {
+            List<Integer> subjectIds = subject != null ? Arrays.asList(subject) : null;
+            List<UUID> skillIds = null;
+            if (skill != null) {
+                skillIds = Arrays.stream(skill)
+                        .map(UUID::fromString)
+                        .toList();
+            }
+
+
+            coursePage = courseMentorServiceImpl.findFilteredCourseMentors(
+                    skillIds,
+                    subjectIds,
+                    pageable
+            );
+
+        }
 
         model.addAttribute("subjectList", courseMentorServiceImpl.findAllTags());
         model.addAttribute("skillList", courseMentorServiceImpl.findAllCourses());
@@ -84,6 +99,7 @@ public class CourseController {
         model.addAttribute("selectedSkills", skill);
         model.addAttribute("selectedSubjects", subject);
         return "courselist";
+
     }
 
     @GetMapping("/courses/{courseId}")
@@ -106,7 +122,7 @@ public class CourseController {
 
     @GetMapping("/mentors/{id}/avatar")
     public ResponseEntity<byte[]> getAvatar(@PathVariable UUID id) {
-        Optional<Mentor> mentor =  mentorServiceImpl.findById(id);
+        Optional<Mentor> mentor = mentorServiceImpl.findById(id);
         if (mentor.isEmpty() || mentor.get().getAvatar() == null) {
             return ResponseEntity.notFound().build();
         }
@@ -134,17 +150,6 @@ public class CourseController {
         return "course-mentor-view";
 
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
