@@ -20,4 +20,5 @@ public interface StaffRepository extends JpaRepository<Staff, UUID> {
         @Query(value = "DELETE FROM staffs WHERE user_id = :user_id", nativeQuery = true)
         void deleteById(@Param("user_id") UUID id);
 
+    Optional<Staff> findByEmail(String email);
 }

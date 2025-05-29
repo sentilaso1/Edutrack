@@ -1,6 +1,8 @@
 package com.example.edutrack.auth.controller;
 
+import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.service.interfaces.StaffService;
 import com.example.edutrack.auth.service.RecaptchaService;
 import com.example.edutrack.auth.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -18,12 +20,14 @@ import java.util.Optional;
 @Controller
 public class AuthController {
     private final UserService userService;
+    private final StaffService staffService;
 
     @Autowired
     private RecaptchaService recaptchaService;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, StaffService staffService) {
         this.userService = userService;
+        this.staffService = staffService;
     }
 
     @GetMapping("/login")
@@ -40,6 +44,22 @@ public class AuthController {
             }
         }
         return "auth/login";
+    }
+
+    @GetMapping("/admin/login")
+    public String showLoginAdminForm(HttpServletRequest request, Model model) {
+        String adminFromCookie;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("admin".equals(cookie.getName())) {
+                    adminFromCookie = cookie.getValue();
+                    model.addAttribute("admin", adminFromCookie);
+                    break;
+                }
+            }
+        }
+        return "auth/login_admin";
     }
 
     @GetMapping("/signup")
@@ -115,6 +135,38 @@ public class AuthController {
         model.addAttribute("error", "Invalid email or password");
         model.addAttribute("user", new User());
         return "auth/login";
+    }
+
+    @PostMapping("/admin/login")
+    public String loginAdmin(@RequestParam String email,
+                        @RequestParam String password,
+                        @RequestParam(required = false) String rememberMe,
+                        HttpServletResponse response,
+                        HttpSession session,
+                        Model model) {
+        Optional<Staff> userOpt = staffService.findByEmail(email);
+        if (userOpt.isPresent()) {
+            Staff user = userOpt.get();
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            if (encoder.matches(password, user.getPassword())) {
+                session.setAttribute("loggedInAdmin", user);
+                if ("on".equals(rememberMe)) {
+                    Cookie cookie = new Cookie("admin", email);
+                    cookie.setMaxAge(7 * 24 * 60 * 60);
+                    cookie.setPath("/");
+                    response.addCookie(cookie);
+                } else {
+                    Cookie cookie = new Cookie("admin", null);
+                    cookie.setMaxAge(0);
+                    cookie.setPath("/");
+                    response.addCookie(cookie);
+                }
+                return "redirect:/admin/home";
+            }
+        }
+        model.addAttribute("error", "Invalid email or password");
+        model.addAttribute("user", new Staff());
+        return "auth/login_admin";
     }
 
     // Logout

@@ -62,17 +62,20 @@ VALUES (UUID_TO_BIN('11111111-1111-1111-1111-111111111111'),
         'female',
         '2002-02-15');
 
--- User: Carol Davis (UUID 3333...)
+-- Staff: Carol Davis (UUID 3333...)
 INSERT INTO users (id, full_name, email, password, phone, is_active, is_locked, created_date, bio, gender, birth_date)
 VALUES (UUID_TO_BIN('33333333-3333-3333-3333-333333333333'),
         'Carol Davis',
-        'carol.davis@example.com',
-        'carolsecure123',
+        'carol@admin.com',
+        '1234',
         '+1234567895',
         1, 0, NOW(),
         'Aspiring data analyst with a love for numbers.',
         'female',
         '1999-09-25');
+
+INSERT INTO users (id, avatar, bio, birth_date, created_date, email, full_name, gender, is_active, is_locked, password, phone, reset_token)
+VALUES (0x70319B79576841CB8A9D1664658972D1, null, null, '2025-05-29 00:00:00.000000', '2025-05-29 14:10:24.329000', 'admin@edutrack.com', 'admin', 'male', true, false, '$2a$10$RYk7.ZaYvgRK1mDpWu.SvOKqfGpTBfnQnWhCAr65vsr0kLJr5vyjG', '0198332567', null);
 
 
 -- Insert Bob Smith into mentors table
@@ -83,6 +86,12 @@ VALUES ('Physics;Mathematics;Calculus', 1, 4.8, 120, UUID_TO_BIN('22222222-2222-
 INSERT INTO mentors (expertise, is_available, rating, total_sessions, user_id)
 VALUES ('Psychology;Mentoring;Conflict Resolution', 1, 4.5, 95, UUID_TO_BIN('55555555-5555-5555-5555-555555555555'));
 
+
+INSERT INTO staffs (role, user_id)
+VALUES ('admin', UUID_TO_BIN('33333333-3333-3333-3333-333333333333'));
+
+INSERT INTO staffs (role, user_id)
+VALUES ('admin', 0x70319B79576841CB8A9D1664658972D1);
 
 -- COURSES
 INSERT INTO courses (id, name, description, is_open, created_date)

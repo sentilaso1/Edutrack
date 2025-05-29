@@ -127,7 +127,7 @@ public class AccountsController {
                 }
                 if (birthDate == null || birthDate.trim().isEmpty() || !verifyBirthDate(birthDate)) {
                         redirectAttributes.addFlashAttribute("error",
-                                        "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng 'yyyy-MM-dd')");
+                                        "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng yyyy-MM-dd)");
                         return "redirect:/profile/" + id + "#edit";
                 }
 

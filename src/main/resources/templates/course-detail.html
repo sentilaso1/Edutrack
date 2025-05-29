@@ -82,30 +82,29 @@
 
     <div class="section">
         <h2>Mentor</h2>
-        <div class="mentor-card">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <!-- Mentor Info -->
-                <div style="display: flex; align-items: center;">
-                    <strong th:text="${mentor.name}">Mentor Name</strong>
-                    <img th:if="${mentor.avatarBase64 != null}"
-                         th:src="'data:image/png;base64,' + ${mentor.avatarBase64}"
-                         alt="Avatar"
-                         style="height:30px; width:30px; border-radius:50%; margin-left:10px;">
-                </div>
 
-                <!-- Action Buttons -->
-                <div>
-                    <a th:href="'/profile/' + ${course.mentor.id}"
-                       style="text-decoration: none; background-color: #86A788; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 5px;">
-                        Xem Hồ Sơ
-                    </a>
-                    <a th:href="'/courses/' + ${course.id} + '/mentor/' + ${course.mentor.id}"
-                       style="text-decoration: none; background-color: #F4B860; color: white; padding: 5px 10px; border-radius: 5px;">
-                        Lịch Trống
-                    </a>
-                </div>
+        <div th:each="mentor : ${mentors}" class="mentor-card" style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center;">
+                <strong th:text="${mentor.name}">Mentor Name</strong>
+                <img th:if="${mentor.avatar != null}"
+                     th:src="'data:image/png;base64,' + ${mentor.avatar}"
+                     alt="Avatar"
+                     style="height:30px; width:30px; border-radius:50%; margin-left:10px;">
+            </div>
+
+            <!-- Action Buttons -->
+            <div>
+                <a th:href="@{'/profile/' + ${mentor.id}}"
+                   style="text-decoration: none; background-color: #86A788; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 5px;">
+                    Xem Hồ Sơ
+                </a>
+                <a th:href="@{'/courses/' + ${course.id} + '/mentor/' + ${mentor.id}}"
+                   style="text-decoration: none; background-color: #F4B860; color: white; padding: 5px 10px; border-radius: 5px;">
+                    Lịch Trống
+                </a>
             </div>
         </div>
+
     </div>
 </div>
 

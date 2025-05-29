@@ -1,111 +1,57 @@
-
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Login</title>
-    <style>
-        :root {
-            --black: #262223;
-            --dark-green: #35402E;
-            --light-green: #E1F2BD;
-            --light-grey: #D1D9C1;
-            --brown-green: #CBD9AD;
-        }
 
-        body {
-            background-color: var(--brown-green);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-
-        .login-container {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            width: 400px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .login-header {
-            background: var(--black);
-            color: var(--light-green);
-            padding: 15px 0;
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            width: 100%;
-            text-align: center;
-            border-radius: 15px 15px 0 0;
-        }
-
-        .input-group {
-            margin: 20px 0;
-            width: 100%;
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-group input {
-            width: calc(100% - 50px);
-            padding: 14px;
-            border: 2px solid #a8b79d;
-            border-radius: 10px;
-            font-size: 16px;
-            padding-left: 40px;
-        }
-
-        .input-group .icon {
-            position: absolute;
-            left: 10px;
-            width: 24px;
-            height: 24px;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--black);
-            color: var(--light-green);
-            border: none;
-            border-radius: 0 0 15px 15px;
-            cursor: pointer;
-            transition: transform 0.3s, background 0.3s;
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-
-        .login-btn:hover {
-            background: #444;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/css/login_admin.css}">
 </head>
+
 <body>
-<form action="login" method="POST" class="login-container">
-    <div class="login-header">User Login</div>
-    <div class="input-group">
-        <img class="icon" src="/user-solid.svg" alt="User Icon">
-        <input type="email" id="username" name="username" placeholder="Enter your email" required>
+<div class="container">
+    <div class="design">
+        <div class="pill-1 rotate-45"></div>
+        <div class="pill-2 rotate-45"></div>
+        <div class="pill-3 rotate-45"></div>
+        <div class="pill-4 rotate-45"></div>
     </div>
-    <div class="input-group">
-        <img class="icon" src="/key-solid.svg" alt="Lock Icon">
-        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+    <div class="login">
+        <h3 class="title">Admin Login</h3>
+
+        <!-- Show error if present -->
+        <div th:if="${param.error}" style="color: red; margin-bottom: 10px;">
+            Invalid username or password
+        </div>
+
+        <!-- Login form -->
+        <form th:action="@{/admin/login}" method="post" style="display: flex; flex-direction: column ;justify-content: center; align-items: center">
+            <div th:if="${error}" style="color: red;">[[${error}]]</div>
+            <div class="text-input">
+                <i class="ri-user-fill"></i>
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="text-input">
+                <i class="ri-lock-fill"></i>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <div style="width: 70%;">
+                <label class="login__remember">
+                    <input type="checkbox" name="rememberMe" value="on"><span class="remember">Remember Me</span>
+                </label>
+            </div>
+            <button class="login-btn" type="submit">LOGIN</button>
+        </form>
+
+
+
+
     </div>
-    <p style="color:#9c0614; margin: 0;" th:if="${error != null}" th:text="${error}"></p>
-    <button class="login-btn">Login</button>
-</form>
+</div>
 </body>
+
 </html>
