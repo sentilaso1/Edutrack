@@ -10,7 +10,11 @@ import com.example.edutrack.curriculum.model.TeachingMaterial;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.service.implementation.*;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -54,6 +59,7 @@ public class CourseManagerController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate,
             @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "0") int page,
             Model model) {
 
         if (search != null && search.trim().isEmpty()) search = null;
@@ -65,17 +71,24 @@ public class CourseManagerController {
             isOpen = Boolean.parseBoolean(open);
         }
 
-        List<Course> courses = courseServiceImpl.getFilteredCourses(search, mentorSearch, isOpen, fromDate, toDate, sortBy);
+        int pageSize = 5;
+        Pageable pageable = PageRequest.of(page, pageSize);
 
-        System.out.println("search=" + search + ", mentorSearch=" + mentorSearch + ", open=" + open + ", fromDate=" + fromDate + ", toDate=" + toDate + ", sortBy=" + sortBy);
-
-        model.addAttribute("courses", courses);
+        Page<Course> coursePage = courseServiceImpl.getFilteredCourses(search, mentorSearch, isOpen, fromDate, toDate, sortBy, pageable);
+        System.out.println("Total Pages: " + coursePage.getTotalPages());
+        System.out.println("Total Elements: " + coursePage.getTotalElements());
+        System.out.println("Current Page: " + page);
+        System.out.println("Courses: " + coursePage.getContent());
+        model.addAttribute("coursePage", coursePage);
+        model.addAttribute("courses", coursePage.getContent());
         model.addAttribute("selectedOpen", open);
         model.addAttribute("search", search);
         model.addAttribute("mentorSearch", mentorSearch);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
         model.addAttribute("sortBy", sortBy);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
 
         return "manager-course-dashboard";
     }
@@ -109,8 +122,15 @@ public class CourseManagerController {
     }
 
     @PostMapping("/courses/create")
-    public String createCourse(@ModelAttribute("courseForm") CourseFormDTO courseFormDTO,
-                               Model model, RedirectAttributes redirectAttributes) {
+    public String createCourse(@Valid @ModelAttribute("courseForm") CourseFormDTO courseFormDTO,
+                               BindingResult bindingResult,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("courseForm", courseFormDTO);
+            model.addAttribute("errors", bindingResult.getAllErrors());
+            return "course-form";
+        }
         try {
             UUID courseID = courseServiceImpl.create(courseFormDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo khóa học thành công");
@@ -144,22 +164,67 @@ public class CourseManagerController {
     }
 
     @PostMapping("/courses/edit/{id}")
-    public String editCourse(@PathVariable UUID id, @ModelAttribute("courseForm") CourseFormDTO courseFormDTO,
-                             Model model, RedirectAttributes redirectAttributes) {
-        if (courseFormDTO.getFiles() == null) {
-            System.out.println("[DEBUG] courseFormDTO.getFiles() = null");
-        } else {
-            System.out.println("[DEBUG] Number of files received: " + courseFormDTO.getFiles().length);
+    public String editCourse(@PathVariable UUID id,
+                             @Valid @ModelAttribute("courseForm") CourseFormDTO courseFormDTO,
+                             BindingResult bindingResult,
+                             Model model,
+                             RedirectAttributes redirectAttributes) {
+        List<TeachingMaterial> materials = teachingMaterialsImpl.findByCourseId(id);
+        int currentFileCount = materials != null ? materials.size() : 0;
+
+        int newFileCount = 0;
+        if (courseFormDTO.getFiles() != null) {
             for (MultipartFile file : courseFormDTO.getFiles()) {
-                System.out.println("[DEBUG] File name: " + file.getOriginalFilename() + ", empty? " + file.isEmpty());
+                if (file != null && !file.isEmpty()) {
+                    newFileCount++;
+                }
             }
         }
+
+        int totalFileCount = currentFileCount + newFileCount;
+        System.out.println("[DEBUG] Current files: " + currentFileCount);
+        System.out.println("[DEBUG] New files: " + newFileCount);
+        System.out.println("[DEBUG] Total files: " + totalFileCount);
+
+        String fileError = null;
+        if (totalFileCount > 5) {
+            fileError = "Vượt quá giới hạn! Hiện tại: " + currentFileCount +
+                    " file, thêm mới: " + newFileCount + " file. Tối đa 5 file.";
+        } else if (totalFileCount < 1) {
+            fileError = "Khóa học phải có ít nhất 1 tài liệu!";
+        }
+
+        if (fileError != null || bindingResult.hasErrors()) {
+            Course course = courseServiceImpl.findById(id);
+
+            model.addAttribute("materials", materials);
+            model.addAttribute("courseForm", courseFormDTO);
+            model.addAttribute("courseId", id);
+            model.addAttribute("fileError", fileError);
+
+            if (bindingResult.hasErrors()) {
+                model.addAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin đã nhập!");
+            }
+
+            return "manager-course-edit";
+        }
+
         try {
             courseServiceImpl.update(id, courseFormDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật khóa học thành công");
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật khóa học thành công!");
+            redirectAttributes.addFlashAttribute("courseId", id);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật khóa học: " + e.getMessage());
+            System.out.println("[ERROR] Exception when updating course: " + e.getMessage());
+            e.printStackTrace();
+            Course course = courseServiceImpl.findById(id);
+
+            model.addAttribute("materials", materials);
+            model.addAttribute("courseForm", courseFormDTO);
+            model.addAttribute("courseId", id);
+            model.addAttribute("errorMessage", "Lỗi khi cập nhật khóa học: " + e.getMessage());
+            return "manager-course-edit";
         }
+
         return "redirect:/manager/courses/edit/" + id;
     }
 

@@ -331,7 +331,8 @@
       <li th:each="mentor : ${mentors}" class="mentor-card card-bg shadow-medium">
         <!-- Mentor Header -->
         <div class="mentor-header">
-          <h3 class="mentor-name text-heading" th:text="${mentor.getFullName()}">John Doe</h3>
+          <a th:href="@{/mentor/{id}(id=${mentor.id})}"><h3 class="mentor-name text-heading" th:text="${mentor.getFullName()}">John Doe</h3></a>
+
           <a class="mentor-email text-accent" th:href="'mailto:' + ${mentor.getEmail()}"
              th:text="${mentor.getEmail()}">john.doe@example.com</a>
         </div>

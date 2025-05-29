@@ -5,6 +5,7 @@ import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.model.TeachingMaterial;
+import com.example.edutrack.curriculum.repository.ApplicantsRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
@@ -31,12 +32,13 @@ public class CourseServiceImpl implements CourseService {
     private final TagServiceImpl tagServiceImpl;
     private final CourseTagServiceImpl courseTagServiceImpl;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
+    private final ApplicantsRepository applicantsRepository;
 
     @Autowired
     public CourseServiceImpl(CourseRepository courseRepository,
                              TeachingMaterialsRepository teachingMaterialsRepository,
                              TagRepository tagRepository,
-                             CourseTagServiceImpl courseTagService, TeachingMaterialsImpl teachingMaterialsImpl, TagServiceImpl tagServiceImpl, CourseTagServiceImpl courseTagServiceImpl, CourseMentorServiceImpl courseMentorServiceImpl) {
+                             CourseTagServiceImpl courseTagService, TeachingMaterialsImpl teachingMaterialsImpl, TagServiceImpl tagServiceImpl, CourseTagServiceImpl courseTagServiceImpl, CourseMentorServiceImpl courseMentorServiceImpl, ApplicantsRepository applicantsRepository) {
         this.courseRepository = courseRepository;
         this.teachingMaterialsRepository = teachingMaterialsRepository;
         this.tagRepository = tagRepository;
@@ -45,6 +47,7 @@ public class CourseServiceImpl implements CourseService {
         this.tagServiceImpl = tagServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
+        this.applicantsRepository = applicantsRepository;
     }
 
     @Override
@@ -164,45 +167,42 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<Course> getFilteredCourses(String search, UUID mentorId, Boolean open, Date fromDate, Date toDate, String sortBy) {
-        return List.of();
-    }
-
-    @Override
-    public List<Course> getFilteredCourses(String search,
+    public Page<Course> getFilteredCourses(String search,
                                            String mentorSearch,
                                            Boolean open,
                                            Date fromDate,
                                            Date toDate,
-                                           String sortBy) {
+                                           String sortBy,
+                                           Pageable pageable) {
         try {
-            if ((search == null || search.trim().isEmpty()) &&
-                    (mentorSearch == null || mentorSearch.trim().isEmpty()) &&
+            String trimmedSearch = (search == null || search.trim().isEmpty()) ? null : search.trim();
+            String trimmedMentorSearch = (mentorSearch == null || mentorSearch.trim().isEmpty()) ? null : mentorSearch.trim();
+
+            if ((trimmedSearch == null) &&
+                    (trimmedMentorSearch == null) &&
                     open == null &&
                     fromDate == null &&
                     toDate == null &&
                     (sortBy == null || sortBy.trim().isEmpty())) {
-
-                return courseRepository.findAllOrderByCreatedDate();
+                return courseRepository.findAllOrderByCreatedDate(pageable);
             }
 
-            String trimmedSearch = (search == null || search.trim().isEmpty()) ? null : search.trim();
-            String trimmedMentorSearch = (mentorSearch == null || mentorSearch.trim().isEmpty()) ? null : mentorSearch.trim();
             if ("name".equalsIgnoreCase(sortBy)) {
-                return courseRepository.findFilteredCoursesOrderByName(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate);
+                return courseRepository.findFilteredCoursesOrderByName(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate, pageable);
             } else if ("createdDate".equalsIgnoreCase(sortBy)) {
-                return courseRepository.findFilteredCoursesOrderByCreatedDate(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate);
+                return courseRepository.findFilteredCoursesOrderByCreatedDate(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate, pageable);
             } else if ("mentorName".equalsIgnoreCase(sortBy)) {
-                return courseRepository.findFilteredCoursesOrderByMentorName(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate);
+                return courseRepository.findFilteredCoursesOrderByMentorName(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate, pageable);
             } else {
-                return courseRepository.findFilteredCoursesDefault(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate);
+                return courseRepository.findFilteredCoursesDefault(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate, pageable);
             }
         } catch (Exception e) {
             System.err.println("Error in getFilteredCourses: " + e.getMessage());
             e.printStackTrace();
-            return courseRepository.findAllOrderByCreatedDate();
+            return courseRepository.findAllOrderByCreatedDate(pageable);
         }
     }
+
 
     @Override
     public void delete(UUID id) {
@@ -223,7 +223,7 @@ public class CourseServiceImpl implements CourseService {
         }
         List<CourseMentor> applicants = courseMentorServiceImpl.findByCourseId(courseId);
         for (CourseMentor courseMentor : applicants) {
-            courseMentorServiceImpl.deleteById(courseMentor.getId());
+            applicantsRepository.deleteById(courseMentor.getId());
         }
         this.delete(courseId);
     }

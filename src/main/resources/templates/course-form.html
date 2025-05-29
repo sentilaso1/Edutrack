@@ -6,10 +6,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
     <style>
         body {
-            background-color: #f8f9fa;
-            font-family: 'Quicksand', sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
@@ -45,6 +45,42 @@
             font-size: 14px;
             outline: none;
             resize: vertical;
+        }
+
+        /* Style cho input có lỗi */
+        input.error,
+        textarea.error {
+            border: 2px solid #dc3545;
+            background-color: #fff5f5;
+        }
+
+        /* Style cho thông báo lỗi */
+        .error-message {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Style cho thông báo lỗi chung */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
         }
 
         input[type="checkbox"] {
@@ -133,6 +169,11 @@
             border-radius: 6px;
             padding: 4px 8px;
             background: white;
+        }
+
+        .tag-container.error {
+            border: 2px solid #dc3545;
+            background-color: #fff5f5;
         }
 
         .tag {
@@ -236,51 +277,71 @@
 </head>
 <body>
 <div class="container">
+    <!-- Modal thành công -->
     <div th:if="${successMessage}" class="modal-overlay">
         <div class="modal-content">
             <p th:text="${successMessage}"></p>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <a th:href="@{/manager/view}" class="modal-button">Về Trang Chủ</a>
-                <a th:href="@{/manager/courses/create}" class="modal-button secondary">Tiếp tục tạo</a>
+                <a th:href="@{/manager/courses/create}" class="modal-button secondary">Tiếp tục </a>
             </div>
         </div>
     </div>
+
+    <!-- Thông báo lỗi chung -->
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
+    </div>
+
     <h2>Tạo Khóa Học</h2>
 
-
     <form th:action="@{/manager/courses/create}" method="post" enctype="multipart/form-data" th:object="${courseForm}" id="courseForm">
+        <!-- Tên khóa học -->
         <label for="name">Tên Khóa Học
             <span class="tooltip" title="Nhập tên khóa học, tối thiểu 3 ký tự">❓</span>
         </label>
-        <input type="text" id="name" th:field="*{name}" placeholder="Tên khóa học" required />
+        <input type="text" id="name" th:field="*{name}"
+               th:class="${#fields.hasErrors('name')} ? 'error' : ''"
+               placeholder="Tên khóa học" required />
+        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></span>
 
+        <!-- Mô tả -->
         <label for="description">Mô Tả
             <span class="tooltip" title="Mô tả chi tiết về khóa học (tối đa 500 ký tự)">❓</span>
         </label>
-        <textarea id="description" th:field="*{description}" placeholder="Mô tả khóa học" maxlength="500"></textarea>
+        <textarea id="description" th:field="*{description}"
+                  th:class="${#fields.hasErrors('description')} ? 'error' : ''"
+                  placeholder="Mô tả khóa học" maxlength="500"></textarea>
+        <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
 
+        <!-- Tags -->
         <label>Kỹ năng / Nội dung (Tags)
             <span class="tooltip" title="Thêm kỹ năng hoặc nội dung liên quan tới khóa học">❓</span>
         </label>
 
-        <div class="tag-container" id="tagContainer"></div>
+        <div class="tag-container" id="tagContainer"
+             th:class="${#fields.hasErrors('tagTexts')} ? 'tag-container error' : 'tag-container'"></div>
 
         <div class="tag-input-wrapper" style="position:relative;">
             <input type="text" id="tagInput" placeholder="Nhấn Enter hoặc Add" autocomplete="off" />
             <div id="autocomplete-list" class="autocomplete-items"></div>
             <button class="add-btn" type="button" onclick="addTag()">Add</button>
         </div>
+        <span th:if="${#fields.hasErrors('tagTexts')}" th:errors="*{tagTexts}" class="error-message"></span>
         <div id="hiddenInput"></div>
 
+        <!-- Files -->
         <label for="files">Tài liệu giảng dạy
             <span class="tooltip" title="Chọn tài liệu giảng dạy (PDF, DOC, PPT) có thể chọn nhiều file">❓</span>
         </label>
-        <input type="file" id="files" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx" />
+        <input type="file" id="files" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx"
+               th:class="${#fields.hasErrors('files')} ? 'error' : ''" />
+        <span th:if="${#fields.hasErrors('files')}" th:errors="*{files}" class="error-message"></span>
         <ul id="filePreview"></ul>
 
         <button type="submit" id="submitBtn">Tạo Khóa Học</button>
         <button type="reset" style="background-color:#f44336; margin-top:10px;">Xóa dữ liệu</button>
-        <a href="/manager/view" style="display: inline-block; margin-top: 10px; width: 100%; background-color: #ccc; color: #333; font-weight: bold; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px;">
+        <a href="/manager/view" style="display: inline-block; margin-top: 10px; width: 96%; background-color: #ccc; color: #333; font-weight: bold; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px;">
             Quay Lại
         </a>
     </form>
@@ -288,6 +349,14 @@
 
 <script>
     const tags = [];
+
+    const serverTags = /*[[${courseForm.tagTexts}]]*/ [];
+    if (serverTags && serverTags.length > 0) {
+        serverTags.forEach(tagText => {
+            tags.push({value: tagText, color: randomColor()});
+        });
+        renderTags();
+    }
 
     const availableTags = [
         "JavaScript", "Java", "Python", "Spring", "React", "Angular", "HTML", "CSS", "Docker", "DevOps",

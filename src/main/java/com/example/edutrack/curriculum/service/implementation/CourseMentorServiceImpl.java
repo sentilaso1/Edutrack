@@ -22,6 +22,26 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         this.courseMentorRepository = courseMentorRepository;
     }
 
+    @Override
+    public Page<CourseMentor> findAlByOrderByCreatedDateAsc(Pageable pageable) {
+        return courseMentorRepository.findAlByOrderByCreatedDateAsc(pageable);
+    }
+
+    @Override
+    public Page<CourseMentor> findAlByOrderByCreatedDateDesc(Pageable pageable) {
+        return courseMentorRepository.findAlByOrderByCreatedDateDesc(pageable);
+    }
+
+    @Override
+    public Page<CourseMentor> findAlByOrderByTitleDesc(Pageable pageable) {
+        return courseMentorRepository.findAlByOrderByTitleDesc(pageable);
+    }
+
+    @Override
+    public Page<CourseMentor> findAlByOrderByTitleAsc(Pageable pageable) {
+        return courseMentorRepository.findAlByOrderByTitleAsc(pageable);
+    }
+
     public Page<CourseMentor> findAll(Pageable pageable) {
         return courseMentorRepository.findAll(pageable);
     }
@@ -40,4 +60,9 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     public Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable) {
         return courseMentorRepository.findFilteredCourseMentors(skillIds, subjectIds, pageable);
     }
+
+    public List<CourseMentor> findByCourseId(UUID courseMentorId) {
+        return courseMentorRepository.findByCourseId(courseMentorId);
+    }
+
 }

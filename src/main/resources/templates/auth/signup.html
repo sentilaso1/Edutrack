@@ -113,6 +113,81 @@
         grecaptcha.reset();
     }, 120000);
 </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".login__form");
+        const fullNameInput = form.querySelector("[name='fullName']");
+        const birthDateInput = document.getElementById("birthDateInput");
+        const phoneInput = form.querySelector("[name='phone']");
+        const emailInput = form.querySelector("[name='email']");
+        const passwordInput = form.querySelector("[name='password']");
+        const confirmPasswordInput = document.getElementById("confirm_password");
+
+        form.addEventListener("submit", function (e) {
+            const fullName = fullNameInput.value.trim();
+            const birthDate = new Date(birthDateInput.value);
+            const phone = phoneInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Full name required
+            if (fullName === "") {
+                alert("Full name is required");
+                e.preventDefault();
+                return;
+            }
+
+            // Birth date cannot be in the future
+            const today = new Date();
+            if (birthDate > today) {
+                alert("Birth date cannot be in the future");
+                e.preventDefault();
+                return;
+            }
+
+            // Phone number format (basic pattern for digits only, 10-15 characters)
+            if (!/^\d{10,15}$/.test(phone)) {
+                alert("Phone number must be between 10 and 15 digits");
+                e.preventDefault();
+                return;
+            }
+
+            // Email format
+            if (!/^\S+@\S+\.\S+$/.test(email)) {
+                alert("Email format is invalid");
+                e.preventDefault();
+                return;
+            }
+
+            // Password length
+            if (password.length < 6) {
+                alert("Password must be at least 6 characters");
+                e.preventDefault();
+                return;
+            }
+
+            // Confirm password
+            if (password !== confirmPassword) {
+                alert("Passwords do not match");
+                e.preventDefault();
+                return;
+            }
+
+            // Check reCAPTCHA
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (recaptchaResponse.length === 0) {
+                alert("Please verify reCAPTCHA");
+                e.preventDefault();
+                return;
+            }
+
+            // All good, allow submit
+        });
+    });
+</script>
+
 <script th:src="@{/assets/js/login.js}"></script>
 </body>
 </html>

@@ -88,5 +88,43 @@
 
 <!--=============== MAIN JS ===============-->
 <script th:src="@{/assets/js/login.js}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".login__form");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+
+        form.addEventListener("submit", function (e) {
+            const emailValue = emailInput.value.trim();
+            const passwordValue = passwordInput.value.trim();
+
+            // Email validation
+            if (emailValue === "") {
+                alert("Email is required");
+                e.preventDefault();
+                return;
+            } else if (!/^\S+@\S+\.\S+$/.test(emailValue)) {
+                alert("Email format is invalid");
+                e.preventDefault();
+                return;
+            }
+
+            // Password validation
+            if (passwordValue === "") {
+                alert("Password is required");
+                e.preventDefault();
+                return;
+            } else if (passwordValue.length < 6) {
+                alert("Password must be at least 6 characters");
+                e.preventDefault();
+                return;
+            }
+
+            // No need to preventDefault if everything is valid
+        });
+    });
+</script>
+
 </body>
 </html>
