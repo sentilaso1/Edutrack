@@ -34,6 +34,17 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
             Pageable pageable
     );
 
-    List<CourseMentor> findByCourseId(UUID courseId);
+    @Query("SELECT c FROM CourseMentor c ORDER BY c.course.createdDate ASC")
+    Page<CourseMentor> findAlByOrderByCreatedDateAsc(Pageable pageable);
 
+    @Query("SELECT c FROM CourseMentor c ORDER BY c.course.createdDate DESC")
+    Page<CourseMentor> findAlByOrderByCreatedDateDesc(Pageable pageable);
+
+    @Query("SELECT c FROM CourseMentor c ORDER BY c.course.name ASC")
+    Page<CourseMentor> findAlByOrderByTitleAsc(Pageable pageable);
+
+    @Query("SELECT c FROM CourseMentor c ORDER BY c.course.name DESC")
+    Page<CourseMentor> findAlByOrderByTitleDesc(Pageable pageable);
+
+    List<CourseMentor> findByCourseId(UUID courseMentorId);
 }

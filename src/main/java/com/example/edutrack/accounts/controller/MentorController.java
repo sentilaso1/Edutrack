@@ -5,10 +5,12 @@ import com.example.edutrack.accounts.service.MentorService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class MentorController {
@@ -37,5 +39,14 @@ public class MentorController {
         model.addAttribute("totalSessions", totalSessions);
         model.addAttribute("isAvailable", isAvailable);
         return "mentor-list";
+    }
+
+    @GetMapping("/mentor/{id}")
+    public String viewMentorDetail(@PathVariable UUID id, Model model){
+        model.addAttribute("mentor", mentorService.getMentorById(id));
+        model.addAttribute("courses", mentorService.getCoursesByMentor(id));
+        model.addAttribute("subjects", mentorService.getTagsByMentor(id));
+        model.addAttribute("cv", mentorService.getCVById(id));
+        return "mentor-course";
     }
 }
