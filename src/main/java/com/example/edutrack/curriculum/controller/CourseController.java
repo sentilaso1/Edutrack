@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
+import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 public class CourseController {
@@ -107,18 +109,21 @@ public class CourseController {
         Course course = courseServiceImpl.findById(courseId);
         List<Tag> tagList = tagServiceImpl.findTagsByCourseId(courseId);
 
-        Mentor mentor = course.getMentor();
-        MentorDTO mentorDTO = null;
-        if (mentor != null) {
-            mentorDTO = new MentorDTO(mentor.getId(), mentor.getFullName(), mentor.getAvatar());
-        }
+        List<MentorDTO> mentors = course.getApplications().stream()
+                .filter(app -> app.getStatus() == ApplicationStatus.ACCEPTED)
+                .map(app -> {
+                    Mentor m = app.getMentor();
+                    return new MentorDTO(m.getId(), m.getFullName(), m.getAvatar());
+                })
+                .collect(Collectors.toList());
 
         model.addAttribute("course", course);
         model.addAttribute("tagList", tagList);
-        model.addAttribute("mentor", mentorDTO);
+        model.addAttribute("mentors", mentors);
 
         return "course-detail";
     }
+
 
     @GetMapping("/mentors/{id}/avatar")
     public ResponseEntity<byte[]> getAvatar(@PathVariable UUID id) {
