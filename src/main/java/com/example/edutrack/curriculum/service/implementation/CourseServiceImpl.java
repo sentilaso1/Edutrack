@@ -166,42 +166,43 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findAll();
     }
 
-
     @Override
-    public List<Course> getFilteredCourses(String search,
+    public Page<Course> getFilteredCourses(String search,
                                            String mentorSearch,
                                            Boolean open,
                                            Date fromDate,
                                            Date toDate,
-                                           String sortBy) {
+                                           String sortBy,
+                                           Pageable pageable) {
         try {
-            if ((search == null || search.trim().isEmpty()) &&
-                    (mentorSearch == null || mentorSearch.trim().isEmpty()) &&
+            String trimmedSearch = (search == null || search.trim().isEmpty()) ? null : search.trim();
+            String trimmedMentorSearch = (mentorSearch == null || mentorSearch.trim().isEmpty()) ? null : mentorSearch.trim();
+
+            if ((trimmedSearch == null) &&
+                    (trimmedMentorSearch == null) &&
                     open == null &&
                     fromDate == null &&
                     toDate == null &&
                     (sortBy == null || sortBy.trim().isEmpty())) {
-
-                return courseRepository.findAllOrderByCreatedDate();
+                return courseRepository.findAllOrderByCreatedDate(pageable);
             }
 
-            String trimmedSearch = (search == null || search.trim().isEmpty()) ? null : search.trim();
-            String trimmedMentorSearch = (mentorSearch == null || mentorSearch.trim().isEmpty()) ? null : mentorSearch.trim();
             if ("name".equalsIgnoreCase(sortBy)) {
-                return courseRepository.findFilteredCoursesOrderByName(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate);
+                return courseRepository.findFilteredCoursesOrderByName(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate, pageable);
             } else if ("createdDate".equalsIgnoreCase(sortBy)) {
-                return courseRepository.findFilteredCoursesOrderByCreatedDate(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate);
+                return courseRepository.findFilteredCoursesOrderByCreatedDate(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate, pageable);
             } else if ("mentorName".equalsIgnoreCase(sortBy)) {
-                return courseRepository.findFilteredCoursesOrderByMentorName(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate);
+                return courseRepository.findFilteredCoursesOrderByMentorName(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate, pageable);
             } else {
-                return courseRepository.findFilteredCoursesDefault(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate);
+                return courseRepository.findFilteredCoursesDefault(trimmedSearch, trimmedMentorSearch, open, fromDate, toDate, pageable);
             }
         } catch (Exception e) {
             System.err.println("Error in getFilteredCourses: " + e.getMessage());
             e.printStackTrace();
-            return courseRepository.findAllOrderByCreatedDate();
+            return courseRepository.findAllOrderByCreatedDate(pageable);
         }
     }
+
 
     @Override
     public void delete(UUID id) {

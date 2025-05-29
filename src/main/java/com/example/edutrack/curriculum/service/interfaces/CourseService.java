@@ -27,12 +27,13 @@ public interface CourseService {
     List<Course> getAll();
 
 
-    List<Course> getFilteredCourses(String search,
+    Page<Course> getFilteredCourses(String search,
                                     String mentorSearch,
                                     Boolean open,
                                     Date fromDate,
                                     Date toDate,
-                                    String sortBy);
+                                    String sortBy,
+                                    Pageable pageable);
 
     void delete(UUID id);
 }
