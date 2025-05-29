@@ -5,14 +5,12 @@
     <title>Chỉnh Sửa Khóa Học</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
     <style>
-        /* Giữ nguyên style từ file tạo khóa học */
         body {
-            background-color: #f8f9fa;
-            font-family: 'Quicksand', sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
-
         .container {
             max-width: 600px;
             margin: 50px auto;
@@ -46,6 +44,28 @@
             font-size: 14px;
             outline: none;
             resize: vertical;
+        }
+
+        /* Style cho thông báo lỗi */
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Style cho alert box */
+        .alert {
+            padding: 12px 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         input[type="checkbox"] {
@@ -82,6 +102,8 @@
             padding: 4px 8px;
             background: white;
         }
+
+
 
         .tag {
             display: flex;
@@ -237,6 +259,7 @@
 </head>
 <body>
 <div class="container">
+    <!-- Success Modal -->
     <div th:if="${successMessage}" class="modal-overlay">
         <div class="modal-content">
             <p th:text="${successMessage}"></p>
@@ -246,15 +269,26 @@
             </div>
         </div>
     </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
     <h2>Chỉnh Sửa Khóa Học</h2>
 
     <form th:action="@{/manager/courses/edit/{id}(id=${courseId})}" method="post" enctype="multipart/form-data" th:object="${courseForm}" id="courseForm">
+        <!-- Tên Khóa Học -->
         <label for="name">Tên Khóa Học <span class="tooltip" title="Nhập tên khóa học, tối thiểu 3 ký tự">❓</span></label>
         <input type="text" id="name" th:field="*{name}" placeholder="Tên khóa học" required />
+        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></span>
 
+        <!-- Mô Tả -->
         <label for="description">Mô Tả <span class="tooltip" title="Mô tả chi tiết về khóa học (tối đa 500 ký tự)">❓</span></label>
         <textarea id="description" th:field="*{description}" placeholder="Mô tả khóa học" maxlength="500"></textarea>
+        <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
 
+        <!-- Tags -->
         <label>Kỹ năng / Nội dung (Tags) <span class="tooltip" title="Thêm kỹ năng hoặc nội dung liên quan tới khóa học">❓</span></label>
 
         <div class="tag-container" id="tagContainer"></div>
@@ -263,6 +297,7 @@
             <div id="autocomplete-list" class="autocomplete-items"></div>
             <button class="add-btn" type="button" onclick="addTag()">Add</button>
         </div>
+        <span th:if="${#fields.hasErrors('tagTexts')}" th:errors="*{tagTexts}" class="error-message"></span>
         <div id="hiddenInput"></div>
 
         <!-- Tài liệu hiện tại -->
@@ -278,18 +313,20 @@
             </li>
         </ul>
 
+        <!-- Upload tài liệu mới -->
         <label>Tải tài liệu mới (có thể chọn nhiều):</label>
         <input type="file" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx" />
+        <span th:if="${#fields.hasErrors('files')}" th:errors="*{files}" class="error-message"></span>
+        <span th:if="${fileError}" th:text="${fileError}" class="error-message"></span>
         <ul id="filePreview"></ul>
 
         <button type="submit" id="submitBtn">Cập Nhật Khóa Học</button>
         <button type="reset" style="background-color:#f44336; margin-top:10px;">Xóa dữ liệu</button>
-        <a href="/manager/view" style="display: inline-block; margin-top: 10px; width: 100%; background-color: #ccc; color: #333; font-weight: bold; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px;">
+        <a href="/manager/view" style="display: inline-block; margin-top: 10px; width: 96%; background-color: #ccc; color: #333; font-weight: bold; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px;">
             Quay Lại
         </a>
     </form>
 </div>
-
 
 <script th:inline="javascript">
     const initialTags = /*[[${courseForm.tagTexts}]]*/ [];
@@ -368,8 +405,7 @@
         renderTags();
     }
 
-
-    const fileInput = document.getElementById('files');
+    const fileInput = document.querySelector('input[type="file"]');
     const filePreview = document.getElementById('filePreview');
     fileInput.addEventListener('change', () => {
         filePreview.innerHTML = '';
@@ -381,18 +417,11 @@
         }
     });
 
-    document.getElementById("tagInput").addEventListener("keydown", function (event){
-        if (event.key === "Enter"){
-            event.preventDefault();
-            addTag();
-        }
-    });
-
     document.getElementById('courseForm').addEventListener('submit', e => {
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
         submitBtn.classList.add('loading');
-        submitBtn.textContent = 'Đang gửi...';
+        submitBtn.textContent = 'Đang cập nhật...';
     });
 
     function closeAllLists() {
@@ -401,7 +430,6 @@
             items[i].innerHTML = '';
         }
     }
-
 </script>
 
 </body>

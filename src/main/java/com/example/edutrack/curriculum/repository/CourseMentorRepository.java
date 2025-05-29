@@ -45,4 +45,6 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
 
     @Query("SELECT c FROM CourseMentor c ORDER BY c.course.name DESC")
     Page<CourseMentor> findAlByOrderByTitleDesc(Pageable pageable);
+
+    List<CourseMentor> findByCourseId(UUID courseMentorId);
 }
