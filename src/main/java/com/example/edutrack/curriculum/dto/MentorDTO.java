@@ -26,6 +26,10 @@ public class MentorDTO {
         this.avatar = banner.getBytes();
     }
 
+    public byte[] getAvatar() {
+        return avatar;
+    }
+
     public String getName() {
         return name;
     }

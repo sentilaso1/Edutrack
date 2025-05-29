@@ -296,7 +296,7 @@
                                     </div>
 
                                     <a
-                                            href="#"
+                                            th:href="@{/courses/{id}(id=${course_mentor.course.id})}"
                                             class="layer-link"
                                             th:aria-label="'Course Details, ' + ${course_mentor.course.name}"
                                     ></a>
@@ -321,8 +321,6 @@
                     <button th:disabled="${coursePage.last}"><a th:if="${!coursePage.last}" class="page-btn"
                                th:href="@{/courses(page=${coursePage.number + 2}, size_page=${param.size_page})}"> &raquo;</a></button>
                 </nav>
-
-                <!-- Kết thúc bố cục 2 cột -->
             </div>
         </section>
     </article>
