@@ -26,10 +26,12 @@ public class TeachingMaterialsImpl implements TeachingMaterialsService {
         return teachingMaterialsRepository.findById(id).orElseThrow(() -> new RuntimeException("File không tồn tại"));
     }
 
+    @Override
     public void deleteById(int id) {
         teachingMaterialsRepository.deleteById(id);
     }
 
+    @Override
     public Course findCourseByMaterialId(int id) {
         return teachingMaterialsRepository.findCourseByTeachingMaterialId(id);
     }

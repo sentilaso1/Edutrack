@@ -1,13 +1,14 @@
 package com.example.edutrack.curriculum.repository;
 
 import com.example.edutrack.curriculum.model.Course;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -21,12 +22,13 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             "AND (:fromDate IS NULL OR c.createdDate >= :fromDate) " +
             "AND (:toDate IS NULL OR c.createdDate <= :toDate) " +
             "ORDER BY c.name ASC")
-    List<Course> findFilteredCoursesOrderByName(
+    Page<Course> findFilteredCoursesOrderByName(
             @Param("search") String search,
             @Param("mentorSearch") String mentorSearch,
             @Param("open") Boolean open,
             @Param("fromDate") Date fromDate,
-            @Param("toDate") Date toDate);
+            @Param("toDate") Date toDate,
+            Pageable pageable);
 
     @Query("SELECT c FROM Course c " +
             "LEFT JOIN c.mentor m " +
@@ -36,12 +38,13 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             "AND (:fromDate IS NULL OR c.createdDate >= :fromDate) " +
             "AND (:toDate IS NULL OR c.createdDate <= :toDate) " +
             "ORDER BY c.createdDate DESC")
-    List<Course> findFilteredCoursesOrderByCreatedDate(
+    Page<Course> findFilteredCoursesOrderByCreatedDate(
             @Param("search") String search,
             @Param("mentorSearch") String mentorSearch,
             @Param("open") Boolean open,
             @Param("fromDate") Date fromDate,
-            @Param("toDate") Date toDate);
+            @Param("toDate") Date toDate,
+            Pageable pageable);
 
     @Query("SELECT c FROM Course c " +
             "LEFT JOIN c.mentor m " +
@@ -51,12 +54,13 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             "AND (:fromDate IS NULL OR c.createdDate >= :fromDate) " +
             "AND (:toDate IS NULL OR c.createdDate <= :toDate) " +
             "ORDER BY m.fullName ASC NULLS LAST")
-    List<Course> findFilteredCoursesOrderByMentorName(
+    Page<Course> findFilteredCoursesOrderByMentorName(
             @Param("search") String search,
             @Param("mentorSearch") String mentorSearch,
             @Param("open") Boolean open,
             @Param("fromDate") Date fromDate,
-            @Param("toDate") Date toDate);
+            @Param("toDate") Date toDate,
+            Pageable pageable);
 
     @Query("SELECT c FROM Course c " +
             "LEFT JOIN c.mentor m " +
@@ -66,13 +70,14 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             "AND (:fromDate IS NULL OR c.createdDate >= :fromDate) " +
             "AND (:toDate IS NULL OR c.createdDate <= :toDate) " +
             "ORDER BY c.createdDate DESC")
-    List<Course> findFilteredCoursesDefault(
+    Page<Course> findFilteredCoursesDefault(
             @Param("search") String search,
             @Param("mentorSearch") String mentorSearch,
             @Param("open") Boolean open,
             @Param("fromDate") Date fromDate,
-            @Param("toDate") Date toDate);
+            @Param("toDate") Date toDate,
+            Pageable pageable);
 
     @Query("SELECT c FROM Course c ORDER BY c.createdDate DESC")
-    List<Course> findAllOrderByCreatedDate();
+    Page<Course> findAllOrderByCreatedDate(Pageable pageable);
 }
