@@ -2,11 +2,14 @@ package com.example.edutrack.accounts.repository;
 
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.profiles.model.CV;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface MentorRepository extends JpaRepository<Mentor, UUID> {
@@ -28,8 +31,17 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
             @Param("isAvailable") Boolean isAvailable
     );
 
-    @Query("SELECT c FROM Course c WHERE c.mentor.id = :mentorId")
+    @Query("SELECT c.course FROM CourseMentor c WHERE c.mentor.id = :mentorId")
     List<Course> findCoursesByMentorId(@Param("mentorId") UUID mentorId);
 
     Mentor findByCourses_Id(UUID courseId);
+
+    @Query("SELECT ct.tag FROM Mentor m " +
+           "JOIN CourseMentor c ON c.mentor = m " +
+           "JOIN CourseTag ct ON ct.course = c.course " +
+           "WHERE m.id = :id")
+    List<Tag> findTagsByMentorId(@Param("id") UUID id);
+
+    @Query("SELECT cv FROM CV cv WHERE cv.user.id = :mentorId")
+    Optional<CV> findCVByMentorId(UUID mentorId);
 }
