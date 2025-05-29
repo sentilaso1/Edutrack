@@ -76,7 +76,6 @@ public class CourseServiceImpl implements CourseService {
         course.setName(courseFormDTO.getName());
         course.setDescription(courseFormDTO.getDescription());
         course.setOpen(false);
-        course.setMentor(null);
 
         courseRepository.save(course);
 
