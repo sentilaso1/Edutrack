@@ -106,7 +106,12 @@
                                                                 class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                                                                 th:classappend="${currentPage == 0} ? 'pointer-events-none' : ''">Previous</a>
                                                 </li>
+                                                <li th:if="${totalPages - 1 < 0}" class="bg-blue-700 text-white">
+                                                        <a th:href="@{/admin/users(page=0, size=${pageSize}, email=${filters.email}, fullName=${filters.fullName}, isLocked=${filters.isLocked}, isActive=${filters.isActive})}"
+                                                                class="px-3 py-1 rounded hover:bg-blue-600">1</a>
+                                                </li>
                                                 <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                        th:if="${totalPages - 1 >= 0}"
                                                         th:class="${i == currentPage} ? 'bg-blue-700 text-white' : 'bg-blue-500 text-white'">
                                                         <a th:href="@{/admin/users(page=${i}, size=${pageSize}, email=${filters.email}, fullName=${filters.fullName}, isLocked=${filters.isLocked}, isActive=${filters.isActive})}"
                                                                 class="px-3 py-1 rounded hover:bg-blue-600" th:text="${i + 1}"></a>
