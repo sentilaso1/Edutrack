@@ -23,9 +23,6 @@ public class Mentor extends User {
     @Column(columnDefinition = "DECIMAL(2,1)")
     private Double rating;
 
-    @OneToMany(mappedBy = "mentor")
-    private List<Course> courses;
-
     public Mentor() {
         super();
     }
