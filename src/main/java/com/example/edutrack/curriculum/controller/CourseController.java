@@ -52,7 +52,7 @@ public class CourseController {
     }
 
     @GetMapping("/courses")
-    public String courses(Model model,
+    public String  courses(Model model,
                           @RequestParam(defaultValue = "1") int page,
                           @RequestParam(defaultValue = "6") int size_page,
                           @RequestParam(required = false) List<Integer> subject,
@@ -100,23 +100,26 @@ public class CourseController {
         return "courselist";
     }
 
+    @GetMapping("/courses/{courseMentorId}")
+    public String courseDetail(@PathVariable("courseMentorId") UUID courseMentorId, Model model) {
 
-    @GetMapping("/courses/{courseId}")
-    public String courseDetail(@PathVariable("courseId") UUID courseId, Model model) {
-        Course course = courseServiceImpl.findById(courseId);
-        List<Tag> tagList = tagServiceImpl.findTagsByCourseId(courseId);
+        CourseMentor courseMentor = courseMentorService.findById(courseMentorId);
 
-        List<MentorDTO> mentors = course.getApplications().stream()
-                .filter(app -> app.getStatus() == ApplicationStatus.ACCEPTED)
-                .map(app -> {
-                    Mentor m = app.getMentor();
-                    return new MentorDTO(m.getId(), m.getFullName(), m.getAvatar(), m.getExpertise());
-                })
-                .collect(Collectors.toList());
+        if (courseMentor == null) {
+            throw new RuntimeException("Course mentor not found");
+        }
+        Course course = courseMentor.getCourse();
+        Mentor mentor = courseMentor.getMentor();
+        List<Tag> tagList = tagServiceImpl.findTagsByCourseId(course.getId());
+
+        MentorDTO mentorDTO = null;
+        if (mentor != null) {
+            mentorDTO = new MentorDTO(mentor.getId(), mentor.getFullName(), mentor.getAvatar(), mentor.getExpertise());
+        }
 
         model.addAttribute("course", course);
         model.addAttribute("tagList", tagList);
-        model.addAttribute("mentors", mentors);
+        model.addAttribute("mentor", mentorDTO);
 
         return "course-detail";
     }
@@ -132,6 +135,11 @@ public class CourseController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "image/jpeg");
         return new ResponseEntity<>(mentor.get().getAvatar(), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/courses/register")
+    public String registerCourse(Model model) {
+        return "register-section";
     }
 
     @GetMapping("/courses/{courseId}/mentor/{mentorId}")
