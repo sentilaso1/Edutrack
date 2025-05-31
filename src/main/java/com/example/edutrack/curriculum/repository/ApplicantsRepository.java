@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -20,4 +21,8 @@ public interface ApplicantsRepository extends JpaRepository<CourseMentor, UUID> 
     List<Mentor> findMentorsByCourseAndStatus(@Param("course") Course course, @Param("status") ApplicationStatus status);
 
     int countByCourseAndStatus(Course course, ApplicationStatus status);
+
+    Optional<CourseMentor> findById(UUID id);
+
+    List<CourseMentor> findByMentorId(UUID mentorId);
 }
