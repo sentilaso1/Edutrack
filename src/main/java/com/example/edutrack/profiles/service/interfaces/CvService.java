@@ -14,8 +14,16 @@ public interface CvService {
     Page<CV> findAllCVsDateDesc(Pageable pageable);
     Page<CV> findAllCVsByStatusDateAsc(Pageable pageable, String status);
     Page<CV> findAllCVsByStatusDateDesc(Pageable pageable, String status);
+
+    Page<CV> findAllCVsContainingSkills(List<String> skills, String sort, Pageable pageable);
+    Page<CV> findAllCVsContainingSkillsByStatus(List<String> skills, String status, String sort, Pageable pageable);
+
+    Page<CV> queryCVs(String filter, String sort, List<String> tags, Pageable pageable);
+    List<String> getAllUniqueSkills();
+
     CV createCV(CVForm form);
     CV getCVById(UUID id);
+
     boolean acceptCV(UUID id);
     boolean rejectCV(UUID id);
 }
