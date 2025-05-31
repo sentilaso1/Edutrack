@@ -1,12 +1,15 @@
 package com.example.edutrack.curriculum.service.interfaces;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.model.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface CourseService {
@@ -35,5 +38,12 @@ public interface CourseService {
                                     String sortBy,
                                     Pageable pageable);
 
+    Map<UUID, Integer> getPendingApplicantCountForCourses(List<Course> courses);
+
     void delete(UUID id);
+
+    public Map<UUID, List<Mentor>> getAcceptedMentorsForCourses(List<Course> courses);
+
+    @Transactional
+    void deleteCourseWithRelatedData(UUID courseId);
 }

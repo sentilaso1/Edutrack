@@ -43,13 +43,17 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             animation: shine 3s infinite;
         }
 
         @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
         }
 
         .header h2 {
@@ -169,7 +173,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
         }
 
@@ -461,6 +465,61 @@
             font-size: 0.9rem;
         }
 
+        .course-name:hover {
+            color: #667eea !important;
+        }
+
+        .course-name.expanded .toggle-icon {
+            transform: rotate(90deg);
+        }
+
+        .mentor-list.expanded {
+            max-height: 500px !important;
+            padding: 10px 0;
+        }
+
+        .course-name-link::after {
+            content: '▼';
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .course-name-link.expanded::after {
+            transform: rotate(180deg);
+        }
+
+        .mentor-item {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-open {
+            background: #d1fae5 !important;
+            color: #065f46 !important;
+        }
+
+        .status-closed {
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+        }
+
+        .action-links a:hover,
+        .action-links button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
         .pagination {
             background: #e6e6e2;
             padding: 20px;
@@ -489,6 +548,7 @@
             color: white;
             font-weight: bold;
         }
+
         .pagination-list li a {
             text-decoration: none;
             color: inherit;
@@ -568,8 +628,10 @@
                         <select id="sortBy" name="sortBy" class="form-select">
                             <option value="">-- Không sắp xếp --</option>
                             <option value="name" th:selected="${sortBy == 'name'}">📝 Tên A-Z</option>
-                            <option value="createdDate" th:selected="${sortBy == 'createdDate'}">📅 Ngày tạo mới nhất</option>
-                            <option value="mentorName" th:selected="${sortBy == 'mentorName'}">👨‍🏫 Tên giảng viên A-Z</option>
+                            <option value="createdDate" th:selected="${sortBy == 'createdDate'}">📅 Ngày tạo mới nhất
+                            </option>
+                            <option value="mentorName" th:selected="${sortBy == 'mentorName'}">👨‍🏫 Tên giảng viên A-Z
+                            </option>
                         </select>
                     </div>
                 </div>
@@ -601,7 +663,7 @@
                 <thead>
                 <tr>
                     <th>📚 Tên khóa học</th>
-                    <th>👨‍🏫 Mentor</th>
+                    <th>👨‍🏫 Ứng Viên</th>
                     <th>📅 Ngày tạo</th>
                     <th>🔰 Trạng thái</th>
                     <th>⚙️ Hành động</th>
@@ -610,42 +672,72 @@
                 <tbody>
                 <tr th:each="course : ${courses}">
                     <td>
-                        <strong th:text="${course.name}">Tên khóa học</strong>
+                        <a href="javascript:void(0);"
+                           th:onclick="'toggleMentorList(this)'"
+                           th:attr="data-course-id=${course.id}"
+                           style="cursor:pointer; text-decoration: none; color: #252847;">
+                            <strong th:text="${course.name}">Tên khóa học</strong>
+                        </a>
+
+                        <!-- Mentor List - Collapsible -->
+                        <div th:id="'mentor-list-course-' + ${course.id}"
+                             class="mentor-list"
+                             style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; margin-top: 0;">
+
+                            <!-- If no mentors -->
+                            <div th:if="${acceptedMentorMap[course.id] == null or #lists.isEmpty(acceptedMentorMap[course.id])}"
+                                 class="no-mentors"
+                                 style="color: #6b7280; font-style: italic; padding: 10px 15px; background: #f9fafb; border-radius: 6px; border-left: 4px solid #d1d5db; margin: 5px 0;">
+                                ❌ Chưa có mentor cho khóa này
+                            </div>
+
+                            <!-- Mentor items -->
+                            <div th:each="mentor : ${acceptedMentorMap[course.id]}"
+                                 class="mentor-item"
+                                 style="background: #f1f5f9; border-left: 4px solid #667eea; padding: 10px 15px; margin: 5px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="mentor-name"
+                              style="font-weight: 500; color: #1e293b;"
+                              th:text="'👨‍💻 ' + ${mentor.fullName}">
+                            Tên mentor
+                        </span>
+                                <div class="mentor-actions" style="display: flex; gap: 8px;">
+                                    <a th:href="@{/manager/mentor/detail/{id}(id=${mentor.id})}"
+                                       style="background: #667eea; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; transition: background-color 0.3s ease;"
+                                       title="Xem chi tiết">
+                                        👁️ Chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </td>
                     <td>
                         <div class="mentor-info">
-                                <span th:if="${course.mentor != null}"
-                                      th:text="${course.mentor.fullName}">Tên mentor</span>
-
-                            <span th:if="${course.mentor == null}">
-                                    <span th:if="${#lists.size(course.applications) > 0}"
-                                          class="applicant-count"
-                                          th:text="|${#lists.size(course.applications)} ứng viên|">
-                                    </span>
-                                    <span th:if="${#lists.size(course.applications) == 0}"
-                                          class="no-applicants">
-                                        Chưa có ứng viên
-                                    </span>
-                                </span>
+                            <span th:if="${pendingApplicantCount[course.id] != null and pendingApplicantCount[course.id] > 0}"
+                                  class="applicant-count"
+                                  th:text="|${pendingApplicantCount[course.id]} ứng viên đang chờ|">
+                            </span>
+                            <span th:if="${pendingApplicantCount[course.id] == null or pendingApplicantCount[course.id] == 0}"
+                                  class="no-applicants"> Chưa có ứng viên
+                            </span>
                         </div>
                     </td>
                     <td th:text="${#dates.format(course.createdDate, 'dd/MM/yyyy')}">Ngày</td>
                     <td>
-                            <span class="status-badge"
-                                  th:classappend="${course.open} ? 'status-open' : 'status-closed'"
-                                  th:text="${course.open ? '🟢 Đang mở' : '🔴 Đã đóng'}"></span>
+                        <span class="status-badge"
+                              th:classappend="${course.open} ? 'status-open' : 'status-closed'"
+                              th:text="${course.open ? '🟢 Đang mở' : '🔴 Đã đóng'}"></span>
                     </td>
                     <td>
                         <div class="action-links">
                             <a th:href="@{/manager/courses/edit/{id}(id=${course.id})}">✏️ Sửa</a>
-                            <a th:href="@{/courses/view-details/{id}(id=${course.id})}">👁️ Chi tiết</a>
                             <a th:href="@{/manager/courses/toggle-open/{id}(id=${course.id})}"
                                th:text="${course.open} ? '🔒 Đóng' : '🔓 Mở'">Mở/Đóng</a>
 
-                            <a th:if="${course.mentor == null and #lists.size(course.applications) > 0}"
+                            <a th:if="${(acceptedMentorMap[course.id] == null or #lists.isEmpty(acceptedMentorMap[course.id])) and pendingApplicantCount[course.id] > 0}"
                                th:href="@{/admin/cv/list/1}">
                                 <strong>👥 Xem ứng viên</strong>
                             </a>
+
 
                             <form th:action="@{/manager/courses/delete/{id}(id=${course.id})}" method="post"
                                   onsubmit="return confirm('Bạn có chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn tác.')"
@@ -737,8 +829,41 @@
         }
     });
 
+    window.toggleMentorList = function(element) {
+        const courseId = element.getAttribute('data-course-id');
+        const mentorList = document.getElementById(`mentor-list-course-${courseId}`);
+
+        if (mentorList) {
+            // Toggle expanded class
+            mentorList.classList.toggle('expanded');
+            element.classList.toggle('expanded');
+
+            // Add smooth animation
+            if (mentorList.classList.contains('expanded')) {
+                mentorList.style.maxHeight = mentorList.scrollHeight + 'px';
+            } else {
+                mentorList.style.maxHeight = '0';
+            }
+        }
+    };
+
+    // Add smooth highlight effect when clicking
+    document.addEventListener('DOMContentLoaded', function() {
+        const courseNames = document.querySelectorAll('.course-name');
+
+        courseNames.forEach(courseName => {
+            courseName.addEventListener('click', function() {
+                const row = this.closest('tr');
+                row.style.background = '#f0f4ff';
+
+                setTimeout(() => {
+                    row.style.background = '';
+                }, 300);
+            });
+        });
+    });
     // Đóng notification khi nhấn Enter hoặc Escape
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
         if (event.key === "Enter" || event.key === "Escape") {
             const successOverlay = document.getElementById('successOverlay');
             const errorOverlay = document.getElementById('errorOverlay');
@@ -760,7 +885,7 @@
     }
 
     // Đóng notification khi click bên ngoài
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         const successOverlay = document.getElementById('successOverlay');
         const errorOverlay = document.getElementById('errorOverlay');
 
@@ -775,8 +900,8 @@
 
     // Smooth scroll cho các form inputs khi focus
     document.querySelectorAll('.form-input, .form-select').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        input.addEventListener('focus', function () {
+            this.scrollIntoView({behavior: 'smooth', block: 'center'});
         });
     });
 </script>

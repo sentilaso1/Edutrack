@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.profiles.model.CV;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +15,11 @@ import java.util.UUID;
 @Service
 public class MentorService {
     private final MentorRepository mentorRepository;
+    private final CourseMentorRepository courseMentorRepository;
 
-    public MentorService(MentorRepository mentorRepository) {
+    public MentorService(MentorRepository mentorRepository, CourseMentorRepository courseMentorRepository) {
         this.mentorRepository = mentorRepository;
+        this.courseMentorRepository = courseMentorRepository;
     }
 
     // Receiving all mentors
@@ -34,7 +37,7 @@ public class MentorService {
     }
 
     public List<Course> getCoursesByMentor(UUID id) {
-        return mentorRepository.findCoursesByMentorId(id);
+        return courseMentorRepository.findCoursesByMentorId(id);
     }
 
     public List<Tag> getTagsByMentor(UUID id) {

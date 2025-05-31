@@ -31,10 +31,6 @@ public class Course {
     @CreatedDate
     private Date createdDate = new Date();
 
-    @ManyToOne
-    @JoinColumn(name = "mentor_id")
-    private Mentor mentor;
-
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<TeachingMaterial> materials = new ArrayList<>();
 
@@ -86,14 +82,6 @@ public class Course {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
-    }
-
-    public Mentor getMentor() {
-        return mentor;
-    }
-
-    public void setMentor(Mentor mentor) {
-        this.mentor = mentor;
     }
 
     public List<TeachingMaterial> getMaterials() {
