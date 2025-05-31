@@ -174,7 +174,7 @@ public class CvServiceImpl implements CvService {
         List<String> skills = cvRepository.findAllSkills();
 
         return skills.stream()
-                .flatMap(skillSet -> Stream.of(skillSet.split(CV.ITEM_SEPARATOR)))
+                .flatMap(skillSet -> Stream.of(skillSet.split(CV.ITEM_SEPARATOR_REGEX)))
                 .distinct()
                 .sorted()
                 .toList();
