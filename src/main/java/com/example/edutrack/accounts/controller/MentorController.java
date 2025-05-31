@@ -28,7 +28,7 @@ public class MentorController {
     @GetMapping("/mentors")
     public String viewMentorList(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String expertise,
+            @RequestParam(required = false) String[] expertise,
             @RequestParam(required = false) Double rating,
             @RequestParam(required = false) Integer totalSessions,
             @RequestParam(required = false) Boolean isAvailable,
@@ -41,6 +41,7 @@ public class MentorController {
         model.addAttribute("expertise", expertise);
         model.addAttribute("rating", rating);
         model.addAttribute("totalSessions", totalSessions);
+        model.addAttribute("expertiseInput", String.join(", ", expertise));
         model.addAttribute("isAvailable", isAvailable);
         return "mentor-list";
     }
