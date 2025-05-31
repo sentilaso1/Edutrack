@@ -14,8 +14,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 public class BookmarkController {
@@ -68,6 +71,12 @@ public class BookmarkController {
 
     @GetMapping("/bookmark/list")
     public String bookmarkRedirect() {
+        return "redirect:/bookmark/list/1";
+    }
+
+    @PostMapping("/bookmark/delete/{id}")
+    public String deleteBookmark(@PathVariable Long id) {
+        bookmarkService.delete(id);
         return "redirect:/bookmark/list/1";
     }
 }

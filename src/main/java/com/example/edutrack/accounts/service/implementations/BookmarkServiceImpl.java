@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,6 +133,16 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     public void delete(Bookmark bookmark) {
-        bookmarkRepository.deleteById(bookmark.getId());
+        this.delete(bookmark.getId());
+    }
+
+    @Override
+    public void delete(Long id) {
+        bookmarkRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<Bookmark> findById(Long id) {
+        return bookmarkRepository.findById(id);
     }
 }
