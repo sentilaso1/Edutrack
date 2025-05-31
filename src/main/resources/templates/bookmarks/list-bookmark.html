@@ -147,7 +147,12 @@
     <main th:with="bookmarkDTOs = ${page.content}" class="bookmark-grid">
         <div th:each="bookmarkDTO : ${bookmarkDTOs}" th:with="bookmark = ${bookmarkDTO.bookmark}, course = ${bookmarkDTO.bookmark.course}, tags = ${bookmarkDTO.tags}" class="bookmark-item container-bg">
             <div class="bookmark-header section-bg">
-                <span th:text="${'Bookmarked on ' + bookmark.getCreatedDate().toLocaleString()}"></span>
+                <span th:text="${bookmark.getCreatedDate().toLocaleString()}"></span>
+                <form th:action="@{/bookmark/delete/{id}(id=${bookmark.id})}" method="post">
+                    <button type="submit" class="" title="Delete Bookmark">
+                        delete
+                    </button>
+                </form>
             </div>
 
             <div class="bookmark-image modal-bg">
@@ -160,7 +165,6 @@
                     <span th:text="${course.getOpen() ? 'Open' : 'Closed'}"></span>
                     )
                 </span>
-                <span th:text="${course.mentor == null ? 'By unknown mentor' : 'By ' + course.getMentor().getFullName()}"></span>
                 <span th:text="${course.description}" class="course-desc"></span>
             </div>
 

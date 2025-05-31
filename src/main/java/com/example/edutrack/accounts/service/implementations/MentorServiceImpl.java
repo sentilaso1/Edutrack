@@ -28,17 +28,11 @@ public class MentorServiceImpl implements com.example.edutrack.accounts.service.
 
         }
 
-        public List<Course> getCoursesByMentor(UUID id) {
-                return mentorRepository.findCoursesByMentorId(id);
-        }
 
         public List<Mentor> getAllMentors() {
                 return mentorRepository.findAll();
         }
 
-        public Mentor findByCourseId(UUID id) {
-                return mentorRepository.findByCourses_Id(id);
-        }
 
     public Optional<Mentor> findById(UUID id) {
                 return mentorRepository.findById(id);

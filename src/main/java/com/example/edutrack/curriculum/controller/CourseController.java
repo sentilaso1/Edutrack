@@ -101,7 +101,6 @@ public class CourseController {
         model.addAttribute("selectedSkills", skill);
         model.addAttribute("selectedSubjects", subject);
         return "courselist";
-
     }
 
     @GetMapping("/courses/{courseId}")
@@ -148,13 +147,6 @@ public class CourseController {
         return "mentor-availability";
     }
 
-    @GetMapping("/course-mentor/view")
-    public String viewMentorAvailableTimes(Model model) {
-        List<Course> mentorCourses = mentorServiceImpl.getCoursesByMentor(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
-        model.addAttribute("mentorCourses", mentorCourses);
-        return "course-mentor-view";
-
-    }
 
 
 }

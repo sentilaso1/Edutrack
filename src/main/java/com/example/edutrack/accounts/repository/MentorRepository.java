@@ -31,11 +31,6 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
             @Param("isAvailable") Boolean isAvailable
     );
 
-    @Query("SELECT c.course FROM CourseMentor c WHERE c.mentor.id = :mentorId")
-    List<Course> findCoursesByMentorId(@Param("mentorId") UUID mentorId);
-
-    Mentor findByCourses_Id(UUID courseId);
-
     @Query("SELECT ct.tag FROM Mentor m " +
            "JOIN CourseMentor c ON c.mentor = m " +
            "JOIN CourseTag ct ON ct.course = c.course " +

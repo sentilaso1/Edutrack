@@ -14,14 +14,17 @@ import java.util.UUID;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, UUID> {
 
-    @Query("SELECT c FROM Course c " +
-            "LEFT JOIN c.mentor m " +
-            "WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-            "AND (:mentorSearch IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :mentorSearch, '%'))) " +
-            "AND (:open IS NULL OR c.isOpen = :open) " +
-            "AND (:fromDate IS NULL OR c.createdDate >= :fromDate) " +
-            "AND (:toDate IS NULL OR c.createdDate <= :toDate) " +
-            "ORDER BY c.name ASC")
+    @Query("""
+        SELECT DISTINCT c FROM Course c
+        LEFT JOIN CourseMentor cm ON cm.course = c
+        LEFT JOIN Mentor m ON m = cm.mentor
+        WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')))
+        AND (:mentorSearch IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :mentorSearch, '%')))
+        AND (:open IS NULL OR c.isOpen = :open)
+        AND (:fromDate IS NULL OR c.createdDate >= :fromDate)
+        AND (:toDate IS NULL OR c.createdDate <= :toDate)
+        ORDER BY c.name ASC
+    """)
     Page<Course> findFilteredCoursesOrderByName(
             @Param("search") String search,
             @Param("mentorSearch") String mentorSearch,
@@ -30,14 +33,17 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             @Param("toDate") Date toDate,
             Pageable pageable);
 
-    @Query("SELECT c FROM Course c " +
-            "LEFT JOIN c.mentor m " +
-            "WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-            "AND (:mentorSearch IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :mentorSearch, '%'))) " +
-            "AND (:open IS NULL OR c.isOpen = :open) " +
-            "AND (:fromDate IS NULL OR c.createdDate >= :fromDate) " +
-            "AND (:toDate IS NULL OR c.createdDate <= :toDate) " +
-            "ORDER BY c.createdDate DESC")
+    @Query("""
+        SELECT DISTINCT c FROM Course c
+        LEFT JOIN CourseMentor cm ON cm.course = c
+        LEFT JOIN Mentor m ON m = cm.mentor
+        WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')))
+        AND (:mentorSearch IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :mentorSearch, '%')))
+        AND (:open IS NULL OR c.isOpen = :open)
+        AND (:fromDate IS NULL OR c.createdDate >= :fromDate)
+        AND (:toDate IS NULL OR c.createdDate <= :toDate)
+        ORDER BY c.createdDate DESC
+    """)
     Page<Course> findFilteredCoursesOrderByCreatedDate(
             @Param("search") String search,
             @Param("mentorSearch") String mentorSearch,
@@ -46,14 +52,17 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             @Param("toDate") Date toDate,
             Pageable pageable);
 
-    @Query("SELECT c FROM Course c " +
-            "LEFT JOIN c.mentor m " +
-            "WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-            "AND (:mentorSearch IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :mentorSearch, '%'))) " +
-            "AND (:open IS NULL OR c.isOpen = :open) " +
-            "AND (:fromDate IS NULL OR c.createdDate >= :fromDate) " +
-            "AND (:toDate IS NULL OR c.createdDate <= :toDate) " +
-            "ORDER BY m.fullName ASC NULLS LAST")
+    @Query("""
+        SELECT DISTINCT c FROM Course c
+        LEFT JOIN CourseMentor cm ON cm.course = c
+        LEFT JOIN Mentor m ON m = cm.mentor
+        WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')))
+        AND (:mentorSearch IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :mentorSearch, '%')))
+        AND (:open IS NULL OR c.isOpen = :open)
+        AND (:fromDate IS NULL OR c.createdDate >= :fromDate)
+        AND (:toDate IS NULL OR c.createdDate <= :toDate)
+        ORDER BY m.fullName ASC NULLS LAST
+    """)
     Page<Course> findFilteredCoursesOrderByMentorName(
             @Param("search") String search,
             @Param("mentorSearch") String mentorSearch,
@@ -62,14 +71,17 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             @Param("toDate") Date toDate,
             Pageable pageable);
 
-    @Query("SELECT c FROM Course c " +
-            "LEFT JOIN c.mentor m " +
-            "WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-            "AND (:mentorSearch IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :mentorSearch, '%'))) " +
-            "AND (:open IS NULL OR c.isOpen = :open) " +
-            "AND (:fromDate IS NULL OR c.createdDate >= :fromDate) " +
-            "AND (:toDate IS NULL OR c.createdDate <= :toDate) " +
-            "ORDER BY c.createdDate DESC")
+    @Query("""
+        SELECT DISTINCT c FROM Course c
+        LEFT JOIN CourseMentor cm ON cm.course = c
+        LEFT JOIN Mentor m ON m = cm.mentor
+        WHERE (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')))
+        AND (:mentorSearch IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :mentorSearch, '%')))
+        AND (:open IS NULL OR c.isOpen = :open)
+        AND (:fromDate IS NULL OR c.createdDate >= :fromDate)
+        AND (:toDate IS NULL OR c.createdDate <= :toDate)
+        ORDER BY c.createdDate DESC
+    """)
     Page<Course> findFilteredCoursesDefault(
             @Param("search") String search,
             @Param("mentorSearch") String mentorSearch,

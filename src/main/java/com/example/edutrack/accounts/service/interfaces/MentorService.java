@@ -12,5 +12,4 @@ public interface MentorService {
 
     Optional<Mentor> findById(UUID id);
 
-    List<Course> getCoursesByMentor(UUID uuid);
 }

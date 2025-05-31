@@ -18,11 +18,11 @@ public class Bookmark {
     @CreatedDate
     private Date createdDate = new Date();
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

@@ -1,10 +1,8 @@
 package com.example.edutrack.curriculum.service.implementation;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseFormDTO;
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.Tag;
-import com.example.edutrack.curriculum.model.TeachingMaterial;
+import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.ApplicantsRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.curriculum.repository.CourseRepository;
@@ -18,9 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -79,7 +75,6 @@ public class CourseServiceImpl implements CourseService {
 
         courseRepository.save(course);
 
-        // Tạo tag và CourseTag qua service tag
         if (courseFormDTO.getTagTexts() != null) {
             for (String title : courseFormDTO.getTagTexts()) {
                 Tag tag = tagRepository.findByTitle(title)
@@ -202,12 +197,32 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
+    @Override
+    public Map<UUID, List<Mentor>> getAcceptedMentorsForCourses(List<Course> courses){
+        Map<UUID, List<Mentor>>  courseMentorMap = new HashMap<>();
+        for (Course course : courses) {
+            List<Mentor> acceptedMentor = applicantsRepository.findMentorsByCourseAndStatus(course, ApplicationStatus.ACCEPTED);
+            courseMentorMap.put(course.getId(), acceptedMentor);
+        }
+        return courseMentorMap;
+    }
+
+    @Override
+    public Map<UUID, Integer> getPendingApplicantCountForCourses(List<Course> courses) {
+        Map<UUID, Integer> pendingCountMap = new HashMap<>();
+        for (Course course : courses) {
+            int count = applicantsRepository.countByCourseAndStatus(course, ApplicationStatus.PENDING);
+            pendingCountMap.put(course.getId(), count);
+        }
+        return pendingCountMap;
+    }
 
     @Override
     public void delete(UUID id) {
         courseRepository.deleteById(id);
     }
 
+    @Override
     @Transactional
     public void deleteCourseWithRelatedData(UUID courseId) {
 
