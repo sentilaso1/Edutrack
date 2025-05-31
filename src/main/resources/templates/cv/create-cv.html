@@ -1,8 +1,9 @@
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EduTrack - Create CV</title>
-    <link rel="stylesheet" href="/css/colors.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create CV - EduTrack</title>
     <style>
         * {
             margin: 0;
@@ -11,289 +12,393 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
-        main {
-            max-width: 800px;
+        .container {
+            max-width: 1720px;
             margin: 0 auto;
-            padding: 40px;
-            border-radius: 16px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
-        .form-header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-        }
-
-        .form-header h2 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .form-subtitle {
-            font-size: 1.1rem;
-            margin-top: 10px;
-            opacity: 0.8;
-        }
-
-        form {
+        .main-content {
             display: grid;
-            gap: 25px;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            min-height: 80vh;
+        }
+
+        .section-header {
+            text-align: center;
+            padding: 15px 25px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .form-group {
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            border-radius: 12px;
-            transition: transform 0.2s ease;
-        }
-
-        .form-group:hover {
-            transform: translateY(-1px);
-        }
-
-        .form-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            font-size: 1rem;
-            resize: vertical;
-            font-family: inherit;
-        }
-
-        .form-group textarea {
-            min-height: 120px;
-            max-height: 200px;
-        }
-
-        .form-group.experience-group input {
-            max-width: 200px;
-        }
-
-        .submit-section {
-            padding: 30px 20px;
-            text-align: center;
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-
-        .submit-btn {
-            font-size: 1.2rem;
-            font-weight: 600;
-            padding: 16px 40px;
-            border-radius: 10px;
-            min-width: 200px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .helper-text {
-            font-size: 0.9rem;
-            margin-top: 5px;
-            font-style: italic;
-        }
-
-        .testing-notice {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-        }
-
-        .char-limit {
-            font-size: 0.8rem;
-            text-align: right;
-            margin-top: 5px;
+            margin-bottom: 25px;
         }
 
         .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .large-textarea {
+            min-height: 150px;
+        }
+
+        .create-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .course-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .course-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .course-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .course-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .tag.azure {
+            background: #cce7ff;
+            border-color: #99d6ff;
+            color: #0066cc;
+        }
+
+        .tag.microsoft {
+            background: #ffe6cc;
+            border-color: #ffcc99;
+            color: #cc6600;
+        }
+
+        .tag.beginner {
+            background: #d4edda;
+            border-color: #a3d9a4;
+            color: #155724;
+        }
+
+        .tag.data {
+            background: #f8d7da;
+            border-color: #f1aeb5;
+            color: #721c24;
+        }
+
+        .course-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+            transform: scale(1.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover {
+            background: #e9ecef;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
         }
 
         @media (max-width: 768px) {
-            main {
-                padding: 20px;
-                margin: 10px;
-            }
-
-            .form-header h2 {
-                font-size: 2rem;
-            }
-
             .form-row {
-                grid-template-columns: 1fr;
+                flex-direction: column;
             }
 
-            .form-group {
-                padding: 15px;
+            .header {
+                padding: 15px 20px;
             }
-        }
 
-        /* Custom styling for specific form elements */
-        .url-input {
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-        }
-
-        .number-input {
-            text-align: center;
-            font-weight: 600;
-            font-size: 1.1rem;
+            .main-content {
+                padding: 20px;
+            }
         }
     </style>
 </head>
-<body class="base-bg">
-<main class="card-bg shadow-medium" style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px;">
-    <div>
-        <div class="form-header">
-            <h2 class="text-heading" style="background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                Create Your CV
-            </h2>
-            <p class="form-subtitle text-secondary">Create CV</p>
-            <div class="divider"></div>
+<body>
+<div class="container">
+    <div class="main-content">
+        <!-- Create CV Section -->
+        <div class="cv-section">
+            <div class="section-header">Create your CV</div>
+
+            <form th:action="@{/cv/create}" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="summary">Summary</label>
+                        <textarea id="summary" name="summary" maxlength="1024" class="large-textarea" required
+                                  placeholder="Brief overview of your professional background and goals..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="experienceYears">Years of experience</label>
+                        <input type="number" id="experienceYears" name="experienceYears"
+                               min="0" max="100" required placeholder="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="skills">Skills & Tech Stacks</label>
+                    <textarea id="skills" name="skills" maxlength="1024" class="large-textarea" required
+                              placeholder="List your technical skills, programming languages, frameworks, tools..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="education">Education</label>
+                    <textarea id="education" name="education" maxlength="1024" required
+                              placeholder="Degrees, institutions, graduation dates, relevant coursework..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="certifications">Certifications</label>
+                    <textarea id="certifications" name="certifications" maxlength="1024" required
+                              placeholder="Professional certifications, licenses, achievements..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="experience">Experience</label>
+                    <textarea id="experience" name="experience" maxlength="1024" class="large-textarea" required
+                              placeholder="List of experiences, your past workplaces, products..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="languages">Languages</label>
+                    <textarea id="languages" name="languages" maxlength="1024" required
+                              placeholder="Languages spoken and proficiency levels..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="portfolioUrl">Portfolio URL</label>
+                    <input id="portfolioUrl" name="portfolioUrl" type="url" required
+                           placeholder="https://your-portfolio-website.com">
+                </div>
+
+                <input type="hidden" name="userId" th:value="${userId}">
+                <button type="submit" class="create-btn">Create CV</button>
+            </form>
         </div>
 
-        <form th:action="@{/cv/create}" method="post">
-            <!-- User ID Section (Testing) -->
-            <div class="form-group alert-warning">
-                <div class="testing-notice">
-                    <strong>⚠️ Testing Mode:</strong> User ID field is temporary and will be removed when login is implemented.
-                </div>
-                <label for="userId" class="text-accent">
-                    User ID
-                </label>
-                <input type="text" id="userId" name="userId" class="input-field" required placeholder="Enter your user ID">
-            </div>
+        <div class="courses-section">
+            <div class="section-header">Register Courses</div>
+            <p style="text-align: center">To be Added</p>
+        </div>
+        <!--
+        Register Courses Section
+        <div class="courses-section">
+            <div class="section-header">Register Courses</div>
 
-            <!-- Summary Section -->
-            <div class="form-group section-bg shadow-soft">
-                <label for="summary" class="text-heading">
-                    Professional Summary
-                </label>
-                <input type="text" id="summary" name="summary" class="input-field" maxlength="256" required
-                       placeholder="Brief overview of your professional background and goals">
-                <div class="char-limit text-muted">Max 256 characters</div>
-            </div>
-
-            <!-- Experience Years -->
-            <div class="form-group container-bg shadow-soft experience-group">
-                <label for="experienceYears" class="text-heading">
-                    Years of Experience
-                </label>
-                <input type="number" id="experienceYears" name="experienceYears" class="input-field number-input"
-                       min="0" max="100" required placeholder="0">
-                <div class="helper-text text-secondary">Enter total years of professional experience</div>
-            </div>
-
-            <!-- Skills and Education Row -->
-            <div class="form-row">
-                <div class="form-group section-bg shadow-soft">
-                    <label for="skills" class="text-heading">
-                        Skills & Technologies
-                    </label>
-                    <textarea id="skills" name="skills" class="input-field" maxlength="512" required
-                              placeholder="List your technical skills, programming languages, frameworks, tools..."></textarea>
-                    <div class="char-limit text-muted">Max 512 characters</div>
-                </div>
-
-                <div class="form-group container-bg shadow-soft">
-                    <label for="education" class="text-heading">
-                         Education
-                    </label>
-                    <textarea id="education" name="education" class="input-field" maxlength="512" required
-                              placeholder="Degrees, institutions, graduation dates, relevant coursework..."></textarea>
-                    <div class="char-limit text-muted">Max 512 characters</div>
+            <div th:if="${coursePage != null}">
+                <div th:each="course : ${coursePage.content}">
+                    <div class="course-card">
+                        <button class="add-btn">+</button>
+                        <div class="course-title" th:text="${course.name}"></div>
+                        <div class="course-tags">
+                            <span class="tag azure">Azure</span>
+                            <span class="tag">Administrator</span>
+                            <span class="tag beginner">Beginner</span>
+                        </div>
+                        <div class="course-description">
+                            Learn the foundational concepts of cloud computing and Microsoft Azure services. This course
+                            covers cloud concepts, core Azure services, security, privacy, compliance, and Azure pricing
+                            and support.
+                        </div>
+                        <div class="course-meta">
+                            <span>Created date: 15/11/2021</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Certifications and Languages Row -->
-            <div class="form-row">
-                <div class="form-group section-bg shadow-soft">
-                    <label for="certifications" class="text-heading">
-                         Certifications
-                    </label>
-                    <textarea id="certifications" name="certifications" class="input-field" maxlength="512" required
-                              placeholder="Professional certifications, licenses, achievements..."></textarea>
-                    <div class="char-limit text-muted">Max 512 characters</div>
-                </div>
-
-                <div class="form-group container-bg shadow-soft">
-                    <label for="languages" class="text-heading">
-                         Languages
-                    </label>
-                    <textarea id="languages" name="languages" class="input-field" maxlength="512" required
-                              placeholder="Languages spoken and proficiency levels..."></textarea>
-                    <div class="char-limit text-muted">Max 512 characters</div>
-                </div>
+            <div th:if="${coursePage.content.isEmpty() || coursePage == null}">
+                <p style="text-align: center">No courses available at the moment.</p>
             </div>
 
-            <!-- Portfolio URL -->
-            <div class="form-group section-bg shadow-soft">
-                <div class="form-group container-bg shadow-soft">
-                    <label for="experience" class="text-heading">
-                        Experience
-                    </label>
-                    <textarea id="experience" name="experience" class="input-field" maxlength="512" required
-                              placeholder="List of experiences..."></textarea>
-                    <div class="char-limit text-muted">Max 512 characters</div>
-                </div>
-                <label for="portfolioUrl" class="text-heading">
-                    Portfolio URL
-                </label>
-                <input type="url" id="portfolioUrl" name="portfolioUrl" class="input-field url-input"
-                       maxlength="1024" required placeholder="https://your-portfolio-website.com">
-                <div class="helper-text text-secondary">Link to your online portfolio, GitHub, or professional website</div>
-                <div class="char-limit text-muted">Max 1024 characters</div>
-            </div>
-
-            <!-- Submit Section -->
-            <div class="submit-section modal-bg shadow-medium">
-                <button type="submit" class="button-bg submit-btn shadow-soft">
-                    Create My CV
-                </button>
-                <p class="helper-text text-secondary" style="margin-top: 15px;">
-                </p>
-            </div>
-        </form>
-    </div>
-    <div class="container-bg shadow-soft" style="padding: 20px; border-radius: 12px; height: fit-content;">
-        <h3 class="text-heading" style="margin-bottom: 20px;">Available Courses</h3>
-        <div th:if="${coursePage != null}">
-            <ul style="list-style: none; padding-left: 0;">
-                <li th:each="course : ${coursePage.content}" style="margin-bottom: 10px; padding: 10px; border-radius: 8px; color: var(--text-color);">
-                    <strong th:text="${course.name}">Course Name</strong><br/>
-                    <span th:text="${course.description}">Course Description</span>
-                </li>
-            </ul>
-            <!-- Pagination controls -->
-            <div style="margin-top: 20px; text-align: center;">
+            <div class="pagination">
                 <a th:href="@{/cv/create(page=${pageNumber - 1}, size=6)}" th:if="${coursePage.hasPrevious()}" style="margin-right: 10px;">« Prev</a>
                 <span>Page <span th:text="${pageNumber}"></span></span>
                 <a th:href="@{/cv/create(page=${pageNumber + 1}, size=6)}" th:if="${coursePage.hasNext()}" style="margin-left: 10px;">Next »</a>
             </div>
         </div>
-        <div th:if="${coursePage == null}">
-            <p>No courses available at the moment.</p>
-        </div>
+        -->
     </div>
+</div>
 
-</main>
+<script>
+    // Add interactivity
+    document.querySelectorAll('.add-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            this.textContent = '✓';
+            this.style.background = '#28a745';
+            setTimeout(() => {
+                this.textContent = '+';
+                this.style.background = '#28a745';
+            }, 1500);
+        });
+    });
+
+    // Pagination functionality
+    document.querySelectorAll('.pagination button').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (!this.textContent.includes('<') && !this.textContent.includes('>') && !this.textContent.includes('...')) {
+                document.querySelector('.pagination .active')?.classList.remove('active');
+                this.classList.add('active');
+            }
+        });
+    });
+</script>
 </body>
 </html>
