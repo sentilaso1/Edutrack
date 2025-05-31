@@ -9,13 +9,15 @@ public class MentorDTO {
     private UUID id;
     private String name;
     private byte[] avatar;
+    private String expertise;
 
-    public MentorDTO(UUID id, String name, byte[] avatar) {
+    public MentorDTO(UUID id, String name, byte[] avatar, String expertise) {
         this.id = id;
         this.name = name;
         if (avatar != null) {
             this.avatar = avatar;
         }
+        this.expertise = expertise;
     }
 
     public UUID getId() {
@@ -28,6 +30,14 @@ public class MentorDTO {
 
     public byte[] getAvatar() {
         return avatar;
+    }
+
+    public void setExpertise(String expertise) {
+        this.expertise = expertise;
+    }
+
+    public String getExpertise() {
+        return expertise;
     }
 
     public String getName() {

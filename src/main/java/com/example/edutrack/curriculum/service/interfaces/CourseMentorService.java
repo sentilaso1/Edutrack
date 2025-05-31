@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CourseMentorService {
 
@@ -24,4 +25,9 @@ public interface CourseMentorService {
 
     List<Course> findAllCourses();
 
+    CourseMentor findById(UUID id);
+
+    List<CourseMentor> getCourseMentorByMentorId(UUID id);
+
+    Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable);
 }
