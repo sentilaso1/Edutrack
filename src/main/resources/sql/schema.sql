@@ -170,9 +170,9 @@ CREATE TABLE mentor_earnings (
 );
 
 CREATE TABLE cv (
-    mentor_id BINARY(16) PRIMARY KEY,
+    user_id BINARY(16) PRIMARY KEY,
     summary TEXT NOT NULL,
-    years_of_experience DECIMAL(3,1) NOT NULL,
+    experience_years DECIMAL(3,1) NOT NULL,
     skills TEXT NOT NULL,
     education TEXT NOT NULL,
     experience TEXT NOT NULL,
@@ -180,8 +180,8 @@ CREATE TABLE cv (
     languages TEXT NOT NULL,
     portfolio_url VARCHAR(255),
     status ENUM('pending', 'approved', 'rejected') NOT NULL,
-    update_date DATETIME NOT NULL,
-    FOREIGN KEY (mentor_id) REFERENCES mentors(user_id)
+    created_date DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE teaching_materials (
