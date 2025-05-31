@@ -110,13 +110,18 @@
 
                 <!-- Avatar Tab -->
                 <div id="avatar" class="tab-content hidden">
-                        <form th:action="@{/upload/{id}(id=${user.id})}" method="post" enctype="multipart/form-data" class="flex flex-col items-center space-y-4">
+                        <form th:action="@{/upload/{id}(id=${user.id})}" method="post" enctype="multipart/form-data"
+                                class="flex flex-col items-center space-y-4" onsubmit="return validateImage()">
                                 <img id="avatar-preview" th:src="@{/avatar/{id}(id=${user.id})}" alt="Avatar"
                                         class="w-32 h-32 rounded-full object-cover border-2 border-gray-200">
-                                <input type="file" id="avatar-input" name="image" accept="image/*" class="mt-2 text-sm text-gray-600" required>
-                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Cập nhật
-                                        ảnh</button>         
-                                </form>
+                                <input type="file" id="avatar-input" name="image" accept="image/*" class="mt-2 text-sm text-gray-600"
+                                        required onchange="checkFileType()">
+                                <p id="file-error" class="text-red-600 text-sm hidden">Chỉ cho phép định dạng ảnh (.jpg, .png, .jpeg,
+                                        .gif, ...)</p>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                        Cập nhật ảnh
+                                </button>
+                        </form>
                 </div>
 
                 <!-- Notifications Tab -->
@@ -148,7 +153,44 @@
                         text: '[[${error}]]'
                 });
         </script>
+        <script>
+                function checkFileType() {
+                        const input = document.getElementById('avatar-input');
+                        const error = document.getElementById('file-error');
+                        const file = input.files[0];
 
+                        if (!file) {
+                                error.classList.add('hidden');
+                                return;
+                        }
+
+                        // Kiểm tra MIME type
+                        if (!file.type.startsWith('image/')) {
+                                error.classList.remove('hidden');
+                                input.value = "";  // Reset file
+                        } else {
+                                error.classList.add('hidden');
+                        }
+                }
+
+                function validateImage() {
+                        const input = document.getElementById('avatar-input');
+                        const error = document.getElementById('file-error');
+
+                        if (!input.files || input.files.length === 0) {
+                                alert("Vui lòng chọn một ảnh.");
+                                return false;
+                        }
+
+                        if (!input.files[0].type.startsWith('image/')) {
+                                error.classList.remove('hidden');
+                                alert("File không hợp lệ. Vui lòng chọn một ảnh.");
+                                return false;
+                        }
+
+                        return true;
+                }
+           </script>
 </body>
 
 </html>
