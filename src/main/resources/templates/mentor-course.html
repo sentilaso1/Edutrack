@@ -55,13 +55,14 @@
 <section class="section__container service__container" id="service">
   <h2 class="section__header">Courses</h2>
   <div class="service__grid">
-    <div class="service__card" th:each="course: ${courses}">
-      <span><i class="ri-window-fill"></i></span>
-      <h4 th:text="${course.name}">Website Design</h4>
-      <p th:text="${course.description}">
-        We craft user-friendly interfaces that engage visitors and help you
-        achieve your online goals with minimum efforts.
-      </p>
+    <div class="service__card" th:each="cm : ${courses}">
+      <a th:href="@{'/courses/' + ${cm.id}}">
+        <span><i class="ri-window-fill"></i></span>
+        <h4 th:text="${cm.course.name}">Course Name</h4>
+        <p th:text="${cm.course.description}">
+          Course description
+        </p>
+      </a>
     </div>
   </div>
 </section>
