@@ -80,5 +80,4 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     public List<CourseMentor> findByCourseId(UUID courseMentorId) {
         return courseMentorRepository.findByCourseId(courseMentorId);
     }
-
 }
