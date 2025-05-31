@@ -37,7 +37,7 @@ public class UserController {
                                         @RequestParam(required = false) Boolean isLocked,
                                         @RequestParam(required = false) Boolean isActive,
                                         @RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10") int size) {
+                                        @RequestParam(defaultValue = "5") int size) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<User> userPage = userService.searchUsers(email, fullName, isLocked, isActive, pageable);
                 List<UserWithRoleDTO> userDtos = new ArrayList<>();
@@ -132,7 +132,7 @@ public class UserController {
                 return "redirect:/admin/users";
         }
 
-        @PostMapping("/{id}/revoke-staff")
+        @PostMapping("/{id}/revoke-staff")      
         public String revokeStaff(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
                         userService.revokeStaffRole(id);
