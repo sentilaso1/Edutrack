@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -38,28 +40,35 @@ public class CvController {
             return "redirect:/404";
         }
 
-        model.addAttribute("pageNumber", page);
-
-        Page<CV> cvPage = null;
         String filter = params.getFilter();
         String sort = params.getSort();
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        List<String> tags = params.getTags();
+        List<String> uniqueSkills = cvService.getAllUniqueSkills();
 
-        if (filter == null || filter.isEmpty()) {
-            if (sort == null || sort.equals(CVFilterForm.SORT_DATE_DESC)) {
-                cvPage = cvService.findAllCVsDateDesc(pageable);
-            } else {
-                cvPage = cvService.findAllCVsDateAsc(pageable);
-            }
-        } else {
-            if (sort == null || sort.equals(CVFilterForm.SORT_DATE_DESC)) {
-                cvPage = cvService.findAllCVsByStatusDateDesc(pageable, filter);
-            } else {
-                cvPage = cvService.findAllCVsByStatusDateAsc(pageable, filter);
-            }
+        // TODO: Optizimize case when all skills are already selected
+        if (tags == null || tags.isEmpty() || tags.contains("all")) {
+            tags = uniqueSkills;
         }
 
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        Page<CV> cvPage = cvService.queryCVs(filter, sort, tags, pageable);
+
+        model.addAttribute("pageNumber", page);
         model.addAttribute("page", cvPage);
+        model.addAttribute("skills", uniqueSkills);
+
+        if (sort != null) {
+            model.addAttribute("sort", sort);
+        }
+        if (filter != null) {
+            model.addAttribute("filter", filter);
+        }
+        model.addAttribute("tags", tags);
+
+        if (cvPage.getTotalPages() > 0 && page > cvPage.getTotalPages()) {
+            return "redirect:/404";
+        }
+
         return "/cv/list-cv";
     }
 
@@ -78,9 +87,9 @@ public class CvController {
     // Handle the form submit
     @PostMapping("cv/create")
     public String handleCVFormSubmission(@ModelAttribute("cv") CVForm request, Model model) {
-            CV saved = cvService.createCV(request);
-            model.addAttribute("message", "CV created successfully!");
-            return "redirect:/cv/mainpage";
+        CV saved = cvService.createCV(request);
+        model.addAttribute("message", "CV created successfully!");
+        return "redirect:/cv/mainpage";
     }
 
     @GetMapping("/cv/edit/{id}")
