@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +27,7 @@ public class MentorController {
     @GetMapping("/mentors")
     public String viewMentorList(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String[] expertise,
+            @RequestParam(required = false, defaultValue = "") String[] expertise,
             @RequestParam(required = false) Double rating,
             @RequestParam(required = false) Integer totalSessions,
             @RequestParam(required = false) Boolean isAvailable,
