@@ -48,4 +48,7 @@ public interface CvRepository extends JpaRepository<CV, UUID> {
               created_date
             """, nativeQuery = true)
     Page<CV> findAllStatusDateAsc(Pageable pageable);
+
+    @Query("SELECT DISTINCT cv.skills FROM CV cv")
+    List<String> findAllSkills();
 }
