@@ -1,9 +1,14 @@
 package com.example.edutrack.profiles.controller;
 
+import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.service.implementations.UserServiceImpl;
 import com.example.edutrack.auth.service.UserService;
+import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
+import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.profiles.service.interfaces.CvService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,10 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
@@ -27,11 +29,13 @@ public class CvController {
 
     private final CvService cvService;
     private final UserService userService;
+    private final CourseService courseService;
 
     @Autowired
-    public CvController(CvService cvService, UserService userService) {
+    public CvController(CvService cvService, UserService userService, CourseService courseService) {
         this.cvService = cvService;
         this.userService = userService;
+        this.courseService = courseService;
     }
 
     @GetMapping("/admin/cv/list/{page}")
@@ -79,8 +83,19 @@ public class CvController {
 
     @GetMapping("cv/create")
     // Show the CV form
-    public String showCVForm(Model model) {
+    public String showCVForm(Model model,
+                             @RequestParam(defaultValue = "1") int page,
+                             @RequestParam(defaultValue = "6") int size) {
+        if (page - 1 < 0) {
+            return "redirect:/404";
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Course> coursePage = courseService.findAll(pageable);
+
         model.addAttribute("cv", new CVForm());
+        model.addAttribute("coursePage", coursePage);
+        model.addAttribute("pageNumber", page);
         return "cv/create-cv";
     }
 
