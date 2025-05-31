@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Khóa Học - Lập Trình Web Cơ Bản</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .back-button svg {
+            margin-right: 8px;
+        }
+
+        .registration-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #86A788, #6b8a6d);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .card-header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .card-header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .progress-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .progress-step.active {
+            background-color: #F4B860;
+            color: white;
+        }
+
+        .progress-step.completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .progress-line {
+            width: 50px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-line.completed {
+            background-color: #4CAF50;
+        }
+
+        .card-body {
+            padding: 40px;
+        }
+
+        .section {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #86A788;
+        }
+
+        .section h3 {
+            color: #86A788;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 1.3em;
+        }
+
+        .section h3 svg {
+            margin-right: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background-color: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #86A788;
+            box-shadow: 0 0 0 3px rgba(134, 167, 136, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .course-summary {
+            background: linear-gradient(135deg, #86A788, #6b8a6d);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .course-summary h3 {
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .mentor-info {
+            background-color: #E6F1E6;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .mentor-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .mentor-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .mentor-details h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .mentor-rating {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .mentor-rating svg {
+            color: #ffc107;
+            margin-right: 3px;
+        }
+
+        .schedule-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .schedule-card {
+            background-color: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .schedule-card:hover {
+            border-color: #86A788;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .schedule-card.selected {
+            border-color: #86A788;
+            background-color: #f0f8f0;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .payment-card {
+            background-color: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-card:hover {
+            border-color: #86A788;
+            transform: translateY(-2px);
+        }
+
+        .payment-card.selected {
+            border-color: #86A788;
+            background-color: #f0f8f0;
+        }
+
+        .payment-card img {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .submit-section {
+            background: linear-gradient(135deg, #86A788, #6b8a6d);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .submit-btn {
+            background-color: #F4B860;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            background-color: #e6a54d;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .security-note {
+            background-color: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #2d5a2d;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .schedule-options {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-methods {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card-header h1 {
+                font-size: 1.8em;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Back Button -->
+    <a href="javascript:history.back()" class="back-button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Quay lại khóa học
+    </a>
+
+    <div class="registration-card">
+        <!-- Header -->
+        <div class="card-header">
+            <h1>🎓 Đăng Ký Khóa Học</h1>
+            <p>Lập Trình Web Cơ Bản với HTML/CSS/JavaScript</p>
+
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-step active">1</div>
+                <div class="progress-line"></div>
+                <div class="progress-step">2</div>
+                <div class="progress-line"></div>
+                <div class="progress-step">3</div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <!-- Alert Messages -->
+            <div class="alert success" id="successAlert">
+                ✅ Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn trong vòng 24h.
+            </div>
+
+            <div class="alert error" id="errorAlert">
+                ❌ Có lỗi xảy ra. Vui lòng kiểm tra lại thông tin và thử lại.
+            </div>
+
+            <!-- Course Summary -->
+            <div class="course-summary">
+                <h3>📋 Tóm tắt khóa học</h3>
+                <div class="summary-item">
+                    <span>Tên khóa học:</span>
+                    <span>Lập Trình Web Cơ Bản</span>
+                </div>
+                <div class="summary-item">
+                    <span>Thời lượng:</span>
+                    <span>8-12 tuần</span>
+                </div>
+                <div class="summary-item">
+                    <span>Hình thức:</span>
+                    <span>1-1 Online</span>
+                </div>
+                <div class="summary-item">
+                    <span>Giá mỗi buổi:</span>
+                    <span>300,000 VNĐ</span>
+                </div>
+            </div>
+
+            <form id="registrationForm">
+                <!-- Personal Information -->
+                <div class="section">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Thông tin cá nhân
+                    </h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">Họ và tên *</label>
+                            <input type="text" id="fullName" name="fullName" required placeholder="Nhập họ và tên của bạn">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required placeholder="example@email.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Số điện thoại *</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="0123456789">
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Tuổi</label>
+                            <input type="number" id="age" name="age" min="16" max="65" placeholder="Nhập tuổi của bạn">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience">Kinh nghiệm lập trình *</label>
+                        <select id="experience" name="experience" required>
+                            <option value="">Chọn mức độ kinh nghiệm</option>
+                            <option value="beginner">Người mới bắt đầu</option>
+                            <option value="basic">Có kiến thức cơ bản</option>
+                            <option value="intermediate">Trung bình</option>
+                            <option value="advanced">Nâng cao</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motivation">Mục tiêu học tập</label>
+                        <textarea id="motivation" name="motivation" rows="3" placeholder="Chia sẻ mục tiêu và lý do bạn muốn học khóa này..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Mentor Information -->
+                <div class="section">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.5-12h-3c0 1.66-1.34 3-3 3s-3-1.34-3-3H7.5L5 16h2.5v6h3v-6h2v6h4z"/>
+                        </svg>
+                        Thông tin mentor
+                    </h3>
+
+                    <div class="mentor-info">
+                        <div class="mentor-profile">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+" alt="Mentor Avatar" class="mentor-avatar">
+                            <div class="mentor-details">
+                                <h4>Nguyễn Văn Minh</h4>
+                                <div class="mentor-rating">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                    <span>4.9/5 (25 đánh giá)</span>
+                                </div>
+                                <p><strong>Chuyên môn:</strong> Web Development, JavaScript, React</p>
+                            </div>
+                        </div>
+                        <p><strong>Kinh nghiệm:</strong> 5+ năm phát triển web, từng làm việc tại FPT Software và VNG Corporation</p>
+                    </div>
+                </div>
+
+                <!-- Schedule Selection -->
+                <div class="section">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                        </svg>
+                        Chọn lịch học ưu tiên
+                    </h3>
+
+                    <div class="schedule-options">
+                        <div class="schedule-card" onclick="selectSchedule(this, 'weekday-morning')">
+                            <h4>🌅 Sáng trong tuần</h4>
+                            <p>Thứ 2-6: 8:00-12:00</p>
+                        </div>
+                        <div class="schedule-card" onclick="selectSchedule(this, 'weekday-afternoon')">
+                            <h4>🌇 Chiều trong tuần</h4>
+                            <p>Thứ 2-6: 13:00-17:00</p>
+                        </div>
+                        <div class="schedule-card" onclick="selectSchedule(this, 'weekday-evening')">
+                            <h4>🌙 Tối trong tuần</h4>
+                            <p>Thứ 2-6: 18:00-21:00</p>
+                        </div>
+                        <div class="schedule-card" onclick="selectSchedule(this, 'weekend')">
+                            <h4>🎯 Cuối tuần</h4>
+                            <p>Thứ 7-CN: Linh hoạt</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selectedSchedule" name="schedule">
+                </div>
+
+                <!-- Payment Method -->
+                <div class="section">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                        </svg>
+                        Phương thức thanh toán
+                    </h3>
+
+                    <div class="payment-methods">
+                        <div class="payment-card" onclick="selectPayment(this, 'bank-transfer')">
+                            <div>🏦</div>
+                            <h4>Chuyển khoản</h4>
+                            <p>Ngân hàng</p>
+                        </div>
+                        <div class="payment-card" onclick="selectPayment(this, 'momo')">
+                            <div>📱</div>
+                            <h4>MoMo</h4>
+                            <p>Ví điện tử</p>
+                        </div>
+                        <div class="payment-card" onclick="selectPayment(this, 'zalopay')">
+                            <div>💳</div>
+                            <h4>ZaloPay</h4>
+                            <p>Ví điện tử</p>
+                        </div>
+                        <div class="payment-card" onclick="selectPayment(this, 'cash')">
+                            <div>💰</div>
+                            <h4>Tiền mặt</h4>
+                            <p>Gặp trực tiếp</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selectedPayment" name="payment">
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">
+                        Tôi đồng ý với <a href="#" style="color: #86A788;">Điều khoản sử dụng</a> và <a href="#" style="color: #86A788;">Chính sách bảo mật</a> của Mentee Learning *
+                    </label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="newsletter" name="newsletter">
+                    <label for="newsletter">
+                        Tôi muốn nhận thông tin về các khóa học và ưu đãi mới qua email
+                    </label>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="submit-section">
+                    <h3 style="color: white; margin-bottom: 10px;">🚀 Hoàn tất đăng ký</h3>
+                    <p>Bạn sẽ nhận được email xác nhận và mentor sẽ liên hệ trong vòng 24h</p>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        Đăng Ký Ngay - 300,000 VNĐ/buổi
+                    </button>
+
+                    <div class="security-note">
+                        🔒 <strong>Bảo mật thông tin:</strong> Thông tin của bạn được mã hóa và bảo vệ an toàn.
+                        Chúng tôi cam kết không chia sẻ thông tin cá nhân với bên thứ ba.
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedScheduleValue = '';
+    let selectedPaymentValue = '';
+
+    function selectSchedule(element, value) {
+        // Remove selected class from all schedule cards
+        document.querySelectorAll('.schedule-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Add selected class to clicked card
+        element.classList.add('selected');
+
+        // Update hidden input
+        selectedScheduleValue = value;
+        document.getElementById('selectedSchedule').value = value;
+
+        // Update progress indicator to step 2
+        updateProgress(2);
+    }
+
+    function selectPayment(element, value) {
+        // Remove selected class from all payment cards
+        document.querySelectorAll('.payment-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Add selected class to clicked card
+        element.classList.add('selected');
+
+        // Update hidden input
+        selectedPaymentValue = value;
+        document.getElementById('selectedPayment').value = value;
+
+        // Update progress indicator to step 3
+        updateProgress(3);
+    }
+
+    function updateProgress(step) {
+        const steps = document.querySelectorAll('.progress-step');
+        const lines = document.querySelectorAll('.progress-line');
+
+        steps.forEach((s, index) => {
+            s.classList.remove('active');
+            if (index + 1 <= step) {
+                s.classList.add('completed');
+            }
+            if (index + 1 === step) {
+                s.classList.add('active');
+            }
+        });
+
+        lines.forEach((line, index) => {
+            line.classList.remove('completed');
+            if (index < step - 1) {
+                line.classList.add('completed');
+            }
+        });
+    }
+
+    function showAlert(type, message) {
+        const alert = document.getElementById(type + 'Alert');
+        alert.textContent = message;
+        alert.style.display = 'block';
+
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 5000);
+    }
+
+    function validateForm() {
+        const form = document.getElementById('registrationForm');
+        const formData = new FormData(form);
+
+        // Check required fields
+        const requiredFields = [
+            { id: 'fullName', label: 'Họ và tên' },
+            { id: 'email', label: 'Email' },
+            { id: 'phone', label: 'Số điện thoại' },
+            { id: 'experience', label: 'Kinh nghiệm lập trình' }
+        ];
+
+        for (let field of requiredFields) {
+            if (!formData.get(field.id)) {
+                showAlert('error', `Vui lòng điền ${field.label}`);
+                return false;
+            }
+        }
+
+        // Check email format
+        const email = formData.get('email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showAlert('error', 'Email không đúng định dạng');
+            return false;
+        }
+
+        // Check phone format
+        const phone = formData.get('phone');
+        const phoneRegex = /^[0-9]{10,11}$/;
+        if (!phoneRegex.test(phone)) {
+            showAlert('error', 'Số điện thoại không đúng định dạng');
+            return false;
+        }
+
+        // Check schedule selection
+        if (!selectedScheduleValue) {
+            showAlert('error', 'Vui lòng chọn lịch học ưu tiên');
+            return false;
+        }
+
+        // Check payment method
+        if (!selectedPaymentValue) {
+            showAlert('error', 'Vui lòng chọn phương thức thanh toán');
+            return false;
+        }
+
+        // Check terms agreement
+        if (!formData.get('terms')) {
+            showAlert('error', 'Vui lòng đồng ý với điều khoản sử dụng');
+            return false;
+        }
+
+        return true;
+    }
+
+    function simulateRegistration() {
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Đang xử lý...';
+
+        // Simulate API call
+        setTimeout(() => {
+            // Simulate success (90% chance) or error (10% chance)
+            const isSuccess = Math.random() > 0.1;
+
+            if (isSuccess) {
+                showAlert('success', '✅ Đăng ký thành công! Mentor sẽ liên hệ với bạn trong vòng 24h.');
+
+                // Update progress indicator to complete
+                updateProgress(3);
+
+                // Reset form
+                document.getElementById('registrationForm').reset();
+                document.querySelectorAll('.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                selectedScheduleValue = '';
+                selectedPaymentValue = '';
+                document.getElementById('selectedSchedule').value = '';
+                document.getElementById('selectedPayment').value = '';
+
+                // Reset progress indicator to step 1
+                setTimeout(() => {
+                    updateProgress(1);
+                }, 5000);
+            } else {
+                showAlert('error', '❌ Có lỗi xảy ra. Vui lòng thử lại sau.');
+            }
+
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Đăng Ký Ngay - 300,000 VNĐ/buổi';
+        }, 2000);
+    }
+
+    // Form submission handler
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (validateForm()) {
+            simulateRegistration();
+        }
+    });
+</script>
+</body>
+</html>
