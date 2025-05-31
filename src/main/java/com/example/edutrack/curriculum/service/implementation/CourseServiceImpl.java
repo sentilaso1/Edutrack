@@ -48,7 +48,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Page<Course> findAll(Pageable pageable) {
-        return null;
+        return courseRepository.findAll(pageable);
     }
 
     @Override

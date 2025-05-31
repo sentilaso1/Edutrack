@@ -10,6 +10,7 @@ import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.profiles.service.interfaces.CvService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -85,10 +86,17 @@ public class CvController {
     // Show the CV form
     public String showCVForm(Model model,
                              @RequestParam(defaultValue = "1") int page,
-                             @RequestParam(defaultValue = "6") int size) {
+                             @RequestParam(defaultValue = "6") int size,
+                             HttpSession session) {
         if (page - 1 < 0) {
             return "redirect:/404";
         }
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        UUID userId = user.getId();
 
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Course> coursePage = courseService.findAll(pageable);
@@ -96,6 +104,7 @@ public class CvController {
         model.addAttribute("cv", new CVForm());
         model.addAttribute("coursePage", coursePage);
         model.addAttribute("pageNumber", page);
+        model.addAttribute("userId", userId);
         return "cv/create-cv";
     }
 
