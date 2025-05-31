@@ -36,44 +36,23 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
             Pageable pageable
     );
 
-    // Các query ordering với ACCEPTED status
-    @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE cm.status = :status
-        ORDER BY cm.course.createdDate DESC
-    """)
-    Page<CourseMentor> findByStatusOrderByCreatedDateDesc(
-            @Param("status") ApplicationStatus status,
+    @Query("SELECT cm FROM CourseMentor cm ORDER BY cm.course.createdDate DESC")
+    Page<CourseMentor> findAlByOrderByCreatedDateDesc(
             Pageable pageable
     );
 
-    @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE cm.status = :status
-        ORDER BY cm.course.createdDate ASC
-    """)
-    Page<CourseMentor> findByStatusOrderByCreatedDateAsc(
-            @Param("status") ApplicationStatus status,
+    @Query("SELECT cm FROM CourseMentor cm ORDER BY cm.course.createdDate ASC")
+    Page<CourseMentor> findAlByOrderByCreatedDateAsc(
             Pageable pageable
     );
 
-    @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE cm.status = :status
-        ORDER BY cm.course.name ASC
-    """)
-    Page<CourseMentor> findByStatusOrderByTitleAsc(
-            @Param("status") ApplicationStatus status,
+    @Query("SELECT cm FROM CourseMentor cm ORDER BY cm.course.name ASC")
+    Page<CourseMentor> findAlByOrderByTitleAsc(
             Pageable pageable
     );
 
-    @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE cm.status = :status
-        ORDER BY cm.course.name DESC
-    """)
-    Page<CourseMentor> findByStatusOrderByTitleDesc(
-            @Param("status") ApplicationStatus status,
+    @Query("SELECT cm FROM CourseMentor cm ORDER BY cm.course.name DESC")
+    Page<CourseMentor> findAlByOrderByTitleDesc(
             Pageable pageable
     );
 
