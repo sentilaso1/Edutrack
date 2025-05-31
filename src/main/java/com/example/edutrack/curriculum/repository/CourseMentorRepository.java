@@ -19,33 +19,63 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
 
     @Query("SELECT distinct cm.course FROM CourseMentor cm")
     List<Course> findAllCourses();
-
     @Query("""
-    SELECT cm FROM CourseMentor cm
-    WHERE (:skillIds IS NULL OR cm.course.id IN :skillIds)
-    AND (:subjectIds IS NULL OR EXISTS (
-        SELECT 1 FROM CourseTag ct
-        WHERE ct.course = cm.course
-        AND ct.tag.id IN :subjectIds
-    ))
-""")
+        SELECT cm FROM CourseMentor cm
+        WHERE cm.status = :status
+        AND (:skillIds IS NULL OR cm.course.id IN :skillIds)
+        AND (:subjectIds IS NULL OR EXISTS (
+            SELECT 1 FROM CourseTag ct
+            WHERE ct.course = cm.course
+            AND ct.tag.id IN :subjectIds
+        ))
+    """)
     Page<CourseMentor> findFilteredCourseMentors(
-            List<UUID> skillIds,
-            List<Integer> subjectIds,
+            @Param("status") ApplicationStatus status,
+            @Param("skillIds") List<UUID> skillIds,
+            @Param("subjectIds") List<Integer> subjectIds,
             Pageable pageable
     );
 
-    @Query("SELECT c FROM CourseMentor c ORDER BY c.course.createdDate ASC")
-    Page<CourseMentor> findAlByOrderByCreatedDateAsc(Pageable pageable);
+    // Các query ordering với ACCEPTED status
+    @Query("""
+        SELECT cm FROM CourseMentor cm
+        WHERE cm.status = :status
+        ORDER BY cm.course.createdDate DESC
+    """)
+    Page<CourseMentor> findByStatusOrderByCreatedDateDesc(
+            @Param("status") ApplicationStatus status,
+            Pageable pageable
+    );
 
-    @Query("SELECT c FROM CourseMentor c ORDER BY c.course.createdDate DESC")
-    Page<CourseMentor> findAlByOrderByCreatedDateDesc(Pageable pageable);
+    @Query("""
+        SELECT cm FROM CourseMentor cm
+        WHERE cm.status = :status
+        ORDER BY cm.course.createdDate ASC
+    """)
+    Page<CourseMentor> findByStatusOrderByCreatedDateAsc(
+            @Param("status") ApplicationStatus status,
+            Pageable pageable
+    );
 
-    @Query("SELECT c FROM CourseMentor c ORDER BY c.course.name ASC")
-    Page<CourseMentor> findAlByOrderByTitleAsc(Pageable pageable);
+    @Query("""
+        SELECT cm FROM CourseMentor cm
+        WHERE cm.status = :status
+        ORDER BY cm.course.name ASC
+    """)
+    Page<CourseMentor> findByStatusOrderByTitleAsc(
+            @Param("status") ApplicationStatus status,
+            Pageable pageable
+    );
 
-    @Query("SELECT c FROM CourseMentor c ORDER BY c.course.name DESC")
-    Page<CourseMentor> findAlByOrderByTitleDesc(Pageable pageable);
+    @Query("""
+        SELECT cm FROM CourseMentor cm
+        WHERE cm.status = :status
+        ORDER BY cm.course.name DESC
+    """)
+    Page<CourseMentor> findByStatusOrderByTitleDesc(
+            @Param("status") ApplicationStatus status,
+            Pageable pageable
+    );
 
     List<CourseMentor> findByCourseId(UUID courseMentorId);
 
