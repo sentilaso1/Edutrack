@@ -21,16 +21,16 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
     List<Course> findAllCourses();
     @Query("""
         SELECT cm FROM CourseMentor cm
-        WHERE 
-            (:skillIds IS NULL OR cm.course.id IN :skillIds)
-        AND 
-            (:subjectIds IS NULL OR EXISTS (
-                SELECT 1 FROM CourseTag ct
-                WHERE ct.course = cm.course
-                AND ct.tag.id IN :subjectIds
-            ))
+        WHERE cm.status = :status
+        AND (:skillIds IS NULL OR cm.course.id IN :skillIds)
+        AND (:subjectIds IS NULL OR EXISTS (
+            SELECT 1 FROM CourseTag ct
+            WHERE ct.course = cm.course
+            AND ct.tag.id IN :subjectIds
+        ))
     """)
     Page<CourseMentor> findFilteredCourseMentors(
+            @Param("status") ApplicationStatus status,
             @Param("skillIds") List<UUID> skillIds,
             @Param("subjectIds") List<Integer> subjectIds,
             Pageable pageable
