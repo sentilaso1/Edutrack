@@ -82,47 +82,6 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
     @Query("SELECT cm.course FROM CourseMentor cm WHERE cm.mentor.id = :mentorId")
     List<Course> findCoursesByMentorId(@Param("mentorId") UUID mentorId);
 
-    // Các query ordering với ACCEPTED status
-    @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE cm.status = :status
-        ORDER BY cm.course.createdDate DESC
-    """)
-    Page<CourseMentor> findByStatusOrderByCreatedDateDesc(
-            @Param("status") ApplicationStatus status,
-            Pageable pageable
-    );
-
-    @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE cm.status = :status
-        ORDER BY cm.course.createdDate ASC
-    """)
-    Page<CourseMentor> findByStatusOrderByCreatedDateAsc(
-            @Param("status") ApplicationStatus status,
-            Pageable pageable
-    );
-
-    @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE cm.status = :status
-        ORDER BY cm.course.name ASC
-    """)
-    Page<CourseMentor> findByStatusOrderByTitleAsc(
-            @Param("status") ApplicationStatus status,
-            Pageable pageable
-    );
-
-    @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE cm.status = :status
-        ORDER BY cm.course.name DESC
-    """)
-    Page<CourseMentor> findByStatusOrderByTitleDesc(
-            @Param("status") ApplicationStatus status,
-            Pageable pageable
-    );
-
     @Query("""
         SELECT cm FROM CourseMentor cm
         WHERE cm.status = :status
