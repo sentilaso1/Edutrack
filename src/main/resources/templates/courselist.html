@@ -140,7 +140,7 @@
                     <!-- Cột trái: bộ lọc -->
                     <aside class="course-filter">
                         <form th:action="@{/courses}" method="get" id="filterForm">
-                            <input type="hidden" name="size_page" th:value="${param.size_page}" />
+                            <input type="hidden" name="size_page" th:value="${param.size_page}"/>
                             <h3>Filter</h3>
 
                             <div class="filter-price">
@@ -151,9 +151,9 @@
                                             <input type="checkbox"
                                                    name="subject"
                                                    th:value="${subject.id}"
-                                                   th:checked="${selectedSubjects != null and #arrays.contains(selectedSubjects, subject.id)}"
-                                                   onchange="submitForm()" />
-                                            <span th:text="${subject.getTitle()}"></span>
+                                                   th:checked="${selectedSubjects != null and selectedSubjects.contains(subject.id)}"
+                                                   onchange="submitForm()"/>
+                                            <span th:text="${subject.title}"></span>
                                         </label>
                                     </li>
                                 </ul>
@@ -167,8 +167,8 @@
                                             <input type="checkbox"
                                                    name="skill"
                                                    th:value="${skill.id}"
-                                                   th:checked="${selectedSkills != null and #arrays.contains(selectedSkills, skill.id.toString())}"
-                                                   onchange="submitForm()" />
+                                                   th:checked="${selectedSkills != null and selectedSkills.contains(skill.id)}"
+                                                   onchange="submitForm()"/>
                                             <span th:text="${skill.name}"></span>
                                         </label>
                                     </li>
@@ -200,36 +200,94 @@
                                     <button class="dropdown-toggle">▾Show</button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a href="?size_page=6"><button type="button">6</button></a>
+                                            <a th:href="@{/courses(
+                                                    size_page=6,
+                                                    subject=${param.subject},
+                                                    skill=${param.skill},
+                                                    order_by=${param.order_by}
+                                            )}">
+                                                <button type="button">6</button>
+                                            </a>
                                         </li>
                                         <li>
-                                            <a href="?size_page=9"><button type="button">9</button></a>
+                                            <a th:href="@{/courses(
+                                                    size_page=9,
+                                                    subject=${param.subject},
+                                                    skill=${param.skill},
+                                                    order_by=${param.order_by}
+                                            )}">
+                                                <button type="button">9</button>
+                                            </a>
                                         </li>
                                         <li>
-                                            <a href="?size_page=12"><button type="button">12</button></a>
+                                            <a th:href="@{/courses(
+                                                    size_page=12,
+                                                    subject=${param.subject},
+                                                    skill=${param.skill},
+                                                    order_by=${param.order_by}
+                                            )}">
+                                                <button type="button">12</button>
+                                            </a>
                                         </li>
                                         <li>
-                                            <a href="?size_page=18"><button type="button">18</button></a>
+                                            <a th:href="@{/courses(
+                                                    size_page=18,
+                                                    subject=${param.subject},
+                                                    skill=${param.skill},
+                                                    order_by=${param.order_by}
+                                            )}">
+                                                <button type="button">18</button>
+                                            </a>
                                         </li>
                                     </ul>
+
                                 </div>
 
                                 <div class="dropdown">
                                     <button class="dropdown-toggle">▾Sort by</button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a href="?order_by=newest"><button type="button">Newest</button></a>
+                                            <a th:href="@{/courses(
+                                                    size_page=${param.size_page},
+                                                    subject=${param.subject},
+                                                    skill=${param.skill},
+                                                    order_by='newest'
+                                            )}">
+                                                <button type="button">Newest</button>
+                                            </a>
                                         </li>
                                         <li>
-                                            <a href="?order_by=oldest"><button type="button">Oldest</button></a>
+                                            <a th:href="@{/courses(
+                                                    size_page=${param.size_page},
+                                                    subject=${param.subject},
+                                                    skill=${param.skill},
+                                                    order_by='oldest'
+                                            )}">
+                                                <button type="button">Oldest</button>
+                                            </a>
                                         </li>
                                         <li>
-                                            <a href="?order_by=title_asc"><button type="button">Alphabet: A to Z</button></a>
+                                            <a th:href="@{/courses(
+                                                    size_page=${param.size_page},
+                                                    subject=${param.subject},
+                                                    skill=${param.skill},
+                                                    order_by='title_asc'
+                                            )}">
+                                                <button type="button">Alphabet: A to Z</button>
+                                            </a>
                                         </li>
                                         <li>
-                                            <a href="?order_by=title_desc"><button type="button">Alphabet: Z to A</button></a>
+                                            <a th:href="@{/courses(
+                                                    size_page=${param.size_page},
+                                                    subject=${param.subject},
+                                                    skill=${param.skill},
+                                                    order_by='title_desc'
+                                            )}">
+                                                <button type="button">Alphabet: Z to A</button>
+                                            </a>
                                         </li>
                                     </ul>
+
                                 </div>
                             </div>
 
@@ -275,7 +333,8 @@
                                             </div>
                                         </div>
 
-                                        <h6 class="title-lg card-title" th:text="${course_mentor.course.name}">Course Name</h6>
+                                        <h6 class="title-lg card-title" th:text="${course_mentor.course.name}">Course
+                                            Name</h6>
 
                                         <div class="card-meta wrapper card-meta-inlayout">
                                             <p class="title-sm">
@@ -308,19 +367,44 @@
                     </div>
                 </div>
                 <nav class="pagination">
+                    <!-- Previous Page -->
                     <button th:disabled="${coursePage.first}">
                         <a th:if="${!coursePage.first}" class="page-btn"
-                           th:href="@{/courses(page=${coursePage.number}, size_page=${param.size_page})}">&laquo;</a>
+                           th:href="@{/courses(
+                           page=${coursePage.number},
+                           size_page=${param.size_page},
+                           subject=${param.subject},
+                           skill=${param.skill},
+                           order_by=${param.order_by}
+                       )}">&laquo;</a>
                     </button>
+
+                    <!-- Page Numbers -->
                     <th:block th:each="i : ${#numbers.sequence(1, coursePage.totalPages)}">
-                        <a th:href="@{/courses(page=${i}, size_page=${param.size_page})}"
+                        <a th:href="@{/courses(
+                            page=${i},
+                            size_page=${param.size_page},
+                            subject=${param.subject},
+                            skill=${param.skill},
+                            order_by=${param.order_by}
+                        )}"
                            th:classappend="${i == coursePage.number + 1} ? 'page-btn active' : 'page-btn'"
                            th:text="${i}">1</a>
                     </th:block>
 
-                    <button th:disabled="${coursePage.last}"><a th:if="${!coursePage.last}" class="page-btn"
-                               th:href="@{/courses(page=${coursePage.number + 2}, size_page=${param.size_page})}"> &raquo;</a></button>
+                    <!-- Next Page -->
+                    <button th:disabled="${coursePage.last}">
+                        <a th:if="${!coursePage.last}" class="page-btn"
+                           th:href="@{/courses(
+                           page=${coursePage.number + 2},
+                           size_page=${param.size_page},
+                           subject=${param.subject},
+                           skill=${param.skill},
+                           order_by=${param.order_by}
+                       )}">&raquo;</a>
+                    </button>
                 </nav>
+
             </div>
         </section>
     </article>
