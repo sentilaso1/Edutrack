@@ -6,6 +6,7 @@ import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.interfaces.TagService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,5 +32,14 @@ public class TagServiceImpl implements TagService {
     @Override
     public Optional<Tag> findById(Integer id) {
         return tagRepository.findById(id);
+    }
+
+    @Override
+    public List<Optional<Tag>> findById(List<Integer> ids) {
+        List<Optional<Tag>> tags = new ArrayList<>();
+        for (Integer id : ids) {
+            tags.add(tagRepository.findById(id));
+        }
+        return tags;
     }
 }
