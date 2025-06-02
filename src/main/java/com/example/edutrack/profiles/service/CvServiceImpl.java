@@ -173,11 +173,14 @@ public class CvServiceImpl implements CvService {
     public List<String> getAllUniqueSkills() {
         List<String> skills = cvRepository.findAllSkills();
 
-        return skills.stream()
+        List<String> distinctSkills = new ArrayList<>(skills.stream()
                 .flatMap(skillSet -> Stream.of(skillSet.split(CV.ITEM_SEPARATOR_REGEX)))
                 .distinct()
                 .sorted()
-                .toList();
+                .toList());
+        distinctSkills.replaceAll(String::trim);
+
+        return distinctSkills;
     }
 
     @Override
