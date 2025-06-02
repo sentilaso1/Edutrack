@@ -73,7 +73,7 @@ public class CvServiceImpl implements CvService {
             clauses.add("skills LIKE :skill" + i);
         }
         sql.append(String.join(" OR ", clauses));
-        sql.append(" ORDER BY created_date ").append(sort != null && sort.equals(CVFilterForm.SORT_DATE_ASC) ? "ASC" : "DESC");
+        sql.append(" ORDER BY CASE status WHEN 'pending' THEN 1 WHEN 'approved' THEN 2 WHEN 'rejected' THEN 3 END, created_date ").append(sort != null && sort.equals(CVFilterForm.SORT_DATE_ASC) ? "ASC" : "DESC");
 
         Query query = entityManager.createNativeQuery(sql.toString(), CV.class);
         for (int i = 0; i < skills.size(); i++) {
@@ -111,7 +111,7 @@ public class CvServiceImpl implements CvService {
             skillClauses.add("skills LIKE :skill" + i);
         }
         sql.append(String.join(" OR ", skillClauses)).append(")");
-        sql.append(" ORDER BY created_date ").append(sort != null && sort.equals(CVFilterForm.SORT_DATE_ASC) ? "ASC" : "DESC");
+        sql.append(" ORDER BY CASE status WHEN 'pending' THEN 1 WHEN 'approved' THEN 2 WHEN 'rejected' THEN 3 END, created_date ").append(sort != null && sort.equals(CVFilterForm.SORT_DATE_ASC) ? "ASC" : "DESC");
 
         Query query = entityManager.createNativeQuery(sql.toString(), CV.class);
         query.setParameter("status", status);

@@ -148,7 +148,7 @@
 
         <div class="checkbox-group">
             <label>
-                <input id="tags-all" type="checkbox" name="tags" value="all" checked/>
+                <input id="tags-all" type="checkbox" name="tags" value="all" th:checked="${#lists.contains(tags, 'all')}"/>
                 <span>All</span>
             </label>
 
