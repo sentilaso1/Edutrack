@@ -355,7 +355,7 @@
         <div th:if="${mentor != null}" class="mentor-card">
             <div class="mentor-info">
                 <img th:if="${mentor.avatar != null}"
-                     th:src="'data:image/png;base64,' + ${mentor.avatar}"
+                     th:src="@{/avatar/{id}(id=${mentor.id})}"
                      alt="Avatar"
                      class="mentor-avatar">
                 <img th:if="${mentor.avatar == null}"
