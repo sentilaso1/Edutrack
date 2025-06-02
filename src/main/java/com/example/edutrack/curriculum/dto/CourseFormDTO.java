@@ -20,7 +20,7 @@ public class CourseFormDTO {
     private List<@NotBlank(message = "Tag không được để trống")
     @Size(min = 2, max = 30, message = "Tag phải từ 2 đến 30 ký tự") String> tagTexts;
 
-    @NotNull(message = "Phải upload ít nhất 1 tài liệu")
+    @NotEmpty(message = "Phải upload ít nhất 1 tài liệu")
     @Size(min = 1, max = 5, message = "Số lượng file từ 1 đến 5")
     private MultipartFile[] files;
     public CourseFormDTO() {}
