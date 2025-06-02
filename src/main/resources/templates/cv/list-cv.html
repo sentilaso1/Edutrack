@@ -148,13 +148,13 @@
 
         <div class="checkbox-group">
             <label>
-                <input id="tags-all" type="checkbox" name="tags" value="all" th:checked="${#lists.contains(tags, 'all')}"/>
+                <input id="tags-all" type="checkbox" th:checked="${tags == null || tags.isEmpty() || tags.size() == skills.size()}"/>
                 <span>All</span>
             </label>
 
             <label th:each="skill : ${skills}">
                 <input type="checkbox" name="tags" th:value="${skill}"
-                       th:checked="${#lists.contains(tags, skill)}"/>
+                       th:attr="checked=${tags != null && #lists.contains(tags, skill)}"/>
                 <span th:text="${skill}"></span>
             </label>
         </div>
@@ -241,11 +241,32 @@
     const allTagsCheckbox = document.getElementById('tags-all');
     const tagCheckboxes = document.querySelectorAll('input[name="tags"]');
 
-    allTagsCheckbox.addEventListener('change', () => {
+    checkAllBoxes = () => {
         tagCheckboxes.forEach(checkbox => {
             checkbox.checked = allTagsCheckbox.checked;
         });
-    });
+    }
+
+    countCheckBoxes = () => {
+        let count = 0;
+        for (const tagCheckbox of tagCheckboxes) {
+            if (tagCheckbox.checked) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    if (allTagsCheckbox.checked) {
+        checkAllBoxes();
+    }
+    allTagsCheckbox.addEventListener('change', checkAllBoxes);
+
+    for (const tagCheckbox of tagCheckboxes) {
+        tagCheckbox.addEventListener('change', () => {
+            allTagsCheckbox.checked = countCheckBoxes() === [[${tags.size()}]];
+        });
+    }
     /*]]>*/
 </script>
 </body>

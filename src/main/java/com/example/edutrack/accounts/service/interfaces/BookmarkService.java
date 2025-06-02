@@ -1,6 +1,7 @@
 package com.example.edutrack.accounts.service.interfaces;
 
 import com.example.edutrack.accounts.dto.BookmarkDTO;
+import com.example.edutrack.accounts.dto.BookmarkFilterForm;
 import com.example.edutrack.accounts.model.Bookmark;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.curriculum.model.Tag;
@@ -9,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface BookmarkService {
     Page<Bookmark> findAllBookmarksDateDesc();
@@ -35,7 +35,11 @@ public interface BookmarkService {
     Page<BookmarkDTO> findAllBookmarkContainingTagsDateAsc(Pageable pageable, List<Integer> tagIds);
     Page<BookmarkDTO> findAllBookmarkContainingTagsDateAsc(Pageable pageable, User user, List<Integer> tagIds);
 
+    Page<BookmarkDTO> queryAll(BookmarkFilterForm params, Pageable pageable);
+
     List<Tag> findAllUniqueTags(List<BookmarkDTO> bookmarkDTOs);
+    List<Tag> findAllSelectedTags(List<Integer> tagIds);
+
     Bookmark save(Bookmark bookmark);
     Optional<Bookmark> findById(Long id);
 
