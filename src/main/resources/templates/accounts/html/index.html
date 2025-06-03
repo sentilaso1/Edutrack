@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin Dashboard</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="bg-gray-100 flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white h-screen fixed">
+                <div class="p-4 text-2xl font-bold">EduTrack Admin</div>
+                <nav class="mt-4">
+                        <a href="/admin/dashboard" class="block py-2 px-4 hover:bg-gray-700">Dashboard</a>
+                        <a href="/admin/users" class="block py-2 px-4 hover:bg-gray-700">User Management</a>
+                        <a href="/admin/system-settings" class="block py-2 px-4 hover:bg-gray-700">System Settings</a>
+                </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="ml-64 flex-1 p-6">
+                <h1 class="text-2xl font-bold mb-6">Admin Dashboard</h1>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- System Status Cards -->
+                        <div class="bg-white p-4 rounded shadow">
+                                <h2 class="text-lg font-semibold">CPU Usage</h2>
+                                <p th:text="${systemStatus.cpuUsage}"></p>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow">
+                                <h2 class="text-lg font-semibold">Memory Usage</h2>
+                                <p th:text="${systemStatus.memoryUsage}"></p>
+                                <p>Total: <span th:text="${systemStatus.totalMemory}"></span></p>
+                                <p>Available: <span th:text="${systemStatus.availableMemory}"></span></p>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow">
+                                <h2 class="text-lg font-semibold">Disk Usage</h2>
+                                <p th:text="${systemStatus.diskUsage}"></p>
+                                <p>Total: <span th:text="${systemStatus.totalDisk}"></span></p>
+                                <p>Used: <span th:text="${systemStatus.usedDisk}"></span></p>
+                        </div>
+                </div>
+        </div>
+
+        <script>
+                // SweetAlert2 for success messages
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('success')) {
+                        Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: urlParams.get('success'),
+                                timer: 3000,
+                                showConfirmButton: false
+                        });
+                }
+        </script>
+</body>
+
+</html>
