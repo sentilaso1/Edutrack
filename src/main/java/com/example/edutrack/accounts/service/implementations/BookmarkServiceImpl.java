@@ -1,31 +1,32 @@
 package com.example.edutrack.accounts.service.implementations;
 
 import com.example.edutrack.accounts.dto.BookmarkDTO;
+import com.example.edutrack.accounts.dto.BookmarkFilterForm;
 import com.example.edutrack.accounts.model.Bookmark;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.BookmarkRepository;
 import com.example.edutrack.accounts.service.interfaces.BookmarkService;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.TagServiceImpl;
+import com.example.edutrack.curriculum.service.interfaces.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class BookmarkServiceImpl implements BookmarkService {
     private final BookmarkRepository bookmarkRepository;
-    private final TagServiceImpl tagServiceImpl;
+    private final TagService tagService;
 
     @Autowired
-    public BookmarkServiceImpl(BookmarkRepository bookmarkRepository, TagServiceImpl tagServiceImpl) {
+    public BookmarkServiceImpl(BookmarkRepository bookmarkRepository, TagService tagService) {
         this.bookmarkRepository = bookmarkRepository;
-        this.tagServiceImpl = tagServiceImpl;
+        this.tagService = tagService;
     }
 
     @Override
@@ -107,6 +108,24 @@ public class BookmarkServiceImpl implements BookmarkService {
     }
 
     @Override
+    public Page<BookmarkDTO> queryAll(BookmarkFilterForm params, Pageable pageable) {
+        String sort = params.getSort();
+        List<Integer> tagIds = params.getTags();
+
+        if (sort == null || sort.equals(BookmarkFilterForm.SORT_DATE_DESC)) {
+            if (tagIds == null || tagIds.isEmpty()) {
+                return this.findAllBookmarkWithCourseTagsDateDesc(pageable);
+            }
+            return this.findAllBookmarkContainingTagsDateDesc(pageable, tagIds);
+        }
+
+        if (tagIds == null || tagIds.isEmpty()) {
+            return this.findAllBookmarkWithCourseTagsDateAsc(pageable);
+        }
+        return this.findAllBookmarkContainingTagsDateAsc(pageable, tagIds);
+    }
+
+    @Override
     public List<Tag> findAllUniqueTags(List<BookmarkDTO> bookmarkDTOs) {
         return bookmarkDTOs.stream()
                 .flatMap(bookmarkDTO -> bookmarkDTO.getTags().stream())
@@ -114,12 +133,26 @@ public class BookmarkServiceImpl implements BookmarkService {
                 .toList();
     }
 
+    @Override
+    public List<Tag> findAllSelectedTags(List<Integer> tagIds) {
+        List<Optional<Tag>> optionals = tagService.findById(tagIds);
+        List<Tag> selectedTags = new ArrayList<>();
+
+        for (Optional<Tag> optional : optionals) {
+            if (optional.isEmpty()) {
+                continue;
+            }
+            selectedTags.add(optional.get());
+        }
+        return selectedTags;
+    }
+
     private Page<BookmarkDTO> getBookmarkDTOS(Page<Bookmark> bookmarkPage) {
         return bookmarkPage.map(bookmark -> {
             BookmarkDTO bookmarkDTO = new BookmarkDTO();
             bookmarkDTO.setBookmark(bookmark);
 
-            List<Tag> tags = tagServiceImpl.findTagsByCourseId(bookmark.getCourse().getId());
+            List<Tag> tags = tagService.findTagsByCourseId(bookmark.getCourse().getId());
             bookmarkDTO.setTags(tags);
 
             return bookmarkDTO;

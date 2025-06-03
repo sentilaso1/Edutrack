@@ -1,22 +1,27 @@
 package com.example.edutrack.profiles.controller;
 
+import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.service.implementations.UserServiceImpl;
 import com.example.edutrack.auth.service.UserService;
+import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
+import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.profiles.service.interfaces.CvService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -25,11 +30,13 @@ public class CvController {
 
     private final CvService cvService;
     private final UserService userService;
+    private final CourseService courseService;
 
     @Autowired
-    public CvController(CvService cvService, UserService userService) {
+    public CvController(CvService cvService, UserService userService, CourseService courseService) {
         this.cvService = cvService;
         this.userService = userService;
+        this.courseService = courseService;
     }
 
     @GetMapping("/admin/cv/list/{page}")
@@ -38,28 +45,35 @@ public class CvController {
             return "redirect:/404";
         }
 
-        model.addAttribute("pageNumber", page);
-
-        Page<CV> cvPage = null;
         String filter = params.getFilter();
         String sort = params.getSort();
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        List<String> tags = params.getTags();
+        List<String> uniqueSkills = cvService.getAllUniqueSkills();
 
-        if (filter == null || filter.isEmpty()) {
-            if (sort == null || sort.equals(CVFilterForm.SORT_DATE_DESC)) {
-                cvPage = cvService.findAllCVsDateDesc(pageable);
-            } else {
-                cvPage = cvService.findAllCVsDateAsc(pageable);
-            }
-        } else {
-            if (sort == null || sort.equals(CVFilterForm.SORT_DATE_DESC)) {
-                cvPage = cvService.findAllCVsByStatusDateDesc(pageable, filter);
-            } else {
-                cvPage = cvService.findAllCVsByStatusDateAsc(pageable, filter);
-            }
+        // TODO: Optizimize case when all skills are already selected
+        if (tags == null || tags.isEmpty() || tags.contains("all")) {
+            tags = uniqueSkills;
         }
 
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        Page<CV> cvPage = cvService.queryCVs(filter, sort, tags, pageable);
+
+        model.addAttribute("pageNumber", page);
         model.addAttribute("page", cvPage);
+        model.addAttribute("skills", uniqueSkills);
+
+        if (sort != null) {
+            model.addAttribute("sort", sort);
+        }
+        if (filter != null) {
+            model.addAttribute("filter", filter);
+        }
+        model.addAttribute("tags", tags);
+
+        if (cvPage.getTotalPages() > 0 && page > cvPage.getTotalPages()) {
+            return "redirect:/404";
+        }
+
         return "/cv/list-cv";
     }
 
@@ -70,17 +84,36 @@ public class CvController {
 
     @GetMapping("cv/create")
     // Show the CV form
-    public String showCVForm(Model model) {
+    public String showCVForm(Model model,
+                             @RequestParam(defaultValue = "1") int page,
+                             @RequestParam(defaultValue = "6") int size,
+                             HttpSession session) {
+        if (page - 1 < 0) {
+            return "redirect:/404";
+        }
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        UUID userId = user.getId();
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Course> coursePage = courseService.findAll(pageable);
+
         model.addAttribute("cv", new CVForm());
+        model.addAttribute("coursePage", coursePage);
+        model.addAttribute("pageNumber", page);
+        model.addAttribute("userId", userId);
         return "cv/create-cv";
     }
 
     // Handle the form submit
     @PostMapping("cv/create")
     public String handleCVFormSubmission(@ModelAttribute("cv") CVForm request, Model model) {
-            CV saved = cvService.createCV(request);
-            model.addAttribute("message", "CV created successfully!");
-            return "redirect:/cv/mainpage";
+        CV saved = cvService.createCV(request);
+        model.addAttribute("message", "CV created successfully!");
+        return "redirect:/cv/mainpage";
     }
 
     @GetMapping("/cv/edit/{id}")

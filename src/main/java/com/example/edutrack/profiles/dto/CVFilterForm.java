@@ -3,6 +3,7 @@ package com.example.edutrack.profiles.dto;
 import jakarta.validation.constraints.Null;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class CVFilterForm implements Serializable {
     public static final String FILTER_APPROVED = "approved";
@@ -16,10 +17,13 @@ public class CVFilterForm implements Serializable {
     private String sort;
     @Null
     private String filter;
+    @Null
+    private List<String> tags;
 
-    public CVFilterForm(String sort, String filter) {
+    public CVFilterForm(String sort, String filter, List<String> tags) {
         this.sort = sort;
         this.filter = filter;
+        this.tags = tags;
     }
 
     public String getSort() {
@@ -54,11 +58,20 @@ public class CVFilterForm implements Serializable {
         this.filter = filter;
     }
 
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public String toString() {
         return "CVFilterForm{" +
                 "sort='" + sort + '\'' +
                 ", filter='" + filter + '\'' +
+                ", tags=" + tags +
                 '}';
     }
 }

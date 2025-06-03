@@ -119,21 +119,34 @@
 </head>
 <body class="viewport">
 <h1 style="padding: 0.5rem 0.5rem 0 0.5rem; margin-bottom: 1rem; font-size: 3em">Bookmark List</h1>
+
 <div class="main-grid">
     <aside class="sidebar">
-        <form>
+        <form class="filter-form">
             <h3 class="small-heading">
                 <label for="sort">Sorting Order:</label>
             </h3>
             <select name="sort" id="sort" style="margin-bottom: 1em">
-                <option value="date-desc" selected>Date descending</option>
-                <option value="date-asc">Date ascending</option>
+                <option value="date-desc"
+                        th:selected="${sort == null || (sort != null && sort == 'date-desc')}">Date
+                    descending
+                </option>
+                <option value="date-asc" th:selected="${sort != null && sort == 'date-asc'}">Date
+                    ascending
+                </option>
             </select>
 
             <h3>Filter Options</h3>
             <div class="filter-options">
+                <label>
+                    <input type="checkbox" id="tags-all"
+                           th:checked="${selectedTags == null || selectedTags.isEmpty() || tags.size() == selectedTags.size()}"/>
+                    <span>All</span>
+                </label>
+
                 <label th:each="tag : ${tags}">
-                    <input type="checkbox" name="tags" th:value="${tag.id}" />
+                    <input type="checkbox" name="tags" th:value="${tag.id}"
+                           th:attr="checked=${selectedTags != null && #lists.contains(selectedTags, tag.id)}"/>
                     <span th:text="${tag.title}"></span>
                 </label>
             </div>
@@ -145,7 +158,9 @@
     </aside>
 
     <main th:with="bookmarkDTOs = ${page.content}" class="bookmark-grid">
-        <div th:each="bookmarkDTO : ${bookmarkDTOs}" th:with="bookmark = ${bookmarkDTO.bookmark}, course = ${bookmarkDTO.bookmark.course}, tags = ${bookmarkDTO.tags}" class="bookmark-item container-bg">
+        <div th:each="bookmarkDTO : ${bookmarkDTOs}"
+             th:with="bookmark = ${bookmarkDTO.bookmark}, course = ${bookmarkDTO.bookmark.course}, tags = ${bookmarkDTO.tags}"
+             class="bookmark-item container-bg">
             <div class="bookmark-header section-bg">
                 <span th:text="${bookmark.getCreatedDate().toLocaleString()}"></span>
                 <form th:action="@{/bookmark/delete/{id}(id=${bookmark.id})}" method="post">
@@ -169,34 +184,86 @@
             </div>
 
             <div class="bookmark-tags">
-                    <th:block th:each="tag : ${bookmarkDTO.tags}">
-                        <span th:text="${tag.title}" class="tag-item modal-bg"></span>
-                    </th:block>
+                <th:block th:each="tag : ${bookmarkDTO.tags}">
+                    <span th:text="${tag.title}" class="tag-item modal-bg"></span>
+                </th:block>
             </div>
         </div>
     </main>
 </div>
 
 <div class="pagination">
-    <a th:href="@{/bookmark/list/1}"
-       th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
+    <button id="first-page" th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
         First
-    </a>
-    <a th:href="@{/bookmark/list/{prev}(prev = ${pageNumber - 1})}"
-       th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
+    </button>
+
+    <button id="previous-page" th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
         Previous
-    </a>
+    </button>
 
     <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
 
-    <a th:href="@{/bookmark/list/{next}(next = ${pageNumber + 1})}"
-       th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
+    <button id="next-page" th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
         Next
-    </a>
-    <a th:href="@{/bookmark/list/{last}(last = ${page.totalPages})}"
-       th:classappend="${(pageNumber < page.getTotalPages()) ? 'visible' : 'invisible'}">
+    </button>
+
+    <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? 'visible' : 'invisible'}">
         Last
-    </a>
+    </button>
 </div>
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const filterForm = document.getElementById("filter-form");
+
+    document.getElementById('first-page').addEventListener('click', () => {
+        filterForm.action = '/bookmark/list/1';
+        filterForm.submit();
+    });
+    document.getElementById('previous-page').addEventListener('click', () => {
+        filterForm.action = '/bookmark/list/' + [[${pageNumber - 1}]];
+        filterForm.submit();
+    });
+    document.getElementById('next-page').addEventListener('click', () => {
+        filterForm.action = '/bookmark/list/' + [[${pageNumber + 1}]];
+        filterForm.submit();
+    });
+    document.getElementById('last-page').addEventListener('click', () => {
+        filterForm.action = '/bookmark/list/' + [[${page.totalPages}]];
+        filterForm.submit();
+    });
+
+    const allTagsCheckbox = document.getElementById('tags-all');
+    const tagCheckboxes = document.querySelectorAll('input[name="tags"]');
+
+    checkAllBoxes = () => {
+        tagCheckboxes.forEach(checkbox => {
+            checkbox.checked = allTagsCheckbox.checked;
+        });
+    }
+
+    countCheckBoxes = () => {
+        let count = 0;
+        for (const tagCheckbox of tagCheckboxes) {
+            if (tagCheckbox.checked) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    if (allTagsCheckbox.checked) {
+        checkAllBoxes();
+    }
+    allTagsCheckbox.addEventListener('change', checkAllBoxes);
+
+    for (const tagCheckbox of tagCheckboxes) {
+        tagCheckbox.addEventListener('change', () => {
+            allTagsCheckbox.checked = countCheckBoxes() === [[${tags.size()}]];
+        });
+    }
+    /*]]>*/
+</script>
 </body>
 </html>

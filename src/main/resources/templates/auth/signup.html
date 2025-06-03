@@ -132,6 +132,8 @@
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
 
+            const today = new Date();
+
             // Full name required
             if (fullName === "") {
                 alert("Full name is required");
@@ -140,9 +142,20 @@
             }
 
             // Birth date cannot be in the future
-            const today = new Date();
             if (birthDate > today) {
                 alert("Birth date cannot be in the future");
+                e.preventDefault();
+                return;
+            }
+
+            // Age must be 6 or older
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            if (age < 6) {
+                alert("You must be at least 6 years old to register");
                 e.preventDefault();
                 return;
             }

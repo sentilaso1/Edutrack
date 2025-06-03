@@ -4,15 +4,13 @@ import com.example.edutrack.accounts.model.User;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "cv")
 public class CV {
-    public static final String ITEM_SEPARATOR = ";";
+    public static final String ITEM_SEPARATOR_REGEX = "[,;]+";
 
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_APPROVED = "approved";
@@ -186,10 +184,10 @@ public class CV {
             return List.of();
         }
 
-        List<String> result = new ArrayList<>(List.of(itemString.split(ITEM_SEPARATOR)));
-        result.removeIf(String::isEmpty);
-
-        return result;
+        return Arrays.stream(itemString.split(ITEM_SEPARATOR_REGEX))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
     }
 
     public List<String> getSkillItems() {

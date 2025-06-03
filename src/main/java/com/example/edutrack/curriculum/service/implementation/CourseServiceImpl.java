@@ -48,7 +48,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Page<Course> findAll(Pageable pageable) {
-        return null;
+        return courseRepository.findAll(pageable);
     }
 
     @Override
@@ -140,6 +140,7 @@ public class CourseServiceImpl implements CourseService {
                         teachingMaterial.setCourse(course);
                         teachingMaterial.setName(file.getOriginalFilename());
                         teachingMaterial.setFile(file.getBytes());
+                        teachingMaterial.setFileType(file.getContentType());
 
                         teachingMaterialsRepository.save(teachingMaterial);
                     } catch (IOException e) {

@@ -4,12 +4,17 @@ import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "mentors")
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Mentor extends User {
+
+    public static final String ITEM_SEPARATOR_REGEX = "[,;]+";
 
     @Column(name = "is_available")
     private Boolean isAvailable = Boolean.FALSE;
@@ -60,6 +65,21 @@ public class Mentor extends User {
 
     public void setRating(Double rating) {
         this.rating = rating;
+    }
+
+    private static List<String> getItemList(String itemString) {
+        if (itemString == null || itemString.isEmpty()) {
+            return List.of();
+        }
+
+        return Arrays.stream(itemString.split(ITEM_SEPARATOR_REGEX))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getExpertiseItem() {
+        return getItemList(getExpertise());
     }
 
     @OneToMany(mappedBy = "mentor")

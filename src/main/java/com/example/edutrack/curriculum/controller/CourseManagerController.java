@@ -152,11 +152,25 @@ public class CourseManagerController {
                                BindingResult bindingResult,
                                Model model,
                                RedirectAttributes redirectAttributes) {
+        boolean hasAtLeastOneFile = false;
+        if(courseFormDTO.getFiles() != null) {
+            for (MultipartFile file : courseFormDTO.getFiles()) {
+                if (file != null && !file.isEmpty()) {
+                    hasAtLeastOneFile = true;
+                    break;
+                }
+            }
+        }
+        if (!hasAtLeastOneFile) {
+            bindingResult.rejectValue("files", "files.empty", "Phải upload ít nhất 1 tài liệu");
+        }
+
         if(bindingResult.hasErrors()) {
             model.addAttribute("courseForm", courseFormDTO);
             model.addAttribute("errors", bindingResult.getAllErrors());
             return "course-form";
         }
+
         try {
             UUID courseID = courseService.create(courseFormDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo khóa học thành công");
