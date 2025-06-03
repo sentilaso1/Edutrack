@@ -3,128 +3,97 @@
     <meta charset="UTF-8">
     <title>EduTrack - CV Approval List</title>
     <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
     <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
 
     <style>
+        .page-header {
+            font-size: 2.5em;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
         .main-grid {
-            max-width: 100%;
             display: grid;
-            grid-template-columns: 1fr 3fr;
-            gap: 1.5em;
-            padding: 0.5em;
-        }
-
-        .sidebar > form {
-            display: flex;
-            flex-direction: column;
-            position: sticky;
-            top: 0.5em;
-        }
-
-        .radio-list {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .cv-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5em;
-        }
-
-        .cv-item {
-            box-sizing: border-box;
-            width: 100%;
-            height: 100%;
-
-            border-radius: 0.25em;
-            background-color: #dddddd;
-        }
-
-        .cv-item .status {
-            border-radius: 0.25em 0.25em 0 0;
-            padding: 0.5em;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .cv-item .status span {
-            font-weight: bold;
-            text-transform: capitalize;
-        }
-
-        .cv-item .content {
-            padding: 0.5em;
-        }
-
-        .cv-item .profile-section {
-            display: flex;
+            grid-template-columns: 1fr;
             gap: 1em;
-            margin-top: 0.5em;
-            margin-bottom: 1em;
-            align-items: center;
+            padding: 0.5em;
         }
 
-        .cv-item .avatar-frame {
-            aspect-ratio: 1/1;
-            height: 6em;
-            border-radius: 100%;
-            background-color: white;
+        .filter-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            grid-template-rows: auto auto;
+            gap: 1em;
+        }
+
+        .filter-group {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-start;
+            gap: 0.5em;
         }
 
-        .avatar-frame svg {
-            aspect-ratio: 1/1;
-            width: 60%;
+        .checkbox-group {
+            grid-column: span 3;
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: 0.5em;
         }
 
-        .cv-item .tags {
+        .cv-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .cv-table-header {
+            background-color: var(--color-primary);
+        }
+
+        .cv-table th, .cv-table td {
+            padding: 0.5em;
+            border: 1px solid var(--color-secondary);
+            text-align: left;
+        }
+
+        .cv-table tbody > tr:nth-child(odd) {
+            background-color: var(--bg-primary);
+        }
+
+        .cv-table tbody > tr:nth-child(even) {
+            background-color: var(--bg-modal);
+        }
+
+        .tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.25em;
+            gap: 0.5em;
         }
 
-        .cv-item .tag-item {
-            background-color: #b5b5b5;
+        .tag-item {
+            background-color: var(--color-info);
+            padding: 0.25em 0.5em;
             border-radius: 0.25em;
-            padding: 0.25em;
         }
 
-        .small-heading {
-            font-weight: bold;
-            margin-bottom: 0.25em;
+        .pagination {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 0.5em;
         }
 
         .bg-approved {
-            background-color: #86A788;
+            background-color: var(--color-success);
         }
 
         .bg-rejected {
-            background-color: #e87878;
+            background-color: var(--color-error);
         }
 
         .bg-pending {
-            background-color: #F4B860;
-        }
-
-        .view-more {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 1em;
-        }
-
-        .filter-button {
-            border: none;
-            border-radius: 0.25em;
-            padding: 0.5em;
-            background-color: #86A788;
-            cursor: pointer;
-        }
-
-        .filter-button:hover {
-            background-color: #759976;
+            background-color: var(--color-warning);
         }
 
         .visible {
@@ -134,117 +103,171 @@
         .invisible {
             visibility: hidden;
         }
-
-        .pagination {
-            margin: 1em;
-            max-width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1em;
-        }
     </style>
 </head>
 <body class="viewport">
-<h1 style="padding: 0.5rem 0.5rem 0 0.5rem; margin-bottom: 1rem; font-size: 3em">CV Approval List</h1>
-<div class="main-grid">
-    <aside class="sidebar">
-        <form>
-            <h3 class="small-heading">
+<h1 class="page-header">CV Approval List</h1>
+<main class="main-grid">
+    <form class="filter-form" id="filter-form">
+        <div class="filter-group">
+            <h3 class="">
                 <label for="sort">Sorting Order:</label>
             </h3>
-            <select name="sort" id="sort" style="margin-bottom: 1em">
-                <option value="date-desc" selected>Date descending</option>
-                <option value="date-asc">Date ascending</option>
+            <select name="sort" id="sort">
+                <option value="date-desc" th:selected="${sort != null && sort == 'date-desc' }">Date
+                    descending
+                </option>
+                <option value="date-asc" th:selected="${sort != null && sort == 'date-asc' }">Date
+                    ascending
+                </option>
             </select>
-
-            <h3 class="small-heading">Filter Options:</h3>
-            <div class="radio-list" style="margin-bottom: 1em">
-                <label for="pending">
-                    <input type="radio" name="filter" id="pending" value="pending">
-                    Pending
-                </label>
-
-                <label for="approved">
-                    <input type="radio" name="filter" id="approved" value="approved">
-                    Approved
-                </label>
-
-                <label for="rejected">
-                    <input type="radio" name="filter" id="rejected" value="rejected">
-                    Rejected
-                </label>
-            </div>
-
-            <button type="submit" class="filter-button">Filter</button>
-        </form>
-    </aside>
-
-    <main class="cv-grid" th:with="cvList = ${page.content}">
-        <div th:each="cv : ${cvList}" class="cv-item">
-            <div class="status"
-                 th:classappend="${cv.status.equals('approved') ? 'bg-approved' : cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending'}">
-                <span th:text="${cv.status}"></span>
-                <time th:text="${cv.createdDate.toLocaleString()}" th:datetime="${cv.createdDate.toString()}"></time>
-                <a th:href="@{'/admin/cv/detail/' + ${cv.user.id}}" style="color: black">View More</a>
-            </div>
-
-            <div class="content">
-                <div class="profile-section">
-                    <div class="avatar-frame">
-                        <svg th:if="${cv.user.avatar == null}" xmlns="http://www.w3.org/2000/svg"
-                             class="bi bi-person-fill" viewBox="0 0 16 16">
-                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
-                        </svg>
-                    </div>
-
-                    <div>
-                        <p th:text="${cv.user.fullName}"
-                           style="font-size: 1.5em; font-weight: bold; margin-bottom: 0.25em"></p>
-                        <p th:text="${cv.summary}"></p>
-                    </div>
-                </div>
-
-                <div class="">
-                    <h3 style="margin-top: 1em; margin-bottom: 0.5em">Skills</h3>
-                    <div class="tags">
-                        <div class="tag-item" th:each="skill : ${cv.getSkillItems()}" th:text="${skill}">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="">
-                    <h3 style="margin-top: 1em; margin-bottom: 0.5em">Education</h3>
-                    <div class="tags">
-                        <div class="tag-item" th:each="education : ${cv.getEducationItems()}" th:text="${education}">
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
-    </main>
-</div>
 
-<div class="pagination">
-    <a th:href="@{/admin/cv/list/1}"
-       th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
-        First
-    </a>
-    <a th:href="@{/admin/cv/list/{prev}(prev = ${pageNumber - 1})}"
-       th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
-        Previous
-    </a>
+        <div class="filter-group">
+            <h3 class="">Filter Options:</h3>
+            <label for="pending">
+                <input type="radio" name="filter" id="pending" value="pending"
+                       th:checked="${filter != null && filter == 'pending'}">
+                Pending
+            </label>
 
-    <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+            <label for="approved">
+                <input type="radio" name="filter" id="approved" value="approved"
+                       th:checked="${filter != null && filter == 'approved'}">
+                Approved
+            </label>
 
-    <a th:href="@{/admin/cv/list/{next}(next = ${pageNumber + 1})}"
-       th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
-        Next
-    </a>
-    <a th:href="@{/admin/cv/list/{last}(last = ${page.totalPages})}"
-       th:classappend="${(pageNumber < page.getTotalPages()) ? 'visible' : 'invisible'}">
-        Last
-    </a>
-</div>
+            <label for="rejected">
+                <input type="radio" name="filter" id="rejected" value="rejected"
+                       th:checked="${filter != null && filter == 'rejected'}">
+                Rejected
+            </label>
+        </div>
+
+        <button type="submit" class="">Filter</button>
+
+        <div class="checkbox-group">
+            <label>
+                <input id="tags-all" type="checkbox" th:checked="${tags == null || tags.isEmpty() || tags.size() == skills.size()}"/>
+                <span>All</span>
+            </label>
+
+            <label th:each="skill : ${skills}">
+                <input type="checkbox" name="tags" th:value="${skill}"
+                       th:attr="checked=${tags != null && #lists.contains(tags, skill)}"/>
+                <span th:text="${skill}"></span>
+            </label>
+        </div>
+    </form>
+
+    <table class="cv-table">
+        <thead class="cv-table-header">
+        <tr>
+            <th>Status</th>
+            <th>Created Date</th>
+            <th>User</th>
+            <th>Skills</th>
+            <th>Education</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="cv : ${page.content}">
+            <td th:text="${cv.status}"
+                th:classappend="${cv.status.equals('approved') ? 'bg-approved' : (cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending')}"></td>
+            <td th:text="${cv.createdDate.toLocaleString()}"></td>
+            <td th:text="${cv.user.fullName}"></td>
+            <td>
+                <div class="tags">
+                    <span th:each="skill : ${cv.getSkillItems()}" th:text="${skill}" class="tag-item"></span>
+                </div>
+            </td>
+            <td>
+                <div class="tags">
+                    <span th:each="education : ${cv.getEducationItems()}" th:text="${education}"
+                          class="tag-item"></span>
+                </div>
+            </td>
+            <td>
+                <a th:href="@{/admin/cv/detail/{id}(id = ${cv.id})}">View More</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <button id="first-page" th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
+            First
+        </button>
+
+        <button id="previous-page" th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
+            Previous
+        </button>
+
+        <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+
+        <button id="next-page" th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
+            Next
+        </button>
+
+        <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? 'visible' : 'invisible'}">
+            Last
+        </button>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const filterForm = document.getElementById("filter-form");
+
+    document.getElementById('first-page').addEventListener('click', () => {
+        filterForm.action = '/admin/cv/list/1';
+        filterForm.submit();
+    });
+    document.getElementById('previous-page').addEventListener('click', () => {
+        filterForm.action = '/admin/cv/list/' + [[${pageNumber - 1}]];
+        filterForm.submit();
+    });
+    document.getElementById('next-page').addEventListener('click', () => {
+        filterForm.action = '/admin/cv/list/' + [[${pageNumber + 1}]];
+        filterForm.submit();
+    });
+    document.getElementById('last-page').addEventListener('click', () => {
+        filterForm.action = '/admin/cv/list/' + [[${page.totalPages}]];
+        filterForm.submit();
+    });
+
+    const allTagsCheckbox = document.getElementById('tags-all');
+    const tagCheckboxes = document.querySelectorAll('input[name="tags"]');
+
+    checkAllBoxes = () => {
+        tagCheckboxes.forEach(checkbox => {
+            checkbox.checked = allTagsCheckbox.checked;
+        });
+    }
+
+    countCheckBoxes = () => {
+        let count = 0;
+        for (const tagCheckbox of tagCheckboxes) {
+            if (tagCheckbox.checked) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    if (allTagsCheckbox.checked) {
+        checkAllBoxes();
+    }
+    allTagsCheckbox.addEventListener('change', checkAllBoxes);
+
+    for (const tagCheckbox of tagCheckboxes) {
+        tagCheckbox.addEventListener('change', () => {
+            allTagsCheckbox.checked = countCheckBoxes() === [[${tags.size()}]];
+        });
+    }
+    /*]]>*/
+</script>
 </body>
 </html>

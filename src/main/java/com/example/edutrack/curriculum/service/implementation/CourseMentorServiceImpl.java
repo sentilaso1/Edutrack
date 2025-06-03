@@ -71,10 +71,9 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         return applicantsRepository.findByMentorId(id);
     }
 
-
     @Override
     public Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable) {
-        return courseMentorRepository.findFilteredCourseMentors(ApplicationStatus.ACCEPTED, skillIds, subjectIds, pageable);
+        return courseMentorRepository.findFilteredCourseMentors(skillIds, subjectIds, pageable);
     }
 
     public List<CourseMentor> findByCourseId(UUID courseMentorId) {

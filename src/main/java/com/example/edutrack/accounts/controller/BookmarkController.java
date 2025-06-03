@@ -2,7 +2,6 @@ package com.example.edutrack.accounts.controller;
 
 import com.example.edutrack.accounts.dto.BookmarkDTO;
 import com.example.edutrack.accounts.dto.BookmarkFilterForm;
-import com.example.edutrack.accounts.model.Bookmark;
 import com.example.edutrack.accounts.service.interfaces.BookmarkService;
 import com.example.edutrack.curriculum.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Controller
 public class BookmarkController {
@@ -37,34 +34,23 @@ public class BookmarkController {
             return "redirect:/404";
         }
 
-        model.addAttribute("pageNumber", page);
+        List<Integer> selectedTags = params.getTags();
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        Page<BookmarkDTO> bookmarkPage = null;
+        Page<BookmarkDTO> bookmarkPage = bookmarkService.queryAll(params, pageable);
+        List<BookmarkDTO> bookmarks;
 
         // TODO: Optimize this logic to avoid redundant queries
-        List<Tag> tags = null;
-        List<BookmarkDTO> bookmarks = null;
-
         if (params.getSort() == null || params.getSort().equals(BookmarkFilterForm.SORT_DATE_DESC)) {
-            if (params.getTags() == null || params.getTags().isEmpty()) {
-                bookmarkPage = bookmarkService.findAllBookmarkWithCourseTagsDateDesc(pageable);
-            } else {
-                bookmarkPage = bookmarkService.findAllBookmarkContainingTagsDateDesc(pageable, params.getTags());
-            }
             bookmarks = bookmarkService.findAllBookmarkWithCourseTagsDateDesc(Pageable.unpaged()).getContent();
-            tags = bookmarkService.findAllUniqueTags(bookmarks);
         } else {
-            if (params.getTags() == null || params.getTags().isEmpty()) {
-                bookmarkPage = bookmarkService.findAllBookmarkWithCourseTagsDateAsc(pageable);
-            } else {
-                bookmarkPage = bookmarkService.findAllBookmarkContainingTagsDateAsc(pageable, params.getTags());
-            }
             bookmarks = bookmarkService.findAllBookmarkWithCourseTagsDateAsc(Pageable.unpaged()).getContent();
-            tags = bookmarkService.findAllUniqueTags(bookmarks);
         }
+        List<Tag> tags = bookmarkService.findAllUniqueTags(bookmarks);
 
+        model.addAttribute("pageNumber", page);
         model.addAttribute("page", bookmarkPage);
         model.addAttribute("tags", tags);
+        model.addAttribute("selectedTags", selectedTags);
 
         return "/bookmarks/list-bookmark";
     }
