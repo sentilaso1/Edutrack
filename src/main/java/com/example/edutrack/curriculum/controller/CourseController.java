@@ -4,7 +4,6 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
-import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
@@ -20,11 +19,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.example.edutrack.curriculum.model.Course;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Controller
 public class CourseController {
@@ -97,7 +94,7 @@ public class CourseController {
         model.addAttribute("selectedSubjects", subject);
         model.addAttribute("selectedSkills", skill);
 
-        return "courselist";
+        return "mentee/courselist";
     }
 
     @GetMapping("/courses/{courseMentorId}")
@@ -121,7 +118,7 @@ public class CourseController {
         model.addAttribute("tagList", tagList);
         model.addAttribute("mentor", mentorDTO);
 
-        return "course-detail";
+        return "mentee/course-detail";
     }
 
 
@@ -150,7 +147,7 @@ public class CourseController {
         model.addAttribute("availableTimes", times);
         model.addAttribute("courseId", courseId);
         model.addAttribute("mentorId", mentorId);
-        return "mentor-availability";
+        return "mentee/mentor-availability";
     }
 
 
