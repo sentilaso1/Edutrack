@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ### Application ###
-/*.log
-/*.env
+*.log
+*.env
