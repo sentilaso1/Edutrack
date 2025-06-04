@@ -118,7 +118,7 @@ public class CourseController {
         model.addAttribute("tagList", tagList);
         model.addAttribute("mentor", mentorDTO);
 
-        return "mentee/course-detail";
+        return "/mentee/course_detail";
     }
 
 
@@ -149,6 +149,12 @@ public class CourseController {
         model.addAttribute("mentorId", mentorId);
         return "mentee/mentor-availability";
     }
+
+    @GetMapping("/home")
+    public String home(Model model) {
+        return "mentee/mentee-dashboard";
+    }
+
 
 
 
