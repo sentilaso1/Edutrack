@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" th:href="@{/assets/css/course_detail.css}" />
+</head>
+<body>
+<div class="overall">
+    <div class="left">
+        <h1>Futures Thinking Specialization</h1>
+        <p>
+            Ready Yourself for a Changing World. Learn the skills and mindsets of
+            the world’s top futurists, so you can forecast what’s coming, imagine
+            new possibilities, and seize control of your own future.
+        </p>
+        <h2>Mentor: Dung BV</h2>
+        <button>Enroll</button>
+        <p><strong>29,878</strong> already enrolled</p>
+    </div>
+    <div>
+        <img th:src="@{#}" alt="avatar_of_mentor" />
+    </div>
+</div>
+<div style="padding: 0 2em 0;">
+    <div class="banner">
+        <div>
+            <h3>5 course series</h3>
+            <p>Get in-depth knowledge of a subject</p>
+        </div>
+        <div>
+            <h3>4.9</h3>
+            <p>(1.545 reviews)</p>
+        </div>
+        <div>
+            <h3>Beginner level</h3>
+            <p>Recommended experience</p>
+        </div>
+        <div>
+            <h3>2 months</h3>
+            <p>at 10 hours a week</p>
+        </div>
+        <div style="border: none">
+            <h3>Flexible schedule</h3>
+            <p>Learn at your own pace</p>
+        </div>
+    </div>
+    <div class="navigate">
+        <ul>
+            <li><a th:href="@{#session1}">About</a></li>
+            <li><a th:href="@{#skill}">Subjects</a></li>
+            <li><a th:href="@{#session3}">Testimonial</a></li>
+            <li><a th:href="@{#session2}">Related Skills</a></li>
+        </ul>
+    </div>
+    <div class="cover">
+        <div class="about">
+            <div class="learn">
+                <h2 id="session1">What you'll learn</h2>
+                <div class="group">
+                    <div class="element">
+                        Gain insight into the most important new technologies, global
+                        events and big ideas that are already shaping the future.
+                    </div>
+                    <div class="element">
+                        Gain insight into the most important new technologies, global
+                        events and big ideas that are already shaping the future.
+                    </div>
+                    <div class="element">
+                        Gain insight into the most important new technologies, global
+                        events and big ideas that are already shaping the future.
+                    </div>
+                    <div class="element">
+                        Gain insight into the most important new technologies, global
+                        events and big ideas that are already shaping the future.
+                    </div>
+                </div>
+            </div>
+            <div class="skill">
+                <h2 id="skill">Subjects</h2>
+                <div class="tag_list">
+                    <div class="tag">Community Organizing</div>
+                    <div class="tag">Virtual Reality</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h2 id="session3">Why people choose EduTrack for their career</h2>
+    <div class="review">
+        <div class="card">
+            <div class="title">
+                <img th:src="@{#}" alt="avatar" />
+                <h3 class="name">Felipe M.</h3>
+            </div>
+            <div>
+                "To be able to take courses at my own pace and rhythm has been an
+                amazing experience. I can learn whenever it fits my schedule and
+                mood."
+            </div>
+        </div>
+        <div class="card">
+            <div class="title">
+                <img th:src="@{#}" alt="avatar" />
+                <h3 class="name">Felipe M.</h3>
+            </div>
+            <div>
+                "To be able to take courses at my own pace and rhythm has been an
+                amazing experience. I can learn whenever it fits my schedule and
+                mood."
+            </div>
+        </div>
+        <div class="card">
+            <div class="title">
+                <img th:src="@{#}" alt="avatar" />
+                <h3 class="name">Felipe M.</h3>
+            </div>
+            <div>
+                "To be able to take courses at my own pace and rhythm has been an
+                amazing experience. I can learn whenever it fits my schedule and
+                mood."
+            </div>
+        </div>
+    </div>
+    <h2 id="session2">Related Skills</h2>
+</div>
+</body>
+</html>
