@@ -4,37 +4,42 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.accounts.repository.MentorRepository;
 import org.springframework.stereotype.Service;
 
 import com.example.edutrack.accounts.model.Mentor;
 
 @Service
 public class MentorServiceImpl implements com.example.edutrack.accounts.service.interfaces.MentorService {
-        private final com.example.edutrack.accounts.repository.MentorRepository mentorRepository;
+    private final MentorRepository mentorRepository;
 
-        public MentorServiceImpl(com.example.edutrack.accounts.repository.MentorRepository mentorRepository) {
-                this.mentorRepository = mentorRepository;
-        }
-        
-        public Mentor getMentorById(String id) {
-                try {
-                        return mentorRepository.findById(UUID.fromString(id))
-                                        .orElseThrow(() -> new IllegalArgumentException(
-                                                        "Mentor not found with id: " + id));
-                } catch (IllegalArgumentException e) {
-                        return null;
-                }
+    public MentorServiceImpl(com.example.edutrack.accounts.repository.MentorRepository mentorRepository) {
+        this.mentorRepository = mentorRepository;
+    }
 
+    public Mentor getMentorById(String id) {
+        try {
+            return mentorRepository.findById(UUID.fromString(id))
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Mentor not found with id: " + id));
+        } catch (IllegalArgumentException e) {
+            return null;
         }
 
+    }
 
-        public List<Mentor> getAllMentors() {
-                return mentorRepository.findAll();
-        }
+
+    public List<Mentor> getAllMentors() {
+        return mentorRepository.findAll();
+    }
 
 
     public Optional<Mentor> findById(UUID id) {
-                return mentorRepository.findById(id);
+        return mentorRepository.findById(id);
+    }
+
+    @Override
+    public long countAll() {
+        return mentorRepository.count();
     }
 }
