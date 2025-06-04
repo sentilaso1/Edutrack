@@ -42,7 +42,7 @@ public class MentorController {
         model.addAttribute("totalSessions", totalSessions);
         model.addAttribute("expertiseInput", String.join(", ", expertise));
         model.addAttribute("isAvailable", isAvailable);
-        return "mentor-list";
+        return "mentee/mentor-list";
     }
 
     @GetMapping("/mentor/{id}")
