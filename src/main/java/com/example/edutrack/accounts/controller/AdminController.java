@@ -1,36 +1,48 @@
 package com.example.edutrack.accounts.controller;
 
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.repository.RequestLogRepository;
+import com.example.edutrack.accounts.model.RequestLog;
 import com.example.edutrack.accounts.model.Staff;
+import com.example.edutrack.accounts.service.interfaces.SystemConfigService;
 import com.example.edutrack.accounts.service.interfaces.UserService;
 import com.example.edutrack.accounts.dto.UserFilter;
 import com.example.edutrack.accounts.dto.UserWithRoleDTO;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Controller
-@RequestMapping("/admin/users")
-public class UserController {
+@RequestMapping("/admin")
+public class AdminController {
 
         private final UserService userService;
+        private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+        private final SystemConfigService systemConfigService;
+        @Autowired
+        private RequestLogRepository requestLogRepository;
 
-        public UserController(UserService userService) {
+
+        @Autowired
+        public AdminController(UserService userService, SystemConfigService systemConfigService) {
                 this.userService = userService;
+                this.systemConfigService = systemConfigService;
         }
 
-        @GetMapping
+        @GetMapping("/users")
         public String showUserManagement(Model model,
                                         @RequestParam(required = false) String email,
                                         @RequestParam(required = false) String fullName,
@@ -68,7 +80,7 @@ public class UserController {
                 return "accounts/html/user-management";
         }
 
-        @PostMapping("/{id}/lock")
+        @PostMapping("/users/{id}/lock")
         public String toggleLock(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
                         User user = userService.getUserById(id);
@@ -88,7 +100,7 @@ public class UserController {
                 return "redirect:/admin/users";
         }
 
-        @PostMapping("/{id}/activate")
+        @PostMapping("/users/{id}/activate")
         public String toggleActivate(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
                         User user = userService.getUserById(id);
@@ -108,7 +120,7 @@ public class UserController {
                 return "redirect:/admin/users";
         }
 
-        @PostMapping("/{id}/grant-staff")
+        @PostMapping("/users/{id}/grant-staff")
         public String grantStaff(@PathVariable String id, @RequestParam String role,
                         RedirectAttributes redirectAttributes) {
                 try {
@@ -132,7 +144,7 @@ public class UserController {
                 return "redirect:/admin/users";
         }
 
-        @PostMapping("/{id}/revoke-staff")      
+        @PostMapping("/users/{id}/revoke-staff")      
         public String revokeStaff(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
                         userService.revokeStaffRole(id);
@@ -142,6 +154,35 @@ public class UserController {
                                         "Lỗi khi hủy vai trò Staff: " + e.getMessage());
                 }
                 return "redirect:/admin/users";
+        }
+
+        @GetMapping("/dashboard")
+        public String showDashboard(Model model) {
+                logger.info("Accessing admin dashboard");
+                model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
+                return "accounts/html/index.html";
+        }
+
+        @GetMapping("/system-settings")
+        public String showSystemSettings(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10") int size,
+                        Model model) {
+                Pageable pageable = PageRequest.of(page, size);
+                Page<RequestLog> logPage = requestLogRepository.findAll(pageable);
+                logger.info("Accessing system settings");
+                model.addAttribute("configs", systemConfigService.getSystemConfigs());
+                model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
+                model.addAttribute("logPage", logPage);
+                model.addAttribute("currentPage", page);
+                model.addAttribute("totalPages", logPage.getTotalPages());
+                return "accounts/html/system-settings";
+        }
+
+        @PostMapping("/system-settings/update")
+        public String updateSystemSettings(@RequestParam String key, @RequestParam String value) {
+                logger.info("Updating system config: {} = {}", key, value);
+                systemConfigService.updateConfig(key, value);
+                return "redirect:/admin/system-settings?success=Configuration updated successfully";
         }
 }
 
