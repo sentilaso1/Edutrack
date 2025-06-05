@@ -38,6 +38,8 @@ public class MentorService {
                     .map(String::toLowerCase)
                     .toList();
 
+
+
             mentors = mentors.stream()
                     .filter(m -> {
                         String mentorExpertise = m.getExpertise().toLowerCase();
@@ -45,6 +47,7 @@ public class MentorService {
                     })
                     .collect(Collectors.toList());
         }
+
 
         return mentors;
     }

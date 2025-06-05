@@ -112,8 +112,9 @@ public class CvController {
     @PostMapping("cv/create")
     public String handleCVFormSubmission(@ModelAttribute("cv") CVForm request, Model model) {
         CV saved = cvService.createCV(request);
+        cvService.aiVerifyCV(saved);
         model.addAttribute("message", "CV created successfully!");
-        return "redirect:/cv/mainpage";
+        return "redirect:/admin/cv/list/1";
     }
 
     @GetMapping("/cv/edit/{id}")

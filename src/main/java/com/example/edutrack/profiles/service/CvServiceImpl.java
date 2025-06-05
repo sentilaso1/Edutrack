@@ -7,18 +7,23 @@ import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.repository.CvRepository;
 import com.example.edutrack.profiles.service.interfaces.CvService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,6 +32,7 @@ public class CvServiceImpl implements CvService {
     private final EntityManager entityManager;
     private final CvRepository cvRepository;
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     public CvServiceImpl(EntityManager entityManager, CvRepository cvRepository, UserRepository userRepository) {
@@ -236,5 +242,156 @@ public class CvServiceImpl implements CvService {
             }
         }
         return false;
+    }
+
+    @Override
+    public void aiVerifyCV(CV cv) {
+        String prompt = generatePrompt(cv);
+        String aiResponse = callMistralAPI(prompt);
+        processAIResponse(cv, aiResponse);
+    }
+
+    @Override
+    public String generatePrompt(CV cv) {
+        // Handle null or empty fields to prevent malformed JSON or prompt issues
+        String summary = cv.getSummary() != null ? cv.getSummary() : "";
+        String experienceYears = cv.getExperienceYears() != null ? cv.getExperienceYears().toString() : "0";
+        String skills = cv.getSkills() != null ? cv.getSkills() : "";
+        String education = cv.getEducation() != null ? cv.getEducation() : "";
+        String experience = cv.getExperience() != null ? cv.getExperience() : "";
+        String certifications = cv.getCertifications() != null ? cv.getCertifications() : "";
+        String languages = cv.getLanguages() != null ? cv.getLanguages() : "";
+
+        // Escape double quotes to prevent JSON injection or malformed strings
+        summary = summary.replace("\"", "\\\"");
+        skills = skills.replace("\"", "\\\"");
+        education = education.replace("\"", "\\\"");
+        experience = experience.replace("\"", "\\\"");
+        certifications = certifications.replace("\"", "\\\"");
+        languages = languages.replace("\"", "\\\"");
+
+        return """
+        You are a CV validation assistant for a mentoring platform. Your task is to review the provided CV data and determine:
+        1. Whether the skills and certifications are valid (i.e., relevant, realistic, and not fake, gibberish, or overly vague).
+        2. Whether the overall CV is consistent and credible based on the summary, experience, education, and languages.
+
+        Validation guidelines:
+        - Skills should be specific, industry-relevant (e.g., "Java, Python, AWS" instead of "coding" or "expert").
+        - Certifications should be from recognized institutions or platforms (e.g., AWS Certified Developer, Coursera, not "Supreme Certificate").
+        - Check for inconsistencies (e.g., 20 years of experience for a 20-year-old candidate, or skills not matching experience).
+        - If fields are empty or overly vague, consider them red flags unless justified by other sections.
+        - Languages should be plausible and relevant to the mentoring context.
+        
+
+        Response requirements:
+        - Respond ONLY with valid JSON in the exact format:
+          {
+            "is-approve": "true" or "false",
+            "reason": "A concise explanation (1-2 sentences) of why the CV was approved or rejected."
+          }
+        - Ensure "is-approve" is a string ("true" or "false"), not a boolean.
+        - Ensure "reason" is a non-empty string.
+        - Do not include any explanation, markdown, code block, or extra fields. Output must be pure JSON only.
+        - Escape special characters in the reason to ensure valid JSON.
+
+        CV data:
+        {
+          "summary": "%s",
+          "years of experience": "%s",
+          "skills": "%s",
+          "educations": "%s",
+          "experience": "%s",
+          "certifications": "%s",
+          "languages": "%s"
+        }
+
+        Example valid responses:
+        {
+          "is-approve": "true",
+          "reason": "Skills (Java, Python) and AWS Certified Developer certification are relevant and verifiable."
+        }
+        {
+          "is-approve": "false",
+          "reason": "Skills are vague ('expert') and certification ('Supreme Certificate') is not recognized."
+        }
+        Respond ONLY with raw JSON, no markdown, no explanation, no code block.
+        """.formatted(summary, experienceYears, skills, education, experience, certifications, languages);
+    }
+
+    public String callMistralAPI(String prompt) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth("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");
+
+        Map<String, Object> body = Map.of(
+                "model", "mistralai/devstral-small:free",
+                "messages", List.of(
+                        Map.of("role", "user", "content", prompt)
+                )
+        );
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "https://openrouter.ai/api/v1/chat/completions",
+                entity,
+                String.class
+        );
+
+        return response.getBody();
+    }
+
+    public void processAIResponse(CV cv, String aiJson) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            if (aiJson == null || aiJson.trim().isEmpty()) {
+                System.err.println("AI response is null or empty");
+                return;
+            }
+
+            JsonNode root = mapper.readTree(aiJson);
+            JsonNode choices = root.path("choices");
+            if (!choices.isArray() || choices.isEmpty()) {
+                System.err.println("Invalid or empty choices array: " + aiJson);
+                return;
+            }
+
+            JsonNode message = choices.get(0).path("message");
+            if (message.isMissingNode()) {
+                System.err.println("Missing message field: " + aiJson);
+                return;
+            }
+
+            JsonNode contentNode = message.path("content");
+            if (contentNode.isMissingNode() || !contentNode.isTextual()) {
+                System.err.println("Missing or invalid content field: " + aiJson);
+                return;
+            }
+
+            String contentJson = contentNode.asText();
+            if (contentJson.startsWith("```")) {
+                contentJson = contentJson.replaceAll("^```(json)?", "").replaceAll("```$", "").trim();
+            }
+            JsonNode decision = mapper.readTree(contentJson);
+
+            JsonNode approveNode = decision.get("is-approve");
+            JsonNode reasonNode = decision.get("reason");
+            if (approveNode == null || reasonNode == null || !approveNode.isTextual() || !reasonNode.isTextual()) {
+                System.err.println("Missing or invalid is-approve/reason fields: " + contentJson);
+                return;
+            }
+
+            boolean approved = approveNode.asText().equalsIgnoreCase("true");
+            String reason = reasonNode.asText();
+
+            System.out.println("Result: " + aiJson);
+
+            cv.setStatus(approved ? "approved" : "rejected");
+            cvRepository.save(cv);
+        } catch (JsonProcessingException e) {
+            System.err.println("JSON parsing error for AI response: " + aiJson);
+        } catch (Exception e) {
+            System.err.println("Unexpected error processing AI response: " + aiJson);
+        }
     }
 }

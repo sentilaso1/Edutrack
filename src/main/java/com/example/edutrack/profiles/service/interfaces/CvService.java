@@ -26,4 +26,9 @@ public interface CvService {
 
     boolean acceptCV(UUID id);
     boolean rejectCV(UUID id);
+
+    void aiVerifyCV(CV cv);
+    String generatePrompt(CV cv);
+    String callMistralAPI(String prompt);
+    void processAIResponse(CV cv, String aiJson);
 }
