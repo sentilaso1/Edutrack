@@ -150,22 +150,17 @@ CREATE TABLE wallets (
     id BINARY(16) PRIMARY KEY,
     user_id BINARY(16) NOT NULL,
     balance DOUBLE NOT NULL,
+    hold DOUBLE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE mentee_payments (
+CREATE TABLE transactions (
     id BINARY(16) PRIMARY KEY,
     wallet_id BINARY(16),
     amount DOUBLE NOT NULL,
+    status ENUM('pending', 'success', 'failed') NOT NULL,
     created_date DATETIME NOT NULL,
-    FOREIGN KEY (wallet_id) REFERENCES wallets(id)
-);
-
-CREATE TABLE mentor_earnings (
-    id BINARY(16) PRIMARY KEY,
-    wallet_id BINARY(16),
-    amount DOUBLE NOT NULL,
-    created_date DATETIME NOT NULL,
+    updated_date DATETIME NOT NULL,
     FOREIGN KEY (wallet_id) REFERENCES wallets(id)
 );
 
