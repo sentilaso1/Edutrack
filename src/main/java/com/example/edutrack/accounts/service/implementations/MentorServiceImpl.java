@@ -5,15 +5,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.example.edutrack.accounts.repository.MentorRepository;
+import com.example.edutrack.accounts.service.interfaces.MentorService;
 import org.springframework.stereotype.Service;
 
 import com.example.edutrack.accounts.model.Mentor;
 
 @Service
-public class MentorServiceImpl implements com.example.edutrack.accounts.service.interfaces.MentorService {
+public class MentorServiceImpl implements MentorService {
     private final MentorRepository mentorRepository;
 
-    public MentorServiceImpl(com.example.edutrack.accounts.repository.MentorRepository mentorRepository) {
+    public MentorServiceImpl(MentorRepository mentorRepository) {
         this.mentorRepository = mentorRepository;
     }
 
@@ -41,5 +42,10 @@ public class MentorServiceImpl implements com.example.edutrack.accounts.service.
     @Override
     public long countAll() {
         return mentorRepository.count();
+    }
+
+    @Override
+    public List<Mentor> findAll() {
+        return mentorRepository.findAll();
     }
 }

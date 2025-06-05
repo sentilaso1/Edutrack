@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+<div class="w-64 bg-gray-800 text-white h-screen fixed">
+    <div class="p-4 text-2xl font-bold">EduTrack Manager</div>
+    <nav class="mt-4">
+        <a th:href="@{/manager/dashboard}" class="block py-2 px-4 hover:bg-gray-700">Dashboard</a>
+        <a th:href="@{/manager/mentees}" class="block py-2 px-4 hover:bg-gray-700">Mentees</a>
+        <a th:href="@{/manager/mentors}" class="block py-2 px-4 hover:bg-gray-700">Mentors</a>
+        <a th:href="@{/manager/payments}" class="block py-2 px-4 hover:bg-gray-700">Payments</a>
+    </nav>
+</div>
+
+<div class="ml-64 flex-1 p-6">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Mentor Management</h2>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-300 rounded-lg">
+            <thead class="bg-gray-200">
+            <tr>
+                <th class="py-2 px-4 border-b text-left text-gray-600">Email</th>
+                <th class="py-2 px-4 border-b text-left text-gray-600">Full Name</th>
+                <th class="py-2 px-4 border-b text-left text-gray-600">Total Sessions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr class="hover:bg-gray-50" th:each="mentor : ${mentors}">
+                <td class="py-2 px-4 border-b" th:text="${mentor.email}"></td>
+                <td class="py-2 px-4 border-b" th:text="${mentor.fullName}"></td>
+                <td class="py-2 px-4 border-b" th:text="${mentor.totalSessions}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

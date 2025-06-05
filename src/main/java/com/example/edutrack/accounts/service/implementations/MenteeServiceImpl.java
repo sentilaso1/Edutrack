@@ -1,17 +1,19 @@
 package com.example.edutrack.accounts.service.implementations;
 
 import com.example.edutrack.accounts.repository.MenteeRepository;
+import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.example.edutrack.accounts.model.Mentee;
 
 @Service
-public class MenteeServiceImpl implements com.example.edutrack.accounts.service.interfaces.MenteeService {
+public class MenteeServiceImpl implements MenteeService {
     private final MenteeRepository menteeRepository;
 
-    public MenteeServiceImpl(com.example.edutrack.accounts.repository.MenteeRepository menteeRepository) {
+    public MenteeServiceImpl(MenteeRepository menteeRepository) {
         this.menteeRepository = menteeRepository;
     }
 
@@ -23,5 +25,10 @@ public class MenteeServiceImpl implements com.example.edutrack.accounts.service.
     @Override
     public long countAll() {
         return menteeRepository.count();
+    }
+
+    @Override
+    public List<Mentee> findAll() {
+        return menteeRepository.findAll();
     }
 }
