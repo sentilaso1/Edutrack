@@ -78,6 +78,9 @@ INSERT INTO users (id, avatar, bio, birth_date, created_date, email, full_name, 
 VALUES (0x70319B79576841CB8A9D1664658972D1, null, null, '2025-05-29 00:00:00.000000', '2025-05-29 14:10:24.329000', 'admin@edutrack.com', 'admin', 'male', true, false, '$2a$10$RYk7.ZaYvgRK1mDpWu.SvOKqfGpTBfnQnWhCAr65vsr0kLJr5vyjG', '0198332567', null);
 
 
+INSERT INTO mentees (interests, total_sessions, user_id)
+VALUES ('Web Development;Data Science;Machine Learning', 10, UUID_TO_BIN('66666666-6666-6666-6666-666666666666'));
+
 -- Insert Bob Smith into mentors table
 INSERT INTO mentors (expertise, is_available, rating, total_sessions, user_id)
 VALUES ('Physics;Mathematics;Calculus', 1, 4.8, 120, UUID_TO_BIN('22222222-2222-2222-2222-222222222222'));
