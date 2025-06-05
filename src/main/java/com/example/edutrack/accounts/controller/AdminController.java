@@ -11,8 +11,7 @@ import com.example.edutrack.accounts.dto.UserWithRoleDTO;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +20,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 @Controller
@@ -30,7 +27,6 @@ import org.slf4j.LoggerFactory;
 public class AdminController {
 
         private final UserService userService;
-        private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
         private final SystemConfigService systemConfigService;
         @Autowired
         private RequestLogRepository requestLogRepository;
@@ -158,29 +154,45 @@ public class AdminController {
 
         @GetMapping("/dashboard")
         public String showDashboard(Model model) {
-                logger.info("Accessing admin dashboard");
                 model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
                 return "accounts/html/index.html";
         }
 
         @GetMapping("/system-settings")
         public String showSystemSettings(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10") int size,
+                        @RequestParam(defaultValue = "10") int size,
+                        @RequestParam(required = false) String ip,
+                        @RequestParam(required = false) String method,
+                        @RequestParam(required = false) String uri,
                         Model model) {
-                Pageable pageable = PageRequest.of(page, size);
-                Page<RequestLog> logPage = requestLogRepository.findAll(pageable);
-                logger.info("Accessing system settings");
+                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));;
+                Page<RequestLog> logPage = requestLogRepository.filterLogs(
+                                (ip != null && !ip.isEmpty()) ? ip : null,
+                                (method != null && !method.isEmpty()) ? method : null,
+                                (uri != null && !uri.isEmpty()) ? uri : null,
+                                pageable);
+                int totalPages = logPage.getTotalPages();
+                int currentPage = page;
+
+                int startPage = Math.max(0, currentPage - 2);
+                int endPage = Math.min(totalPages - 1, currentPage + 2);
                 model.addAttribute("configs", systemConfigService.getSystemConfigs());
                 model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
                 model.addAttribute("logPage", logPage);
-                model.addAttribute("currentPage", page);
-                model.addAttribute("totalPages", logPage.getTotalPages());
+                model.addAttribute("currentPage", currentPage);
+                model.addAttribute("totalPages", totalPages);
+                model.addAttribute("startPage", startPage);
+                model.addAttribute("endPage", endPage);
+                model.addAttribute("pageSize", size);
+
+                model.addAttribute("filterIp", ip);
+                model.addAttribute("filterMethod", method);
+                model.addAttribute("filterUri", uri);
                 return "accounts/html/system-settings";
         }
 
         @PostMapping("/system-settings/update")
         public String updateSystemSettings(@RequestParam String key, @RequestParam String value) {
-                logger.info("Updating system config: {} = {}", key, value);
                 systemConfigService.updateConfig(key, value);
                 return "redirect:/admin/system-settings?success=Configuration updated successfully";
         }
