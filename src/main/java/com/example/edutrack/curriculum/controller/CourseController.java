@@ -1,13 +1,17 @@
 package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
+import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
+import com.example.edutrack.curriculum.service.interfaces.EnrollmentService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,13 +36,14 @@ public class CourseController {
     private final TagServiceImpl tagServiceImpl;
     private final CourseMentorService courseMentorService;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
+    private final EnrollmentService enrollmentService;
 
     public CourseController(CourseServiceImpl courseServiceImpl,
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorAvailableTimeServiceImpl mentorAvailableTimeServiceImpl,
                             MentorServiceImpl mentorServiceImpl,
                             TagServiceImpl tagServiceImpl,
-                            CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl) {
+                            CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl, EnrollmentService enrollmentService) {
         this.courseServiceImpl = courseServiceImpl;
         this.mentorAvailableTimeServiceImpl = mentorAvailableTimeServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
@@ -46,6 +51,7 @@ public class CourseController {
         this.tagServiceImpl = tagServiceImpl;
         this.courseMentorService = courseMentorService;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
+        this.enrollmentService = enrollmentService;
     }
 
     @GetMapping("/courses")
@@ -151,9 +157,52 @@ public class CourseController {
     }
 
     @GetMapping("/home")
-    public String home(Model model) {
-        return "mentee/mentee-dashboard";
+    public String home(HttpSession session, Model model) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+
+        if (loggedInUser == null) {
+            return handleGuestUser(model);
+        } else {
+            return handleLoggedInUser(loggedInUser, model);
+        }
     }
+
+    private String handleGuestUser(Model model) {
+        model.addAttribute("headerCTA", "Sign Up");
+        model.addAttribute("headerCTALink", "/signup");
+
+        model.addAttribute("heroHeadline", "Better <span class=\"span\">Learning Future</span> Starts With Youdemi");
+        model.addAttribute("heroSubHeadline", "It is long established fact that reader distracted by the readable content.");
+        model.addAttribute("heroCTA", "Explore Courses");
+        model.addAttribute("heroCTALink", "/courses");
+
+        model.addAttribute("sectionOneTitle", "Featured Courses");
+        model.addAttribute("sectionOneSubtitle", "Choose Unlimited Courses");
+
+        model.addAttribute("sectionTwoTitle", "Latest Courses");
+        model.addAttribute("sectionTwoSubtitle", "Newest Courses");
+
+
+        List<CourseMentor> popularCourses = enrollmentService.getPopularCoursesForGuest(8);
+        List<CourseCardDTO> courseSectionOne = enrollmentService.mapToCourseCardDTOList(popularCourses);
+        model.addAttribute("courseSectionOne", courseSectionOne);
+
+        List<CourseMentor> latestCourses = courseMentorService.findLatestCourse(8);
+        List<CourseCardDTO> courseSectionTwo = enrollmentService.mapToCourseCardDTOList(latestCourses);
+        model.addAttribute("courseSectionTwo", courseSectionTwo);
+
+
+
+        model.addAttribute("userType", "guest");
+        model.addAttribute("showSchedulesLink", false);
+
+        return "mentee/mentee-landing-page";
+    }
+
+    private String handleLoggedInUser(User loggedInUser, Model model) {
+        return "home";
+    }
+
 
 
 
