@@ -22,11 +22,10 @@ public class RequestLoggingInterceptor implements HandlerInterceptor{
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         StringBuilder params = new StringBuilder();
         Enumeration<String> paramNames = request.getParameterNames();
-        while(paramNames.hasMoreElements()) {
+        while (paramNames.hasMoreElements()) {
             String name = paramNames.nextElement();
             params.append(name).append("=").append(request.getParameter(name)).append(" ");
         }
-
         RequestLog log = new RequestLog(
             request.getMethod(),
             request.getRequestURI(),
@@ -34,6 +33,9 @@ public class RequestLoggingInterceptor implements HandlerInterceptor{
             params.toString().trim(),
             LocalDateTime.now()
         );
+        if (request.getMethod().equalsIgnoreCase("POSt")) {
+            log.setParameters("Sensitive data not logged for POST requests");
+        }
 
         repository.save(log);
         return true;
