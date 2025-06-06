@@ -119,6 +119,32 @@
                                         </button>
                                 </div>
                         </form>
+                        <!-- Actions Row: Import, Export, Clear -->
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                                <!-- Import Form -->
+                                <form th:action="@{/admin/system-settings/import-log}" method="post" enctype="multipart/form-data"
+                                        class="flex items-center gap-2">
+                                        <label class="block text-sm text-gray-700">📥 Import Logs</label>
+                                        <input type="file" name="file" accept=".csv" required
+                                                class="text-sm text-gray-700 bg-white border border-gray-300 rounded p-1 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600" />
+                                        <button type="submit"
+                                                class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 shadow">Import</button>
+                                </form>
+                        
+                                <!-- Export Button -->
+                                <a href="/admin/system-settings/export-log"
+                                        class="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 shadow">
+                                        📤 Export Logs
+                                </a>
+                        
+                                <!-- Clear Logs Button -->
+                                <form th:action="@{/admin/system-settings/clear-logs}" method="post"
+                                        onsubmit="return confirm('Are you sure you want to delete all logs?');">
+                                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600 shadow">
+                                                🗑️ Clear All Logs
+                                        </button>
+                                </form>
+                        </div>
                         <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                         <thead class="bg-gray-50">
