@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,5 +61,8 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
 
     @Query("SELECT cm.course FROM CourseMentor cm WHERE cm.mentor.id = :mentorId")
     List<Course> findCoursesByMentorId(@Param("mentorId") UUID mentorId);
+
+    @Query("SELECT cm FROM CourseMentor cm WHERE cm.status = 'ACCEPTED' ORDER BY cm.appliedDate DESC")
+    List<CourseMentor> findLatestCourse(Pageable pageable);
 
 }
