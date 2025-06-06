@@ -5,10 +5,12 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
+import com.example.edutrack.curriculum.dto.TagEnrollmentCountDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
+import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import com.example.edutrack.curriculum.service.interfaces.EnrollmentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ import java.util.UUID;
 public class CourseController {
     private final CourseServiceImpl courseServiceImpl;
     private final CourseTagServiceImpl courseTagServiceImpl;
+    private final CourseTagService courseTagService;
     private final MentorServiceImpl mentorServiceImpl;
     private final TagServiceImpl tagServiceImpl;
     private final CourseMentorService courseMentorService;
@@ -40,6 +43,7 @@ public class CourseController {
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorServiceImpl mentorServiceImpl,
                             TagServiceImpl tagServiceImpl,
+                            CourseTagService courseTagService,
                             CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl, EnrollmentService enrollmentService) {
         this.courseServiceImpl = courseServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
@@ -48,6 +52,7 @@ public class CourseController {
         this.courseMentorService = courseMentorService;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.enrollmentService = enrollmentService;
+        this.courseTagService = courseTagService;
     }
 
     @GetMapping("/courses")
@@ -153,6 +158,11 @@ public class CourseController {
         }
     }
 
+    private void addTopTagsToModel(Model model, int limit) {
+        List<TagEnrollmentCountDTO> topTags = courseTagService.getTopTags(limit);
+        model.addAttribute("topTags", topTags);
+    }
+
     private String handleGuestUser(Model model) {
         model.addAttribute("headerCTA", "Sign Up");
         model.addAttribute("headerCTALink", "/signup");
@@ -168,6 +178,13 @@ public class CourseController {
         model.addAttribute("sectionTwoTitle", "Latest Courses");
         model.addAttribute("sectionTwoSubtitle", "Newest Courses");
 
+        addTopTagsToModel(model, 9);
+
+        List<Tag> allCourseTags = courseTagService.getAllTags();
+        List<Integer> allCourseTagIds = allCourseTags.stream()
+                .map(Tag::getId)
+                .toList();
+        model.addAttribute("allCourseTagIds", allCourseTagIds);
 
         List<CourseMentor> popularCourses = enrollmentService.getPopularCoursesForGuest(8);
         List<CourseCardDTO> courseSectionOne = enrollmentService.mapToCourseCardDTOList(popularCourses);
