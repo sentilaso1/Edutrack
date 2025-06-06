@@ -114,6 +114,23 @@
             color: #333;
         }
 
+        .layer-link {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            text-decoration: none;
+        }
+        .card.category-card {
+            position: relative;
+        }
+
+        .popular-label {
+            font-weight: 600;
+            color: #da7e17;
+            font-size: 0.85rem;
+        }
+
 
     </style>
     <!-- Swiper CSS -->
@@ -238,23 +255,28 @@
                 </h2>
 
                 <ul class="grid-list">
-                    <li>
+                    <li th:each="tag : ${topTags}">
                         <div class="card category-card">
                             <div class="card-icon">
-                                <img th:src="@{/assets/images/category-6.svg}" width="72" height="72" loading="lazy"
-                                     alt="Finances icon">
+                                <img th:src="@{/assets/images/category-6.svg}" width="72" height="72" alt="Category Icon">
                             </div>
                             <div>
-                                <h3 class="title-lg">Finances</h3>
-                                <p class="title-sm">68 Courses</p>
+                                <h3 class="title-lg" th:text="${tag.tag.title}">Category</h3>
+                                <p class="title-sm popular-label">🔥Popular</p>
                             </div>
-                            <a href="#" class="layer-link" aria-label="Finances Category"></a>
+
+                            <a th:href="@{'/courses'(size_page=6, subject=${tag.tag.id})}"
+                               class="layer-link"
+                               aria-label="Browse courses in this category"></a>
                         </div>
                     </li>
-
                 </ul>
 
-                <a href="#" class="btn btn-primary">View All Categories</a>
+
+                <a th:href="@{'/courses'(size_page=6, subject=${allCourseTagIds})}" class="btn btn-primary">
+                    View All Categories
+                </a>
+
 
             </div>
         </section>
@@ -445,7 +467,10 @@
                     Education Is About Creating Leaders For Tomorrow
                 </h2>
 
-                <a th:href="@{/signup}" class="btn btn-tertiary">Register Today</a>
+                <div th:if="${userType == 'guest'}">
+                    <a th:href="@{/signup}" class="btn btn-primary">Register Today</a>
+                </div>
+
 
             </div>
         </section>
