@@ -7,8 +7,8 @@ import java.util.UUID;
 
 @Embeddable
 public class MentorAvailableTimeId implements Serializable {
-    @Transient
     private UUID mentorId;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "slot")

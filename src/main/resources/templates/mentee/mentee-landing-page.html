@@ -29,7 +29,7 @@
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <style>
         *{
-            overflow: visible !important;
+            overflow-x: hidden;
         }
 
         .course-card {
@@ -45,11 +45,59 @@
 
         .img-cover {
             width: 100%;
-            height: 250px;
+            height: 100%;
             object-fit: cover;
-            object-position: center;
             display: block;
         }
+
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            max-width: 100%;
+            margin-top: 40px;
+        }
+
+
+        .carousel-wrapper {
+            display: flex;
+            transition: transform 0.5s ease;
+            gap: 30px;
+            width: max-content;
+        }
+        .carousel-slide {
+            flex: 0 0 auto;
+            width: 320px;
+            max-width: 320px;
+            box-sizing: border-box;
+        }
+
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .carousel-prev {
+            left: -10px;
+        }
+
+        .carousel-next {
+            right: -10px;
+        }
+
+        .carousel-indicators {
+            text-align: center;
+            margin-top: 10px;
+        }
+
 
         .card-content {
             flex: 1;
@@ -88,7 +136,7 @@
 <header class="header" data-header>
     <div class="container">
 
-        <a href="#" class="logo">
+        <a th:href="@{/home}" class="logo">
             <img th:src="@{/assets/images/logo.svg}" width="145" height="27" alt="Youdemi home">
         </a>
 
@@ -190,8 +238,6 @@
                 </h2>
 
                 <ul class="grid-list">
-
-
                     <li>
                         <div class="card category-card">
                             <div class="card-icon">
@@ -282,20 +328,14 @@
                     <span th:utext="${sectionOneTitle}">Section One Title</span>
                 </h2>
 
-                <!-- Swiper -->
-                <div class="swiper mySwiper">
-                    <div class="swiper-wrapper">
-
-                        <div class="swiper-slide" th:each="courseMentor : ${courseSectionOne}">
+                <div class="carousel-container" id="carousel1">
+                    <div class="carousel-wrapper">
+                        <div class="carousel-slide" th:each="courseMentor : ${courseSectionOne}">
                             <div class="card-container">
                                 <div class="card course-card">
-
                                     <figure class="card-banner">
-                                        <img th:if="${courseMentor.mentor.id != null}"
-                                             th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
-                                             loading="lazy" alt="Mentor Avatar" class="img-cover" />
+                                        <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}" class="img-cover" alt="Mentor Avatar" />
                                     </figure>
-
                                     <div class="card-content">
                                         <div class="wrapper">
                                             <p>Price</p>
@@ -303,39 +343,34 @@
                                                 <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" alt="">
                                             </div>
                                         </div>
-
                                         <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course Title</h3>
-
                                         <div class="card-meta wrapper">
                                             <p class="title-sm">
                                                 <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20" alt="">
-                                                <span class="span" th:text="${courseMentor.lessonCount + ' Lessons'}">2 Lessons</span>
+                                                <span th:text="${courseMentor.lessonCount + ' Lessons'}">Lessons</span>
                                             </p>
                                             <p class="title-sm">
                                                 <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="">
-                                                <span class="span" th:text="${courseMentor.studentCount + ' Students'}">4k Students</span>
+                                                <span th:text="${courseMentor.studentCount + ' Students'}">Students</span>
                                             </p>
                                         </div>
-
-                                        <!-- 👇 Thêm tên mentor ở đây -->
                                         <p class="title-sm mentor-name">
-                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="Mentor Icon">
-                                            <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor Name</span>
+                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="">
+                                            <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor</span>
                                         </p>
                                     </div>
-
-                                    <a th:href="@{'/courses/' + ${courseMentor.courseMentorId}}"
-                                       class="layer-link"
-                                       th:aria-label="'Course Details, ' + ${courseMentor.courseTitle}"></a>
+                                    <a th:href="@{'/courses/' + ${courseMentor.courseMentorId}}" class="layer-link"></a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Navigation buttons -->
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
+                    <button class="carousel-nav carousel-prev" onclick="moveCarousel('carousel1', -1)">‹</button>
+                    <button class="carousel-nav carousel-next" onclick="moveCarousel('carousel1', 1)">›</button>
                 </div>
+
+                <div class="carousel-indicators" id="indicators1"></div>
+
                 <div class="view-more-wrapper text-center" style="margin-top: 30px;">
                     <a th:href="@{/courses}" class="btn btn-primary">View More</a>
                 </div>
@@ -348,27 +383,20 @@
                  th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
             <div class="container">
 
-                <p class="title-sm section-subtitle text-center" th:text="${sectionTwoSubtitle}">Section Two Subtitle</p>
+                <p class="title-sm section-subtitle text-center" th:text="${sectionTwoSubtitle}">Section One Subtitle</p>
 
                 <h2 class="headline-md section-title text-center" id="course-label-2">
-                    <span th:utext="${sectionTwoTitle}">Section Two Title</span>
+                    <span th:utext="${sectionTwoTitle}">Section One Title</span>
                 </h2>
 
-                <!-- Swiper -->
-                <div class="swiper mySwiper">
-                    <div class="swiper-wrapper">
-
-                        <!-- Each Slide -->
-                        <div class="swiper-slide" th:each="courseMentor : ${courseSectionOne}">
+                <div class="carousel-container" id="carousel2">
+                    <div class="carousel-wrapper">
+                        <div class="carousel-slide" th:each="courseMentor : ${courseSectionTwo}">
                             <div class="card-container">
                                 <div class="card course-card">
-
                                     <figure class="card-banner">
-                                        <img th:if="${courseMentor.mentor.id != null}"
-                                             th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
-                                             loading="lazy" alt="Mentor Avatar" class="img-cover" />
+                                        <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}" class="img-cover" alt="Mentor Avatar" />
                                     </figure>
-
                                     <div class="card-content">
                                         <div class="wrapper">
                                             <p>Price</p>
@@ -376,45 +404,36 @@
                                                 <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" alt="">
                                             </div>
                                         </div>
-
                                         <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course Title</h3>
-
                                         <div class="card-meta wrapper">
                                             <p class="title-sm">
                                                 <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20" alt="">
-                                                <span class="span" th:text="${courseMentor.lessonCount + ' Lessons'}">2 Lessons</span>
+                                                <span th:text="${courseMentor.lessonCount + ' Lessons'}">Lessons</span>
                                             </p>
                                             <p class="title-sm">
                                                 <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="">
-                                                <span class="span" th:text="${courseMentor.studentCount + ' Students'}">4k Students</span>
+                                                <span th:text="${courseMentor.studentCount + ' Students'}">Students</span>
                                             </p>
                                         </div>
-
                                         <p class="title-sm mentor-name">
-                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="Mentor Icon">
-                                            <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor Name</span>
+                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="">
+                                            <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor</span>
                                         </p>
                                     </div>
-
-                                    <a th:href="@{'/courses/' + ${courseMentor.courseMentorId}}"
-                                       class="layer-link"
-                                       th:aria-label="'Course Details, ' + ${courseMentor.courseTitle}"></a>
+                                    <a th:href="@{'/courses/' + ${courseMentor.courseMentorId}}" class="layer-link"></a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Navigation buttons -->
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
+                    <button class="carousel-nav carousel-prev" onclick="moveCarousel('carousel2', -1)">‹</button>
+                    <button class="carousel-nav carousel-next" onclick="moveCarousel('carousel2', 1)">›</button>
                 </div>
                 <div class="view-more-wrapper text-center" style="margin-top: 30px;">
                     <a th:href="@{/courses}" class="btn btn-primary">View More</a>
                 </div>
             </div>
         </section>
-
-
         <!--
           - #CTA
         -->
@@ -553,24 +572,24 @@
 -->
 <script type="module" th:src="'https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js'"></script>
 <script nomodule th:src="'https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js'"></script>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const swiper = new Swiper('.mySwiper', {
-            slidesPerView: 4,
-            spaceBetween: 30,
-            loop: true,
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            breakpoints: {
-                320: { slidesPerView: 1 },
-                640: { slidesPerView: 2 },
-                1024: { slidesPerView: 4 },
-            }
-        });
-    });
+    function moveCarousel(id, direction) {
+        const container = document.getElementById(id);
+        const wrapper = container.querySelector('.carousel-wrapper');
+        const slides = container.querySelectorAll('.carousel-slide');
+
+        const slideWidth = slides[0].offsetWidth + 30;
+        const maxScroll = (slides.length - 1) * slideWidth;
+
+        let currentScroll = wrapper.dataset.scroll ? parseInt(wrapper.dataset.scroll) : 0;
+        currentScroll += direction * slideWidth;
+
+        if (currentScroll < 0) currentScroll = maxScroll;
+        if (currentScroll > maxScroll) currentScroll = 0;
+
+        wrapper.style.transform = `translateX(-${currentScroll}px)`;
+        wrapper.dataset.scroll = currentScroll;
+    }
 </script>
 
 </body>
