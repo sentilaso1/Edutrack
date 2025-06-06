@@ -150,7 +150,7 @@ CREATE TABLE wallets (
     id BINARY(16) PRIMARY KEY,
     user_id BINARY(16) NOT NULL,
     balance DOUBLE NOT NULL,
-    hold DOUBLE NOT NULL,
+    on_hold DOUBLE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
