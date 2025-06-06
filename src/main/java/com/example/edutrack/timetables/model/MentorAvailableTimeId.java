@@ -7,15 +7,15 @@ import java.util.UUID;
 
 @Embeddable
 public class MentorAvailableTimeId implements Serializable {
+    @Column(name = "mentor_id", nullable = false)
     private UUID mentorId;
 
-
     @Enumerated(EnumType.STRING)
-    @Column(name = "slot")
+    @Column(name = "slot", nullable = false)
     private Slot slot;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "day")
+    @Column(name = "day", nullable = false)
     private Day day;
 
     public MentorAvailableTimeId() {
