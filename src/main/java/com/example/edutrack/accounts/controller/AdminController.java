@@ -160,6 +160,7 @@ public class AdminController {
         @GetMapping("/dashboard")
         public String showDashboard(Model model) {
                 model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
+                model.addAttribute("userStats", userService.getUserStatistics());
                 return "accounts/html/index.html";
         }
 
