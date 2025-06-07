@@ -4,7 +4,6 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
-import com.example.edutrack.curriculum.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
@@ -30,7 +29,6 @@ import java.util.UUID;
 @Controller
 public class CourseController {
     private final CourseServiceImpl courseServiceImpl;
-    private final MentorAvailableTimeServiceImpl mentorAvailableTimeServiceImpl;
     private final CourseTagServiceImpl courseTagServiceImpl;
     private final MentorServiceImpl mentorServiceImpl;
     private final TagServiceImpl tagServiceImpl;
@@ -40,12 +38,10 @@ public class CourseController {
 
     public CourseController(CourseServiceImpl courseServiceImpl,
                             CourseTagServiceImpl courseTagServiceImpl,
-                            MentorAvailableTimeServiceImpl mentorAvailableTimeServiceImpl,
                             MentorServiceImpl mentorServiceImpl,
                             TagServiceImpl tagServiceImpl,
                             CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl, EnrollmentService enrollmentService) {
         this.courseServiceImpl = courseServiceImpl;
-        this.mentorAvailableTimeServiceImpl = mentorAvailableTimeServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
         this.tagServiceImpl = tagServiceImpl;
@@ -56,11 +52,11 @@ public class CourseController {
 
     @GetMapping("/courses")
     public String  courses(Model model,
-                          @RequestParam(defaultValue = "1") int page,
-                          @RequestParam(defaultValue = "6") int size_page,
-                          @RequestParam(required = false) List<Integer> subject,
-                          @RequestParam(required = false) List<UUID> skill,
-                          @RequestParam(required = false) String order_by) {
+                           @RequestParam(defaultValue = "1") int page,
+                           @RequestParam(defaultValue = "6") int size_page,
+                           @RequestParam(required = false) List<Integer> subject,
+                           @RequestParam(required = false) List<UUID> skill,
+                           @RequestParam(required = false) String order_by) {
 
         if (page < 1) {
             return "redirect:/404";
@@ -145,16 +141,6 @@ public class CourseController {
         return "register-section";
     }
 
-    @GetMapping("/courses/{courseId}/mentor/{mentorId}")
-    public String viewMentorAvailability(@PathVariable UUID courseId,
-                                         @PathVariable UUID mentorId,
-                                         Model model) {
-        List<MentorAvailableTimeDTO> times = mentorAvailableTimeServiceImpl.getMentorAvailableTime(mentorId);
-        model.addAttribute("availableTimes", times);
-        model.addAttribute("courseId", courseId);
-        model.addAttribute("mentorId", mentorId);
-        return "mentee/mentor-availability";
-    }
 
     @GetMapping("/home")
     public String home(HttpSession session, Model model) {
