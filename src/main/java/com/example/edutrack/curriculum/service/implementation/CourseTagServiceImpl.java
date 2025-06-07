@@ -1,6 +1,6 @@
 package com.example.edutrack.curriculum.service.implementation;
 
-import com.example.edutrack.curriculum.dto.TagDTO;
+import com.example.edutrack.curriculum.dto.TagEnrollmentCountDTO;
 import com.example.edutrack.curriculum.model.CourseTag;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.Tag;
@@ -9,11 +9,11 @@ import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class CourseTagServiceImpl implements CourseTagService {
@@ -53,4 +53,38 @@ public class CourseTagServiceImpl implements CourseTagService {
     public void deleteCourseTag(UUID courseId, int tagId) {
         courseTagsRepository.deleteByCourseIdAndTagId(courseId, tagId);
     }
+
+    @Override
+    public List<TagEnrollmentCountDTO> getTopTags(int limit){
+        List<Object[]> topTagsRaw = courseTagsRepository.findTopTagsByEnrollment(PageRequest.of(0, limit));
+        List<TagEnrollmentCountDTO> topTags = new java.util.ArrayList<>(topTagsRaw.stream()
+                .map(obj -> new TagEnrollmentCountDTO((Tag) obj[0], (Long) obj[1]))
+                .toList());
+
+        int remaining = Math.max(0, limit - topTags.size());
+
+        if (remaining > 0) {
+            List<Integer> excludeIds = topTags.stream()
+                    .map(dto -> dto.getTag().getId())
+                    .toList();
+
+            List<Tag> fallbackTags = courseTagsRepository.findRandomTagsExcluding(excludeIds, PageRequest.of(0, remaining));
+
+            List<TagEnrollmentCountDTO> fallbackDtos = fallbackTags.stream()
+                    .map(tag -> new TagEnrollmentCountDTO(tag, 0L))
+                    .toList();
+
+            topTags.addAll(fallbackDtos);
+        }
+
+        return topTags;
+    }
+
+    @Override
+    public List<Tag> getAllTags(){
+        return courseTagsRepository.findDistinctTagsFromCourses();
+    }
+
+
+
 }
