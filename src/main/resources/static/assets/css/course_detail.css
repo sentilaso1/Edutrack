@@ -2,20 +2,37 @@
     font-family: "Gilroy", sans-serif;;
 }
 .overall{
+
     display: grid;
     grid-template-columns: 3fr 2fr;
     background-color: hsla(357, 100%, 75%, 0.119);
-    padding: 0 2em 3em;
+    padding: 2em 2em 3em;
 }
 
-.overall button{
+.overall .left{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.overall .right{
+    display: flex;
+    justify-content: center;
+}
+
+
+.overall .register-btn{
+    text-decoration: none;
     border-style: none;
     padding: 1em 3em;
     border-radius: 5px;
     background-color: hsl(357, 100%, 75%);
     border-color: hsl(357, 100%, 75%);
     color: aliceblue;
+    width: fit-content;
 }
+
+
 
 .banner{
     display: grid;
@@ -23,15 +40,21 @@
     background-color: hsl(0, 0%, 100%);
     padding: 1em 2em;
     margin-top: -3em;
+    margin-bottom: 2em;
     border-radius: 6px;
     box-shadow: 0px 6px 18px 2px rgba(0,0,0,0.24);
     -webkit-box-shadow: 0px 6px 18px 2px rgba(0,0,0,0.24);
     -moz-box-shadow: 0px 6px 18px 2px rgba(0,0,0,0.24);
+    min-height: 6em;
 }
 .banner div{
     margin: 0;
     padding: 0 1em;
     border-right: 1px solid rgba(0, 0, 0, 0.162);
+}
+
+h2{
+    margin: 0.7em 0 1em;
 }
 
 .banner div h3{
@@ -48,7 +71,7 @@
     display: flex;
 }
 
-li{
+.navigate li{
     list-style: none;
     padding: 1em;
 }
@@ -58,7 +81,7 @@ li{
     text-decoration: none;
 }
 
-li:hover{
+.navigate li:hover{
     background-color: hsl(357, 100%, 93%);
     cursor: pointer;
     border-radius: 5px;
@@ -109,8 +132,99 @@ li:hover{
 }
 
 .review .card .title img{
-    border-radius: 100%;
+    border-radius: 50%;
     width: 80px;
     aspect-ratio: 1/1;
     object-fit: cover;
+}
+
+.mentor {
+    width: 100%;
+    background-color: white;
+    border-radius: 16px;
+    padding: 32px 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative;
+}
+
+.mentor-avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 20px;
+    border: 3px solid #ff6b6b;
+    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+}
+
+.mentor-info{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.mentor-info h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+}
+
+.mentor-info p {
+    font-size: 14px;
+    color: #8b8b8b;
+    margin: 0 0 24px 0;
+}
+
+.follow-btn {
+    background-color: transparent;
+    border: 2px solid #ff6b6b;
+    color: #ff6b6b;
+    padding: 10px 24px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 32px;
+}
+
+.follow-btn:hover {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 24px;
+}
+
+.stat-item {
+    text-align: center;
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--roman-silver);
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #8b8b8b;
+    font-weight: 400;
+}
+
+.mentor_section{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
