@@ -1,5 +1,6 @@
 package com.example.edutrack.accounts.service.interfaces;
 
+import com.example.edutrack.accounts.dto.UserStatsDTO;
 import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.model.User;
 import java.util.List;
@@ -18,4 +19,5 @@ public interface UserService {
         void revokeStaffRole(String id);
         Staff getStaffByUserId(String userId);
         Page<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive, Pageable pageable);
+        UserStatsDTO getUserStatistics();
 }
