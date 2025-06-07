@@ -3,10 +3,15 @@ package com.example.edutrack.accounts.service.implementations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.edutrack.accounts.dto.UserStatsDTO;
+import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.StaffRepository;
 import com.example.edutrack.accounts.repository.UserRepository;
+import com.example.edutrack.accounts.repository.MentorRepository;
+import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.service.interfaces.UserService;
 
 import jakarta.persistence.EntityManager;
@@ -24,13 +29,18 @@ import org.springframework.data.domain.Pageable;
 public class UserServiceImpl implements UserService{
         private final UserRepository userRepository;
         private final StaffRepository staffRepository;
+        private final MentorRepository mentorRepository;
+        private final MenteeRepository menteeRepository;
         @PersistenceContext
         private EntityManager entityManager;
 
         @Autowired
-        public UserServiceImpl(UserRepository userRepository, StaffRepository staffRepository) {
+        public UserServiceImpl(UserRepository userRepository, StaffRepository staffRepository, 
+                        MentorRepository mentorRepository, MenteeRepository menteeRepository) {
                 this.userRepository = userRepository;
                 this.staffRepository = staffRepository;
+                this.mentorRepository = mentorRepository;
+                this.menteeRepository = menteeRepository;
         }
 
         @Override
@@ -90,9 +100,14 @@ public class UserServiceImpl implements UserService{
                         return;
                 }
                 try {
+                        if (mentorRepository.existsById(staffId) || menteeRepository.existsById(staffId)) {
+                                throw new IllegalStateException(
+                                                "Không thể gán vai trò nhân viên cho người dùng đã là Mentor hoặc Mentee");
+                                
+                        }
                         staffRepository.insertStaff(staffId, role.name());
                 } catch (Exception e) {
-                        throw new RuntimeException("Failed to grant staff role: " + e.getMessage(), e);
+                        throw new RuntimeException(e.getMessage(), e);
                 }
         }
 
@@ -117,6 +132,13 @@ public class UserServiceImpl implements UserService{
                 } catch (Exception e) {
                         return null; // Return null if no staff found or any error occurs
                 }
-                
+
+        }
+        
+        public UserStatsDTO getUserStatistics() {
+                long total = userRepository.count();
+                long active = userRepository.countByIsActiveTrue();
+                long locked = userRepository.countByIsLockedTrue();
+                return new UserStatsDTO(total, active, locked);
         }
 }
