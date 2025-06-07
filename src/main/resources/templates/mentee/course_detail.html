@@ -1,227 +1,165 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Document</title>
-    <link rel="stylesheet" th:href="@{/assets/css/course_detail.css}" />
-    <style>
-        .mentor-card {
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            background-color: #FFE1E0;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .mentor-card:hover {
-            background-color: #FFE1E0;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .mentor-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .mentor-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 15px;
-            object-fit: cover;
-        }
-        .mentor-details h3 {
-            margin: 0;
-            color: #333;
-        }
-        .mentor-rating svg {
-            color: #ffc107;
-            margin-right: 2px;
-        }
-        .mentor-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .btn {
-            padding: 8px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 0.9em;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        .register-btn {
-            background-color: #A53860;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 1.1em;
-            font-weight: bold;
-            transition: all 0.3s;
-            display: inline-block;
-            margin-top: 15px;
-        }
-        .register-btn:hover {
-            background-color: #3A0519;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .btn-primary {
-            background-color: #7F55B1;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #481c93;
-        }
-        .btn-secondary {
-            background-color: #9B7EBD;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background-color: #836a9c;
-        }
-        .btn-outline {
-            background-color: transparent;
-            color: #ef6767;
-            border: 1px solid #F49BAB;
-        }
-        .btn-outline:hover {
-            background-color: #ed4767;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/assets/css/course_detail.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
 </head>
 <body>
-<div class="overall">
-    <div class="left">
-        <h1 th:text="${course.name}">Course Name</h1>
-        <div th:if="${mentor != null}" class="mentor-card">
-            <div class="mentor-info">
-                <img th:if="${mentor.avatar != null}"
-                     th:src="@{/avatar/{id}(id=${mentor.id})}"
-                     alt="Avatar"
-                     class="mentor-avatar">
-                <img th:if="${mentor.avatar == null}"
-                     src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+"
-                     alt="Default Avatar"
-                     class="mentor-avatar">
-                <div class="mentor-details">
-                    <h2 th:text="${mentor.name}">Tên Mentor</h2>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<main>
+    <article class="section course">
+        <div class="overall">
+            <div class="left">
+                <div>
+                    <h1 th:text="${course.name}">Course Name</h1>
+                    <p th:text="${course.description}">Mô tả khóa học chi tiết sẽ được hiển thị ở đây. Đây là một
+                        khóa học tuyệt vời giúp bạn nâng cao kỹ năng và kiến thức trong lĩnh vực này.</p>
+                </div>
+                <div>
+                    <div class="mentor-details" style="margin-bottom: 1em">
+                        <h3 th:text="${'Mentor: ' + mentor.name}">Tên Mentor</h3>
+                    </div>
+                    <a th:href="@{'/courses/register'}" class="register-btn">
+                        Enroll
+                    </a>
+                    <p style="padding-top: 1em"><strong>29,878</strong> already enrolled</p>
+                </div>
+
+            </div>
+
+            <div class="right">
+            </div>
+        </div>
+        <div style="padding: 0 2em 0;">
+            <div class="banner">
+                <div>
+                    <h3>5 course series</h3>
+                    <p>Get in-depth knowledge of a subject</p>
+                </div>
+                <div>
+                    <h3>4.9</h3>
+                    <p>(1.545 reviews)</p>
+                </div>
+                <div>
+                    <h3>Beginner level</h3>
+                    <p>Recommended experience</p>
+                </div>
+                <div>
+                    <h3>2 months</h3>
+                    <p>at 10 hours a week</p>
+                </div>
+                <div style="border: none">
+                    <h3>Flexible schedule</h3>
+                    <p>Learn at your own pace</p>
                 </div>
             </div>
-
-            <div th:if="${mentor.expertise != null}" style="margin: 10px 0; color: #666; font-style: italic;">
-                <strong>Chuyên môn:</strong> <span th:text="${mentor.expertise}">Web Development, JavaScript, React</span>
+            <div class="navigate">
+                <ul>
+                    <li><a th:href="@{#skill}">Subjects</a></li>
+                    <li><a th:href="@{#session1}">About</a></li>
+                    <li><a th:href="@{#mentor}">Mentor</a></li>
+                    <li><a th:href="@{#session3}">Testimonial</a></li>
+                    <li><a th:href="@{#session2}">Related Skills</a></li>
+                </ul>
             </div>
-
-            <div class="mentor-actions">
-                <a th:href="@{'/mentor/' + ${mentor.id}}" class="btn btn-primary">
-                    👤 Xem Hồ Sơ
-                </a>
-                <a href="#" class="btn btn-outline" onclick="contactMentor()">
-                    💬 Liên hệ
-                </a>
-            </div>
-        </div>
-        <a th:href="@{'/courses/register'}" class="register-btn">
-            🚀 Enroll
-        </a>
-        <p><strong>29,878</strong> already enrolled</p>
-    </div>
-</div>
-<div style="padding: 0 2em 0;">
-    <div class="banner">
-        <div>
-            <h3>5 course series</h3>
-            <p>Get in-depth knowledge of a subject</p>
-        </div>
-        <div>
-            <h3>4.9</h3>
-            <p>(1.545 reviews)</p>
-        </div>
-        <div>
-            <h3>Beginner level</h3>
-            <p>Recommended experience</p>
-        </div>
-        <div>
-            <h3>2 months</h3>
-            <p>at 10 hours a week</p>
-        </div>
-        <div style="border: none">
-            <h3>Flexible schedule</h3>
-            <p>Learn at your own pace</p>
-        </div>
-    </div>
-    <div class="navigate">
-        <ul>
-            <li><a th:href="@{#session1}">About</a></li>
-            <li><a th:href="@{#skill}">Subjects</a></li>
-            <li><a th:href="@{#session3}">Testimonial</a></li>
-            <li><a th:href="@{#session2}">Related Skills</a></li>
-        </ul>
-    </div>
-    <div class="cover">
-        <div class="about">
-            <div class="learn">
-                <h2 id="session1">What you'll learn</h2>
-                <div class="group">
-                    <div class="element">
-                        <p th:text="${course.description}">Mô tả khóa học chi tiết sẽ được hiển thị ở đây. Đây là một khóa học tuyệt vời giúp bạn nâng cao kỹ năng và kiến thức trong lĩnh vực này.</p>
+            <div class="cover">
+                <div class="about">
+                    <div class="skill">
+                        <h2 id="skill">Subjects</h2>
+                        <div class="tag_list">
+                            <div class="tag" th:each="tag : ${tagList}" th:text="'#' + ${tag.title}">Community Organizing</div>
+                        </div>
+                    </div>
+                    <div class="learn">
+                        <h2 id="session1">What you'll learn</h2>
+                        <div class="group">
+                            <div class="element">
+                                <p th:text="${course.description}">Mô tả khóa học chi tiết sẽ được hiển thị ở đây. Đây là một
+                                    khóa học tuyệt vời giúp bạn nâng cao kỹ năng và kiến thức trong lĩnh vực này.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="skill">
-                <h2 id="skill">Subjects</h2>
-                <div class="tag_list">
-                    <div class="tag" th:each="tag : ${tagList}"  th:text="'#' + ${tag.title}">Community Organizing</div>
+            <h2>Mentor</h2>
+            <div class="mentor_section">
+                <div id="mentor" class="mentor">
+                    <img th:src="@{/assets/img/em.png}"
+                         alt="Avatar"
+                         class="mentor-avatar">
+                    <div class="mentor-info">
+                        <h3 style="color: #7b7b8a;">Ten mentor</h3>
+                        <p>cac expertise o day</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em">
+                            <button class="follow-btn">Detail</button>
+<!--                            hien thi modal khi click schedule-->
+                            <button class="follow-btn">Schedule</button>
+                        </div>
+
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-number">150</div>
+                            <div class="stat-label">Number of Skill</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">140</div>
+                            <div class="stat-label">Learners</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">45</div>
+                            <div class="stat-label">Reviews</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <h2 id="session3">Why people choose EduTrack for their career</h2>
-    <div class="review">
-        <div class="card">
-            <div class="title">
-                <img th:src="@{#}" alt="avatar" />
-                <h3 class="name">Felipe M.</h3>
-            </div>
-            <div>
-                "To be able to take courses at my own pace and rhythm has been an
-                amazing experience. I can learn whenever it fits my schedule and
-                mood."
-            </div>
-        </div>
-        <div class="card">
-            <div class="title">
-                <img th:src="@{#}" alt="avatar" />
-                <h3 class="name">Felipe M.</h3>
-            </div>
-            <div>
-                "To be able to take courses at my own pace and rhythm has been an
-                amazing experience. I can learn whenever it fits my schedule and
-                mood."
-            </div>
-        </div>
-        <div class="card">
-            <div class="title">
-                <img th:src="@{#}" alt="avatar" />
-                <h3 class="name">Felipe M.</h3>
-            </div>
-            <div>
-                "To be able to take courses at my own pace and rhythm has been an
-                amazing experience. I can learn whenever it fits my schedule and
-                mood."
-            </div>
-        </div>
-    </div>
-    <h2 id="session2">Related Skills</h2>
-</div>
 
+            <h2 id="session3">Why people choose EduTrack for their career</h2>
+            <div class="review">
+                <div class="card">
+                    <div class="title">
+                        <img th:src="@{#}" alt="avatar"/>
+                        <h3 class="name">Felipe M.</h3>
+                    </div>
+                    <div>
+                        "To be able to take courses at my own pace and rhythm has been an
+                        amazing experience. I can learn whenever it fits my schedule and
+                        mood."
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="title">
+                        <img th:src="@{#}" alt="avatar"/>
+                        <h3 class="name">Felipe M.</h3>
+                    </div>
+                    <div>
+                        "To be able to take courses at my own pace and rhythm has been an
+                        amazing experience. I can learn whenever it fits my schedule and
+                        mood."
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="title">
+                        <img th:src="@{#}" alt="avatar"/>
+                        <h3 class="name">Felipe M.</h3>
+                    </div>
+                    <div>
+                        "To be able to take courses at my own pace and rhythm has been an
+                        amazing experience. I can learn whenever it fits my schedule and
+                        mood."
+                    </div>
+                </div>
+            </div>
+            <h2 id="session2">Related Skills</h2>
+        </div>
+    </article>
+
+</main>
+
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 <script>
     function contactMentor() {
         alert('Tính năng liên hệ mentor sẽ được triển khai sớm!');
@@ -229,3 +167,6 @@
 </script>
 </body>
 </html>
+
+
+//vẽ mô hình tichs hop ai
