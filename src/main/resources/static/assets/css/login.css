@@ -49,7 +49,7 @@
   margin: 0;
 }
 *{
-  overflow: visible;
+  overflow: visible !important;
 }
 
 body,
@@ -57,6 +57,7 @@ input,
 button {
   font-family: var(--body-font);
   font-size: var(--normal-font-size);
+  overflow: visible !important;
 }
 
 body {
