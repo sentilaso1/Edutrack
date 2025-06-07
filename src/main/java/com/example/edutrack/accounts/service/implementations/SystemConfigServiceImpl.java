@@ -3,32 +3,32 @@ package com.example.edutrack.accounts.service.implementations;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.edutrack.accounts.repository.PropertyRepository;
 import com.example.edutrack.accounts.model.Property;
+import com.example.edutrack.accounts.model.RequestLog;
+import com.example.edutrack.accounts.repository.RequestLogRepository;
 import com.example.edutrack.accounts.service.interfaces.SystemConfigService;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HWDiskStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.io.*;
+import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SystemConfigServiceImpl implements SystemConfigService {
-    private static final Logger logger = LoggerFactory.getLogger(SystemConfigService.class);
     @Autowired
     private PropertyRepository propertyRepository;
+
+    @Autowired
+    private RequestLogRepository requestLogRepository;
 
     private final SystemInfo systemInfo = new SystemInfo();
 
@@ -52,7 +52,6 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         property.setValue(value);
         property.setUpdatedDate(new Date());
         propertyRepository.save(property);
-        logger.info("Updated config: {} = {}", key, value);
     }
 
     public Map<String, Object> getSystemStatus() {
@@ -86,16 +85,66 @@ public class SystemConfigServiceImpl implements SystemConfigService {
             status.put("totalDisk", formatBytes(totalDisk));
             status.put("usedDisk", formatBytes(usedDisk));
         } catch (Exception e) {
-            logger.error("Error retrieving system status: {}", e.getMessage());
             status.put("error", "Unable to retrieve system status");
         }
         return status;
     }
 
     private String formatBytes(long bytes) {
-        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024)
+            return bytes + " B";
         int exp = (int) (Math.log(bytes) / Math.log(1024));
-        String pre = "KMGTPE".charAt(exp-1) + "";
+        String pre = "KMGTPE".charAt(exp - 1) + "";
         return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre);
     }
+    
+    @Override
+    public void importFromCsv(MultipartFile file) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean isFirst = true;
+            while ((line = reader.readLine()) != null) {
+                if (isFirst) { isFirst = false; continue; } // Skip header
+                String[] tokens = line.split(",");
+                if (tokens.length < 6) continue;
+
+                RequestLog log = new RequestLog();
+                log.setTimestamp(LocalDateTime.parse(tokens[1].trim()));
+                log.setIp(tokens[2].trim());
+                log.setMethod(tokens[3].trim());
+                log.setUri(tokens[4].trim());
+                log.setParameters(tokens[5].trim());
+
+                requestLogRepository.save(log);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to import log file", e);
+        }
+    }
+
+    @Override
+    public void exportToCsv(Writer writer) {
+        List<RequestLog> logs = requestLogRepository.findAll();
+        try (BufferedWriter bw = new BufferedWriter(writer)) {
+            bw.write("ID,Timestamp,IP,Method,URI,Parameters\n");
+            for (RequestLog log : logs) {
+                bw.write(String.format("%d,%s,%s,%s,%s,%s\n",
+                    log.getId(),
+                    log.getTimestamp(),
+                    log.getIp(),
+                    log.getMethod(),
+                    log.getUri(),
+                    log.getParameters().replace(",", " ")  // avoid CSV corruption
+                ));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to export logs", e);
+        }
+    }
+
+    @Override
+    public void clearAllLogs() {
+        requestLogRepository.deleteAll();
+    }
+
 }

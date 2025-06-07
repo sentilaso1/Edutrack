@@ -30,4 +30,8 @@ public interface CourseMentorService {
     List<CourseMentor> getCourseMentorByMentorId(UUID id);
 
     Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable);
+
+    List<CourseMentor> findByCourseId(UUID courseMentorId);
+
+    List<CourseMentor> findLatestCourse(int maxCount);
 }

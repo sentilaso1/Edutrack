@@ -1,6 +1,5 @@
 package com.example.edutrack.curriculum.service.implementation;
 
-import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
@@ -9,6 +8,7 @@ import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -76,7 +76,14 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         return courseMentorRepository.findFilteredCourseMentors(skillIds, subjectIds, pageable);
     }
 
+    @Override
     public List<CourseMentor> findByCourseId(UUID courseMentorId) {
         return courseMentorRepository.findByCourseId(courseMentorId);
+    }
+
+    @Override
+    public List<CourseMentor> findLatestCourse(int maxCount) {
+        Pageable topLatest = PageRequest.of(0, maxCount);
+        return courseMentorRepository.findLatestCourse(topLatest);
     }
 }

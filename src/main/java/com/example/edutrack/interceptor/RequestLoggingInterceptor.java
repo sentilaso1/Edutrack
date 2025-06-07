@@ -2,12 +2,9 @@ package com.example.edutrack.interceptor;
 
 import java.time.LocalDateTime;
 import java.util.Enumeration;
-
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import com.example.edutrack.accounts.model.RequestLog;
 import com.example.edutrack.accounts.repository.RequestLogRepository;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
