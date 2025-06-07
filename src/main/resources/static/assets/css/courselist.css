@@ -26,7 +26,7 @@
   --light-coral: hsl(357, 100%, 75%);
   --oxford-blue: hsl(224, 53%, 10%);
   --light-gray: hsl(0, 0%, 80%);
-  --keppei: hsl(173, 60%, 47%);
+  --keppei: hsl(0, 94%, 67%);
   --white: hsl(0, 0%, 100%);
   --black: hsl(0, 0%, 0%);
   --black_10: hsla(0, 0%, 0%, 0.1);
@@ -129,16 +129,8 @@ body {
   color: var(--roman-silver);
   font-size: 1.6rem;
   line-height: 1.5;
-  overflow: hidden;
+  overflow: auto;
 }
-
-body.loaded { overflow: visible; }
-
-body.nav-active { overflow: hidden; }
-
-
-
-
 
 /*-----------------------------------*\
   #REUSED STYLE
@@ -282,50 +274,6 @@ body.nav-active { overflow: hidden; }
   height: 100%;
   object-fit: cover;
 }
-
-
-
-
-
-/*-----------------------------------*\
-  #PRELOADER
-\*-----------------------------------*/
-
-.preloader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background-color: var(--light-coral);
-  display: grid;
-  place-items: center;
-  z-index: 6;
-  transition: var(--transition);
-}
-
-.preloader.loaded {
-  visibility: hidden;
-  opacity: 0;
-}
-
-.preloader .circle {
-  width: 50px;
-  height: 50px;
-  border-radius: var(--radius-circle);
-  border: 4px solid var(--white);
-  border-block-start-color: transparent;
-  animation: rotate360 1s ease infinite;
-}
-
-@keyframes rotate360 {
-  0% { transform: rotate(0); }
-  100% { transform: rotate(1turn); }
-}
-
-
-
-
 
 /*-----------------------------------*\
   #HEADER
