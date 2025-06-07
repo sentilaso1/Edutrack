@@ -6,10 +6,14 @@ import com.example.edutrack.accounts.model.RequestLog;
 import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.service.interfaces.SystemConfigService;
 import com.example.edutrack.accounts.service.interfaces.UserService;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import com.example.edutrack.accounts.dto.UserFilter;
 import com.example.edutrack.accounts.dto.UserWithRoleDTO;
 
 import java.util.List;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
@@ -196,5 +201,27 @@ public class AdminController {
                 systemConfigService.updateConfig(key, value);
                 return "redirect:/admin/system-settings?success=Configuration updated successfully";
         }
+
+        @PostMapping("/system-settings/import-log")
+        public String importLog(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+                systemConfigService.importFromCsv(file);
+                redirectAttributes.addAttribute("success", "Logs imported successfully.");
+                return "redirect:/admin/system-settings";
+        }
+
+        @GetMapping("/system-settings/export-log")
+        public void exportLog(HttpServletResponse response) throws IOException {
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=\"logs.csv\"");
+                systemConfigService.exportToCsv(response.getWriter());
+        }
+
+        @PostMapping("/system-settings/clear-logs")
+        public String clearLogs(RedirectAttributes redirectAttributes) {
+                systemConfigService.clearAllLogs();
+                redirectAttributes.addAttribute("success", "All logs cleared.");
+                return "redirect:/admin/system-settings";
+        }
+
 }
 
