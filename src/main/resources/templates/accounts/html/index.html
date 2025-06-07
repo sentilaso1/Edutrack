@@ -42,6 +42,12 @@
                                 <p>Used: <span th:text="${systemStatus.usedDisk}"></span></p>
                         </div>
                 </div>
+                <div class="bg-white p-4 rounded shadow mt-6">
+                        <h2 class="text-lg font-semibold">Users Overview</h2>
+                        <p class="text-gray-700">👥 Total Users: <span th:text="${userStats.total}"></span></p>
+                        <p class="text-green-600">🟢 Active: <span th:text="${userStats.active}"></span></p>
+                        <p class="text-red-600">🔒 Locked: <span th:text="${userStats.locked}"></span></p>
+                </div>                    
         </div>
 
         <script>
