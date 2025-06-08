@@ -81,17 +81,23 @@
             border-radius: 50%;
             width: 40px;
             height: 40px;
+            line-height: 36px;
             font-size: 20px;
+            font-weight: bold;
             z-index: 10;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .carousel-prev {
-            left: -10px;
+            left: 10px;
         }
 
         .carousel-next {
-            right: -10px;
+            right: 10px;
         }
 
         .carousel-indicators {
@@ -140,7 +146,6 @@
             font-weight: bold;
         }
 
-        /* Distinguish mentor card if needed */
         .mentor-card {
             height: 100%;
             display: flex;
@@ -203,52 +208,33 @@
   - #HEADER
 -->
 
-
 <header class="header" data-header>
     <div class="container">
-
         <a th:href="@{/home}" class="logo">
             <img th:src="@{/assets/images/logo.svg}" width="145" height="27" alt="Youdemi home">
         </a>
 
         <nav class="navbar" data-navbar>
-
             <div class="navbar-top">
                 <a href="#" class="logo">
                     <img th:src="@{/assets/images/logo.svg}" width="145" height="27" alt="Youdemi home">
                 </a>
-
                 <button class="nav-close-btn" aria-label="close menu" data-nav-toggler>
                     <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
                 </button>
             </div>
 
             <ul class="navbar-list">
-
-                <li class="navbar-item">
-                    <a th:href="@{/home}" class="navbar-link title-sm" data-nav-link>Home</a>
-                </li>
-
-                <li class="navbar-item">
-                    <a th:href="@{/courses}" class="navbar-link title-sm" data-nav-link>Courses</a>
-                </li>
-
-                <li class="navbar-item">
-                    <a th:href="@{/mentors}" class="navbar-link title-sm" data-nav-link>Mentors</a>
-                </li>
-
-                <li class="navbar-item">
-                    <a th:href="@{/schedules}" class="navbar-link title-sm" data-nav-link>Schedules</a>
-                </li>
-
-                <li class="navbar-item">
-                    <a href="#" class="navbar-link title-sm" data-nav-link>Contacts</a>
-                </li>
-
+                <li class="navbar-item"><a th:href="@{/home}" class="navbar-link title-sm">Home</a></li>
+                <li class="navbar-item"><a th:href="@{/courses}" class="navbar-link title-sm">Courses</a></li>
+                <li class="navbar-item"><a th:href="@{/mentors}" class="navbar-link title-sm">Mentors</a></li>
+                <li class="navbar-item"><a th:href="@{/schedules}" class="navbar-link title-sm"
+                                           th:if="${showSchedulesLink}">Schedules</a></li>
+                <li class="navbar-item"><a href="#" class="navbar-link title-sm">Contacts</a></li>
             </ul>
-
         </nav>
 
+        <!-- CTA button: Sign Up / Dashboard / My Learning -->
         <a th:href="@{${headerCTALink}}" class="btn btn-secondary" th:text="${headerCTA}">Start Free Trial</a>
 
         <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
@@ -256,7 +242,6 @@
         </button>
 
         <div class="overlay" data-overlay data-nav-toggler></div>
-
     </div>
 </header>
 
@@ -267,30 +252,29 @@
         <!--
           - #HERO
         -->
-
         <section class="section hero has-bg-image" aria-labelledby="hero-label"
-                 style="background-image: url('/assets/images/hero-bg.png')">
-            <div class="container">
+                 style="background-image: url('/assets/images/hero-bg.png'); position: relative;">
+            <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
 
-                <div class="hero-content">
-
+                <!-- LEFT: Welcome / Title -->
+                <div class="hero-content" style="max-width: 55%;">
+                    <!-- Headline (name for logged in user) -->
                     <h1 class="headline-lg" id="hero-label" th:utext="${heroHeadline}">
                         Better <span class="span">Learning Future</span> Starts With Youdemi
                     </h1>
 
-                    <p class="title-md has-before" th:text="${heroSubHeadline}">
+                    <!-- Subtitle -->
+                    <p class="title-md" style="margin-top: 8px;" th:text="${heroSubHeadline}">
                         It is long established fact that reader distracted by the readable content.
                     </p>
 
-                    <div class="btn-group">
-                        <a th:href="@{${heroCTALink}}" class="btn btn-primary" th:text="${heroCTA}">Get Started Now</a>
+                    <!-- CTA Button -->
+                    <div class="btn-group" style="margin-top: 16px;">
+                        <a th:href="@{${heroCTALink}}" class="btn btn-primary" th:text="${heroCTA}">
+                            Explore Courses
+                        </a>
                     </div>
                 </div>
-
-                <figure class="hero-banner">
-                    <img th:src="@{/assets/images/hero-banner.png}" width="590" height="620" alt="hero banner"
-                         class="w-100">
-                </figure>
 
             </div>
         </section>
@@ -428,14 +412,9 @@
                                             Title</h3>
                                         <div class="card-meta wrapper">
                                             <p class="title-sm">
-                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20"
-                                                     alt="">
-                                                <span th:text="${courseMentor.lessonCount + ' Lessons'}">Lessons</span>
-                                            </p>
-                                            <p class="title-sm">
                                                 <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
                                                      alt="">
-                                                <span th:text="${courseMentor.studentCount + ' Students'}">Students</span>
+                                                <span th:text="${courseMentor.studentCount + ' Enrollments'}">Students</span>
                                             </p>
                                         </div>
                                         <p class="title-sm mentor-name">
@@ -496,14 +475,9 @@
                                             Title</h3>
                                         <div class="card-meta wrapper">
                                             <p class="title-sm">
-                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20"
-                                                     alt="">
-                                                <span th:text="${courseMentor.lessonCount + ' Lessons'}">Lessons</span>
-                                            </p>
-                                            <p class="title-sm">
                                                 <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
                                                      alt="">
-                                                <span th:text="${courseMentor.studentCount + ' Students'}">Students</span>
+                                                <span th:text="${courseMentor.studentCount + ' Enrollments'}">Students</span>
                                             </p>
                                         </div>
                                         <p class="title-sm mentor-name">
@@ -527,15 +501,15 @@
             </div>
         </section>
 
-        <section class="section mentor has-bg-image" aria-labelledby="mentor-label"
-                 th:style="|background-image: url('@{/assets/images/mentor-bg.png}')|"
+        <section class="section mentor has-bg-image" aria-labelledby="course-label"
+                 th:style="|background-image: url('@{/assets/images/course-bg.png}')|"
                  th:if="${recommendedMentors != null}">
 
             <div class="container">
                 <p class="title-sm section-subtitle text-center">Top Mentors for You</p>
 
-                <h2 class="headline-md section-title text-center" id="mentor-label">
-                    <span class="span has-after">Recommended Mentors</span>
+                <h2 class="headline-md section-title text-center" id="course-label-3">
+                    <span>Recommended Mentors</span>
                 </h2>
 
                 <div class="carousel-container" id="mentor-carousel">
@@ -551,7 +525,6 @@
                                     <div class="card-content">
                                         <h3 class="title-lg card-title" th:text="${mentor.fullName}">Mentor Name</h3>
                                         <p class="title-sm" th:text="'Expertise: ' + ${mentor.expertise}">Expertise</p>
-                                        <p class="title-sm" th:text="'Sessions: ' + ${mentor.totalSessions}">Total Sessions</p>
                                         <p class="title-sm" id="rating">
                                             Rating:
                                             <span th:text="${mentor.rating}">4.9</span>

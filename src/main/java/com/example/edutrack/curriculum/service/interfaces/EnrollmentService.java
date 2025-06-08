@@ -10,11 +10,11 @@ import java.util.UUID;
 public interface EnrollmentService {
     public List<CourseMentor> getPopularCoursesForGuest(int topPopular);
 
-    Enrollment getEnrollmentByCourseMentorId(UUID id);
-
     CourseCardDTO mapToCourseCardDTO(CourseMentor courseMentor);
 
     List<CourseCardDTO> mapToCourseCardDTOList(List<CourseMentor> courseMentors);
 
     List<Enrollment> getEnrollmentsByMenteeId(UUID menteeId);
+
+    List<CourseMentor> getCourseInProgressMentee(UUID menteeId);
 }

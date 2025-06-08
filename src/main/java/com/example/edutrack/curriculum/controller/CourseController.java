@@ -1,18 +1,14 @@
 package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
-import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
-import com.example.edutrack.curriculum.dto.TagEnrollmentCountDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import com.example.edutrack.curriculum.service.interfaces.EnrollmentService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,21 +33,19 @@ public class CourseController {
     private final TagServiceImpl tagServiceImpl;
     private final CourseMentorService courseMentorService;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
-    private final EnrollmentService enrollmentService;
 
     public CourseController(CourseServiceImpl courseServiceImpl,
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorServiceImpl mentorServiceImpl,
                             TagServiceImpl tagServiceImpl,
                             CourseTagService courseTagService,
-                            CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl, EnrollmentService enrollmentService) {
+                            CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl) {
         this.courseServiceImpl = courseServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
         this.tagServiceImpl = tagServiceImpl;
         this.courseMentorService = courseMentorService;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
-        this.enrollmentService = enrollmentService;
         this.courseTagService = courseTagService;
     }
 

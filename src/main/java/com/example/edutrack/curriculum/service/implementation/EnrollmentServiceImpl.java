@@ -26,29 +26,16 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.findPopularCoursesByEnrollmentCount(topPopular);
     }
 
-    @Override
-    public Enrollment getEnrollmentByCourseMentorId(UUID id) {
-        return enrollmentRepository.findByCourseMentorId(id);
-    }
-
-    public int getLessonCountByCourseMentor(UUID courseMentorId) {
-        Integer result = enrollmentRepository.totalSessionsByCourseMentorId(courseMentorId);
-        return result != null ? result : 0;
-    }
-
     public int getStudentCountByCourseMentor(UUID courseMentorId) {
         return enrollmentRepository.countByCourseMentor_IdAndIsApprovedTrue(courseMentorId);
     }
 
     @Override
     public CourseCardDTO mapToCourseCardDTO(CourseMentor courseMentor) {
-        int lessonCount = getLessonCountByCourseMentor(courseMentor.getId());
         int studentCount = getStudentCountByCourseMentor(courseMentor.getId());
-
         return new CourseCardDTO(
                 courseMentor.getId(),
                 courseMentor.getCourse().getName(),
-                lessonCount,
                 studentCount,
                 courseMentor.getMentor()
         );
@@ -64,6 +51,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<Enrollment> getEnrollmentsByMenteeId(UUID menteeId) {
         return enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId);
+    }
+
+    @Override
+    public List<CourseMentor> getCourseInProgressMentee(UUID menteeId) {
+        return enrollmentRepository.findInProgressCourses(menteeId);
     }
 
 }

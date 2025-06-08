@@ -22,4 +22,23 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
     )
     List<Tag> findByCourseId(@Param("courseId") UUID courseId);
 
+
+    @Query("""
+    SELECT ct.tag FROM CourseMentor cm
+    JOIN CourseTag ct ON ct.course = cm.course
+    WHERE cm.id = :courseMentorId
+""")
+    List<Tag> findByCourseMentorId(@Param("courseMentorId") UUID courseMentorId);
+
+
+    @Query("""
+                SELECT DISTINCT t.title FROM Enrollment e
+                JOIN e.courseMentor cm
+                JOIN cm.course c
+                JOIN CourseTag ct ON ct.course = c
+                JOIN Tag t ON ct.tag = t
+                WHERE e.mentee.id = :menteeId AND e.status = 'ACCEPTED'
+            """)
+    List<String> findDistinctTagTitlesFromMenteeId(@Param("menteeId") UUID menteeId);
+
 }
