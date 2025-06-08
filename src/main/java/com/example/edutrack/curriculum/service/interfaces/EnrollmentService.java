@@ -15,4 +15,6 @@ public interface EnrollmentService {
     CourseCardDTO mapToCourseCardDTO(CourseMentor courseMentor);
 
     List<CourseCardDTO> mapToCourseCardDTOList(List<CourseMentor> courseMentors);
+
+    List<Enrollment> getEnrollmentsByMenteeId(UUID menteeId);
 }

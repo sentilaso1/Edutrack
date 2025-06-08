@@ -61,4 +61,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .toList();
     }
 
+    @Override
+    public List<Enrollment> getEnrollmentsByMenteeId(UUID menteeId) {
+        return enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId);
+    }
+
 }

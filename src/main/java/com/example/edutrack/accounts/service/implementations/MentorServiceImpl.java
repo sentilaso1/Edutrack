@@ -1,11 +1,12 @@
 package com.example.edutrack.accounts.service.implementations;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.edutrack.accounts.model.Mentor;
@@ -13,9 +14,11 @@ import com.example.edutrack.accounts.model.Mentor;
 @Service
 public class MentorServiceImpl implements MentorService {
     private final MentorRepository mentorRepository;
+    private final MenteeRepository menteeRepository;
 
-    public MentorServiceImpl(MentorRepository mentorRepository) {
+    public MentorServiceImpl(MentorRepository mentorRepository, MenteeRepository menteeRepository) {
         this.mentorRepository = mentorRepository;
+        this.menteeRepository = menteeRepository;
     }
 
     public Mentor getMentorById(String id) {
@@ -47,5 +50,35 @@ public class MentorServiceImpl implements MentorService {
     @Override
     public List<Mentor> findAll() {
         return mentorRepository.findAll();
+    }
+
+    @Override
+    public List<Mentor> getTopMentorsByRatingOrSessions(int limit) {
+        return mentorRepository.findTopActiveMentors(PageRequest.of(0, limit));
+    }
+
+    @Override
+    public List<Mentor> findMentorsByMenteeInterest(UUID menteeId, int limit){
+        Mentee mentee = menteeRepository.findById(menteeId)
+                .orElseThrow(() -> new RuntimeException("Mentee not found"));
+        List<String> interests = Arrays.stream(mentee.getInterests().split(","))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .toList();
+        List<Mentor> mentorList = new ArrayList<>();
+        Set<UUID> seen = new HashSet<>();
+
+        for(String keyword : interests){
+            List<Mentor> mentorWithKeyword = mentorRepository.findByExpertiseKeyword(keyword, PageRequest.of(0, limit));
+            for (Mentor mentor : mentorWithKeyword){
+                if(seen.add(mentor.getId())){
+                    mentorList.add(mentor);
+                    if (mentorList.size() >= limit) return mentorList;
+                }
+            }
+
+        }
+        return mentorList;
+
     }
 }

@@ -29,7 +29,7 @@ public class Enrollment {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private EnrollMentStatus status;
+    private EnrollmentStatus status;
 
     @Column(name = "is_paid", nullable = false)
     private Boolean isPaid;
@@ -84,11 +84,11 @@ public class Enrollment {
         this.totalSessions = totalSessions;
     }
 
-    public EnrollMentStatus getStatus() {
+    public EnrollmentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(EnrollMentStatus status) {
+    public void setStatus(EnrollmentStatus status) {
         this.status = status;
     }
 

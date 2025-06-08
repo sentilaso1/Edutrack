@@ -1,6 +1,6 @@
 package com.example.edutrack.curriculum.model;
 
-public enum EnrollMentStatus {
+public enum EnrollmentStatus {
     Pending,
     Accepted,
     Rejected,
