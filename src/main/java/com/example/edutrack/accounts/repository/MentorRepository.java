@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.profiles.model.CV;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,11 +31,28 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
     );
 
     @Query("SELECT ct.tag FROM Mentor m " +
-           "JOIN CourseMentor c ON c.mentor = m " +
-           "JOIN CourseTag ct ON ct.course = c.course " +
-           "WHERE m.id = :id")
+            "JOIN CourseMentor c ON c.mentor = m " +
+            "JOIN CourseTag ct ON ct.course = c.course " +
+            "WHERE m.id = :id")
     List<Tag> findTagsByMentorId(@Param("id") UUID id);
 
     @Query("SELECT cv FROM CV cv WHERE cv.user.id = :mentorId")
     Optional<CV> findCVByMentorId(UUID mentorId);
+
+    @Query("""
+    SELECT DISTINCT m
+    FROM Mentor m
+    JOIN CourseMentor cm ON cm.mentor = m
+    WHERE cm.status = com.example.edutrack.curriculum.model.ApplicationStatus.ACCEPTED
+    AND (m.rating IS NOT NULL OR m.totalSessions > 0)
+    ORDER BY m.rating DESC NULLS LAST, m.totalSessions DESC
+""")
+    List<Mentor> findTopActiveMentors(Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT m FROM Mentor m
+    WHERE LOWER(m.expertise) LIKE CONCAT('%', :keyword, '%')
+""")
+    List<Mentor> findByExpertiseKeyword(@Param("keyword") String keyword, Pageable pageable);
+
 }

@@ -14,4 +14,8 @@ public interface MentorService {
     long countAll();
 
     List<Mentor> findAll();
+
+    List<Mentor> getTopMentorsByRatingOrSessions(int limit);
+
+    List<Mentor> findMentorsByMenteeInterest(UUID menteeId, int limit);
 }

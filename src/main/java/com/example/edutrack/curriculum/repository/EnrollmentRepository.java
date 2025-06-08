@@ -27,4 +27,13 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     Integer totalSessionsByCourseMentorId(@Param("courseMentorId") UUID courseMentorId);
 
     int countByCourseMentor_IdAndIsApprovedTrue(UUID courseMentorId);
+
+    @Query("""
+    SELECT e FROM Enrollment e
+    WHERE e.mentee.id = :menteeId
+      AND e.status = com.example.edutrack.curriculum.model.EnrollmentStatus.Accepted
+      AND e.isApproved = true
+      AND e.isPaid = true
+""")
+    List<Enrollment> findAcceptedEnrollmentsByMenteeId(UUID menteeId);
 }

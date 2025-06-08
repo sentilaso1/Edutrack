@@ -28,7 +28,7 @@
     -->
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <style>
-        *{
+        * {
             overflow-x: hidden;
         }
 
@@ -64,6 +64,7 @@
             gap: 30px;
             width: max-content;
         }
+
         .carousel-slide {
             flex: 0 0 auto;
             width: 320px;
@@ -116,11 +117,14 @@
 
         .layer-link {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 1;
             text-decoration: none;
         }
+
         .card.category-card {
             position: relative;
         }
@@ -131,10 +135,61 @@
             font-size: 0.85rem;
         }
 
+        #rating{
+            color: #d8d50a;
+            font-weight: bold;
+        }
+
+        /* Distinguish mentor card if needed */
+        .mentor-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            min-height: 420px;
+            max-width: 320px;
+            position: relative;
+        }
+
+        .mentor-card .card-content {
+            padding: 10px 0;
+            flex-grow: 1;
+        }
+
+        .mentor-card .card-title {
+            margin-bottom: 8px;
+            color: #222;
+        }
+
+        .mentor-card p {
+            margin: 4px 0;
+            font-size: 14px;
+            color: #555;
+        }
+        .mentor-card .card-banner {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .mentor-card .card-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
 
     </style>
     <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
 
     <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
@@ -147,7 +202,6 @@
 <!--
   - #HEADER
 -->
-
 
 
 <header class="header" data-header>
@@ -207,7 +261,6 @@
 </header>
 
 
-
 <main>
     <article>
 
@@ -235,12 +288,12 @@
                 </div>
 
                 <figure class="hero-banner">
-                    <img th:src="@{/assets/images/hero-banner.png}" width="590" height="620" alt="hero banner" class="w-100">
+                    <img th:src="@{/assets/images/hero-banner.png}" width="590" height="620" alt="hero banner"
+                         class="w-100">
                 </figure>
 
             </div>
         </section>
-
 
 
         <!-- #CATEGORY -->
@@ -258,7 +311,8 @@
                     <li th:each="tag : ${topTags}">
                         <div class="card category-card">
                             <div class="card-icon">
-                                <img th:src="@{/assets/images/category-6.svg}" width="72" height="72" alt="Category Icon">
+                                <img th:src="@{/assets/images/category-6.svg}" width="72" height="72"
+                                     alt="Category Icon">
                             </div>
                             <div>
                                 <h3 class="title-lg" th:text="${tag.tag.title}">Category</h3>
@@ -288,7 +342,8 @@
             <div class="container">
 
                 <figure class="about-banner">
-                    <img th:src="@{/assets/images/about-banner.png}" width="775" height="685" loading="lazy" alt="about banner"
+                    <img th:src="@{/assets/images/about-banner.png}" width="775" height="685" loading="lazy"
+                         alt="about banner"
                          class="w-100">
                 </figure>
 
@@ -300,7 +355,8 @@
                     </h2>
 
                     <p class="title-sm section-text">
-                        There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration
+                        There are many variations of passages of Lorem Ipsum available, but the majority have suffered
+                        alteration
                         in some form, by injected humour.
                     </p>
 
@@ -344,7 +400,8 @@
                  th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
             <div class="container">
 
-                <p class="title-sm section-subtitle text-center" th:text="${sectionOneSubtitle}">Section One Subtitle</p>
+                <p class="title-sm section-subtitle text-center" th:text="${sectionOneSubtitle}">Section One
+                    Subtitle</p>
 
                 <h2 class="headline-md section-title text-center" id="course-label">
                     <span th:utext="${sectionOneTitle}">Section One Title</span>
@@ -356,28 +413,34 @@
                             <div class="card-container">
                                 <div class="card course-card">
                                     <figure class="card-banner">
-                                        <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}" class="img-cover" alt="Mentor Avatar" />
+                                        <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
+                                             class="img-cover" alt="Mentor Avatar"/>
                                     </figure>
                                     <div class="card-content">
                                         <div class="wrapper">
                                             <p>Price</p>
                                             <div class="rating-wrapper">
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" alt="">
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
+                                                     alt="">
                                             </div>
                                         </div>
-                                        <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course Title</h3>
+                                        <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course
+                                            Title</h3>
                                         <div class="card-meta wrapper">
                                             <p class="title-sm">
-                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20" alt="">
+                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20"
+                                                     alt="">
                                                 <span th:text="${courseMentor.lessonCount + ' Lessons'}">Lessons</span>
                                             </p>
                                             <p class="title-sm">
-                                                <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="">
+                                                <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
+                                                     alt="">
                                                 <span th:text="${courseMentor.studentCount + ' Students'}">Students</span>
                                             </p>
                                         </div>
                                         <p class="title-sm mentor-name">
-                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="">
+                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
+                                                 alt="">
                                             <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor</span>
                                         </p>
                                     </div>
@@ -405,7 +468,8 @@
                  th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
             <div class="container">
 
-                <p class="title-sm section-subtitle text-center" th:text="${sectionTwoSubtitle}">Section One Subtitle</p>
+                <p class="title-sm section-subtitle text-center" th:text="${sectionTwoSubtitle}">Section One
+                    Subtitle</p>
 
                 <h2 class="headline-md section-title text-center" id="course-label-2">
                     <span th:utext="${sectionTwoTitle}">Section One Title</span>
@@ -417,28 +481,34 @@
                             <div class="card-container">
                                 <div class="card course-card">
                                     <figure class="card-banner">
-                                        <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}" class="img-cover" alt="Mentor Avatar" />
+                                        <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
+                                             class="img-cover" alt="Mentor Avatar"/>
                                     </figure>
                                     <div class="card-content">
                                         <div class="wrapper">
                                             <p>Price</p>
                                             <div class="rating-wrapper">
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" alt="">
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
+                                                     alt="">
                                             </div>
                                         </div>
-                                        <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course Title</h3>
+                                        <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course
+                                            Title</h3>
                                         <div class="card-meta wrapper">
                                             <p class="title-sm">
-                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20" alt="">
+                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20"
+                                                     alt="">
                                                 <span th:text="${courseMentor.lessonCount + ' Lessons'}">Lessons</span>
                                             </p>
                                             <p class="title-sm">
-                                                <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="">
+                                                <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
+                                                     alt="">
                                                 <span th:text="${courseMentor.studentCount + ' Students'}">Students</span>
                                             </p>
                                         </div>
                                         <p class="title-sm mentor-name">
-                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt="">
+                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
+                                                 alt="">
                                             <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor</span>
                                         </p>
                                     </div>
@@ -456,6 +526,52 @@
                 </div>
             </div>
         </section>
+
+        <section class="section mentor has-bg-image" aria-labelledby="mentor-label"
+                 th:style="|background-image: url('@{/assets/images/mentor-bg.png}')|"
+                 th:if="${recommendedMentors != null}">
+
+            <div class="container">
+                <p class="title-sm section-subtitle text-center">Top Mentors for You</p>
+
+                <h2 class="headline-md section-title text-center" id="mentor-label">
+                    <span class="span has-after">Recommended Mentors</span>
+                </h2>
+
+                <div class="carousel-container" id="mentor-carousel">
+                    <div class="carousel-wrapper">
+                        <div class="carousel-slide" th:each="mentor : ${recommendedMentors}">
+                            <div class="card-container">
+                                <div class="card mentor-card">
+                                    <figure class="card-banner">
+                                        <img th:src="@{/mentors/{id}/avatar(id=${mentor.id})}"
+                                             onerror="this.src='/assets/images/default-avatar.png'"
+                                             alt="Mentor Avatar" class="img-cover"/>
+                                    </figure>
+                                    <div class="card-content">
+                                        <h3 class="title-lg card-title" th:text="${mentor.fullName}">Mentor Name</h3>
+                                        <p class="title-sm" th:text="'Expertise: ' + ${mentor.expertise}">Expertise</p>
+                                        <p class="title-sm" th:text="'Sessions: ' + ${mentor.totalSessions}">Total Sessions</p>
+                                        <p class="title-sm" id="rating">
+                                            Rating:
+                                            <span th:text="${mentor.rating}">4.9</span>
+                                        </p>
+                                    </div>
+                                    <a th:href="@{'/mentors/' + ${mentor.id}}" class="layer-link"
+                                       th:aria-label="'Mentor Profile: ' + ${mentor.fullName}"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="carousel-nav carousel-prev" onclick="moveCarousel('mentor-carousel', -1)">‹</button>
+                    <button class="carousel-nav carousel-next" onclick="moveCarousel('mentor-carousel', 1)">›</button>
+                </div>
+
+                <div class="carousel-indicators" id="mentor-indicators"></div>
+            </div>
+        </section>
+
         <!--
           - #CTA
         -->
@@ -493,32 +609,37 @@
                 </a>
 
                 <p class="title-sm footer-text">
-                    Lorem ipsum amet, consectetur adipiscing elit. Suspendis varius enim eros elementum tristique. Duis cursus.
+                    Lorem ipsum amet, consectetur adipiscing elit. Suspendis varius enim eros elementum tristique. Duis
+                    cursus.
                 </p>
 
                 <ul class="social-list">
 
                     <li>
                         <a th:href="@{/facebook}" class="social-link">
-                            <img th:src="@{/assets/images/facebook.svg}" width="40" height="40" loading="lazy" alt="facebook">
+                            <img th:src="@{/assets/images/facebook.svg}" width="40" height="40" loading="lazy"
+                                 alt="facebook">
                         </a>
                     </li>
 
                     <li>
                         <a th:href="@{/twitter}" class="social-link">
-                            <img th:src="@{/assets/images/twitter.svg}" width="40" height="40" loading="lazy" alt="twitter">
+                            <img th:src="@{/assets/images/twitter.svg}" width="40" height="40" loading="lazy"
+                                 alt="twitter">
                         </a>
                     </li>
 
                     <li>
                         <a th:href="@{/pinterest}" class="social-link">
-                            <img th:src="@{/assets/images/pinterest.svg}" width="40" height="40" loading="lazy" alt="pinterest">
+                            <img th:src="@{/assets/images/pinterest.svg}" width="40" height="40" loading="lazy"
+                                 alt="pinterest">
                         </a>
                     </li>
 
                     <li>
                         <a th:href="@{/instagram}" class="social-link">
-                            <img th:src="@{/assets/images/instagram.svg}" width="40" height="40" loading="lazy" alt="instagram">
+                            <img th:src="@{/assets/images/instagram.svg}" width="40" height="40" loading="lazy"
+                                 alt="instagram">
                         </a>
                     </li>
 
@@ -561,12 +682,18 @@
                     <p class="headline-sm footer-list-title">Instagram Post</p>
                     <ul class="grid-list">
 
-                        <li><img th:src="@{/assets/images/ins-1.png}" width="80" height="80" loading="lazy" alt="instagram post" class="img-cover"></li>
-                        <li><img th:src="@{/assets/images/ins-2.png}" width="80" height="80" loading="lazy" alt="instagram post" class="img-cover"></li>
-                        <li><img th:src="@{/assets/images/ins-3.png}" width="80" height="80" loading="lazy" alt="instagram post" class="img-cover"></li>
-                        <li><img th:src="@{/assets/images/ins-4.png}" width="80" height="80" loading="lazy" alt="instagram post" class="img-cover"></li>
-                        <li><img th:src="@{/assets/images/ins-5.png}" width="80" height="80" loading="lazy" alt="instagram post" class="img-cover"></li>
-                        <li><img th:src="@{/assets/images/ins-6.png}" width="80" height="80" loading="lazy" alt="instagram post" class="img-cover"></li>
+                        <li><img th:src="@{/assets/images/ins-1.png}" width="80" height="80" loading="lazy"
+                                 alt="instagram post" class="img-cover"></li>
+                        <li><img th:src="@{/assets/images/ins-2.png}" width="80" height="80" loading="lazy"
+                                 alt="instagram post" class="img-cover"></li>
+                        <li><img th:src="@{/assets/images/ins-3.png}" width="80" height="80" loading="lazy"
+                                 alt="instagram post" class="img-cover"></li>
+                        <li><img th:src="@{/assets/images/ins-4.png}" width="80" height="80" loading="lazy"
+                                 alt="instagram post" class="img-cover"></li>
+                        <li><img th:src="@{/assets/images/ins-5.png}" width="80" height="80" loading="lazy"
+                                 alt="instagram post" class="img-cover"></li>
+                        <li><img th:src="@{/assets/images/ins-6.png}" width="80" height="80" loading="lazy"
+                                 alt="instagram post" class="img-cover"></li>
 
                     </ul>
                 </li>

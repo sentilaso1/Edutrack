@@ -34,4 +34,6 @@ public interface CourseMentorService {
     List<CourseMentor> findByCourseId(UUID courseMentorId);
 
     List<CourseMentor> findLatestCourse(int maxCount);
+
+    List<CourseMentor> getRecommendedCoursesByInterests(UUID menteeId, int limit);
 }

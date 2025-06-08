@@ -13,24 +13,25 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface CourseMentorRepository  extends JpaRepository<CourseMentor, CourseMentorId> {
+public interface CourseMentorRepository extends JpaRepository<CourseMentor, CourseMentorId> {
 
     @Query("SELECT ct.tag FROM CourseMentor cm JOIN CourseTag ct ON ct.course = cm.course")
     List<Tag> findAllTags();
 
     @Query("SELECT cm.course FROM CourseMentor cm")
     List<Course> findAllCourses();
+
     @Query("""
-        SELECT cm FROM CourseMentor cm
-        WHERE 
-            (:skillIds IS NULL OR cm.course.id IN :skillIds)
-        AND 
-            (:subjectIds IS NULL OR EXISTS (
-                SELECT 1 FROM CourseTag ct
-                WHERE ct.course = cm.course
-                AND ct.tag.id IN :subjectIds
-            ))
-    """)
+                SELECT cm FROM CourseMentor cm
+                WHERE 
+                    (:skillIds IS NULL OR cm.course.id IN :skillIds)
+                AND 
+                    (:subjectIds IS NULL OR EXISTS (
+                        SELECT 1 FROM CourseTag ct
+                        WHERE ct.course = cm.course
+                        AND ct.tag.id IN :subjectIds
+                    ))
+            """)
     Page<CourseMentor> findFilteredCourseMentors(
             @Param("skillIds") List<UUID> skillIds,
             @Param("subjectIds") List<Integer> subjectIds,
@@ -64,5 +65,15 @@ public interface CourseMentorRepository  extends JpaRepository<CourseMentor, Cou
 
     @Query("SELECT cm FROM CourseMentor cm WHERE cm.status = 'ACCEPTED' ORDER BY cm.appliedDate DESC")
     List<CourseMentor> findLatestCourse(Pageable pageable);
+
+    @Query("""
+                SELECT DISTINCT cm FROM CourseMentor cm
+                JOIN cm.course c
+                JOIN CourseTag ct ON ct.course = c
+                JOIN Tag t ON ct.tag = t
+                WHERE LOWER(t.title) IN :interests
+            """)
+    List<CourseMentor> findByTagsMatchingInterests(@Param("interests") List<String> interests, Pageable pageable);
+
 
 }
