@@ -277,7 +277,7 @@
         <div class="cv-section">
             <div class="section-header">Create your CV</div>
 
-            <form th:action="@{/cv/create}" method="post">
+            <form th:action="@{/cv/create}" method="post" id="cvForm">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="summary">Summary</label>
@@ -328,36 +328,24 @@
                 </div>
 
                 <input type="hidden" name="userId" th:value="${userId}">
+                <input type="hidden" name="selectedCourses" id="selectedCoursesInput" />
                 <button type="submit" class="create-btn">Create CV</button>
             </form>
         </div>
 
-        <div class="courses-section">
-            <div class="section-header">Register Courses</div>
-            <p style="text-align: center">To be Added</p>
-        </div>
-        <!--
-        Register Courses Section
+        <!-- Register Courses Section -->
+        <!-- Courses Section -->
         <div class="courses-section">
             <div class="section-header">Register Courses</div>
 
             <div th:if="${coursePage != null}">
                 <div th:each="course : ${coursePage.content}">
                     <div class="course-card">
-                        <button class="add-btn">+</button>
+                        <button class="add-btn" type="button" th:attr="data-course-id=${course.id}">+</button>
                         <div class="course-title" th:text="${course.name}"></div>
-                        <div class="course-tags">
-                            <span class="tag azure">Azure</span>
-                            <span class="tag">Administrator</span>
-                            <span class="tag beginner">Beginner</span>
-                        </div>
-                        <div class="course-description">
-                            Learn the foundational concepts of cloud computing and Microsoft Azure services. This course
-                            covers cloud concepts, core Azure services, security, privacy, compliance, and Azure pricing
-                            and support.
-                        </div>
+                        <div class="course-description" th:text="${course.description}"></div>
                         <div class="course-meta">
-                            <span>Created date: 15/11/2021</span>
+                            <span th:text="'Created date: ' + ${#dates.format(course.createdDate, 'dd/MM/yyyy')}"></span>
                         </div>
                     </div>
                 </div>
@@ -373,31 +361,35 @@
                 <a th:href="@{/cv/create(page=${pageNumber + 1}, size=6)}" th:if="${coursePage.hasNext()}" style="margin-left: 10px;">Next »</a>
             </div>
         </div>
-        -->
     </div>
 </div>
 
 <script>
-    // Add interactivity
+    // Store selected course IDs in a Set for uniqueness
+    const selectedCourseIds = new Set();
+
+    // Handle clicking add/remove buttons
     document.querySelectorAll('.add-btn').forEach(btn => {
         btn.addEventListener('click', function () {
-            this.textContent = '✓';
-            this.style.background = '#28a745';
-            setTimeout(() => {
+            const courseId = this.getAttribute('data-course-id');
+            if (selectedCourseIds.has(courseId)) {
+                // Remove course
+                selectedCourseIds.delete(courseId);
                 this.textContent = '+';
                 this.style.background = '#28a745';
-            }, 1500);
+            } else {
+                // Add course
+                selectedCourseIds.add(courseId);
+                this.textContent = '✓';
+                this.style.background = '#218838';
+            }
         });
     });
 
-    // Pagination functionality
-    document.querySelectorAll('.pagination button').forEach(btn => {
-        btn.addEventListener('click', function () {
-            if (!this.textContent.includes('<') && !this.textContent.includes('>') && !this.textContent.includes('...')) {
-                document.querySelector('.pagination .active')?.classList.remove('active');
-                this.classList.add('active');
-            }
-        });
+    // Before form submit, populate the hidden input with selected course IDs
+    document.getElementById('cvForm').addEventListener('submit', function (event) {
+        const input = document.getElementById('selectedCoursesInput');
+        input.value = Array.from(selectedCourseIds).join(';');
     });
 </script>
 </body>
