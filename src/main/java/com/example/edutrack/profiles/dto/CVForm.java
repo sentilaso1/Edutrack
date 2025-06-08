@@ -23,6 +23,8 @@ public class CVForm {
     private String languages;
     private String portfolioUrl;
 
+    private String selectedCourses;
+
     @NotNull
     private UUID userId;
 
@@ -96,5 +98,13 @@ public class CVForm {
 
     public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public String getSelectedCourses() {
+        return selectedCourses;
+    }
+
+    public void setSelectedCourses(String selectedCourses) {
+        this.selectedCourses = selectedCourses;
     }
 }

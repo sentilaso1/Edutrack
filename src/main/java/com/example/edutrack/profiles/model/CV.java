@@ -15,6 +15,7 @@ public class CV {
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_APPROVED = "approved";
     public static final String STATUS_REJECTED = "rejected";
+    public static final String STATUS_AIAPPROVED = "aiapproved";
 
     @Id
     @Column(name = "user_id")
@@ -133,7 +134,7 @@ public class CV {
             throw new IllegalArgumentException("Status must not be empty");
         }
 
-        if (!status.equals(STATUS_PENDING) && !status.equals(STATUS_APPROVED) && !status.equals(STATUS_REJECTED)) {
+        if (!status.equals(STATUS_PENDING) && !status.equals(STATUS_APPROVED) && !status.equals(STATUS_REJECTED) && !status.equals(STATUS_AIAPPROVED)) {
             throw new IllegalArgumentException("Status must be pending, approved or rejected");
         }
         this.status = status;
