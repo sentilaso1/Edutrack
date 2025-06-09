@@ -14,7 +14,7 @@ import java.util.Date;
 public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
     @Query("SELECT 1 FROM EnrollmentSchedule es " +
            "JOIN Enrollment e ON e = es.enrollment " +
-           "WHERE e.mentor = :mentor " +
+           "WHERE e.courseMentor.mentor = :mentor " +
            "AND es.date = :date AND es.slot = :slot AND WEEKDAY(es.date) = :day")
     public boolean isAvailableSlot(Slot slot, Day day, Date date, User mentor);
 }

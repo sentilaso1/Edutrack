@@ -24,11 +24,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<CourseMentor> getPopularCoursesForGuest(int maxCount) {
         Pageable topPopular= PageRequest.of(0, maxCount);
-        return enrollmentRepository.findPopularCoursesByEnrollmentCount(topPopular);
+        return enrollmentRepository.findPopularCoursesByEnrollmentCount(topPopular, Enrollment.EnrollmentStatus.APPROVED);
     }
 
     public int getStudentCountByCourseMentor(UUID courseMentorId) {
-        return enrollmentRepository.countByCourseMentor_IdAndIsApprovedTrue(courseMentorId);
+        return enrollmentRepository.countByCourseMentor_IdAndStatus(courseMentorId, Enrollment.EnrollmentStatus.APPROVED);
     }
 
     @Override
@@ -51,12 +51,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public List<Enrollment> getEnrollmentsByMenteeId(UUID menteeId) {
-        return enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId);
+        return enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
 
     @Override
     public List<CourseMentor> getCourseInProgressMentee(UUID menteeId) {
-        return enrollmentRepository.findInProgressCourses(menteeId);
+        return enrollmentRepository.findInProgressCourses(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
 
 }
