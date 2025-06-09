@@ -1,10 +1,11 @@
-package com.example.edutrack.curriculum.service.implementation;
+package com.example.edutrack.timetables.service.implementation;
+
 
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.Enrollment;
-import com.example.edutrack.curriculum.repository.EnrollmentRepository;
-import com.example.edutrack.curriculum.service.interfaces.EnrollmentService;
+import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.repository.EnrollmentRepository;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
