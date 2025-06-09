@@ -8,7 +8,7 @@ import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
-import com.example.edutrack.curriculum.service.interfaces.EnrollmentService;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

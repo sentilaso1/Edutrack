@@ -9,7 +9,7 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
-import com.example.edutrack.curriculum.service.interfaces.EnrollmentService;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

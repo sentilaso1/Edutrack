@@ -1,8 +1,8 @@
-package com.example.edutrack.curriculum.service.interfaces;
+package com.example.edutrack.timetables.service.interfaces;
 
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.Enrollment;
+import com.example.edutrack.timetables.model.Enrollment;
 
 import java.util.List;
 import java.util.UUID;
