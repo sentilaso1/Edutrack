@@ -32,26 +32,28 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
     private final SystemInfo systemInfo = new SystemInfo();
 
-    public Map<String, String> getSystemConfigs() {
-        List<Property> properties = propertyRepository.findAll();
-        Map<String, String> configs = new HashMap<>();
-        for (Property prop : properties) {
-            configs.put(prop.getKey(), prop.getValue());
-        }
-        return configs;
+    @Override
+    public String getValue(String key) {
+        return propertyRepository.findByKey(key)
+                .map(Property::getValue)
+                .orElse("");
     }
 
-    @Transactional
-    public void updateConfig(String key, String value) {
-        Property property = propertyRepository.findByKey(key);
-        if (property == null) {
-            property = new Property();
-            property.setKey(key);
-            property.setCreatedDate(new Date());
+    @Override
+    public void updateValue(String key, String value) {
+        Property p = propertyRepository.findByKey(key).orElse(new Property());
+        p.setKey(key);
+        p.setValue(value);
+        propertyRepository.save(p);
+    }
+
+    @Override
+    public Map<String, String> getConfigs(String... keys) {
+        Map<String, String> map = new HashMap<>();
+        for (String key : keys) {
+            map.put(key, getValue(key));
         }
-        property.setValue(value);
-        property.setUpdatedDate(new Date());
-        propertyRepository.save(property);
+        return map;
     }
 
     public Map<String, Object> getSystemStatus() {

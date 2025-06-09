@@ -18,6 +18,7 @@
                         <a href="/admin/users" class="block py-2 px-4 hover:bg-gray-700">User Management</a>
                         <a href="/admin/system-settings" class="block py-2 px-4 bg-gray-700 text-white">System
                                 Settings</a>
+                        <a href="/admin/jobs" class="block py-2 px-4 hover:bg-gray-700">ScheduledJobs</a>
                 </nav>
         </div>
 
@@ -28,40 +29,43 @@
                 <!-- Configuration Form -->
                 <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
                         <h2 class="text-lg font-semibold mb-4">Manage Configurations</h2>
-                        <form th:action="@{/admin/system-settings/update}" method="post" class="space-y-4">
-                                <div>
-                                        <label for="appName" class="block text-sm font-medium text-gray-700">Application
-                                                Name</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <form th:action="@{/admin/system-settings/update}" method="post">
+                                        <label for="appName" class="block text-sm font-medium text-gray-700">Application Name</label>
                                         <input type="text" id="appName" name="value" th:value="${configs['app.name']}"
                                                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                                         <input type="hidden" name="key" value="app.name" />
-                                </div>
-                                <div>
-                                        <label for="appEmail" class="block text-sm font-medium text-gray-700">Contact
-                                                Email</label>
-                                        <input type="email" id="appEmail" name="value"
-                                                th:value="${configs['app.email']}"
+                                        <button type="submit"
+                                                class="mt-2 bg-blue-500 text-white font-medium px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Update</button>
+                                </form>
+                
+                                <form th:action="@{/admin/system-settings/update}" method="post">
+                                        <label for="appEmail" class="block text-sm font-medium text-gray-700">Contact Email</label>
+                                        <input type="email" id="appEmail" name="value" th:value="${configs['app.email']}"
                                                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                                         <input type="hidden" name="key" value="app.email" />
-                                </div>
-                                <div>
-                                        <label for="smtpHost" class="block text-sm font-medium text-gray-700">SMTP
-                                                Host</label>
+                                        <button type="submit"
+                                                class="mt-2 bg-blue-500 text-white font-medium px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Update</button>
+                                </form>
+                
+                                <form th:action="@{/admin/system-settings/update}" method="post">
+                                        <label for="smtpHost" class="block text-sm font-medium text-gray-700">SMTP Host</label>
                                         <input type="text" id="smtpHost" name="value" th:value="${configs['smtp.host']}"
                                                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                                         <input type="hidden" name="key" value="smtp.host" />
-                                </div>
-                                <div>
-                                        <label for="smtpPort" class="block text-sm font-medium text-gray-700">SMTP
-                                                Port</label>
-                                        <input type="number" id="smtpPort" name="value"
-                                                th:value="${configs['smtp.port']}"
+                                        <button type="submit"
+                                                class="mt-2 bg-blue-500 text-white font-medium px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Update</button>
+                                </form>
+                
+                                <form th:action="@{/admin/system-settings/update}" method="post">
+                                        <label for="smtpPort" class="block text-sm font-medium text-gray-700">SMTP Port</label>
+                                        <input type="number" id="smtpPort" name="value" th:value="${configs['smtp.port']}"
                                                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                                         <input type="hidden" name="key" value="smtp.port" />
-                                </div>
-                                <button type="submit"
-                                        class="bg-blue-500 text-white font-medium px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Update</button>
-                        </form>
+                                        <button type="submit"
+                                                class="mt-2 bg-blue-500 text-white font-medium px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Update</button>
+                                </form>
+                        </div>              
                 </div>
 
                 <!-- System Monitoring -->
