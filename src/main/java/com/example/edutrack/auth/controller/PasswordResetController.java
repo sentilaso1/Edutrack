@@ -11,7 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import com.example.edutrack.accounts.service.interfaces.SystemConfigService;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,11 +19,14 @@ import java.util.UUID;
 public class PasswordResetController {
     private final UserService userService;
     private final JavaMailSender mailSender;
+    private final SystemConfigService systemConfigService;
 
     @Autowired
-    public PasswordResetController(UserService userService, JavaMailSender mailSender) {
+    public PasswordResetController(UserService userService, JavaMailSender mailSender, 
+                                   SystemConfigService systemConfigService) {
         this.userService = userService;
         this.mailSender = mailSender;
+        this.systemConfigService = systemConfigService;
     }
 
     @GetMapping("/forgot-password")
@@ -45,6 +48,7 @@ public class PasswordResetController {
 
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email);
+            message.setFrom(systemConfigService.getValue("app.email"));
             message.setSubject("Reset Password");
             message.setText("Click this link to reset your password: " + resetLink);
 

@@ -8,9 +8,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface SystemConfigService {
         
-        Map<String, String> getSystemConfigs();
-        
-        void updateConfig(String key, String value);
+        String getValue(String key);
+
+        void updateValue(String key, String value);
+
+        Map<String, String> getConfigs(String... keys);
         
         Map<String, Object> getSystemStatus();
 
