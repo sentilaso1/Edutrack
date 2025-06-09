@@ -174,7 +174,7 @@ CREATE TABLE cv (
     certifications TEXT NOT NULL,
     languages TEXT NOT NULL,
     portfolio_url VARCHAR(255),
-    status ENUM('pending', 'approved', 'rejected') NOT NULL,
+    status ENUM('pending', 'approved', 'rejected', 'aiapproved') NOT NULL,
     created_date DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -211,4 +211,13 @@ CREATE TABLE bookmarks (
     created_date DATETIME NOT NULL,
     FOREIGN KEY (course_id) REFERENCES courses(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE cv_courses (
+    cv_id BINARY(16) NOT NULL,
+    course_id BINARY(16) NOT NULL,
+    added_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (cv_id, course_id),
+    FOREIGN KEY (cv_id) REFERENCES cv(user_id),
+    FOREIGN KEY (course_id) REFERENCES courses(id)
 );

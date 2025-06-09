@@ -21,8 +21,6 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
             "AND (:rating IS NULL OR m.rating >= :rating) " +
             "AND (:totalSessions IS NULL OR m.totalSessions >= :totalSessions) " +
             "AND (:isAvailable IS NULL OR m.isAvailable = :isAvailable)")
-
-
     List<Mentor> searchMentorsBasic(
             @Param("name") String name,
             @Param("rating") Double rating,
@@ -40,19 +38,27 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
     Optional<CV> findCVByMentorId(UUID mentorId);
 
     @Query("""
-    SELECT DISTINCT m
-    FROM Mentor m
-    JOIN CourseMentor cm ON cm.mentor = m
-    WHERE cm.status = com.example.edutrack.curriculum.model.ApplicationStatus.ACCEPTED
-    AND (m.rating IS NOT NULL OR m.totalSessions > 0)
-    ORDER BY m.rating DESC NULLS LAST, m.totalSessions DESC
-""")
+                SELECT DISTINCT m
+                FROM Mentor m
+                JOIN CourseMentor cm ON cm.mentor = m
+                WHERE cm.status = com.example.edutrack.curriculum.model.ApplicationStatus.ACCEPTED
+                AND (m.rating IS NOT NULL OR m.totalSessions > 0)
+                ORDER BY m.rating DESC NULLS LAST, m.totalSessions DESC
+            """)
     List<Mentor> findTopActiveMentors(Pageable pageable);
 
     @Query("""
-    SELECT DISTINCT m FROM Mentor m
-    WHERE LOWER(m.expertise) LIKE CONCAT('%', :keyword, '%')
-""")
+                SELECT DISTINCT m FROM Mentor m
+                WHERE LOWER(m.expertise) LIKE CONCAT('%', :keyword, '%')
+            """)
     List<Mentor> findByExpertiseKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+
+    @Query("""
+                SELECT DISTINCT cm.mentor.expertise FROM Enrollment e
+                JOIN e.courseMentor cm
+                WHERE e.mentee.id = :menteeId and e.status = 'ACCEPTED'
+            """)
+    List<String> findExpertiseOfMentorsByMentee(@Param("menteeId") UUID menteeId);
 
 }

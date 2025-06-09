@@ -1,5 +1,6 @@
 package com.example.edutrack.profiles.service.interfaces;
 
+import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.profiles.dto.CVForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ public interface CvService {
     CV createCV(CVForm form);
     CV getCVById(UUID id);
 
+    List<Course> getCoursesForCV(UUID cvId);
     boolean acceptCV(UUID id);
     boolean rejectCV(UUID id);
 

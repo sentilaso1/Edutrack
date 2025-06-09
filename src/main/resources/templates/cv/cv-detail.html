@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1720px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -29,7 +29,11 @@
         }
 
         .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
             padding: 30px;
+            min-height: 80vh;
         }
 
         .back-link {
@@ -39,6 +43,7 @@
             margin-bottom: 10px;
             display: inline-block;
             transition: all 0.3s ease;
+            grid-column: 1 / -1;
         }
 
         .back-link:hover {
@@ -52,6 +57,12 @@
             color: #333;
             margin-bottom: 30px;
             text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .cv-section {
+            display: flex;
+            flex-direction: column;
         }
 
         .cv-card {
@@ -298,6 +309,172 @@
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
         }
 
+        /* Courses Section Styles (from create-cv.html) */
+        .section-header {
+            text-align: center;
+            padding: 15px 25px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .course-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .course-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .course-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .course-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .tag.azure {
+            background: #cce7ff;
+            border-color: #99d6ff;
+            color: #0066cc;
+        }
+
+        .tag.microsoft {
+            background: #ffe6cc;
+            border-color: #ffcc99;
+            color: #cc6600;
+        }
+
+        .tag.beginner {
+            background: #d4edda;
+            border-color: #a3d9a4;
+            color: #155724;
+        }
+
+        .tag.data {
+            background: #f8d7da;
+            border-color: #f1aeb5;
+            color: #721c24;
+        }
+
+        .course-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+            transform: scale(1.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover {
+            background: #e9ecef;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination a {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background: #e9ecef;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
         @media (max-width: 768px) {
             .profile-section {
                 flex-direction: column;
@@ -319,126 +496,156 @@
 
             .main-content {
                 padding: 20px;
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <a href="/admin/cv/list" class="back-link">← Back to CV List</a>
+    <h1 class="page-title">CV Detail</h1>
 
     <div class="main-content">
-        <a href="/admin/cv/list" class="back-link">← Back to CV List</a>
-        <h1 class="page-title">CV Detail</h1>
+        <!-- CV Details Section (Left Column) -->
+        <div class="cv-section">
+            <div class="cv-card">
+                <div class="profile-section">
+                    <div class="avatar-container">
+                        <div class="avatar">👤</div>
+                        <div class="avatar-label">Avatar</div>
+                    </div>
 
-        <div class="cv-card">
-            <div class="profile-section">
-                <div class="avatar-container">
-                    <div class="avatar">👤</div>
-                    <div class="avatar-label">Avatar</div>
-                </div>
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value" th:text="${cv.user.fullName}"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value" th:text="${cv.user.email}"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value" th:text="${cv.user.phone}"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Gender</div>
+                            <div class="info-value" th:text="${cv.user.gender}"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Birth Date</div>
+                            <div class="info-value" th:text="${cv.user.birthDate}"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Bio</div>
+                            <div class="info-value" th:text="${cv.user.bio}"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Summary</div>
+                            <div class="info-value" th:text="${cv.summary}"></div>
+                        </div>
+                    </div>
 
-                <div class="profile-info">
-                    <div class="info-item">
-                        <div class="info-label">Full Name</div>
-                        <div class="info-value" th:text="${cv.user.fullName}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Email</div>
-                        <div class="info-value" th:text="${cv.user.email}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Phone Number</div>
-                        <div class="info-value" th:text="${cv.user.phone}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Gender</div>
-                        <div class="info-value" th:text="${cv.user.gender}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Birth Date</div>
-                        <div class="info-value" th:text="${cv.user.birthDate}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Bio</div>
-                        <div class="info-value" th:text="${cv.user.bio}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Summary</div>
-                        <div class="info-value" th:text="${cv.summary}"></div>
+                    <div class="status-section">
+                        <div class="created-date" th:text="${cv.createdDate}"></div>
+                        <div class="status-badge" th:text="${cv.status}"></div>
                     </div>
                 </div>
+            </div>
 
-                <div class="status-section">
-                    <div class="created-date" th:text="${cv.createdDate}"></div>
-                    <div class="status-badge" th:text="${cv.status}"></div>
+            <div class="section-card">
+                <div class="section-title">Experience Years</div>
+                <div class="section-content">
+                    <div class="info-value" th:text="${cv.experienceYears}"></div>
                 </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Professional Experience</div>
+                <div class="section-content">
+                    <div th:each="experience : ${cv.experienceItems}">
+                        <div class="list-item" th:text="${experience}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Skills</div>
+                <div class="section-content">
+                    <div th:each="skill : ${cv.skillItems}">
+                        <div class="list-item" th:text="${skill}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Education</div>
+                <div class="section-content">
+                    <div th:each="education : ${cv.educationItems}">
+                        <div class="list-item" th:text="${education}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Certifications</div>
+                <div class="section-content">
+                    <div th:each="certification : ${cv.certificationItems}">
+                        <div class="list-item" th:text="${certification}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Languages</div>
+                <div class="section-content">
+                    <div th:each="language : ${cv.languageItems}">
+                        <div class="list-item" th:text="${language}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="portfolio-section">
+                <div class="portfolio-label">Portfolio URL</div>
+                <a th:href="${cv.portfolioUrl}" class="portfolio-url" th:text="${cv.portfolioUrl}"></a>
+            </div>
+
+            <div th:if="${cv.status == 'aiapproved'}" class="action-buttons">
+                <form th:action="@{/cv/accept/{id}(id=${cv.id})}" method="post">
+                    <button type="submit" class="btn btn-primary">Accept CV</button>
+                </form>
+                <form th:action="@{/cv/reject/{id}(id=${cv.id})}" method="post">
+                    <button type="submit" class="btn btn-secondary">Reject CV</button>
+                </form>
             </div>
         </div>
 
-        <div class="section-card">
-            <div class="section-title">Experience Years</div>
-            <div class="section-content">
-                <div class="info-value" th:text="${cv.experienceYears}"></div>
-            </div>
-        </div>
+        <!-- Courses Section (Right Column) -->
+        <div class="courses-section">
+            <div class="section-header">Registered Courses</div>
 
-        <div class="section-card">
-            <div class="section-title">Professional Experience</div>
-            <div class="section-content">
-                <div th:each="experience : ${cv.experienceItems}">
-                    <div class="list-item" th:text="${experience}"></div>
+            <div th:if="${registeredCourses != null}">
+                <div th:each="course : ${registeredCourses}">
+                    <div class="course-card">
+                        <div class="course-title" th:text="${course.name}"></div>
+                        <div class="course-description" th:text="${course.description}"></div>
+                        <div class="course-meta">
+                            <span th:text="'Created date: ' + ${#dates.format(course.createdDate, 'dd/MM/yyyy')}"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="section-card">
-            <div class="section-title">Skills</div>
-            <div class="section-content">
-                <div th:each="skill : ${cv.skillItems}">
-                    <div class="list-item" th:text="${skill}"></div>
-                </div>
+            <div th:if="${registeredCourses.isEmpty()}">
+                <p>No courses registered for this CV.</p>
             </div>
-        </div>
 
-        <div class="section-card">
-            <div class="section-title">Education</div>
-            <div class="section-content">
-                <div th:each="education : ${cv.educationItems}">
-                    <div class="list-item" th:text="${education}"></div>
-                </div>
+            <div class="pagination">
+                <a th:href="@{/cv/detail/{id}(id=${cv.id}, page=${pageNumber - 1}, size=6)}" th:if="${coursePage.hasPrevious()}" style="margin-right: 10px;">« Prev</a>
+                <span>Page <span th:text="${pageNumber}"></span></span>
+                <a th:href="@{/cv/detail/{id}(id=${cv.id}, page=${pageNumber + 1}, size=6)}" th:if="${coursePage.hasNext()}" style="margin-left: 10px;">Next »</a>
             </div>
-        </div>
-
-        <div class="section-card">
-            <div class="section-title">Certifications</div>
-            <div class="section-content">
-                <div th:each="certification : ${cv.certificationItems}">
-                    <div class="list-item" th:text="${certification}"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="section-card">
-            <div class="section-title">Languages</div>
-            <div class="section-content">
-                <div th:each="language : ${cv.languageItems}">
-                    <div class="list-item" th:text="${language}"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="portfolio-section">
-            <div class="portfolio-label">Portfolio URL</div>
-            <a th:href="${cv.portfolioUrl}" class="portfolio-url" th:text="${cv.portfolioUrl}"></a>
-        </div>
-
-        <div th:if="${cv.status == 'pending'}" class="action-buttons">
-            <form th:action="@{/cv/accept/{id}(id=${cv.id})}" method="post">
-                <button type="submit" class="btn btn-primary">Accept CV</button>
-            </form>
-            <form th:action="@{/cv/reject/{id}(id=${cv.id})}" method="post">
-                <button type="submit" class="btn btn-secondary">Reject CV</button>
-            </form>
         </div>
     </div>
 </div>

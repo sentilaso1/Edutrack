@@ -2,6 +2,10 @@ package com.example.edutrack.profiles.service;
 
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.UserRepository;
+import com.example.edutrack.curriculum.model.CVCourse;
+import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.repository.CVCourseRepository;
+import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
@@ -32,13 +36,17 @@ public class CvServiceImpl implements CvService {
     private final EntityManager entityManager;
     private final CvRepository cvRepository;
     private final UserRepository userRepository;
+    private final CourseRepository courseRepository;
+    private final CVCourseRepository cvCourseRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
-    public CvServiceImpl(EntityManager entityManager, CvRepository cvRepository, UserRepository userRepository) {
+    public CvServiceImpl(EntityManager entityManager, CvRepository cvRepository, UserRepository userRepository, CourseRepository courseRepository, CVCourseRepository cvCourseRepository) {
         this.entityManager = entityManager;
         this.cvRepository = cvRepository;
         this.userRepository = userRepository;
+        this.courseRepository = courseRepository;
+        this.cvCourseRepository = cvCourseRepository;
     }
 
     @Override
@@ -207,7 +215,20 @@ public class CvServiceImpl implements CvService {
         cv.setLanguages(cvRequest.getLanguages());
         cv.setPortfolioUrl(cvRequest.getPortfolioUrl());
 
-        return cvRepository.save(cv);
+        cvRepository.save(cv);
+
+        if (cvRequest.getSelectedCourses() != null && !cvRequest.getSelectedCourses().isEmpty()) {
+            String[] courseIds = cvRequest.getSelectedCourses().split(";");
+            for (String courseIdStr : courseIds) {
+                UUID courseId = UUID.fromString(courseIdStr);
+                Course course = courseRepository.findById(courseId)
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid course ID: " + courseId));
+                CVCourse cvCourse = new CVCourse(cv, course);
+                cvCourseRepository.save(cvCourse);
+            }
+        }
+
+        return cv;
     }
 
     @Override
@@ -217,11 +238,19 @@ public class CvServiceImpl implements CvService {
     }
 
     @Override
+    public List<Course> getCoursesForCV(UUID cvId) {
+        List<CVCourse> cvCourses = cvCourseRepository.findByIdCvId(cvId);
+        return cvCourses.stream()
+                .map(CVCourse::getCourse)
+                .toList();
+    }
+
+    @Override
     public boolean acceptCV(UUID id) {
         Optional<CV> optionalCv = cvRepository.findById(id);
         if (optionalCv.isPresent()) {
             CV cv = optionalCv.get();
-            if (cv.getStatus().equals("pending")) {
+            if (cv.getStatus().equals("aiapproved")) {
                 cv.setStatus("approved");
                 cvRepository.save(cv);
                 return true;
@@ -235,7 +264,7 @@ public class CvServiceImpl implements CvService {
         Optional<CV> optionalCv = cvRepository.findById(id);
         if (optionalCv.isPresent()) {
             CV cv = optionalCv.get();
-            if (cv.getStatus().equals("pending")) {
+            if (cv.getStatus().equals("aiapproved")) {
                 cv.setStatus("rejected");
                 cvRepository.save(cv);
                 return true;
@@ -386,7 +415,7 @@ public class CvServiceImpl implements CvService {
 
             System.out.println("Result: " + aiJson);
 
-            cv.setStatus(approved ? "approved" : "rejected");
+            cv.setStatus(approved ? "aiapproved" : "rejected");
             cvRepository.save(cv);
         } catch (JsonProcessingException e) {
             System.err.println("JSON parsing error for AI response: " + aiJson);

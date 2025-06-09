@@ -76,4 +76,41 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     List<CourseMentor> findByTagsMatchingInterests(@Param("interests") List<String> interests, Pageable pageable);
 
 
+    @Query("""
+                SELECT DISTINCT cm FROM CourseMentor cm
+                JOIN cm.course c
+                JOIN CourseTag ct ON ct.course = c
+                JOIN ct.tag t
+                WHERE LOWER(t.title) IN :tagTitles
+                AND cm.course.id NOT IN (
+                    SELECT e.courseMentor.course.id FROM Enrollment e
+                    WHERE e.mentee.id = :menteeId
+                )
+            """)
+    List<CourseMentor> findRelatedByTagsAndNotEnrolled(
+            @Param("tagTitles") List<String> tagTitles,
+            @Param("menteeId") UUID menteeId,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT DISTINCT cm FROM CourseMentor cm
+            JOIN cm.course c
+            JOIN CourseTag ct ON ct.course = c
+             WHERE (
+                  LOWER(ct.tag.title) IN :keywords
+                  OR LOWER(cm.mentor.expertise) IN :keywords
+              )
+              AND cm.course.id NOT IN (
+                  SELECT e.courseMentor.course.id FROM Enrollment e
+                  WHERE e.mentee.id = :menteeId
+              )
+            """)
+    List<CourseMentor> findRecommendedByKeywords(
+            @Param("keywords") List<String> keywords,
+            @Param("menteeId") UUID menteeId,
+            Pageable pageable
+    );
+
+
 }

@@ -34,9 +34,11 @@ public interface CourseTagsRepository extends JpaRepository<CourseTag, CourseTag
     FROM CourseTag ct
     WHERE ct.tag.id NOT IN :excludedIds
     ORDER BY FUNCTION('RAND')
-""")
+    """)
     List<Tag> findRandomTagsExcluding(@Param("excludedIds") List<Integer> excludedIds, Pageable pageable);
 
     @Query("SELECT DISTINCT ct.tag FROM CourseTag ct")
     List<Tag> findDistinctTagsFromCourses();
+
+
 }
