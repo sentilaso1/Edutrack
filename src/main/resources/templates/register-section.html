@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Ký Khóa Học - Lập Trình Web Cơ Bản</title>
     <style>
+        :root {
+            --keppei: #47c8ba;
+            --light-coral: hsl(357, 92%, 79%);
+            --keppei-light: hsl(173, 60%, 67%);
+            --keppei-lighter: hsl(173, 60%, 87%);
+            --keppei-lightest: hsl(173, 60%, 97%);
+            --coral-light: hsl(357, 100%, 78%);
+            --coral-lighter: hsl(356, 89%, 93%);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,9 +23,9 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            margin: 1em 5em;
         }
 
         .container {
@@ -55,8 +65,8 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #86A788, #6b8a6d);
-            color: white;
+            background-color: #ffffff;
+            color: hsl(240, 6%, 51%);;
             padding: 30px;
             text-align: center;
             position: relative;
@@ -85,7 +95,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(200, 200, 200, 0.86);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -94,23 +104,23 @@
         }
 
         .progress-step.active {
-            background-color: #F4B860;
+            background-color: var(--coral-light);
             color: white;
         }
 
         .progress-step.completed {
-            background-color: #4CAF50;
+            background-color: var(--keppei);
             color: white;
         }
 
         .progress-line {
             width: 50px;
             height: 2px;
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: #bababa;
         }
 
         .progress-line.completed {
-            background-color: #4CAF50;
+            background-color: var(--coral-lighter);
         }
 
         .card-body {
@@ -118,15 +128,16 @@
         }
 
         .section {
-            background-color: #f8f9fa;
+            background-color: white;
             border-radius: 15px;
-            padding: 25px;
+            padding: 25px !important;
             margin-bottom: 30px;
-            border-left: 5px solid #86A788;
+            border-left: 5px solid var(--light-coral);
+            box-shadow: 5px 10px 15px rgba(0, 0, 0, 0.3);
         }
 
         .section h3 {
-            color: #86A788;
+            color: var(--light-coral);
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -164,8 +175,8 @@
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #86A788;
-            box-shadow: 0 0 0 3px rgba(134, 167, 136, 0.1);
+            border-color: var(--keppei);
+            box-shadow: 0 0 0 3px rgba(56, 178, 160, 0.1);
         }
 
         .form-row {
@@ -175,7 +186,7 @@
         }
 
         .course-summary {
-            background: linear-gradient(135deg, #86A788, #6b8a6d);
+            background-color: rgba(250, 187, 27, 0.62);
             color: white;
             border-radius: 15px;
             padding: 25px;
@@ -202,7 +213,7 @@
         }
 
         .mentor-info {
-            background-color: #E6F1E6;
+            background-color: var(--coral-lighter);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
@@ -246,59 +257,6 @@
             margin-top: 15px;
         }
 
-        .schedule-card {
-            background-color: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .schedule-card:hover {
-            border-color: #86A788;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .schedule-card.selected {
-            border-color: #86A788;
-            background-color: #f0f8f0;
-        }
-
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .payment-card {
-            background-color: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .payment-card:hover {
-            border-color: #86A788;
-            transform: translateY(-2px);
-        }
-
-        .payment-card.selected {
-            border-color: #86A788;
-            background-color: #f0f8f0;
-        }
-
-        .payment-card img {
-            width: 40px;
-            height: 40px;
-            margin-bottom: 10px;
-        }
 
         .checkbox-group {
             display: flex;
@@ -313,7 +271,6 @@
         }
 
         .submit-section {
-            background: linear-gradient(135deg, #86A788, #6b8a6d);
             border-radius: 15px;
             padding: 30px;
             text-align: center;
@@ -321,20 +278,22 @@
         }
 
         .submit-btn {
-            background-color: #F4B860;
+            background-color: var(--keppei);
             color: white;
             padding: 15px 40px;
             border: none;
-            border-radius: 25px;
+            border-radius: 10px;
             font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 15px;
+            width: 100%;
+            height: 60px;
         }
 
         .submit-btn:hover {
-            background-color: #e6a54d;
+            background-color: var(--keppei-light);
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
@@ -346,13 +305,13 @@
         }
 
         .security-note {
-            background-color: #e8f5e8;
-            border: 1px solid #c3e6c3;
+            background-color: var(--keppei-lightest);
+            border: 1px solid var(--keppei-lighter);
             border-radius: 10px;
             padding: 15px;
             margin-top: 20px;
             font-size: 0.9em;
-            color: #2d5a2d;
+            color: var(--keppei);
         }
 
         .alert {
@@ -363,15 +322,15 @@
         }
 
         .alert.success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
+            background-color: var(--keppei-lightest);
+            border: 1px solid var(--keppei-lighter);
+            color: var(--keppei);
         }
 
         .alert.error {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
+            background-color: var(--coral-lighter);
+            border: 1px solid var(--coral-light);
+            color: #b91c1c;
         }
 
         @media (max-width: 768px) {
@@ -396,238 +355,176 @@
             }
         }
     </style>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
 </head>
 <body>
-<div class="container">
-    <!-- Back Button -->
-    <a href="javascript:history.back()" class="back-button">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-        </svg>
-        Quay lại khóa học
-    </a>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<main>
+    <article>
+        <section class="section course has-bg-image" style="box-shadow: none; border-style: none; padding: 0 20em">
+            <div class="container">
+                <!-- Back Button -->
+                <a href="javascript:history.back()" class="back-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                    Quay lại khóa học
+                </a>
 
-    <div class="registration-card">
-        <!-- Header -->
-        <div class="card-header">
-            <h1>🎓 Đăng Ký Khóa Học</h1>
-            <p>Lập Trình Web Cơ Bản với HTML/CSS/JavaScript</p>
+                <div class="registration-card">
+                    <!-- Header -->
+                    <div class="card-header">
+                        <h1>Skill Registration</h1>
+                        <p>Name of Skill will go here</p>
 
-            <!-- Progress Indicator -->
-            <div class="progress-indicator">
-                <div class="progress-step active">1</div>
-                <div class="progress-line"></div>
-                <div class="progress-step">2</div>
-                <div class="progress-line"></div>
-                <div class="progress-step">3</div>
-            </div>
-        </div>
-
-        <!-- Body -->
-        <div class="card-body">
-            <!-- Alert Messages -->
-            <div class="alert success" id="successAlert">
-                ✅ Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn trong vòng 24h.
-            </div>
-
-            <div class="alert error" id="errorAlert">
-                ❌ Có lỗi xảy ra. Vui lòng kiểm tra lại thông tin và thử lại.
-            </div>
-
-            <!-- Course Summary -->
-            <div class="course-summary">
-                <h3>📋 Tóm tắt khóa học</h3>
-                <div class="summary-item">
-                    <span>Tên khóa học:</span>
-                    <span>Lập Trình Web Cơ Bản</span>
-                </div>
-                <div class="summary-item">
-                    <span>Thời lượng:</span>
-                    <span>8-12 tuần</span>
-                </div>
-                <div class="summary-item">
-                    <span>Hình thức:</span>
-                    <span>1-1 Online</span>
-                </div>
-                <div class="summary-item">
-                    <span>Giá mỗi buổi:</span>
-                    <span>300,000 VNĐ</span>
-                </div>
-            </div>
-
-            <form id="registrationForm">
-                <!-- Personal Information -->
-                <div class="section">
-                    <h3>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                        Thông tin cá nhân
-                    </h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="fullName">Họ và tên *</label>
-                            <input type="text" id="fullName" name="fullName" required placeholder="Nhập họ và tên của bạn">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" required placeholder="example@email.com">
+                        <!-- Progress Indicator -->
+                        <div class="progress-indicator">
+                            <div class="progress-step active">1</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step">2</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step">3</div>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="phone">Số điện thoại *</label>
-                            <input type="tel" id="phone" name="phone" required placeholder="0123456789">
+                    <!-- Body -->
+                    <div class="card-body">
+                        <!-- Alert Messages -->
+                        <div class="alert success" id="successAlert">
+                            Register sucessfully!
                         </div>
-                        <div class="form-group">
-                            <label for="age">Tuổi</label>
-                            <input type="number" id="age" name="age" min="16" max="65" placeholder="Nhập tuổi của bạn">
+
+                        <div class="alert error" id="errorAlert">
+                            Error happened. Try again!
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="experience">Kinh nghiệm lập trình *</label>
-                        <select id="experience" name="experience" required>
-                            <option value="">Chọn mức độ kinh nghiệm</option>
-                            <option value="beginner">Người mới bắt đầu</option>
-                            <option value="basic">Có kiến thức cơ bản</option>
-                            <option value="intermediate">Trung bình</option>
-                            <option value="advanced">Nâng cao</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="motivation">Mục tiêu học tập</label>
-                        <textarea id="motivation" name="motivation" rows="3" placeholder="Chia sẻ mục tiêu và lý do bạn muốn học khóa này..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Mentor Information -->
-                <div class="section">
-                    <h3>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.5-12h-3c0 1.66-1.34 3-3 3s-3-1.34-3-3H7.5L5 16h2.5v6h3v-6h2v6h4z"/>
-                        </svg>
-                        Thông tin mentor
-                    </h3>
-
-                    <div class="mentor-info">
-                        <div class="mentor-profile">
-                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+" alt="Mentor Avatar" class="mentor-avatar">
-                            <div class="mentor-details">
-                                <h4>Nguyễn Văn Minh</h4>
-                                <div class="mentor-rating">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                    </svg>
-                                    <span>4.9/5 (25 đánh giá)</span>
-                                </div>
-                                <p><strong>Chuyên môn:</strong> Web Development, JavaScript, React</p>
+                        <div class="section">
+                            <h3>Skill Summary</h3>
+                            <div class="summary-item">
+                                <span>Skill name</span>
+                                <span>Machine Learning</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Subject</span>
+                                <span>Artificial Intelligence</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Mentor</span>
+                                <span>John Doe</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Price per Slot</span>
+                                <span>30,000</span>
                             </div>
                         </div>
-                        <p><strong>Kinh nghiệm:</strong> 5+ năm phát triển web, từng làm việc tại FPT Software và VNG Corporation</p>
+
+                        <form id="registrationForm">
+                            <!-- Personal Information -->
+                            <div class="section">
+                                <h3>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                    </svg>
+                                    Personal Information
+                                </h3>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="fullName">Full Name</label>
+                                        <input type="text" id="fullName" name="fullName" required placeholder="Enter your Full Name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">Email</label>
+                                        <input type="email" id="email" name="email" required placeholder="example@email.com">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="phone">Phone Number</label>
+                                        <input type="tel" id="phone" name="phone" required placeholder="0123456789">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="age">Age</label>
+                                        <input type="number" id="age" name="age" min="16" max="65" placeholder="Enter your Age">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="experience">Experience</label>
+                                    <select id="experience" name="experience" required>
+                                        <option value="">Level</option>
+                                        <option value="beginner">Beginner</option>
+                                        <option value="intermediate"></option>
+                                        <option value="advanced"></option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="motivation">Target</label>
+                                    <textarea id="motivation" name="motivation" rows="3" placeholder="Share your motivation with this skill"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Mentor Information -->
+                            <div class="section">
+                                <h3>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.5-12h-3c0 1.66-1.34 3-3 3s-3-1.34-3-3H7.5L5 16h2.5v6h3v-6h2v6h4z"/>
+                                    </svg>
+                                    Mentor Information
+                                </h3>
+
+                                <div class="mentor-info">
+                                    <div class="mentor-profile">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+" alt="Mentor Avatar" class="mentor-avatar">
+                                        <div class="mentor-details">
+                                            <h4>John Doe</h4>
+                                            <div class="mentor-rating">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                </svg>
+                                                <span>4.9/5 (25 đánh giá)</span>
+                                            </div>
+                                            <p><strong>Expertises: </strong> Web Development, JavaScript, React</p>
+                                        </div>
+                                    </div>
+                                    <p><strong>Experience:</strong>None</p>
+                                </div>
+                            </div>
+
+                            <!-- Schedule Selection -->
+                            <div class="section">
+                                <h3>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                                    </svg>
+                                    Choose Slot per Week
+                                </h3>
+
+                                <div class="schedule-options">
+
+                                </div>
+                                <input type="hidden" id="selectedSchedule" name="schedule">
+                            </div>
+
+
+
+                            <!-- Submit Section -->
+                            <div class="submit-section">
+                                <button type="submit" class="submit-btn" id="submitBtn">
+                                    Register Now
+                                </button>
+
+                            </div>
+                        </form>
                     </div>
                 </div>
+            </div>
+        </section>
+    </article>
+</main>
 
-                <!-- Schedule Selection -->
-                <div class="section">
-                    <h3>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                        </svg>
-                        Chọn lịch học ưu tiên
-                    </h3>
-
-                    <div class="schedule-options">
-                        <div class="schedule-card" onclick="selectSchedule(this, 'weekday-morning')">
-                            <h4>🌅 Sáng trong tuần</h4>
-                            <p>Thứ 2-6: 8:00-12:00</p>
-                        </div>
-                        <div class="schedule-card" onclick="selectSchedule(this, 'weekday-afternoon')">
-                            <h4>🌇 Chiều trong tuần</h4>
-                            <p>Thứ 2-6: 13:00-17:00</p>
-                        </div>
-                        <div class="schedule-card" onclick="selectSchedule(this, 'weekday-evening')">
-                            <h4>🌙 Tối trong tuần</h4>
-                            <p>Thứ 2-6: 18:00-21:00</p>
-                        </div>
-                        <div class="schedule-card" onclick="selectSchedule(this, 'weekend')">
-                            <h4>🎯 Cuối tuần</h4>
-                            <p>Thứ 7-CN: Linh hoạt</p>
-                        </div>
-                    </div>
-                    <input type="hidden" id="selectedSchedule" name="schedule">
-                </div>
-
-                <!-- Payment Method -->
-                <div class="section">
-                    <h3>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-                        </svg>
-                        Phương thức thanh toán
-                    </h3>
-
-                    <div class="payment-methods">
-                        <div class="payment-card" onclick="selectPayment(this, 'bank-transfer')">
-                            <div>🏦</div>
-                            <h4>Chuyển khoản</h4>
-                            <p>Ngân hàng</p>
-                        </div>
-                        <div class="payment-card" onclick="selectPayment(this, 'momo')">
-                            <div>📱</div>
-                            <h4>MoMo</h4>
-                            <p>Ví điện tử</p>
-                        </div>
-                        <div class="payment-card" onclick="selectPayment(this, 'zalopay')">
-                            <div>💳</div>
-                            <h4>ZaloPay</h4>
-                            <p>Ví điện tử</p>
-                        </div>
-                        <div class="payment-card" onclick="selectPayment(this, 'cash')">
-                            <div>💰</div>
-                            <h4>Tiền mặt</h4>
-                            <p>Gặp trực tiếp</p>
-                        </div>
-                    </div>
-                    <input type="hidden" id="selectedPayment" name="payment">
-                </div>
-
-                <!-- Terms and Conditions -->
-                <div class="checkbox-group">
-                    <input type="checkbox" id="terms" name="terms" required>
-                    <label for="terms">
-                        Tôi đồng ý với <a href="#" style="color: #86A788;">Điều khoản sử dụng</a> và <a href="#" style="color: #86A788;">Chính sách bảo mật</a> của Mentee Learning *
-                    </label>
-                </div>
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="newsletter" name="newsletter">
-                    <label for="newsletter">
-                        Tôi muốn nhận thông tin về các khóa học và ưu đãi mới qua email
-                    </label>
-                </div>
-
-                <!-- Submit Section -->
-                <div class="submit-section">
-                    <h3 style="color: white; margin-bottom: 10px;">🚀 Hoàn tất đăng ký</h3>
-                    <p>Bạn sẽ nhận được email xác nhận và mentor sẽ liên hệ trong vòng 24h</p>
-
-                    <button type="submit" class="submit-btn" id="submitBtn">
-                        Đăng Ký Ngay - 300,000 VNĐ/buổi
-                    </button>
-
-                    <div class="security-note">
-                        🔒 <strong>Bảo mật thông tin:</strong> Thông tin của bạn được mã hóa và bảo vệ an toàn.
-                        Chúng tôi cam kết không chia sẻ thông tin cá nhân với bên thứ ba.
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <script>
     let selectedScheduleValue = '';
@@ -737,13 +634,7 @@
 
         // Check schedule selection
         if (!selectedScheduleValue) {
-            showAlert('error', 'Vui lòng chọn lịch học ưu tiên');
-            return false;
-        }
-
-        // Check payment method
-        if (!selectedPaymentValue) {
-            showAlert('error', 'Vui lòng chọn phương thức thanh toán');
+            showAlert('error', 'Please choose Slot');
             return false;
         }
 
@@ -761,7 +652,7 @@
 
         // Disable button and show loading
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ Đang xử lý...';
+        submitBtn.textContent = 'Processing...';
 
         // Simulate API call
         setTimeout(() => {
@@ -769,7 +660,7 @@
             const isSuccess = Math.random() > 0.1;
 
             if (isSuccess) {
-                showAlert('success', '✅ Đăng ký thành công! Mentor sẽ liên hệ với bạn trong vòng 24h.');
+                showAlert('success', 'Register Successfully!');
 
                 // Update progress indicator to complete
                 updateProgress(3);
@@ -789,12 +680,12 @@
                     updateProgress(1);
                 }, 5000);
             } else {
-                showAlert('error', '❌ Có lỗi xảy ra. Vui lòng thử lại sau.');
+                showAlert('error', 'Error happened, try later');
             }
 
             // Re-enable button
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Đăng Ký Ngay - 300,000 VNĐ/buổi';
+            submitBtn.textContent = 'Register now';
         }, 2000);
     }
 
