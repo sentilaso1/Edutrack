@@ -9,7 +9,6 @@ import java.util.UUID;
 public class CourseCardDTO {
     private UUID courseMentorId;
     private String courseTitle;
-    private int lessonCount;
     private int studentCount;
     private Mentor mentor;
 
@@ -18,10 +17,9 @@ public class CourseCardDTO {
 
 
 
-    public CourseCardDTO(UUID id, String name, int lessonCount, int studentCount, Mentor mentor) {
+    public CourseCardDTO(UUID id, String name,int studentCount, Mentor mentor) {
         this.courseMentorId = id;
         this.courseTitle = name;
-        this.lessonCount = lessonCount;
         this.studentCount = studentCount;
         this.mentor = mentor;
     }
@@ -41,15 +39,6 @@ public class CourseCardDTO {
 
     public void setCourseTitle(String courseTitle) {
         this.courseTitle = courseTitle;
-    }
-
-
-    public int getLessonCount() {
-        return lessonCount;
-    }
-
-    public void setLessonCount(int lessonCount) {
-        this.lessonCount = lessonCount;
     }
 
     public int getStudentCount() {

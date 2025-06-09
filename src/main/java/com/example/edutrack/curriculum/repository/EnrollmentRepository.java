@@ -23,8 +23,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     Enrollment findByCourseMentorId(UUID courseMentorId);
 
-    @Query("SELECT e.totalSessions FROM Enrollment e WHERE e.courseMentor.id = :courseMentorId AND e.isApproved = true")
-    Integer totalSessionsByCourseMentorId(@Param("courseMentorId") UUID courseMentorId);
 
     int countByCourseMentor_IdAndIsApprovedTrue(UUID courseMentorId);
 
@@ -36,4 +34,15 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
       AND e.isPaid = true
 """)
     List<Enrollment> findAcceptedEnrollmentsByMenteeId(UUID menteeId);
+
+    @Query("""
+                SELECT DISTINCT e.courseMentor
+                FROM Enrollment e
+                JOIN Schedule s ON s.mentee = e.mentee AND s.course = e.courseMentor.course
+                WHERE e.mentee.id = :menteeId
+                  AND e.status = 'ACCEPTED'
+                  AND s.date >= CURRENT_DATE
+            """)
+    List<CourseMentor> findInProgressCourses(@Param("menteeId") UUID menteeId);
+
 }

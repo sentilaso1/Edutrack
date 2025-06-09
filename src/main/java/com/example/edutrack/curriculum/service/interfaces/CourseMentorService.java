@@ -36,4 +36,8 @@ public interface CourseMentorService {
     List<CourseMentor> findLatestCourse(int maxCount);
 
     List<CourseMentor> getRecommendedCoursesByInterests(UUID menteeId, int limit);
+
+    List<CourseMentor> getRelatedCoursesByTags(UUID courseMentorId, UUID menteeId, int limit);
+
+    List<CourseMentor> getRecommendedByHistory(UUID menteeId, int limit);
 }

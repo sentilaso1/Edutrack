@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -42,10 +43,6 @@ public class HomeControlller {
         } else {
             return handleExperiencedLoggedInUser(loggedInUser, model);
         }
-    }
-
-    private String handleExperiencedLoggedInUser(User loggedInUser, Model model) {
-        return "mentee/mentee-landing-page";
     }
 
     private void addTopTagsToModel(Model model, int limit) {
@@ -82,7 +79,7 @@ public class HomeControlller {
         List<CourseCardDTO> courseSectionTwo = enrollmentService.mapToCourseCardDTOList(latestCourses);
         model.addAttribute("courseSectionTwo", courseSectionTwo);
 
-        List<Mentor> topMentors = mentorService.getTopMentorsByRatingOrSessions(5);
+        List<Mentor> topMentors = mentorService.getTopMentorsByRatingOrSessions(7);
         model.addAttribute("recommendedMentors", topMentors);
 
         model.addAttribute("userType", "guest");
@@ -130,7 +127,53 @@ public class HomeControlller {
         return "mentee/mentee-landing-page";
     }
 
+    private String handleExperiencedLoggedInUser(User user, Model model) {
+        model.addAttribute("headerCTA", "My Dashboard");
+        model.addAttribute("headerCTALink", "/dashboard");
 
+        model.addAttribute("heroHeadline", "<span class=\"span\">Upcoming Sessions</span>");
+        model.addAttribute("heroSubHeadline", "Next session: Tomorrow, 10:00 AM");
+        model.addAttribute("heroCTA", "View schedule →");
+        model.addAttribute("heroCTALink", "/schedules");
+
+        List<CourseMentor> inProgress = enrollmentService.getCourseInProgressMentee(user.getId());
+        CourseMentor baseCourse = inProgress.isEmpty() ? null : inProgress.get(0);
+
+        if (baseCourse != null) {
+            model.addAttribute("sectionOneTitle", "Because You Learned " + baseCourse.getCourse().getName());
+            model.addAttribute("sectionOneSubtitle", "Recommended courses related to your progress");
+
+            List<CourseMentor> relatedCourses = courseMentorService.getRelatedCoursesByTags(baseCourse.getCourse().getId(), user.getId(), 8);
+            List<CourseCardDTO> courseSectionOne = enrollmentService.mapToCourseCardDTOList(relatedCourses);
+            model.addAttribute("courseSectionOne", courseSectionOne);
+        } else {
+            model.addAttribute("sectionOneTitle", "Continue Your Journey");
+            model.addAttribute("sectionOneSubtitle", "Pick up where you left off");
+            model.addAttribute("courseSectionOne", Collections.emptyList());
+        }
+
+        addTopTagsToModel(model, 9);
+
+        List<Tag> allCourseTags = courseTagService.getAllTags();
+        List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
+        model.addAttribute("allCourseTagIds", allCourseTagIds);
+
+
+        model.addAttribute("sectionTwoTitle", "Recommended Courses");
+        model.addAttribute("sectionTwoSubtitle", "Enhance your skills with these picks");
+
+        List<CourseMentor> recommendations = courseMentorService.getRecommendedByHistory(user.getId(), 8);
+        List<CourseCardDTO> courseSectionTwo = enrollmentService.mapToCourseCardDTOList(recommendations);
+        model.addAttribute("courseSectionTwo", courseSectionTwo);
+
+        List<Mentor> topMentors = mentorService.getTopMentorsByRatingOrSessions(7);
+        model.addAttribute("recommendedMentors", topMentors);
+
+        model.addAttribute("userType", "experiencedUser");
+        model.addAttribute("showSchedulesLink", true);
+
+        return "mentee/mentee-landing-page";
+    }
 
 
 }
