@@ -6,13 +6,13 @@ import com.example.edutrack.accounts.model.RequestLog;
 import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.service.interfaces.SystemConfigService;
 import com.example.edutrack.accounts.service.interfaces.UserService;
-
 import jakarta.servlet.http.HttpServletResponse;
-
+import com.example.edutrack.accounts.dto.ScheduledJobDTO;
 import com.example.edutrack.accounts.dto.UserFilter;
 import com.example.edutrack.accounts.dto.UserWithRoleDTO;
-
+import com.example.edutrack.accounts.service.interfaces.ScheduledJobService;
 import java.util.List;
+import java.util.Map;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.springframework.data.domain.Sort;
@@ -30,19 +30,21 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-
         private final UserService userService;
         private final SystemConfigService systemConfigService;
+        private final ScheduledJobService scheduledJobService;
         @Autowired
         private RequestLogRepository requestLogRepository;
 
 
         @Autowired
-        public AdminController(UserService userService, SystemConfigService systemConfigService) {
+        public AdminController(UserService userService, SystemConfigService systemConfigService,
+                        ScheduledJobService scheduledJobService) {
                 this.userService = userService;
                 this.systemConfigService = systemConfigService;
+                this.scheduledJobService = scheduledJobService;
         }
-
+        
         @GetMapping("/users")
         public String showUserManagement(Model model,
                                         @RequestParam(required = false) String email,
@@ -182,7 +184,10 @@ public class AdminController {
 
                 int startPage = Math.max(0, currentPage - 2);
                 int endPage = Math.min(totalPages - 1, currentPage + 2);
-                model.addAttribute("configs", systemConfigService.getSystemConfigs());
+
+                Map<String, String> configs = systemConfigService.getConfigs("smtp.host", "smtp.port", "app.email",
+                                "app.name");
+                model.addAttribute("configs", configs);
                 model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
                 model.addAttribute("logPage", logPage);
                 model.addAttribute("currentPage", currentPage);
@@ -199,7 +204,7 @@ public class AdminController {
 
         @PostMapping("/system-settings/update")
         public String updateSystemSettings(@RequestParam String key, @RequestParam String value) {
-                systemConfigService.updateConfig(key, value);
+                systemConfigService.updateValue(key, value);
                 return "redirect:/admin/system-settings?success=Configuration updated successfully";
         }
 
@@ -224,5 +229,43 @@ public class AdminController {
                 return "redirect:/admin/system-settings";
         }
 
+        @GetMapping("/jobs")
+        public String viewJobs(@RequestParam(required = false) String search,
+                           @RequestParam(defaultValue = "0") int page,
+                           @RequestParam(defaultValue = "10") int size,
+                        Model model) {
+                Pageable pageable = PageRequest.of(page, size);
+                Page<ScheduledJobDTO> jobPage = scheduledJobService.getJobs(search, pageable);
+
+                model.addAttribute("jobs", jobPage.getContent());
+                model.addAttribute("currentPage", page);
+                model.addAttribute("totalPages", jobPage.getTotalPages());
+                model.addAttribute("search", search);
+                return "accounts/html/scheduled-jobs";
+        }
+        
+        @PostMapping("/jobs/{id}/toggle")
+        public String toggleJob(@PathVariable Long id, @RequestParam boolean active) {
+                scheduledJobService.toggleJob(id, active);
+                return "redirect:/admin/jobs";
+        }
+
+        @PostMapping("/jobs/{id}/run")
+        public String runJobNow(@PathVariable Long id) {
+                scheduledJobService.runJobNow(id);
+                return "redirect:/admin/jobs";
+        }
+
+        @PostMapping("/jobs/{id}/update")
+        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto) {
+                scheduledJobService.updateJob(id, dto);
+                return "redirect:/admin/jobs";
+        }
+
+        @GetMapping("/jobs/{id}/logs")
+        public String viewJobLogs(@PathVariable Long id, Model model) {
+                model.addAttribute("logs", scheduledJobService.getJobLogs(id));
+                return "fragments/job-log :: logList";
+        }
 }
 

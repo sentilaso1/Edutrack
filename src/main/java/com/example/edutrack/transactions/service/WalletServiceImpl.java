@@ -5,10 +5,12 @@ import com.example.edutrack.transactions.model.Wallet;
 import com.example.edutrack.transactions.repository.WalletRepository;
 import com.example.edutrack.transactions.service.interfaces.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
 public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
 
