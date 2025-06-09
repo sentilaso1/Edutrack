@@ -26,7 +26,7 @@
   --light-coral: hsl(357, 100%, 75%);
   --oxford-blue: hsl(224, 53%, 10%);
   --light-gray: hsl(0, 0%, 80%);
-  --keppei: hsl(0, 94%, 67%);
+  --keppei: #369f93;
   --white: hsl(0, 0%, 100%);
   --black: hsl(0, 0%, 0%);
   --black_10: hsla(0, 0%, 0%, 0.1);
@@ -35,8 +35,7 @@
    * typography
    */
 
-  --ff-gilroy: "Gilroy", sans-serif;
-
+  --ff-gilroy: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --headline-lg: 4.8rem;
   --headline-md: 3rem;
   --headline-sm: 2.4rem;

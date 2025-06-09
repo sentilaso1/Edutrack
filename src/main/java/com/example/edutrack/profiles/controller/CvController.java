@@ -146,7 +146,9 @@ public class CvController {
     @GetMapping("/admin/cv/detail/{id}")
     public String detailCV(@PathVariable("id") UUID id, Model model) {
         CV cv = cvService.getCVById(id);
+        List<Course> registeredCourses = cvService.getCoursesForCV(id);
         model.addAttribute("cv", cv);
+        model.addAttribute("registeredCourses", registeredCourses);
         return "cv/cv-detail";
     }
 

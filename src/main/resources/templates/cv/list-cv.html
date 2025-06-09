@@ -131,6 +131,12 @@
                 Pending
             </label>
 
+            <label for="pending">
+                <input type="radio" name="filter" id="aiapproved" value="aiapproved"
+                       th:checked="${filter != null && filter == 'aiapproved'}">
+                Pending
+            </label>
+
             <label for="approved">
                 <input type="radio" name="filter" id="approved" value="approved"
                        th:checked="${filter != null && filter == 'approved'}">
