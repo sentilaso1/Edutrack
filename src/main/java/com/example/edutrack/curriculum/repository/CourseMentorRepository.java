@@ -94,6 +94,15 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     );
 
     @Query("""
+                SELECT cm FROM CourseMentor cm
+                JOIN cm.course c
+                JOIN CourseTag ct ON ct.course.id = c.id
+                WHERE LOWER(ct.tag.title) IN :tags
+            """)
+    List<CourseMentor> findRelatedByTags(@Param("tags") List<String> tags,
+                                         Pageable pageable);
+
+    @Query("""
             SELECT DISTINCT cm FROM CourseMentor cm
             JOIN cm.course c
             JOIN CourseTag ct ON ct.course = c
