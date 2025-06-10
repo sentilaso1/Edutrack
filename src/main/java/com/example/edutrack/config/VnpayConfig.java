@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Component
 public class VnpayConfig {
@@ -21,6 +22,27 @@ public class VnpayConfig {
 
     @Value("${vnpay.returnUrl}")
     public String vnpReturnUrl;
+
+    public String hashAllFields(Map<String, String> params) {
+        List<String> fieldNames = new ArrayList<>(params.keySet());
+        Collections.sort(fieldNames);
+
+        StringBuilder sb = new StringBuilder();
+        Iterator<String> iter = fieldNames.iterator();
+
+        while (iter.hasNext()) {
+            String fieldName = iter.next();
+            String fieldValue = params.get(fieldName);
+            if (fieldValue != null && !fieldValue.isEmpty()) {
+                sb.append(fieldName).append("=").append(fieldValue);
+
+                if (iter.hasNext()) {
+                    sb.append("&");
+                }
+            }
+        }
+        return hmacSHA512(vnpHashSecret, sb.toString());
+    }
 
     public String hmacSHA512(String key, String data) {
         try {
