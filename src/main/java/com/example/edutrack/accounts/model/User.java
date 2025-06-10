@@ -13,6 +13,7 @@ import java.util.UUID;
 public class User {
     public static final String GENDER_MALE = "male";
     public static final String GENDER_FEMALE = "female";
+    public static final String UNKNOWN = "unknown";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -131,7 +132,7 @@ public class User {
     }
 
     public void setGender(String gender) {
-        if (gender != null && (gender.equals(GENDER_MALE) || gender.equals(GENDER_FEMALE))) {
+        if (gender != null && (gender.equals(GENDER_MALE) || gender.equals(GENDER_FEMALE) || gender.equals(UNKNOWN))) {
             this.gender = gender;
         }
     }
