@@ -134,8 +134,11 @@ public class CourseController {
         return new ResponseEntity<>(mentor.get().getAvatar(), headers, HttpStatus.OK);
     }
 
-    @GetMapping("/courses/register")
-    public String registerCourse(Model model) {
+    @GetMapping("course/register/{cmid}")
+    public String registerCourse(@PathVariable UUID cmid,
+                                 Model model) {
+        CourseMentor courseMentor = courseMentorService.findById(cmid);
+        model.addAttribute("courseMentor", courseMentor);
         return "register-section";
     }
 
