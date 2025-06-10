@@ -33,4 +33,17 @@ public class WalletServiceImpl implements WalletService {
     public Wallet save(User user) {
         return walletRepository.save(new Wallet(user));
     }
+
+    @Override
+    public Optional<Wallet> addFunds(User user, Double amount) {
+        Optional<Wallet> walletOpt = walletRepository.findByUser(user);
+        if (walletOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Wallet wallet = walletOpt.get();
+        wallet.setBalance(wallet.getBalance() + (amount / Wallet.CONVERSION_RATE));
+
+        return Optional.of(walletRepository.save(wallet));
+    }
 }
