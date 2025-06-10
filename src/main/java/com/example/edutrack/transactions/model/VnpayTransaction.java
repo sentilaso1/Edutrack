@@ -2,11 +2,9 @@ package com.example.edutrack.transactions.model;
 
 import com.example.edutrack.accounts.model.User;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -224,7 +222,7 @@ public class VnpayTransaction {
         this.user = user;
     }
 
-    public Boolean getDone() {
+    public Boolean isDone() {
         return isDone;
     }
 
