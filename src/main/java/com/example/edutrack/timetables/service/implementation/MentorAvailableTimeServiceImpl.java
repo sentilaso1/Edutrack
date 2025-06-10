@@ -1,19 +1,18 @@
 package com.example.edutrack.timetables.service.implementation;
 
 import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.model.MentorAvailableTimeId;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
-import com.example.edutrack.timetables.service.interfaces.ScheduleService;
+import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class ScheduleServiceImpl implements ScheduleService {
+public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeService {
 
     MentorAvailableTimeRepository mentorAvailableTimeRepository;
 
-    public ScheduleServiceImpl(MentorAvailableTimeRepository scheduleRepository) {
+    public MentorAvailableTimeServiceImpl(MentorAvailableTimeRepository scheduleRepository) {
         this.mentorAvailableTimeRepository = scheduleRepository;
     }
 

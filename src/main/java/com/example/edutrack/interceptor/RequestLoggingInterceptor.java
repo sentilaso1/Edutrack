@@ -30,7 +30,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor{
             params.toString().trim(),
             LocalDateTime.now()
         );
-        if (request.getMethod().equalsIgnoreCase("POSt")) {
+        if (request.getMethod().equalsIgnoreCase("POST") || request.getMethod().equalsIgnoreCase("GET")) {
             log.setParameters("Sensitive data not logged for POST requests");
         }
 
