@@ -4,7 +4,6 @@ import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.service.interfaces.DashboardService;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
-import com.example.edutrack.timetables.repository.ScheduleRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,12 +18,11 @@ public class DashboardServiceImpl implements DashboardService {
 
     private final EnrollmentScheduleRepository enrollmentScheduleRepository;
     private final MentorRepository mentorRepository;
-    private final ScheduleRepository scheduleRepository;
 
-    public DashboardServiceImpl(EnrollmentScheduleRepository enrollmentRepository, MentorRepository mentorRepository, ScheduleRepository scheduleRepository) {
+
+    public DashboardServiceImpl(EnrollmentScheduleRepository enrollmentRepository, MentorRepository mentorRepository) {
         this.enrollmentScheduleRepository= enrollmentRepository;
         this.mentorRepository = mentorRepository;
-        this.scheduleRepository = scheduleRepository;
     }
 
     @Override
@@ -36,7 +34,7 @@ public class DashboardServiceImpl implements DashboardService {
 
         for (EnrollmentSchedule s : schedules) {
             //Temporarily use structure date in EnrollmentSchedule is yyyy:mm:dd and slot is hh:mm:ss
-            LocalDate date = s.getDate().toInstant().atZone(java.time.ZoneOffset.systemDefault()).toLocalDate();
+            LocalDate date = s.getDate();
             LocalTime time = s.getSlot().getStartTime();
             LocalDateTime sessionTime = LocalDateTime.of(date, time);
 
@@ -65,7 +63,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public int getLearningProgress(UUID menteeId) {
         int total = enrollmentScheduleRepository.countTotalSlotsByMenteeId(menteeId);
-        int completed = scheduleRepository.countCompletedAttendanceByMenteeId(menteeId);
+        int completed = 10;
         if (total == 0) return 0;
         return (int) Math.round((completed * 100.0) / total);
     }

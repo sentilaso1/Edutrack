@@ -36,7 +36,6 @@ public class VnpayTransaction {
     private String version = "2.1.0";
     private String locale = "vn";
     private String currCode = "VND";
-    //private String bankCode = "VNPAYQR";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -66,6 +65,36 @@ public class VnpayTransaction {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "is_done", nullable = false)
+    private Boolean isDone = Boolean.FALSE;
+
+    @Column(name = "bank_tran_no")
+    private String bankTranNo;
+
+    @Column(name = "card_type")
+    private String cardType;
+
+    @Column(name = "transaction_no")
+    private String transactionNo;
+
+    @Column(name = "bank_code")
+    private String bankCode;
+
+    @Column(name = "pay_date")
+    private String payDate;
+
+    @Column(name = "response_code")
+    private String responseCode;
+
+    @Column(name = "transaction_status")
+    private String transactionStatus;
+
+    public static boolean isValidAmount(Long amount) {
+        return amount == AMOUNT_100 || amount == AMOUNT_200 ||
+                amount == AMOUNT_500 || amount == AMOUNT_1000 ||
+                amount == AMOUNT_2000 || amount == AMOUNT_5000;
+    }
 
     public VnpayTransaction() {
     }
@@ -141,9 +170,7 @@ public class VnpayTransaction {
 
     public void setAmount(Long amount) {
         amount *= FRACTION_SHIFT;
-        if (amount != AMOUNT_100 && amount != AMOUNT_200 &&
-            amount != AMOUNT_500 && amount != AMOUNT_1000 &&
-            amount != AMOUNT_2000 && amount != AMOUNT_5000) {
+        if (!isValidAmount(amount)) {
             throw new IllegalArgumentException("Invalid amount for VNPAY transaction");
         }
         this.amount = amount;
@@ -197,18 +224,90 @@ public class VnpayTransaction {
         this.user = user;
     }
 
+    public Boolean getDone() {
+        return isDone;
+    }
+
+    public void setDone(Boolean done) {
+        isDone = done;
+    }
+
+    public String getBankTranNo() {
+        return bankTranNo;
+    }
+
+    public void setBankTranNo(String bankTranNo) {
+        this.bankTranNo = bankTranNo;
+    }
+
+    public String getCardType() {
+        return cardType;
+    }
+
+    public void setCardType(String cardType) {
+        this.cardType = cardType;
+    }
+
+    public String getTransactionNo() {
+        return transactionNo;
+    }
+
+    public void setTransactionNo(String transactionNo) {
+        this.transactionNo = transactionNo;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
+    }
+
+    public String getPayDate() {
+        return payDate;
+    }
+
+    public void setPayDate(String payDate) {
+        this.payDate = payDate;
+    }
+
+    public String getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(String responseCode) {
+        this.responseCode = responseCode;
+    }
+
+    public String getTransactionStatus() {
+        return transactionStatus;
+    }
+
+    public void setTransactionStatus(String transactionStatus) {
+        this.transactionStatus = transactionStatus;
+    }
+
     @Override
     public String toString() {
         return "VnpayTransaction{" +
                 "txnRef=" + txnRef +
-                ", command='" + command + '\'' +
                 ", amount=" + amount +
-                ", date=" + createdDate +
-                ", expireDate=" + expireDate +
+                ", createdDate='" + createdDate + '\'' +
+                ", command='" + command + '\'' +
+                ", expireDate='" + expireDate + '\'' +
                 ", ipAddress='" + ipAddress + '\'' +
                 ", orderInfo='" + orderInfo + '\'' +
                 ", orderType='" + orderType + '\'' +
-                ", user='" + user + '\'' +
+                ", user=" + user +
+                ", isDone=" + isDone +
+                ", bankTranNo='" + bankTranNo + '\'' +
+                ", cardType='" + cardType + '\'' +
+                ", transactionNo='" + transactionNo + '\'' +
+                ", bankCode='" + bankCode + '\'' +
+                ", payDate='" + payDate + '\'' +
+                ", responseCode='" + responseCode + '\'' +
+                ", transactionStatus='" + transactionStatus + '\'' +
                 '}';
     }
 }

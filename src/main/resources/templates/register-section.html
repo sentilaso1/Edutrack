@@ -354,6 +354,85 @@
                 padding: 20px;
             }
         }
+
+
+        .modal {
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 90vw;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .calendar {
+            max-width: 900px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+        }
+
+        .calendar > div {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 6px;
+            text-align: center;
+            font-weight: 500;
+            user-select: none;
+            color: var(--coral-light);
+        }
+
+        .calendar .time-header {
+            background: #f0f0f0;
+            font-weight: 500;
+            width: 5em;
+        }
+
+        .day-header {
+            background: var(--coral-light);
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;         ;
+        }
+
+        .slot-button {
+            border: 1.5px solid #999;
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 2em 1em;
+            transition: background-color 0.3s, border-color 0.3s;
+            user-select: none;
+        }
+
+        .slot-button:hover {
+            border-color: var(--coral-light);
+        }
+
+        .slot-button.active {
+            background-color: var(--coral-light);
+            border-color: var(--coral-lighter);
+            color: white;
+        }
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
 </head>
@@ -418,7 +497,7 @@
                             </div>
                         </div>
 
-                        <form id="registrationForm">
+                        <form id="slotForm" method="post" action="/">
                             <!-- Personal Information -->
                             <div class="section">
                                 <h3>
@@ -431,11 +510,13 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="fullName">Full Name</label>
-                                        <input type="text" id="fullName" name="fullName" required placeholder="Enter your Full Name">
+                                        <input type="text" id="fullName" name="fullName" required
+                                               placeholder="Enter your Full Name">
                                     </div>
                                     <div class="form-group">
                                         <label for="email">Email</label>
-                                        <input type="email" id="email" name="email" required placeholder="example@email.com">
+                                        <input type="email" id="email" name="email" required
+                                               placeholder="example@email.com">
                                     </div>
                                 </div>
 
@@ -446,7 +527,8 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="age">Age</label>
-                                        <input type="number" id="age" name="age" min="16" max="65" placeholder="Enter your Age">
+                                        <input type="number" id="age" name="age" min="16" max="65"
+                                               placeholder="Enter your Age">
                                     </div>
                                 </div>
 
@@ -462,7 +544,8 @@
 
                                 <div class="form-group">
                                     <label for="motivation">Target</label>
-                                    <textarea id="motivation" name="motivation" rows="3" placeholder="Share your motivation with this skill"></textarea>
+                                    <textarea id="motivation" name="motivation" rows="3"
+                                              placeholder="Share your motivation with this skill"></textarea>
                                 </div>
                             </div>
 
@@ -477,7 +560,8 @@
 
                                 <div class="mentor-info">
                                     <div class="mentor-profile">
-                                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+" alt="Mentor Avatar" class="mentor-avatar">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+"
+                                             alt="Mentor Avatar" class="mentor-avatar">
                                         <div class="mentor-details">
                                             <h4>John Doe</h4>
                                             <div class="mentor-rating">
@@ -501,21 +585,272 @@
                                     </svg>
                                     Choose Slot per Week
                                 </h3>
+                                <div class="modal">
+                                    <div class="modal-content">
+                                        <div>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Choose Learning Slot</h5>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="calendar">
+                                                    <div class="time-header"></div>
 
-                                <div class="schedule-options">
+                                                    <div class="day-header">Mon</div>
+                                                    <div class="day-header">Tue</div>
+                                                    <div class="day-header">Wed</div>
+                                                    <div class="day-header">Thu</div>
+                                                    <div class="day-header">Fri</div>
+                                                    <div class="day-header">Sat</div>
+                                                    <div class="day-header">Sun</div>
 
+                                                    <!-- SLOT 1 -->
+                                                    <div class="time-header">8:00 - 9:00</div>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="MONDAY"
+                                                            data-slot="SLOT_1"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="TUESDAY"
+                                                            data-slot="SLOT_1"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="WEDNESDAY"
+                                                            data-slot="SLOT_1"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="THURSDAY"
+                                                            data-slot="SLOT_1"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="FRIDAY"
+                                                            data-slot="SLOT_1"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SATURDAY"
+                                                            data-slot="SLOT_1"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SUNDAY"
+                                                            data-slot="SLOT_1"
+                                                    ></button>
+
+                                                    <!-- SLOT 2 -->
+                                                    <div class="time-header">9:00 - 10:00</div>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="MONDAY"
+                                                            data-slot="SLOT_2"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="TUESDAY"
+                                                            data-slot="SLOT_2"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="WEDNESDAY"
+                                                            data-slot="SLOT_2"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="THURSDAY"
+                                                            data-slot="SLOT_2"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="FRIDAY"
+                                                            data-slot="SLOT_2"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SATURDAY"
+                                                            data-slot="SLOT_2"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SUNDAY"
+                                                            data-slot="SLOT_2"
+                                                    ></button>
+
+                                                    <!-- SLOT 3 -->
+                                                    <div class="time-header">10:00 - 11:00</div>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="MONDAY"
+                                                            data-slot="SLOT_3"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="TUESDAY"
+                                                            data-slot="SLOT_3"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="WEDNESDAY"
+                                                            data-slot="SLOT_3"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="THURSDAY"
+                                                            data-slot="SLOT_3"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="FRIDAY"
+                                                            data-slot="SLOT_3"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SATURDAY"
+                                                            data-slot="SLOT_3"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SUNDAY"
+                                                            data-slot="SLOT_3"
+                                                    ></button>
+
+                                                    <!-- SLOT 4 -->
+                                                    <div class="time-header">11:00 - 12:00</div>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="MONDAY"
+                                                            data-slot="SLOT_4"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="TUESDAY"
+                                                            data-slot="SLOT_4"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="WEDNESDAY"
+                                                            data-slot="SLOT_4"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="THURSDAY"
+                                                            data-slot="SLOT_4"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="FRIDAY"
+                                                            data-slot="SLOT_4"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SATURDAY"
+                                                            data-slot="SLOT_4"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SUNDAY"
+                                                            data-slot="SLOT_4"
+                                                    ></button>
+
+                                                    <!-- SLOT 5 -->
+                                                    <div class="time-header">12:00 - 13:00</div>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="MONDAY"
+                                                            data-slot="SLOT_5"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="TUESDAY"
+                                                            data-slot="SLOT_5"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="WEDNESDAY"
+                                                            data-slot="SLOT_5"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="THURSDAY"
+                                                            data-slot="SLOT_5"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="FRIDAY"
+                                                            data-slot="SLOT_5"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SATURDAY"
+                                                            data-slot="SLOT_5"
+                                                    ></button>
+                                                    <button
+                                                            type="button"
+                                                            class="slot-button"
+                                                            data-day="SUNDAY"
+                                                            data-slot="SLOT_5"
+                                                    ></button>
+
+                                                    <div
+                                                            style="
+                                                                    grid-column: span 8;
+                                                                    text-align: center;
+                                                                    margin-top: 20px;
+                                                                  "
+                                                    >
+                                                        <input type="number" name="totalSlot" placeholder="Enter number of Slots">
+                                                        <span>Start Time:
+                                                        <button type="submit">Check Start Date</button></span>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <input type="hidden" id="selectedSchedule" name="schedule">
                             </div>
-
-
-
                             <!-- Submit Section -->
                             <div class="submit-section">
                                 <button type="submit" class="submit-btn" id="submitBtn">
                                     Register Now
                                 </button>
-
                             </div>
                         </form>
                     </div>
@@ -525,176 +860,55 @@
     </article>
 </main>
 
-
 <script>
-    let selectedScheduleValue = '';
-    let selectedPaymentValue = '';
+    const form = document.getElementById("slotForm");
+    const buttons = form.querySelectorAll(".slot-button");
 
-    function selectSchedule(element, value) {
-        // Remove selected class from all schedule cards
-        document.querySelectorAll('.schedule-card').forEach(card => {
-            card.classList.remove('selected');
+    buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+            button.classList.toggle("active");
+            button.textContent = button.classList.contains("active") ? "✔" : "";
+
+            updateHiddenInputs();
         });
+    });
 
-        // Add selected class to clicked card
-        element.classList.add('selected');
+    function updateHiddenInputs() {
+        // Remove old hidden inputs
+        const oldInputs = form.querySelectorAll(
+            'input[type=hidden][data-generated="true"]'
+        );
+        oldInputs.forEach((i) => i.remove());
 
-        // Update hidden input
-        selectedScheduleValue = value;
-        document.getElementById('selectedSchedule').value = value;
+        // Add new hidden inputs for each selected slot
+        buttons.forEach((btn) => {
+            if (btn.classList.contains("active")) {
+                // Create slot input
+                const slotInput = document.createElement("input");
+                slotInput.type = "hidden";
+                slotInput.name = "slot";
+                slotInput.value = btn.dataset.slot;
+                slotInput.dataset.generated = "true";
+                form.appendChild(slotInput);
 
-        // Update progress indicator to step 2
-        updateProgress(2);
-    }
-
-    function selectPayment(element, value) {
-        // Remove selected class from all payment cards
-        document.querySelectorAll('.payment-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-
-        // Add selected class to clicked card
-        element.classList.add('selected');
-
-        // Update hidden input
-        selectedPaymentValue = value;
-        document.getElementById('selectedPayment').value = value;
-
-        // Update progress indicator to step 3
-        updateProgress(3);
-    }
-
-    function updateProgress(step) {
-        const steps = document.querySelectorAll('.progress-step');
-        const lines = document.querySelectorAll('.progress-line');
-
-        steps.forEach((s, index) => {
-            s.classList.remove('active');
-            if (index + 1 <= step) {
-                s.classList.add('completed');
-            }
-            if (index + 1 === step) {
-                s.classList.add('active');
-            }
-        });
-
-        lines.forEach((line, index) => {
-            line.classList.remove('completed');
-            if (index < step - 1) {
-                line.classList.add('completed');
+                // Create day input
+                const dayInput = document.createElement("input");
+                dayInput.type = "hidden";
+                dayInput.name = "day";
+                dayInput.value = btn.dataset.day;
+                dayInput.dataset.generated = "true";
+                form.appendChild(dayInput);
             }
         });
     }
 
-    function showAlert(type, message) {
-        const alert = document.getElementById(type + 'Alert');
-        alert.textContent = message;
-        alert.style.display = 'block';
-
-        // Auto hide after 5 seconds
-        setTimeout(() => {
-            alert.style.display = 'none';
-        }, 5000);
-    }
-
-    function validateForm() {
-        const form = document.getElementById('registrationForm');
-        const formData = new FormData(form);
-
-        // Check required fields
-        const requiredFields = [
-            { id: 'fullName', label: 'Họ và tên' },
-            { id: 'email', label: 'Email' },
-            { id: 'phone', label: 'Số điện thoại' },
-            { id: 'experience', label: 'Kinh nghiệm lập trình' }
-        ];
-
-        for (let field of requiredFields) {
-            if (!formData.get(field.id)) {
-                showAlert('error', `Vui lòng điền ${field.label}`);
-                return false;
-            }
-        }
-
-        // Check email format
-        const email = formData.get('email');
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            showAlert('error', 'Email không đúng định dạng');
-            return false;
-        }
-
-        // Check phone format
-        const phone = formData.get('phone');
-        const phoneRegex = /^[0-9]{10,11}$/;
-        if (!phoneRegex.test(phone)) {
-            showAlert('error', 'Số điện thoại không đúng định dạng');
-            return false;
-        }
-
-        // Check schedule selection
-        if (!selectedScheduleValue) {
-            showAlert('error', 'Please choose Slot');
-            return false;
-        }
-
-        // Check terms agreement
-        if (!formData.get('terms')) {
-            showAlert('error', 'Vui lòng đồng ý với điều khoản sử dụng');
-            return false;
-        }
-
-        return true;
-    }
-
-    function simulateRegistration() {
-        const submitBtn = document.getElementById('submitBtn');
-
-        // Disable button and show loading
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Processing...';
-
-        // Simulate API call
-        setTimeout(() => {
-            // Simulate success (90% chance) or error (10% chance)
-            const isSuccess = Math.random() > 0.1;
-
-            if (isSuccess) {
-                showAlert('success', 'Register Successfully!');
-
-                // Update progress indicator to complete
-                updateProgress(3);
-
-                // Reset form
-                document.getElementById('registrationForm').reset();
-                document.querySelectorAll('.selected').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                selectedScheduleValue = '';
-                selectedPaymentValue = '';
-                document.getElementById('selectedSchedule').value = '';
-                document.getElementById('selectedPayment').value = '';
-
-                // Reset progress indicator to step 1
-                setTimeout(() => {
-                    updateProgress(1);
-                }, 5000);
-            } else {
-                showAlert('error', 'Error happened, try later');
-            }
-
-            // Re-enable button
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Register now';
-        }, 2000);
-    }
-
-    // Form submission handler
-    document.getElementById('registrationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        if (validateForm()) {
-            simulateRegistration();
+    form.addEventListener("submit", function (e) {
+        const hasSelected = [...buttons].some((btn) =>
+            btn.classList.contains("active")
+        );
+        if (!hasSelected) {
+            e.preventDefault();
+            alert("Vui lòng chọn ít nhất 1 slot trước khi gửi");
         }
     });
 </script>

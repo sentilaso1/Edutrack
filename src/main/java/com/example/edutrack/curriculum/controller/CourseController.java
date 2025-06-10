@@ -106,17 +106,10 @@ public class CourseController {
             throw new RuntimeException("Course mentor not found");
         }
         Course course = courseMentor.getCourse();
-        Mentor mentor = courseMentor.getMentor();
         List<Tag> tagList = tagServiceImpl.findTagsByCourseId(course.getId());
 
-        MentorDTO mentorDTO = null;
-        if (mentor != null) {
-            mentorDTO = new MentorDTO(mentor.getId(), mentor.getFullName(), mentor.getAvatar(), mentor.getExpertise());
-        }
-
-        model.addAttribute("course", course);
+        model.addAttribute("course", courseMentor);
         model.addAttribute("tagList", tagList);
-        model.addAttribute("mentor", mentorDTO);
 
         return "/mentee/course_detail";
     }
@@ -134,8 +127,11 @@ public class CourseController {
         return new ResponseEntity<>(mentor.get().getAvatar(), headers, HttpStatus.OK);
     }
 
-    @GetMapping("/courses/register")
-    public String registerCourse(Model model) {
+    @GetMapping("course/register/{cmid}")
+    public String registerCourse(@PathVariable UUID cmid,
+                                 Model model) {
+        CourseMentor courseMentor = courseMentorService.findById(cmid);
+        model.addAttribute("courseMentor", courseMentor);
         return "register-section";
     }
 
