@@ -6,9 +6,12 @@ import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
@@ -17,4 +20,10 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
            "WHERE e.courseMentor.mentor = :mentor " +
            "AND es.date = :date AND es.slot = :slot AND WEEKDAY(es.date) = :day")
     public boolean isAvailableSlot(Slot slot, Day day, Date date, User mentor);
+
+    @Query("SELECT s FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
+    List<EnrollmentSchedule> findAllByMenteeId(@Param("menteeId") UUID menteeId);
+
+    @Query("SELECT COUNT(s) FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
+    int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);
 }

@@ -43,4 +43,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
               AND s.date >= CURRENT_DATE
            """)
     List<CourseMentor> findInProgressCourses(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
+
+
 }

@@ -31,5 +31,43 @@ public class EnrollmentSchedule {
     public EnrollmentSchedule() {
     }
 
+    public long getId() {
+        return id;
+    }
+    public void setId(long id) {
+        this.id = id;
+    }
+    public Enrollment getEnrollment() {
+        return enrollment;
+    }
+    public void setEnrollment(Enrollment enrollment) {
+        this.enrollment = enrollment;
+    }
+    public Slot getSlot() {
+        return slot;
+    }
+    public void setSlot(Slot slot) {
+        this.slot = slot;
+    }
+    public Date getDate() {
+        return date;
+    }
+    public void setDate(Date date) {
+        this.date = date;
+    }
+    public Boolean getIsTest() {
+        return isTest;
+    }
+    public void setIsTest(Boolean isTest) {
+        this.isTest = isTest;
+    }
+    public Integer getScore() {
+        return score;
+    }
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+
 
 }
