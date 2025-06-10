@@ -8,6 +8,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "wallets")
 public class Wallet {
+    public static final Double CONVERSION_RATE = 1000.0;
+
     @Id
     @Column(name = "user_id")
     private UUID id;

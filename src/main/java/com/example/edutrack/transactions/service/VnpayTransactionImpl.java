@@ -68,6 +68,25 @@ public class VnpayTransactionImpl implements VnpayTransactionService {
         return config.vnpApiUrl + "?" + queryUrl;
     }
 
+    @Override
+    public Optional<VnpayTransaction> finalizeTransaction(Map<String, String> params) {
+        Optional<VnpayTransaction> transactionOptional = vnpayTransactionRepository.findById(UUID.fromString(params.get("vnp_TxnRef")));
+        if (transactionOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        VnpayTransaction transaction = transactionOptional.get();
+        transaction.setBankCode(params.get("vnp_BankCode"));
+        transaction.setBankTranNo(params.get("vnp_BankTranNo"));
+        transaction.setCardType(params.get("vnp_CardType"));
+        transaction.setTransactionNo(params.get("vnp_TransactionNo"));
+        transaction.setPayDate(params.get("vnp_PayDate"));
+        transaction.setResponseCode(params.get("vnp_ResponseCode"));
+        transaction.setTransactionStatus(params.get("vnp_TransactionStatus"));
+
+        return Optional.of(vnpayTransactionRepository.save(transaction));
+    }
+
     private static Map<String, String> getParamMap(VnpayTransaction transaction, VnpayConfig config) {
         Map<String, String> params = new HashMap<>();
         params.put("vnp_Version", transaction.getVersion());

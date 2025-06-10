@@ -1,0 +1,244 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Recharge Neurons</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+
+    <style>
+        body {
+            background-color: var(--bg-primary);
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        header > h1 {
+            font-size: 2.5em;
+            font-weight: bolder;
+        }
+
+        header > p {
+            font-size: 1em;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 2em;
+            padding: 1em;
+        }
+
+        .vertical-flex {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 2em;
+        }
+
+        .horizontal-flex {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            gap: 2em;
+        }
+
+        .fund-list {
+            width: 75%;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+            gap: 2em;
+        }
+
+        .fund-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.75em;
+            border-radius: 0.5em;
+            gap: 0.75em;
+            background-color: var(--bg-secondary);
+        }
+
+        .fund-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.25em;
+        }
+
+        .fund-header > h3 {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .fund-header > p {
+            font-size: 1em;
+            color: var(--text-secondary)
+        }
+
+        .fund-form {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0.25em;
+            background-color: var(--bg-primary);
+        }
+
+        .fund-form span {
+            font-size: 1em;
+            padding: 0 0.75em;
+            color: var(--text-primary);
+        }
+
+        .fund-form button {
+            border: none;
+            border-radius: 0.25em;
+            padding: 0.4em 0.5em;
+            font-size: 1.1em;
+            background-color: var(--bg-tertiary);
+        }
+
+        .fund-form button:hover {
+            background-color: var(--bg-secondary);
+            cursor: pointer;
+        }
+
+        .sidebar {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            gap: 2em;
+        }
+
+        .sidebar > div {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            border-radius: 0.5em;
+        }
+
+        .sidebar .balance {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .invisible {
+            display: none;
+        }
+    </style>
+</head>
+<body class="viewport">
+    <div class="main-container">
+        <header>
+            <h1>Recharge Neurons</h1>
+            <p>Stimulate your neurons to continue your learning journeys.</p>
+        </header>
+
+        <div class="horizontal-flex">
+            <main class="fund-list">
+                <div class="fund-container">
+                    <div class="fund-header">
+                        <h3>Add 100 Neurons</h3>
+                        <p>Minimum recharge level</p>
+                    </div>
+
+                    <div class="fund-form">
+                        <span>100.000 VND</span>
+                        <form th:action="@{/api/vnpay/pay}" method="post">
+                            <input type="hidden" name="amount" value="100000"/>
+                            <button type="submit" class="">Recharge</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="fund-container">
+                    <div class="fund-header">
+                        <h3>Add 200 Neurons</h3>
+                        <p class="invisible">Minimum recharge level</p>
+                    </div>
+
+                    <div class="fund-form">
+                        <span>200.000 VND</span>
+                        <form th:action="@{/api/vnpay/pay}" method="post">
+                            <input type="hidden" name="amount" value="200000"/>
+                            <button type="submit" class="">Recharge</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="fund-container">
+                    <div class="fund-header">
+                        <h3>Add 500 Neurons</h3>
+                        <p class="invisible">Minimum recharge level</p>
+                    </div>
+
+                    <div class="fund-form">
+                        <span>500.000 VND</span>
+                        <form th:action="@{/api/vnpay/pay}" method="post">
+                            <input type="hidden" name="amount" value="500000"/>
+                            <button type="submit" class="">Recharge</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="fund-container">
+                    <div class="fund-header">
+                        <h3>Add 1,000 Neurons</h3>
+                        <p class="invisible">Minimum recharge level</p>
+                    </div>
+
+                    <div class="fund-form">
+                        <span>1.000.000 VND</span>
+                        <form th:action="@{/api/vnpay/pay}" method="post">
+                            <input type="hidden" name="amount" value="1000000"/>
+                            <button type="submit" class="">Recharge</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="fund-container">
+                    <div class="fund-header">
+                        <h3>Add 2,000 Neurons</h3>
+                        <p class="invisible">Minimum recharge level</p>
+                    </div>
+
+                    <div class="fund-form">
+                        <span>2.000.000 VND</span>
+                        <form th:action="@{/api/vnpay/pay}" method="post">
+                            <input type="hidden" name="amount" value="2000000"/>
+                            <button type="submit" class="">Recharge</button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="sidebar">
+                <div>
+                    <h3>Current balance:</h3>
+                    <p class="balance" th:text="${wallet != null ? wallet.balance + ' Neurons' : '<null>'}">250 Neurons</p>
+                </div>
+
+                <div>
+                    <a href="#">View account details</a>
+                    <a href="#">Redeem a gift card</a>
+                </div>
+
+                <div>
+                    <h3>Recharge Instructions:</h3>
+                    <p>1. Select the amount of neurons you want to add.</p>
+                    <p>2. Click the "Recharge" button to proceed with the payment.</p>
+                    <p>3. Follow the instructions on the payment gateway.</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+</body>
+</html>

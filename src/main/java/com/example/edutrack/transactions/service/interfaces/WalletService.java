@@ -9,5 +9,7 @@ import java.util.UUID;
 public interface WalletService {
     Optional<Wallet> findByUser(User user);
     Optional<Wallet> findById(UUID id);
+
     Wallet save(User user);
+    Optional<Wallet> addFunds(User user, Double amount);
 }
