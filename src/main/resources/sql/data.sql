@@ -303,3 +303,34 @@ VALUES
 
     (UUID_TO_BIN('aaaaaaa5-aaaa-aaaa-aaaa-aaaaaaaaaaa5'), '2024-05-05 16:00:00.000000', 'ACCEPTED',
      UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('55555555-5555-5555-5555-555555555555'));
+
+INSERT INTO properties (id, prop_key, prop_value, description, created_date)
+VALUES 
+(
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'app.name',
+    'EduTrack',
+    'Application name',
+    NOW()
+),
+(
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'app.email',
+    'lephuonglinhnga1801@gmail.com',
+    'Sender email used in system notifications',
+    NOW()
+),
+(
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'smtp.host',
+    'smtp.gmail.com',
+    'SMTP server host',
+    NOW()
+),
+(
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'smtp.port',
+    '587',
+    'SMTP server port',
+    NOW()
+);
