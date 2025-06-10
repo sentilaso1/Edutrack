@@ -2,6 +2,7 @@ package com.example.edutrack.timetables.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -20,7 +21,7 @@ public class EnrollmentSchedule {
     private Slot slot;
 
     @Column(name = "date", nullable = false)
-    private Date date;
+    private LocalDate date;
 
     @Column(name = "is_test")
     private Boolean isTest = Boolean.FALSE;

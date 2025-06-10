@@ -39,6 +39,9 @@ public class Enrollment {
     @JoinColumn(name = "course_mentor_id", nullable = false)
     private CourseMentor courseMentor;
 
+    @Column(name = "total_slots")
+    private Integer totalSlots;
+
     @Column(name = "start_time")
     private String startTime; //startDate,startSlot => many slots in a day
 
@@ -53,9 +56,11 @@ public class Enrollment {
 
     }
 
-    public Enrollment(Mentee mentee, CourseMentor courseMentor) {
+    public Enrollment(Mentee mentee, CourseMentor courseMentor, Integer totalSlots, Slot slot, Day day) {
         this.mentee = mentee;
         this.courseMentor = courseMentor;
+        this.totalSlots = totalSlots;
+        this.scheduleSummary = day+"-"+slot;
     }
 
     public Long getId() {
@@ -90,6 +95,14 @@ public class Enrollment {
         this.courseMentor = courseMentor;
     }
 
+    public Integer getTotalSlots() {
+        return totalSlots;
+    }
+
+    public void setTotalSlots(Integer totalSlots) {
+        this.totalSlots = totalSlots;
+    }
+
     public String getStartTime() {
         return startTime;
     }
@@ -121,6 +134,7 @@ public class Enrollment {
                ", status=" + status +
                ", mentee=" + mentee +
                ", courseMentor=" + courseMentor +
+               ", totalSlots=" + totalSlots +
                ", startTime='" + startTime + '\'' +
                ", createdDate=" + createdDate +
                ", scheduleSummary='" + scheduleSummary + '\'' +
