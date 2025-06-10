@@ -37,7 +37,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("""
             SELECT DISTINCT e.courseMentor
             FROM Enrollment e
-            JOIN Schedule s ON s.mentee = e.mentee AND s.course = e.courseMentor.course
+            JOIN EnrollmentSchedule s ON s.enrollment.mentee = e.mentee AND s.enrollment.courseMentor.course = e.courseMentor.course
             WHERE e.mentee.id = :menteeId
               AND e.status = :enrollmentStatus
               AND s.date >= CURRENT_DATE
