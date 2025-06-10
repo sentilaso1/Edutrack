@@ -1,7 +1,6 @@
 package com.example.edutrack.timetables.repository;
 
 import com.example.edutrack.accounts.model.Mentee;
-import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
@@ -11,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
