@@ -25,7 +25,7 @@
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
 
     <style>
-        body{
+        body {
             background-color: #f4e7eb;
         }
 
@@ -188,66 +188,38 @@
             font-size: 0.8rem;
         }
 
-        .course-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .course-card-mini {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
-        }
-
-        .course-image {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
-
-        .course-content {
-            padding: 15px;
-        }
-
-        .course-price {
-            color: #ff6b35;
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-        }
-
-        .course-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .course-meta {
+        .single-row-scroll {
             display: flex;
-            justify-content: space-between;
-            color: #666;
-            font-size: 0.9rem;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 24px;
+            padding: 10px 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .rating {
-            display: flex;
-            align-items: center;
+        .single-row-scroll::-webkit-scrollbar {
+            display: none;
         }
 
-        .star {
-            color: #fbbf24;
-            margin-right: 2px;
+        .single-row-scroll > a.card {
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+            width: 300px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease;
         }
 
-        .section-title {
-            font-size: 1.5rem;
+        .single-row-scroll > a.card:hover {
+            transform: translateY(-4px);
+        }
+
+        .mentor-name{
             font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
+            margin-top: 10px;
         }
+
     </style>
 </head>
 
@@ -272,10 +244,18 @@
                 <div class="dashboard-card">
                     <div class="card-header">
                         <i class="fa fa-clock-o card-icon"></i>
-                        <h3 class="card-title">Upcoming Sessions</h3>
+                        <h3 class="card-title">Upcoming Session</h3>
                     </div>
-                    <div class="stat-number" th:text="${upcomingSessions ?: 2}">2</div>
-                    <div class="stat-label" th:text="'Next session: ' + (${nextSessionTime ?: 'Tomorrow, 10:00 AM'})">Next session: Tomorrow, 10:00 AM</div>
+
+                    <!-- Styled and emphasized session info -->
+                    <div class="stat-label">
+                        <span>Next session: </span>
+                        <span style="font-weight: bold; font-style: italic;"
+                              th:text="${nextSessionTime} ?: 'No upcoming session'">
+                            No upcoming session
+                        </span>
+                    </div>
+
                     <a href="#" class="view-link" th:href="@{/mentee/schedule}">
                         View schedule
                         <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
@@ -307,7 +287,7 @@
                     </div>
                     <div class="stat-number" th:text="${totalMentors ?: 3}">3</div>
                     <div class="stat-label">Active mentorship relationships</div>
-                    <a href="#" class="view-link" th:href="@{/mentee/mentors}">
+                    <a href="#" class="view-link" th:href="@{/mentors}">
                         Find more mentors
                         <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                     </a>
@@ -359,7 +339,8 @@
                                     Enrollment accepted
                                 </a>
                             </div>
-                            <div class="activity-description">Web Development with React - 8 sessions with Sarah M.</div>
+                            <div class="activity-description">Web Development with React - 8 sessions with Sarah M.
+                            </div>
                             <div class="activity-time">2 days ago</div>
                         </div>
                     </li>
@@ -417,74 +398,48 @@
                 </div>
             </div>
 
-            <!-- Recommended Courses -->
-            <div>
-                <h2 class="section-title">Recommended Courses for You</h2>
-                <div class="course-grid">
-                    <div class="course-card-mini" th:each="course : ${recommendedCourses ?: {}}">
-                        <img th:src="@{/assets/images/course-1.jpg}"
-                             th:alt="${course.name}"
-                             class="course-image"/>
-                        <div class="course-content">
-                            <div class="course-price" th:text="'$' + (${course.price ?: '29.28'})">$29.28</div>
-                            <div class="course-name" th:text="${course.name ?: 'Introduction to Java'}">Introduction to Java</div>
-                            <div class="course-meta">
-                                <span th:text="(${course.lessonsCount ?: 2}) + ' Lessons'">2 Lessons</span>
-                                <div class="rating">
-                                    <span th:each="i : ${#numbers.sequence(1, 4)}">⭐</span>
-                                    <span th:text="(${course.rating ?: '4.5'})">4.5</span>
+            <section class="section course" aria-labelledby="recommended-label">
+                <div class="container">
+                    <p class="title-sm section-subtitle text-center">Recommended For You</p>
+
+                    <h2 class="headline-md section-title text-center" id="recommended-label">
+                        <span>Courses You Might Like</span>
+                    </h2>
+
+                    <div class="single-row-scroll">
+                        <a th:each="courseMentor : ${recommendedCourses}" th:href="@{'/courses/' + ${courseMentor.courseMentorId}}"
+                           class="card course-card">
+                            <figure class="card-banner">
+                                <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
+                                     class="img-cover" alt="Mentor Avatar"/>
+                            </figure>
+                            <div class="card-content">
+                                <div class="wrapper">
+                                    <p>Price</p>
+                                    <div class="rating-wrapper">
+                                        <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" alt="star"/>
+                                    </div>
                                 </div>
+                                <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course Title</h3>
+                                <div class="card-meta wrapper">
+                                    <p class="title-sm">
+                                        <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt=""/>
+                                        <span th:text="${courseMentor.studentCount + ' Enrollments'}">0 Enrollments</span>
+                                    </p>
+                                </div>
+                                <p class="title-sm mentor-name">
+                                    <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor Name</span>
+                                </p>
                             </div>
-                        </div>
+                        </a>
                     </div>
 
-                    <!-- Default courses if no data -->
-                    <div class="course-card-mini" th:if="${#lists.isEmpty(recommendedCourses ?: {})}">
-                        <img th:src="@{/assets/images/course-1.jpg}" alt="Introduction to Java" class="course-image"/>
-                        <div class="course-content">
-                            <div class="course-price">$29.28</div>
-                            <div class="course-name">Introduction to Java</div>
-                            <div class="course-meta">
-                                <span>2 Lessons</span>
-                                <div class="rating">
-                                    <span>⭐⭐⭐⭐</span>
-                                    <span>4.5</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="course-card-mini" th:if="${#lists.isEmpty(recommendedCourses ?: {})}">
-                        <img th:src="@{/assets/images/course-2.jpg}" alt="Web Development with React" class="course-image"/>
-                        <div class="course-content">
-                            <div class="course-price">$35.50</div>
-                            <div class="course-name">Web Development with React</div>
-                            <div class="course-meta">
-                                <span>5 Lessons</span>
-                                <div class="rating">
-                                    <span>⭐⭐⭐⭐⭐</span>
-                                    <span>4.8</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="course-card-mini" th:if="${#lists.isEmpty(recommendedCourses ?: {})}">
-                        <img th:src="@{/assets/images/course-3.jpg}" alt="Machine Learning Basics" class="course-image"/>
-                        <div class="course-content">
-                            <div class="course-price">$42.00</div>
-                            <div class="course-name">Machine Learning Basics</div>
-                            <div class="course-meta">
-                                <span>8 Lessons</span>
-                                <div class="rating">
-                                    <span>⭐⭐⭐⭐</span>
-                                    <span>4.3</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="view-more-wrapper text-center" style="margin-top: 30px;">
+                        <a th:href="@{/courses}" class="btn btn-primary">View More</a>
                     </div>
                 </div>
-            </div>
+            </section>
+
         </div>
     </section>
 </main>

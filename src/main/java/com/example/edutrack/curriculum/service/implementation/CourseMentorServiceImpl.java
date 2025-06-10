@@ -10,6 +10,8 @@ import com.example.edutrack.curriculum.repository.ApplicantsRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
+import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseMentorServiceImpl implements CourseMentorService {
@@ -27,15 +30,17 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     private final TagRepository tagRepository;
     private final MentorRepository mentorRepository;
     private final EnrollmentServiceImpl enrollmentServiceImpl;
+    private final EnrollmentRepository enrollmentRepository;
 
     @Autowired
-    public CourseMentorServiceImpl(CourseMentorRepository courseMentorRepository, ApplicantsRepository applicantsRepository, MenteeRepository menteeRepository, TagRepository tagRepository, MentorRepository mentorRepository, EnrollmentServiceImpl enrollmentServiceImpl) {
+    public CourseMentorServiceImpl(CourseMentorRepository courseMentorRepository, ApplicantsRepository applicantsRepository, MenteeRepository menteeRepository, TagRepository tagRepository, MentorRepository mentorRepository, EnrollmentServiceImpl enrollmentServiceImpl, EnrollmentRepository enrollmentRepository) {
         this.courseMentorRepository = courseMentorRepository;
         this.applicantsRepository = applicantsRepository;
         this.menteeRepository = menteeRepository;
         this.tagRepository = tagRepository;
         this.mentorRepository = mentorRepository;
         this.enrollmentServiceImpl = enrollmentServiceImpl;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     @Override
@@ -119,39 +124,48 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         return courseMentorRepository.findByTagsMatchingInterests(interestKeywords, pageable);
     }
 
+
+    private List<CourseMentor> getRecommendationsByTags(
+            Set<String> tagTitles, UUID menteeId, int limit
+    ) {
+        if (tagTitles.isEmpty()) return Collections.emptyList();
+
+        List<CourseMentor> matches = courseMentorRepository
+                .findRelatedByTagsAndNotEnrolled(new ArrayList<>(tagTitles), menteeId, PageRequest.of(0, limit));
+
+        if (matches.size() < limit) {
+            int remaining = limit - matches.size();
+            List<CourseMentor> fallback = enrollmentServiceImpl.getPopularCoursesForGuest(remaining);
+
+            Set<CourseMentor> combined = new LinkedHashSet<>(matches);
+            combined.addAll(fallback);
+            matches = new ArrayList<>(combined).subList(0, Math.min(limit, combined.size()));
+        }
+
+        return matches;
+    }
+
+
     @Override
-    public List<CourseMentor> getRelatedCoursesByTags(UUID courseId, UUID menteeId, int limit) {
-        List<Tag> tagListByCourseMentorId = tagRepository.findByCourseId(courseId);
-
-        if (tagListByCourseMentorId.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        tagListByCourseMentorId.forEach(tag -> System.out.println(" - " + tag.getTitle()));
-
-        List<String> tagTitles = tagListByCourseMentorId.stream()
+    public List<CourseMentor> getRelatedCoursesByTags(UUID courseId,UUID menteeId, int limit) {
+        Set<String> tagTitles = tagRepository.findByCourseId(courseId).stream()
                 .map(tag -> tag.getTitle().toLowerCase())
-                .toList();
+                .collect(Collectors.toSet());
 
-        System.out.println("[DEBUG] Tag titles for search: " + tagTitles);
-        System.out.println("[DEBUG] Mentee ID to exclude enrolled courses: " + menteeId);
+        return getRecommendationsByTags(tagTitles, menteeId, limit);
+    }
 
-        Pageable pageable = PageRequest.of(0, limit);
-
-        List<CourseMentor> result = courseMentorRepository.findRelatedByTagsAndNotEnrolled(tagTitles, menteeId, pageable);
-
-        System.out.println("[DEBUG] Related course mentors found: " + result.size());
-        result.forEach(cm -> System.out.println(" - Course: " + cm.getCourse().getName() + ", Mentor: " + cm.getMentor().getFullName()));
-        if (result.size() < limit) {
-            int remaining = Math.max(limit - result.size(), 0);
-            List<CourseMentor> popularFallback = enrollmentServiceImpl.getPopularCoursesForGuest(remaining);
-
-            Set<CourseMentor> combined = new LinkedHashSet<>(result);
-            combined.addAll(popularFallback);
-            return new ArrayList<>(combined).subList(0, Math.min(limit, combined.size()));
+    @Override
+    public List<CourseMentor> getRecommendedCourseMentors(UUID menteeId, int limit) {
+        List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+        Set<String> tagTitles = new HashSet<>();
+        for (Enrollment e : enrollments) {
+            List<Tag> tags = tagRepository.findByCourseId(e.getCourseMentor().getCourse().getId());
+            for (Tag tag : tags) {
+                tagTitles.add(tag.getTitle().toLowerCase());
+            }
         }
-
-        return result;
+        return getRecommendationsByTags(tagTitles, menteeId, limit);
     }
 
     @Override
