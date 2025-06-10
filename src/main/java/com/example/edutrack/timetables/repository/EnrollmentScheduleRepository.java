@@ -10,10 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 
 @Repository
 public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
@@ -44,7 +41,5 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     List<EnrollmentSchedule> findAllByMenteeId(@Param("menteeId") UUID menteeId);
 
     @Query("SELECT COUNT(s) FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
-    int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);
-
-
+    int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);                      
 }
