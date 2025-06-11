@@ -1,0 +1,168 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Wallet</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background-color: var(--bg-primary);
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5em;
+            padding: 1em;
+        }
+
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .header-container > h1 {
+            font-size: 2.5em;
+            font-weight: bolder;
+        }
+
+        .header-container > p {
+            font-size: 1em;
+        }
+
+        .horizontal-flex {
+            display: flex;
+            gap: 2em;
+        }
+
+        aside.sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            width: 25%;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 2em;
+            width: 75%;
+        }
+
+        .wallet-box {
+            display: flex;
+            justify-content: space-between;
+            gap: 2em;
+        }
+
+        .wallet-balance, .wallet-chart {
+            flex: 1;
+        }
+
+        .wallet-balance {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .wallet-balance .wallet-balance-number {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .history-section {
+            width: 100%;
+        }
+
+        .history-section header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.5em;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .view-more {
+            text-align: right;
+            margin-top: 0.5em;
+        }
+    </style>
+</head>
+<body class="viewport">
+<div class="main-container">
+    <header class="header-container">
+        <h1>My Wallet</h1>
+        <p>User ID: <span th:text="${wallet != null ? wallet.user.id : '<null>'}"></span></p>
+    </header>
+
+    <div class="horizontal-flex">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div>Account Details</div>
+            <a th:href="@{/wallet/history}">Transaction History</a>
+            <a th:href="@{/wallet/recharge}">Recharge Neurons</a>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Balance and Chart -->
+            <div class="wallet-box">
+                <div class="wallet-balance">
+                    <h3>Wallet Balance</h3>
+                    <div class="wallet-balance-number">
+                        <p th:text="${wallet != null ? wallet.balance + ' Neurons' : '0 Neurons'}">250 Neurons</p>
+                    </div>
+                </div>
+                <div class="wallet-chart">
+                    <h3>Wallet Change</h3>
+                    <canvas id="walletChart"></canvas> <!-- Placeholder -->
+                </div>
+            </div>
+
+            <!-- Recent History -->
+            <div class="history-section">
+                <header>
+                    <h3>Recent History</h3>
+                    <a th:href="@{/wallet/history}">view more</a>
+                </header>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Item</th>
+                        <th>Change</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="transaction : ${transactions}">
+                        <td th:text="${transaction.transactionDate}"></td>
+                        <td th:text="${transaction.transactionInfo}">Recharge</td>
+                        <td th:text="${transaction.transactionAmount} + ' Neurons'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>
