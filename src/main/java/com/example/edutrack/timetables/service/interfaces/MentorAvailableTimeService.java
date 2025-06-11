@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.service.interfaces;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Day;
@@ -12,4 +13,6 @@ import java.util.List;
 @Service
 public interface MentorAvailableTimeService {
     public void insertWorkingSchedule(List<MentorAvailableTime> schedule);
+
+    List<MentorAvailableTime> findByMentorId(Mentor mentor);
 }
