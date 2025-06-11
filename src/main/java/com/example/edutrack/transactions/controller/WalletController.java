@@ -38,6 +38,14 @@ public class WalletController {
             model.addAttribute("error", "Missing wallet information");
         } else {
             model.addAttribute("wallet", wallet.get());
+
+            System.out.println(
+
+                    commonTransactionRepository.findAllByUserIdLimit(
+                            user.getId(),
+                            RECENT_TRANSACTION_LIMIT
+                    )
+            );
             model.addAttribute(
                     "transactions",
                     commonTransactionRepository.findAllByUserIdLimit(

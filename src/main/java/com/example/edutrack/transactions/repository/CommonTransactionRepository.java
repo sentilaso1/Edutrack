@@ -8,6 +8,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import org.springframework.stereotype.Repository;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Repository
@@ -23,34 +24,40 @@ public class CommonTransactionRepository {
     };
 
     private Transaction mapToTransaction(Object[] row) {
+        System.out.println(Arrays.toString(row));
         Transaction transaction = new Transaction();
-        transaction.setId(UUID.fromString((String) row[0]));
-        transaction.setInfo((String) row[1]);
-        transaction.setAmount((Double) row[2]);
-        transaction.setStatus(Transaction.TransactionStatus.valueOf((String) row[3]));
+
+        transaction.setId(UUID.fromString(String.valueOf(row[0])));
+        transaction.setInfo(String.valueOf(row[1]));
+        transaction.setAmount(((Number) row[2]).doubleValue());
+        transaction.setStatus(Transaction.TransactionStatus.valueOf(String.valueOf(row[3])));
         transaction.setUpdatedDate((java.util.Date) row[4]);
+
         return transaction;
     }
 
     private VnpayTransaction mapToVnpayTransaction(Object[] row) {
+        System.out.println(Arrays.toString(row));
         VnpayTransaction vnpayTransaction = new VnpayTransaction();
-        vnpayTransaction.setTxnRef(UUID.fromString((String) row[0]));
-        vnpayTransaction.setOrderInfo((String) row[1]);
-        vnpayTransaction.setAmount((Long) row[2]);
+
+        vnpayTransaction.setTxnRef(UUID.fromString(String.valueOf(row[0])));
+        vnpayTransaction.setOrderInfo(String.valueOf(row[1]));
+        vnpayTransaction.setAmount(((Number) row[2]).longValue());
         vnpayTransaction.setTransactionStatus((String) row[3]);
         vnpayTransaction.setPayDate((String) row[4]);
+
         return vnpayTransaction;
     }
 
-    private String getTransactionSql(boolean isVnpay, boolean filterByUserId, int limit) {
+    private String getTransactionSql(boolean isVnpay, UUID userId, int limit) {
         String sql;
 
         // TODO: Refactor to use a common method for both transaction types
         if (!isVnpay) {
-            if (!filterByUserId) {
+            if (userId == null) {
                 sql = """
                             SELECT
-                                id,
+                                BIN_TO_UUID(id) AS id,
                                 info,
                                 amount,
                                 status,
@@ -63,46 +70,48 @@ public class CommonTransactionRepository {
             } else {
                 sql = """
                             SELECT
-                                id,
+                                BIN_TO_UUID(id) AS id,
                                 info,
                                 amount,
                                 status,
                                 updated_date AS date
                             FROM transactions
                             WHERE updated_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-                            AND wallet_id = :userId
+                            AND wallet_id = UUID_TO_BIN(:userId)
                             ORDER BY date DESC
                             %s
                         """;
+                sql = sql.replace(":userId", "'" + userId + "'");
             }
         } else {
-            if (!filterByUserId) {
+            if (userId == null) {
                 sql = """
                             SELECT
-                                txn_ref AS id,
+                                BIN_TO_UUID(txn_ref) AS id,
                                 order_info AS info,
-                                CAST((amount / 100) AS DOUBLE) AS amount,
+                                (amount / 100) AS amount,
                                 IFNULL(transaction_status, 'pending') AS status,
                                 IFNULL(pay_date, created_date) AS date
                             FROM vnpay_transactions
-                            WHERE IFNULL(pay_date, created_date) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                            WHERE IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
                             ORDER BY date DESC
                             %s
                         """;
             } else {
                 sql = """
                             SELECT
-                                txn_ref AS id,
+                                BIN_TO_UUID(txn_ref) AS id,
                                 order_info AS info,
-                                CAST((amount / 100) AS DOUBLE) AS amount,
+                                (amount / 100) AS amount,
                                 IFNULL(transaction_status, 'pending') AS status,
                                 IFNULL(pay_date, created_date) AS date
                             FROM vnpay_transactions
-                            WHERE IFNULL(pay_date, created_date) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-                            AND user_id = :userId
+                            WHERE IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                            AND user_id = UUID_TO_BIN(:userId)
                             ORDER BY date DESC
                             %s
                         """;
+                sql = sql.replace(":userId", "'" + userId + "'");
             }
         }
 
@@ -139,34 +148,28 @@ public class CommonTransactionRepository {
     }
 
     private List<CommonTransaction> getAllTransactions(UUID userId, int limit) {
-        String transactionSql = getTransactionSql(false, true, limit / 2);
-        String vnpayTransactionSql = getTransactionSql(true, true, limit / 2);
+        String transactionSql = getTransactionSql(false, userId, limit / 2);
+        String vnpayTransactionSql = getTransactionSql(true, userId, limit / 2);
 
         Query transactionQuery = entityManager.createNativeQuery(transactionSql);
-        transactionQuery.setParameter("userId", userId);
-
         Query vnpayTransactionQuery = entityManager.createNativeQuery(vnpayTransactionSql);
-        vnpayTransactionQuery.setParameter("userId", userId);
 
         return executeQuery(transactionQuery, vnpayTransactionQuery);
     }
 
     private List<CommonTransaction> getAllTransactions(UUID userId) {
-        String transactionSql = getTransactionSql(false, true, 0);
-        String vnpayTransactionSql = getTransactionSql(true, true, 0);
+        String transactionSql = getTransactionSql(false, userId, 0);
+        String vnpayTransactionSql = getTransactionSql(true, userId, 0);
 
         Query transactionQuery = entityManager.createNativeQuery(transactionSql);
-        transactionQuery.setParameter("userId", userId);
-
         Query vnpayTransactionQuery = entityManager.createNativeQuery(vnpayTransactionSql);
-        vnpayTransactionQuery.setParameter("userId", userId);
 
         return executeQuery(transactionQuery, vnpayTransactionQuery);
     }
 
     private List<CommonTransaction> getAllTransactions() {
-        String transactionSql = getTransactionSql(false, false, 0);
-        String vnpayTransactionSql = getTransactionSql(true, false, 0);
+        String transactionSql = getTransactionSql(false, null, 0);
+        String vnpayTransactionSql = getTransactionSql(true, null, 0);
 
         Query transactionQuery = entityManager.createNativeQuery(transactionSql);
         Query vnpayTransactionQuery = entityManager.createNativeQuery(vnpayTransactionSql);

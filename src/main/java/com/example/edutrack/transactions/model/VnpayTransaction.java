@@ -18,6 +18,7 @@ public class VnpayTransaction implements CommonTransaction {
 
     public static final int TRANSACTION_EXPIRATION_TIME = 15;  // minutes
     public static final int FRACTION_SHIFT = 100;
+    public static final int POINT_SHIFT = 1000;
     public static final String ORDER_TYPE_OTHER = "other";
 
     public static final String COMMAND_PAY = "pay";
@@ -94,6 +95,7 @@ public class VnpayTransaction implements CommonTransaction {
     private String transactionStatus;
 
     public static boolean isValidAmount(Long amount) {
+        amount /= FRACTION_SHIFT;
         return amount == AMOUNT_100 || amount == AMOUNT_200 ||
                 amount == AMOUNT_500 || amount == AMOUNT_1000 ||
                 amount == AMOUNT_2000 || amount == AMOUNT_5000;
@@ -287,7 +289,7 @@ public class VnpayTransaction implements CommonTransaction {
 
     @Override
     public Double getTransactionAmount() {
-        return (double) getAmount() / FRACTION_SHIFT;
+        return (double) getAmount() / FRACTION_SHIFT / POINT_SHIFT;
     }
 
     public String getTransactionStatus() {
