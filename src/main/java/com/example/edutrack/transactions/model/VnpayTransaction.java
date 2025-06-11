@@ -13,6 +13,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "vnpay_transactions")
 public class VnpayTransaction implements CommonTransaction {
+    public static final String TIME_ZONE = "Etc/GMT+7";
+    public static final String TIME_FORMAT = "yyyyMMddHHmmss";
+
     public static final int TRANSACTION_EXPIRATION_TIME = 15;  // minutes
     public static final int FRACTION_SHIFT = 100;
     public static final String ORDER_TYPE_OTHER = "other";
@@ -29,9 +32,9 @@ public class VnpayTransaction implements CommonTransaction {
     public static final long AMOUNT_5000 = 5000000L;
 
     @Transient
-    private final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+    private final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE));
     @Transient
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
 
     private String version = "2.1.0";
     private String locale = "vn";
@@ -139,14 +142,6 @@ public class VnpayTransaction implements CommonTransaction {
     public void setCurrCode(String currCode) {
         this.currCode = currCode;
     }
-
-//    public String getBankCode() {
-//        return bankCode;
-//    }
-//
-//    public void setBankCode(String bankCode) {
-//        this.bankCode = bankCode;
-//    }
 
     public UUID getTxnRef() {
         return txnRef;
