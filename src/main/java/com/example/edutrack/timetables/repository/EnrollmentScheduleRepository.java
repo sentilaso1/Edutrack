@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
@@ -36,5 +38,13 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
                            @Param("slot") Slot slot,
                            @Param("day") Day day,
                            @Param("date") LocalDate date);
+
+    // Author: Nguyen Thanh Vinh
+    @Query("SELECT s FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
+    List<EnrollmentSchedule> findAllByMenteeId(@Param("menteeId") UUID menteeId);
+
+    // Author: Nguyen Thanh Vinh
+    @Query("SELECT COUNT(s) FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
+    int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);
 
 }
