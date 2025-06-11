@@ -1,17 +1,86 @@
 package com.example.edutrack.accounts.controller;
 
 
+import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
+import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Controller(value="mentor")
 public class MentorController {
+    private final EnrollmentScheduleService enrollmentScheduleService;
+
+    public MentorController(EnrollmentScheduleService enrollmentScheduleService) {
+        this.enrollmentScheduleService = enrollmentScheduleService;
+    }
+
     @GetMapping("/mentor")
     public String mentor(Model model) {
         return "mentor-dashboard";
     }
+
+    @GetMapping("/mentor/schedule")
+    public String viewWeek(@RequestParam(value = "weekStart", required = false) LocalDate weekStart,
+                           HttpSession session,
+                           Model model) {
+
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+
+        if (weekStart == null) {
+            weekStart = LocalDate.now().with(DayOfWeek.MONDAY);
+        }
+        LocalDate weekEnd = weekStart.plusDays(6);
+
+        List<EnrollmentSchedule> schedules = enrollmentScheduleService.findByMentorAndDateBetween(mentor, weekStart, weekEnd);
+
+        for (EnrollmentSchedule schedule : schedules) {
+            System.out.println("Course: " + schedule.getEnrollment().getCourseMentor().getCourse().getName());
+            System.out.println("Mentee: " + schedule.getEnrollment().getMentee().getFullName());
+            System.out.println("Date: " + schedule.getDate());
+            System.out.println("Slot: " + schedule.getSlot().name());
+        }
+
+        model.addAttribute("schedules", schedules);
+        model.addAttribute("startDate", weekStart);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        model.addAttribute("startDateFormatted", weekStart.format(dateFormatter));
+        model.addAttribute("endDateFormatted", weekEnd.format(dateFormatter));
+
+        List<LocalDate> daysOfWeek = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            daysOfWeek.add(weekStart.plusDays(i));
+        }
+
+        DateTimeFormatter dayLabelFormatter = DateTimeFormatter.ofPattern("EEE dd/MM", Locale.ENGLISH);
+        List<String> dayLabels = daysOfWeek.stream()
+                .map(d -> d.format(dayLabelFormatter))
+                .toList();
+
+        model.addAttribute("dayLabels", dayLabels);
+        model.addAttribute("previousWeek", weekStart.minusWeeks(1));
+        model.addAttribute("nextWeek", weekStart.plusWeeks(1));
+        model.addAttribute("slots", Slot.values());
+
+        return "mentor_calendar";
+    }
+
 
 }

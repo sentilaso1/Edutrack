@@ -1,8 +1,10 @@
 package com.example.edutrack.timetables.service.implementation;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Day;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
@@ -182,6 +184,16 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             }
         }
         return result;
+    }
+
+    @Override
+    public List<EnrollmentSchedule> findAll() {
+        return enrollmentScheduleRepository.findAll();
+    }
+
+    @Override
+    public List<EnrollmentSchedule> findByMentorAndDateBetween(Mentor mentor, LocalDate weekStart, LocalDate weekEnd) {
+        return enrollmentScheduleRepository.findByMentorAndDateBetween(mentor, weekStart, weekEnd);
     }
 
 }

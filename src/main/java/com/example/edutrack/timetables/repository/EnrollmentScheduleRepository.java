@@ -48,6 +48,17 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);
 
     @Query("""
+                SELECT s FROM EnrollmentSchedule s
+                WHERE s.date BETWEEN :startDate AND :endDate
+                AND s.enrollment.courseMentor.mentor = :mentor
+            """)
+    List<EnrollmentSchedule> findByMentorAndDateBetween(
+            @Param("mentor") Mentor mentor,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    @Query("""
                 SELECT COUNT(s) FROM EnrollmentSchedule s
                 WHERE s.enrollment.mentee.id = :menteeId AND s.attendance = :status
             """)
@@ -59,4 +70,3 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
             """)
     int countUnfinishedSlotsByMentee(@Param("menteeId") UUID menteeId, @Param("status") EnrollmentSchedule.Attendance status);
 }
-
