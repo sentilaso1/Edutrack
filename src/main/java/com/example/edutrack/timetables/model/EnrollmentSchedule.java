@@ -3,8 +3,6 @@ package com.example.edutrack.timetables.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.Date;
-
 @Entity
 @Table(name = "enrollment_schedule")
 public class EnrollmentSchedule {
@@ -38,6 +36,7 @@ public class EnrollmentSchedule {
     @Column(name = "score")
     private Integer score;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "attendance")
     private Attendance attendance = Attendance.NOT_YET;
 
