@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.service.implementation;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
@@ -19,5 +20,10 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
     @Override
     public void insertWorkingSchedule(List<MentorAvailableTime> schedule) {
         mentorAvailableTimeRepository.saveAll(schedule);
+    }
+
+    @Override
+    public List<MentorAvailableTime> findByMentorId(Mentor mentor) {
+        return mentorAvailableTimeRepository.findByMentorId(mentor.getId());
     }
 }

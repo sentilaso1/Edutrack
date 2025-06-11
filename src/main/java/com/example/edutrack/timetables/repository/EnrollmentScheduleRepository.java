@@ -1,8 +1,7 @@
 package com.example.edutrack.timetables.repository;
 
 import com.example.edutrack.accounts.model.Mentee;
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
@@ -17,11 +16,11 @@ import java.time.LocalDate;
 public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
     @Query("SELECT COUNT(e) > 0 FROM Enrollment e " +
            "JOIN EnrollmentSchedule es ON es.enrollment = e " +
-           "WHERE e.courseMentor = :courseMentor " +
+           "WHERE e.courseMentor.mentor = :mentor " +
            "AND es.slot = :slot " +
            "AND FUNCTION('WEEKDAY', es.date) = :day " +
            "AND es.date = :date")
-    boolean isTakenSlot(@Param("courseMentor") CourseMentor courseMentor,
+    boolean isTakenSlot(@Param("mentor") Mentor mentor,
                         @Param("slot") Slot slot,
                         @Param("day") Day day,
                         @Param("date") LocalDate date);
