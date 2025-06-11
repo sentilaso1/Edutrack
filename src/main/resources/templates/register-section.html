@@ -841,7 +841,7 @@
                                                         <input type="number" name="totalSlot" placeholder="Enter number of Slots">
                                                         <span>Start Time:
                                                             <p th:text="${startTime}"></p>
-                                                        <button type="submit">Check Start Date</button></span>
+                                                        <button type="submit" name="action" value="checkStartDate">Check Start Date</button></span>
 
                                                     </div>
                                                 </div>
@@ -852,7 +852,7 @@
                             </div>
                             <!-- Submit Section -->
                             <div class="submit-section">
-                                <button type="submit" class="submit-btn" id="submitBtn">
+                                <button type="submit" class="submit-btn" id="submitBtn" name="action" value="submitForm">
                                     Register Now
                                 </button>
                             </div>
