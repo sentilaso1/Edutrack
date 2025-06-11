@@ -6,7 +6,7 @@ CREATE TABLE users (
     phone_number VARCHAR(20),
     avatar LONGBLOB,
     bio TEXT,
-    gender ENUM('male', 'female', 'other') NOT NULL,
+    gender ENUM('male', 'female', 'other', 'unknown') NOT NULL,
     birth_date DATETIME,
     reset_token BINARY(16),
     created_date DATETIME NOT NULL
