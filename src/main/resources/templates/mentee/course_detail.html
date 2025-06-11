@@ -22,7 +22,7 @@
                     <div class="mentor-details" style="margin-bottom: 1em">
                         <h3 th:text="${'Mentor: ' + mentor.name}">Tên Mentor</h3>
                     </div>
-                    <a th:href="@{'/courses/register'}" class="register-btn">
+                    <a th:href="@{/courses/register/{cid}(cid=${courseMentor.id})}" class="register-btn">
                         Enroll
                     </a>
                     <p style="padding-top: 1em"><strong>29,878</strong> already enrolled</p>
