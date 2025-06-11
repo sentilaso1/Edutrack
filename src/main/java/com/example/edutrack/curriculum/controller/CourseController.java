@@ -111,17 +111,10 @@ public class CourseController {
             throw new RuntimeException("Course mentor not found");
         }
         Course course = courseMentor.getCourse();
-        Mentor mentor = courseMentor.getMentor();
         List<Tag> tagList = tagServiceImpl.findTagsByCourseId(course.getId());
 
-        MentorDTO mentorDTO = null;
-        if (mentor != null) {
-            mentorDTO = new MentorDTO(mentor.getId(), mentor.getFullName(), mentor.getAvatar(), mentor.getExpertise());
-        }
-
-        model.addAttribute("course", course);
+        model.addAttribute("course", courseMentor);
         model.addAttribute("tagList", tagList);
-        model.addAttribute("mentor", mentorDTO);
 
         model.addAttribute("courseMentor", courseMentor);
         return "/mentee/course_detail";

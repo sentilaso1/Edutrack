@@ -28,8 +28,12 @@
     -->
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <style>
-        * {
+        html, body {
             overflow-x: hidden;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         .course-card {
@@ -332,7 +336,7 @@
                 </figure>
 
                 <div class="about-content">
-                    <p class="title-sm section-subtitle" id="about-label">About Youdemi</p>
+                    <p class="title-sm section-subtitle" id="about-label">About Edutrack</p>
 
                     <h2 class="headline-md section-title">
                         We Provide The Best Online <span class="span has-after">Education</span>
@@ -577,8 +581,8 @@
 
             <div class="footer-brand">
 
-                <a th:href="@{/}" class="logo">
-                    <img th:src="@{/assets/images/logo-footer.svg}" width="145" height="27" alt="Youdemi home">
+                <a th:href="@{/home}" class="logo">
+                    <img th:src="@{/assets/images/logo-footer.svg}" width="145" height="27" alt="Edutrack home">
                 </a>
 
                 <p class="title-sm footer-text">
@@ -679,7 +683,7 @@
     <div class="footer-bottom">
         <div class="container">
             <p class="copyright">
-                © Copyright 2022 | Youdemi Template | All Rights Reserved by codewithsadee
+                © Copyright 2022 | Edutrack Template | All Rights Reserved by codewithsadee
             </p>
         </div>
     </div>

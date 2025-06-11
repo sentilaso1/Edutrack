@@ -9,7 +9,37 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "transactions")
-public class Transaction {
+public class Transaction implements CommonTransaction {
+    @Override
+    public UUID getTransactionId() {
+        return getId();
+    }
+
+    @Override
+    public String getTransactionInfo() {
+        return getInfo();
+    }
+
+    @Override
+    public Double getTransactionAmount() {
+        return getAmount();
+    }
+
+    @Override
+    public String getTransactionStatus() {
+        return getStatus().toString();
+    }
+
+    @Override
+    public Date getTransactionDate() {
+        return getUpdatedDate();
+    }
+
+    @Override
+    public UUID getUserId() {
+        return getWallet().getUser().getId();
+    }
+
     public enum TransactionStatus {
         PENDING, COMPLETED, FAILED;
 
@@ -22,6 +52,9 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "info", nullable = false)
+    private String info;
 
     @Column(name = "amount", nullable = false)
     private Double amount;
@@ -56,6 +89,14 @@ public class Transaction {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
     }
 
     public Double getAmount() {
@@ -102,6 +143,7 @@ public class Transaction {
     public String toString() {
         return "Transaction{" +
                 "id=" + id +
+                ", info='" + info + '\'' +
                 ", amount=" + amount +
                 ", status='" + status + '\'' +
                 ", createdDate=" + createdDate +

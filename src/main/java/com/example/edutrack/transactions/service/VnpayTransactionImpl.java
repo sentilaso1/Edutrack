@@ -76,6 +76,10 @@ public class VnpayTransactionImpl implements VnpayTransactionService {
         }
 
         VnpayTransaction transaction = transactionOptional.get();
+        if (transaction.isDone()) {
+            return Optional.of(transaction);
+        }
+
         transaction.setBankCode(params.get("vnp_BankCode"));
         transaction.setBankTranNo(params.get("vnp_BankTranNo"));
         transaction.setCardType(params.get("vnp_CardType"));
@@ -83,6 +87,7 @@ public class VnpayTransactionImpl implements VnpayTransactionService {
         transaction.setPayDate(params.get("vnp_PayDate"));
         transaction.setResponseCode(params.get("vnp_ResponseCode"));
         transaction.setTransactionStatus(params.get("vnp_TransactionStatus"));
+        transaction.setDone(true);
 
         return Optional.of(vnpayTransactionRepository.save(transaction));
     }
