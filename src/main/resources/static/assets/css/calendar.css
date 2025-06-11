@@ -1,0 +1,103 @@
+.graph h3 {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 1em 0 1em;
+}
+
+.week-nav button {
+    background-color: #fefefe;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #f84e4e;
+    transition: all 0.2s ease-in-out;
+}
+
+.week-nav button:hover {
+    background-color: #f0e6ff;
+}
+
+.calendar {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 8px;
+    text-align: center;
+    background: #f1f1fb;
+    border-radius: 10px;
+}
+
+.calendar thead th {
+    color: #a08fa0;
+    font-size: 17px;
+    padding-bottom: 8px;
+    flex-wrap: nowrap;
+}
+
+.calendar td, .calendar th {
+    vertical-align: top;
+    padding: 0;
+}
+
+.calendar td {
+    background-color: #fff;
+    border-radius: 12px;
+    height: 100px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: background 0.3s ease;
+}
+
+.calendar td:hover {
+    background-color: rgba(248, 78, 78, 0.12);
+}
+
+.slot-label {
+    font-weight: bold;
+    color: #f84e4e;
+    margin: 0.5em;
+    font-size: 1em;
+}
+
+.slot-card {
+    background-color: rgba(248, 78, 78, 0.2);
+    border-left: 4px solid #f84e4e;
+    margin: 6px 6px 0 6px;
+    padding: 6px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 12px;
+    color: #333;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.slot-card p {
+    margin: 2px 0;
+}
+
+input[type="date"] {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fffafc;
+    color: #333;
+    font-family: 'Segoe UI', sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color:#f84e4e;
+}
+

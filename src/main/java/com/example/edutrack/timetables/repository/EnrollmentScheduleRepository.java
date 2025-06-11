@@ -1,7 +1,7 @@
 package com.example.edutrack.timetables.repository;
 
 import com.example.edutrack.accounts.model.Mentee;
-import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -17,11 +18,11 @@ import java.util.UUID;
 public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
     @Query("SELECT COUNT(e) > 0 FROM Enrollment e " +
            "JOIN EnrollmentSchedule es ON es.enrollment = e " +
-           "WHERE e.courseMentor = :courseMentor " +
+           "WHERE e.courseMentor.mentor = :mentor " +
            "AND es.slot = :slot " +
            "AND FUNCTION('WEEKDAY', es.date) = :day " +
            "AND es.date = :date")
-    boolean isTakenSlot(@Param("courseMentor") CourseMentor courseMentor,
+    boolean isTakenSlot(@Param("mentor") Mentor mentor,
                         @Param("slot") Slot slot,
                         @Param("day") Day day,
                         @Param("date") LocalDate date);
@@ -38,9 +39,34 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
                            @Param("day") Day day,
                            @Param("date") LocalDate date);
 
+    // Author: Nguyen Thanh Vinh
     @Query("SELECT s FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
     List<EnrollmentSchedule> findAllByMenteeId(@Param("menteeId") UUID menteeId);
 
+    // Author: Nguyen Thanh Vinh
     @Query("SELECT COUNT(s) FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
-    int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);                      
+    int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);
+
+    @Query("""
+                SELECT s FROM EnrollmentSchedule s
+                WHERE s.date BETWEEN :startDate AND :endDate
+                AND s.enrollment.courseMentor.mentor = :mentor
+            """)
+    List<EnrollmentSchedule> findByMentorAndDateBetween(
+            @Param("mentor") Mentor mentor,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    @Query("""
+                SELECT COUNT(s) FROM EnrollmentSchedule s
+                WHERE s.enrollment.mentee.id = :menteeId AND s.attendance = :status
+            """)
+    int countAttendedSlotsByMenteeId(@Param("menteeId") UUID menteeId, @Param("status") EnrollmentSchedule.Attendance status);
+
+    @Query("""
+                SELECT COUNT(s) FROM EnrollmentSchedule s
+                WHERE s.enrollment.mentee.id = :menteeId AND s.attendance != :status
+            """)
+    int countUnfinishedSlotsByMentee(@Param("menteeId") UUID menteeId, @Param("status") EnrollmentSchedule.Attendance status);
 }

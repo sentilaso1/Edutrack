@@ -63,9 +63,14 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public int getLearningProgress(UUID menteeId) {
         int total = enrollmentScheduleRepository.countTotalSlotsByMenteeId(menteeId);
-        int completed = 10;
+        int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT);
         if (total == 0) return 0;
         return (int) Math.round((completed * 100.0) / total);
+    }
+
+    @Override
+    public boolean isAllCoursesCompleted(UUID menteeId) {
+        return enrollmentScheduleRepository.countUnfinishedSlotsByMentee(menteeId, EnrollmentSchedule.Attendance.PRESENT) == 0;
     }
 
 }

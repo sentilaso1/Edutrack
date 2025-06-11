@@ -497,7 +497,7 @@
                             </div>
                         </div>
 
-                        <form id="slotForm" method="post" action="/">
+                        <form id="slotForm" method="post" th:action="@{/courses/register/{cid}(cid=${courseMentor.id})}">
                             <!-- Personal Information -->
                             <div class="section">
                                 <h3>
@@ -511,24 +511,24 @@
                                     <div class="form-group">
                                         <label for="fullName">Full Name</label>
                                         <input type="text" id="fullName" name="fullName" required
-                                               placeholder="Enter your Full Name">
+                                               placeholder="Enter your Full Name" th:value="${param.fullName}">
                                     </div>
                                     <div class="form-group">
                                         <label for="email">Email</label>
                                         <input type="email" id="email" name="email" required
-                                               placeholder="example@email.com">
+                                               placeholder="example@email.com" th:value="${param.email}">
                                     </div>
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="phone">Phone Number</label>
-                                        <input type="tel" id="phone" name="phone" required placeholder="0123456789">
+                                        <input type="tel" id="phone" name="phone" th:value="${param.phone}" required placeholder="0123456789">
                                     </div>
                                     <div class="form-group">
                                         <label for="age">Age</label>
                                         <input type="number" id="age" name="age" min="16" max="65"
-                                               placeholder="Enter your Age">
+                                               placeholder="Enter your Age" th:value="${param.age}">
                                     </div>
                                 </div>
 
@@ -574,6 +574,9 @@
                                         </div>
                                     </div>
                                     <p><strong>Experience:</strong>None</p>
+                                </div>
+                                <div class="mentor_info" th:each="mentor : ${mentorAvailableTime}">
+                                    <p th:text="${mentor.id.day.name() + mentor.id.slot.name()}"></p>
                                 </div>
                             </div>
 
@@ -837,7 +840,8 @@
                                                     >
                                                         <input type="number" name="totalSlot" placeholder="Enter number of Slots">
                                                         <span>Start Time:
-                                                        <button type="submit">Check Start Date</button></span>
+                                                            <p th:text="${startTime}"></p>
+                                                        <button type="submit" name="action" value="checkStartDate">Check Start Date</button></span>
 
                                                     </div>
                                                 </div>
@@ -848,7 +852,7 @@
                             </div>
                             <!-- Submit Section -->
                             <div class="submit-section">
-                                <button type="submit" class="submit-btn" id="submitBtn">
+                                <button type="submit" class="submit-btn" id="submitBtn" name="action" value="submitForm">
                                     Register Now
                                 </button>
                             </div>

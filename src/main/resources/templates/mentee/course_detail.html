@@ -22,10 +22,10 @@
                     <div class="mentor-details" style="margin-bottom: 1em">
                         <h3 th:text="${'Mentor: ' + course.mentor.fullName}">Tên Mentor</h3>
                     </div>
-                    <a th:href="@{'/courses/register/' + ${course.mentor.id}}"  class="register-btn">
+                    <a th:href="@{/courses/register/{cid}(cid=${courseMentor.id})}" class="register-btn">
                         Enroll
                     </a>
-                    <p style="padding-top: 1em"><strong>29,878</strong> already enrolled</p>
+                    <p style="padding-top: 1em; padding-bottom: 1em"><strong>29,878</strong> already enrolled</p>
                 </div>
 
             </div>
@@ -70,7 +70,9 @@
                     <div class="skill">
                         <h2 id="skill">Subjects</h2>
                         <div class="tag_list">
-                            <div class="tag" th:each="tag : ${tagList}" th:text="'#' + ${tag.title}">Community Organizing</div>
+                            <div class="tag" th:each="tag : ${tagList}" th:text="'#' + ${tag.title}">Community
+                                Organizing
+                            </div>
                         </div>
                     </div>
                     <div class="learn">
@@ -87,17 +89,16 @@
             <h2>Mentor</h2>
             <div class="mentor_section">
                 <div id="mentor" class="mentor">
-                    <img th:src="@{/assets/img/em.png}"
-                         alt="Avatar"
+                    <img th:src="@{/mentors/{id}/avatar(id=${course.mentor.id})}"
                          class="mentor-avatar">
                     <div class="mentor-info">
-                        <h3 style="color: #7b7b8a;">Ten mentor</h3>
-                        <p>cac expertise o day</p>
+                        <h3 style="color: #7b7b8a;" th:text="${course.mentor.fullName}"></h3>
+                        <p th:text="${course.mentor.expertise}"></p>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em">
-                            <button class="follow-btn">Detail</button>
-<!--                            hien thi modal khi click schedule-->
-                            <button class="follow-btn">Schedule</button>
+                            <a th:href="@{'/mentors/' + ${course.mentor.id}}" class="follow-btn">Detail</a>
+                            <a th:href="@{'/courses/schedule/' + ${course.id}}" class="follow-btn">Schedule</a>
                         </div>
+
 
                     </div>
                     <div class="stats">
@@ -154,6 +155,56 @@
                 </div>
             </div>
             <h2 id="session2">Related Skills</h2>
+
+            <div class="container">
+                <div class="carousel-container" id="carousel-related">
+                    <div class="carousel-wrapper">
+                        <div class="carousel-slide" th:each="related : ${relatedCourses}">
+                            <div class="card-container">
+                                <div class="card course-card">
+                                    <figure class="card-banner">
+                                        <img th:src="@{/mentors/{id}/avatar(id=${related.mentor.id})}"
+                                             class="img-cover" alt="Mentor Avatar"/>
+                                    </figure>
+                                    <div class="card-content">
+                                        <div class="wrapper">
+                                            <p>Price</p>
+                                            <div class="rating-wrapper">
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
+                                                     alt="">
+                                            </div>
+                                        </div>
+                                        <h3 class="title-lg card-title" th:text="${related.courseTitle}">Course
+                                            Title</h3>
+                                        <div class="card-meta wrapper">
+                                            <p class="title-sm">
+                                                <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
+                                                     alt="">
+                                                <span th:text="${related.studentCount+ ' Enrollments'}">Students</span>
+                                            </p>
+                                        </div>
+                                        <p class="title-sm mentor-name">
+                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20"
+                                                 alt="">
+                                            <span th:text="'Mentor: ' + ${related.mentor.fullName}">Mentor</span>
+                                        </p>
+                                    </div>
+                                    <a th:href="@{'/courses/' + ${related.courseMentorId}}" class="layer-link"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="carousel-nav carousel-prev" onclick="moveCarousel('carousel-related', -1)">‹</button>
+                    <button class="carousel-nav carousel-next" onclick="moveCarousel('carousel-related', 1)">›</button>
+                </div>
+
+                <div class="carousel-indicators" id="indicators-related"></div>
+
+                <div class="view-more-wrapper text-center" style="margin-top: 30px;">
+                    <a th:href="@{/courses}" class="btn btn-primary">View More</a>
+                </div>
+            </div>
         </div>
     </article>
 
@@ -164,9 +215,26 @@
     function contactMentor() {
         alert('Tính năng liên hệ mentor sẽ được triển khai sớm!');
     }
+
+    function moveCarousel(id, direction) {
+        const container = document.getElementById(id);
+        const wrapper = container.querySelector('.carousel-wrapper');
+        const slides = container.querySelectorAll('.carousel-slide');
+
+        const slideWidth = slides[0].offsetWidth + 30;
+        const maxScroll = (slides.length - 1) * slideWidth;
+
+        let currentScroll = wrapper.dataset.scroll ? parseInt(wrapper.dataset.scroll) : 0;
+        currentScroll += direction * slideWidth;
+
+        if (currentScroll < 0) currentScroll = maxScroll;
+        if (currentScroll > maxScroll) currentScroll = 0;
+
+        wrapper.style.transform = `translateX(-${currentScroll}px)`;
+        wrapper.dataset.scroll = currentScroll;
+    }
 </script>
 </body>
 </html>
 
 
-//vẽ mô hình tichs hop ai

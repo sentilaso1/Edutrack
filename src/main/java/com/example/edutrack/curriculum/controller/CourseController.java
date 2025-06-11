@@ -2,12 +2,18 @@ package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
+import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
+import com.example.edutrack.timetables.model.MentorAvailableTime;
+import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
+import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,13 +38,18 @@ public class CourseController {
     private final TagServiceImpl tagServiceImpl;
     private final CourseMentorService courseMentorService;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
+    private final MentorAvailableTimeService mentorAvailableTimeService;
+    private final EnrollmentService enrollmentService;
 
     public CourseController(CourseServiceImpl courseServiceImpl,
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorServiceImpl mentorServiceImpl,
                             TagServiceImpl tagServiceImpl,
                             CourseTagService courseTagService,
-                            CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl) {
+                            CourseMentorService courseMentorService,
+                            CourseMentorServiceImpl courseMentorServiceImpl,
+                            MentorAvailableTimeService mentorAvailableTimeService,
+                            EnrollmentService enrollmentService) {
         this.courseServiceImpl = courseServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
@@ -46,6 +57,8 @@ public class CourseController {
         this.courseMentorService = courseMentorService;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.courseTagService = courseTagService;
+        this.mentorAvailableTimeService = mentorAvailableTimeService;
+        this.enrollmentService = enrollmentService;
     }
 
     @GetMapping("/courses")
@@ -108,9 +121,13 @@ public class CourseController {
         Course course = courseMentor.getCourse();
         List<Tag> tagList = tagServiceImpl.findTagsByCourseId(course.getId());
 
+        List<CourseMentor> relatedCourse = courseMentorService.getRelatedCoursesByTags(course.getId(), null, 6);
+        List<CourseCardDTO> relatedCourseToDTO = enrollmentService .mapToCourseCardDTOList(relatedCourse);
+        model.addAttribute("relatedCourses", relatedCourseToDTO);
         model.addAttribute("course", courseMentor);
         model.addAttribute("tagList", tagList);
 
+        model.addAttribute("courseMentor", courseMentor);
         return "/mentee/course_detail";
     }
 
@@ -127,12 +144,13 @@ public class CourseController {
         return new ResponseEntity<>(mentor.get().getAvatar(), headers, HttpStatus.OK);
     }
 
-    @GetMapping("course/register/{cmid}")
+    @GetMapping("courses/register/{cmid}")
     public String registerCourse(@PathVariable UUID cmid,
                                  Model model) {
         CourseMentor courseMentor = courseMentorService.findById(cmid);
+        List <MentorAvailableTime> mentorAvailableTime = mentorAvailableTimeService.findByMentorId(courseMentor.getMentor());
         model.addAttribute("courseMentor", courseMentor);
+        model.addAttribute("mentorAvailableTime", mentorAvailableTime);
         return "register-section";
     }
-
 }

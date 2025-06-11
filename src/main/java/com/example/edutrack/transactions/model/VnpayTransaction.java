@@ -2,8 +2,8 @@ package com.example.edutrack.transactions.model;
 
 import com.example.edutrack.accounts.model.User;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,9 +12,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "vnpay_transactions")
-public class VnpayTransaction {
+public class VnpayTransaction implements CommonTransaction {
+    public static final String TIME_ZONE = "Etc/GMT+7";
+    public static final String TIME_FORMAT = "yyyyMMddHHmmss";
+
     public static final int TRANSACTION_EXPIRATION_TIME = 15;  // minutes
     public static final int FRACTION_SHIFT = 100;
+    public static final int POINT_SHIFT = 1000;
     public static final String ORDER_TYPE_OTHER = "other";
 
     public static final String COMMAND_PAY = "pay";
@@ -29,9 +33,9 @@ public class VnpayTransaction {
     public static final long AMOUNT_5000 = 5000000L;
 
     @Transient
-    private final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+    private final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE));
     @Transient
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
 
     private String version = "2.1.0";
     private String locale = "vn";
@@ -91,6 +95,7 @@ public class VnpayTransaction {
     private String transactionStatus;
 
     public static boolean isValidAmount(Long amount) {
+        amount /= FRACTION_SHIFT;
         return amount == AMOUNT_100 || amount == AMOUNT_200 ||
                 amount == AMOUNT_500 || amount == AMOUNT_1000 ||
                 amount == AMOUNT_2000 || amount == AMOUNT_5000;
@@ -139,14 +144,6 @@ public class VnpayTransaction {
     public void setCurrCode(String currCode) {
         this.currCode = currCode;
     }
-
-//    public String getBankCode() {
-//        return bankCode;
-//    }
-//
-//    public void setBankCode(String bankCode) {
-//        this.bankCode = bankCode;
-//    }
 
     public UUID getTxnRef() {
         return txnRef;
@@ -224,7 +221,7 @@ public class VnpayTransaction {
         this.user = user;
     }
 
-    public Boolean getDone() {
+    public Boolean isDone() {
         return isDone;
     }
 
@@ -280,8 +277,43 @@ public class VnpayTransaction {
         this.responseCode = responseCode;
     }
 
+    @Override
+    public UUID getTransactionId() {
+        return getTxnRef();
+    }
+
+    @Override
+    public String getTransactionInfo() {
+        return getOrderInfo();
+    }
+
+    @Override
+    public Double getTransactionAmount() {
+        return (double) getAmount() / FRACTION_SHIFT / POINT_SHIFT;
+    }
+
     public String getTransactionStatus() {
         return transactionStatus;
+    }
+
+    @Override
+    public Date getTransactionDate() {
+        Date date;
+        try {
+            if (payDate != null && !payDate.isEmpty()) {
+                date = dateFormat.parse(payDate);
+            } else {
+                date = dateFormat.parse(createdDate);
+            }
+            return date;
+        } catch (ParseException e) {
+            throw new RuntimeException("Failed to parse transaction date", e);
+        }
+    }
+
+    @Override
+    public UUID getUserId() {
+        return getUser().getId();
     }
 
     public void setTransactionStatus(String transactionStatus) {

@@ -1,10 +1,13 @@
 package com.example.edutrack.timetables.service.implementation;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Day;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
+import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +20,11 @@ import java.util.List;
 @Service
 public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService {
     private final EnrollmentScheduleRepository enrollmentScheduleRepository;
+    private final MentorAvailableTimeRepository mentorAvailableTimeRepository;
 
-    public EnrollmentScheduleServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository) {
+    public EnrollmentScheduleServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository, MentorAvailableTimeRepository mentorAvailableTimeRepository) {
         this.enrollmentScheduleRepository = enrollmentScheduleRepository;
+        this.mentorAvailableTimeRepository = mentorAvailableTimeRepository;
     }
 
 //    @Override
@@ -90,6 +95,32 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 //        return firstDate;
 //    }
 
+
+    private void sortDayByWeek(List<Day> days, List<Slot> slots) {
+        List<String> weekDays = new ArrayList<>();
+        weekDays.add("MONDAY");
+        weekDays.add("TUESDAY");
+        weekDays.add("WEDNESDAY");
+        weekDays.add("THURSDAY");
+        weekDays.add("FRIDAY");
+        weekDays.add("SATURDAY");
+        weekDays.add("SUNDAY");
+
+        for(int i = 0; i < days.size(); i++){
+            for(int j = i+1; j < days.size(); j++){
+                if(weekDays.indexOf(days.get(i).name()) > weekDays.indexOf(days.get(j).name())){
+                    Day t = days.get(i);
+                    days.set(i, days.get(j));
+                    days.set(j, t);
+
+                    Slot s = slots.get(i);
+                    slots.set(i, slots.get(j));
+                    slots.set(j, s);
+                }
+            }
+        }
+    }
+
     @Override
     public String findStartLearningTime(Mentee user,
                                         CourseMentor courseMentor,
@@ -98,10 +129,12 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
                                         Integer totalSlot) {
 
         LocalDate startDate = LocalDate.now();
+        sortDayByWeek(day, slot);
 
         while (!day.contains(Day.valueOf(startDate.getDayOfWeek().name()))) {
             startDate = startDate.plusDays(1);
         }
+        System.out.println("INITIAL: "+ startDate);
 
         int found = 0;
         int i = day.indexOf(Day.valueOf(startDate.getDayOfWeek().name()));
@@ -111,15 +144,24 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         while (found < totalSlot) {
             Slot currentSlot = slot.get(i);
             Day currentDay = day.get(i);
+            System.out.println("=============================================================");
+            System.out.println(startDate);
+            System.out.println(currentDay.name() + "-" + currentSlot.name());
+
+            boolean isMentorAvailableTime = mentorAvailableTimeRepository.isMentorAvailableTime(courseMentor.getMentor(), currentSlot, currentDay);
+            if (!isMentorAvailableTime) {
+                return null;
+            }
 
             boolean clashMentor = enrollmentScheduleRepository
-                    .isTakenSlot(courseMentor, currentSlot, currentDay, startDate);
+                    .isTakenSlot(courseMentor.getMentor(), currentSlot, currentDay, startDate);
             boolean clashMentee = enrollmentScheduleRepository
                     .isLearningSlot(user, currentSlot, currentDay, startDate);
 
             if (!clashMentor && !clashMentee) {
                 if (found == 0) {
                     result = startDate.format(formatter) + "-" + currentSlot.name();
+                    System.out.println("FOUND: " + result);
                 }
                 found++;
             } else {
@@ -142,6 +184,16 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             }
         }
         return result;
+    }
+
+    @Override
+    public List<EnrollmentSchedule> findAll() {
+        return enrollmentScheduleRepository.findAll();
+    }
+
+    @Override
+    public List<EnrollmentSchedule> findByMentorAndDateBetween(Mentor mentor, LocalDate weekStart, LocalDate weekEnd) {
+        return enrollmentScheduleRepository.findByMentorAndDateBetween(mentor, weekStart, weekEnd);
     }
 
 }
