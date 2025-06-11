@@ -1,4 +1,4 @@
-    <header th:fragment="header"
+<header th:fragment="header"
         class="header"
         data-header
         xmlns:th="http://www.thymeleaf.org">
@@ -55,10 +55,18 @@
             </ul>
         </nav>
 
-        <div style="display: flex;">
-            <a th:href="@{/login}" class="btn btn-secondary">Sign In</a>
-            <a th:href="@{/signup}" class="btn btn-signup">Sign Up</a>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div th:if="${session.loggedInUser == null}">
+                <a th:href="@{/login}" class="btn btn-secondary">Sign In</a>
+                <a th:href="@{/signup}" class="btn btn-signup">Sign Up</a>
+            </div>
+
+            <div th:if="${session.loggedInUser != null}" style="display: flex; align-items: center; gap: 12px;">
+                <span style="color: #ff6b6b; font-weight: bold" class="title-sm" th:text="'👋 Hi, ' + ${session.loggedInUser.fullName}">Hi, User</span>
+                <a th:href="@{/logout}" class="btn btn-secondary">Logout</a>
+            </div>
         </div>
+
 
         <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
             <ion-icon name="menu-outline" aria-hidden="true"></ion-icon>

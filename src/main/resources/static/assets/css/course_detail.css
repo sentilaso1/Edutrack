@@ -15,6 +15,12 @@
     justify-content: space-between;
 }
 
+.overall .left h1{
+    font-weight: bold;
+    color: hsl(357, 100%, 75%);
+    font-size: 3em;
+}
+
 .overall .right{
     display: flex;
     justify-content: center;
@@ -196,6 +202,16 @@ h2{
     color: white;
 }
 
+.register-btn, .follow-btn {
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.register-btn:hover, .follow-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    background-color: #ff4d4d;
+}
+
 .stats {
     display: flex;
     justify-content: space-between;
@@ -227,4 +243,107 @@ h2{
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.course-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 450px;
+    max-height: 450px;
+    overflow: hidden;
+    margin-bottom: 40px;
+}
+
+.img-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.carousel-container {
+    position: relative;
+    overflow: hidden;
+    max-width: 100%;
+    margin-top: 40px;
+}
+
+
+.carousel-wrapper {
+    display: flex;
+    transition: transform 0.5s ease;
+    gap: 30px;
+    width: max-content;
+}
+
+.carousel-slide {
+    flex: 0 0 auto;
+    width: 320px;
+    max-width: 320px;
+    box-sizing: border-box;
+}
+
+.carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 2px solid #007bff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    line-height: 36px;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-prev {
+    left: 10px;
+}
+
+.carousel-next {
+    right: 10px;
+}
+
+.carousel-indicators {
+    text-align: center;
+    margin-top: 10px;
+}
+
+
+.card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.mentor-name {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+}
+
+.layer-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    text-decoration: none;
+}
+
+.card.category-card {
+    position: relative;
 }
