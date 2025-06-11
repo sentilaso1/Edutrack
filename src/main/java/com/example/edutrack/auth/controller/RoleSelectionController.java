@@ -43,11 +43,6 @@ public class RoleSelectionController {
         String email = (String) userInfo.get("email");
         String name = (String) userInfo.get("name");
 
-        if (menteeRepository.findByEmail(email).isPresent()) {
-            return "redirect:/home";
-        } else if (mentorRepository.findByEmail(email).isPresent()) {
-            return "redirect:/mentor";
-        }
 
         if ("MENTEE".equalsIgnoreCase(role)) {
             Mentee mentee = new Mentee();

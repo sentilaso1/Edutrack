@@ -1,6 +1,7 @@
 package com.example.edutrack.auth.controller;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
@@ -40,6 +41,17 @@ public class GoogleAuthController {
         String accessToken = googleOAuthService.exchangeCodeForAccessToken(code);
         Map<String, Object> userInfo = googleOAuthService.fetchUserInfo(accessToken);
         session.setAttribute("googleUserInfo", userInfo);
+        String email = (String) userInfo.get("email");
+
+        if (menteeRepository.findByEmail(email).isPresent()) {
+            Mentee mentee = menteeRepository.findByEmail(email).get();
+            session.setAttribute("loggedInUser", mentee);
+            return "redirect:/home";
+        } else if (mentorRepository.findByEmail(email).isPresent()) {
+            Mentor mentor = mentorRepository.findByEmail(email).get();
+            session.setAttribute("loggedInUser", mentor);
+            return "redirect:/mentor";
+        }
         return "redirect:/choose-role";
     }
 }
