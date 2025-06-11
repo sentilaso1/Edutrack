@@ -40,15 +40,15 @@ public class MenteeScheduleController {
                                 @RequestParam Integer totalSlot,
                                 HttpSession session,
                                 Model model,
-                                @RequestParam(required = false) String startTime) {
+                                @RequestParam String action) {
         Mentee user = (Mentee) session.getAttribute("loggedInUser");
         if (user == null) {
             return "redirect:/login";
         }
 
         CourseMentor courseMentor = courseMentorService.findById(courseMentorId);
-        if(startTime == null){
-            startTime = enrollmentScheduleService.findStartLearningTime(user, courseMentor, slot, day, totalSlot);
+        if("checkStartDate".equals(action)){
+            String startTime = enrollmentScheduleService.findStartLearningTime(user, courseMentor, slot, day, totalSlot);
             System.out.println(startTime);
             if(startTime == null){
                 startTime = "Cannot find start time";
@@ -63,11 +63,3 @@ public class MenteeScheduleController {
         return "register-section";
     }
 }
-//fullName=dung+beo
-// email=lephuonglinhnga1801gmail.com
-// phone=0198332567
-// age=19
-// experience=beginner
-// motivation=12345678
-// slot=SLOT_1
-// day=MONDAY
