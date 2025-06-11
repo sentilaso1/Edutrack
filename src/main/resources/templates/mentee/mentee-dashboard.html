@@ -244,22 +244,34 @@
                 <div class="dashboard-card">
                     <div class="card-header">
                         <i class="fa fa-clock-o card-icon"></i>
-                        <h3 class="card-title">Upcoming Session</h3>
+                        <h3 class="card-title" th:text="${isAllCompleted} ? 'All Sessions Completed' : 'Upcoming Session'">Upcoming Session</h3>
                     </div>
 
                     <!-- Styled and emphasized session info -->
-                    <div class="stat-label">
-                        <span>Next session: </span>
-                        <span style="font-weight: bold; font-style: italic;"
-                              th:text="${nextSessionTime} ?: 'No upcoming session'">
-                            No upcoming session
-                        </span>
+                    <div th:if="${isAllCompleted}">
+                        <div class="stat-label" style="font-weight: bold;">
+                            🎉 Congratulations! You’ve completed all sessions.
+                        </div>
+                        <a href="#" th:href="@{/courses}" class="view-link">
+                            Find New Courses
+                            <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                        </a>
                     </div>
 
-                    <a href="#" class="view-link" th:href="@{/mentee/schedule}">
-                        View schedule
-                        <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
-                    </a>
+                    <div th:if="${!isAllCompleted}">
+                        <div class="stat-label">
+                            <span>Next session: </span>
+                            <span style="font-weight: bold; font-style: italic;"
+                                  th:text="${nextSessionTime} ?: 'No upcoming session'">
+                            No upcoming session
+                        </span>
+                        </div>
+
+                        <a href="#" class="view-link" th:href="@{/mentee/schedule}">
+                            View schedule
+                            <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Learning Progress -->
@@ -295,7 +307,7 @@
             </div>
 
             <!-- Recent Activity -->
-<!--            Chưa có notification cho nhóm-->
+            <!--            Chưa có notification cho nhóm-->
             <div class="dashboard-card" style="margin-bottom: 40px;">
                 <div class="card-header">
                     <i class="fa fa-history card-icon"></i>
