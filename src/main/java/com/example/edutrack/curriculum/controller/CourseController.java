@@ -2,6 +2,7 @@ package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
+import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.MentorDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
@@ -113,6 +114,9 @@ public class CourseController {
         Course course = courseMentor.getCourse();
         List<Tag> tagList = tagServiceImpl.findTagsByCourseId(course.getId());
 
+        List<CourseMentor> relatedCourse = courseMentorService.getRelatedCoursesByTags(course.getId(), null, 6);
+        List<CourseCardDTO> relatedCourseToDTO = enrollmentService.mapToCourseCardDTOList(relatedCourse);
+        model.addAttribute("relatedCourses", relatedCourseToDTO);
         model.addAttribute("course", courseMentor);
         model.addAttribute("tagList", tagList);
 

@@ -130,8 +130,15 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     ) {
         if (tagTitles.isEmpty()) return Collections.emptyList();
 
-        List<CourseMentor> matches = courseMentorRepository
-                .findRelatedByTagsAndNotEnrolled(new ArrayList<>(tagTitles), menteeId, PageRequest.of(0, limit));
+        List<CourseMentor> matches;
+
+        if (menteeId == null) {
+            matches = courseMentorRepository
+                    .findRelatedByTags(new ArrayList<>(tagTitles), PageRequest.of(0, limit));
+        } else {
+            matches = courseMentorRepository
+                    .findRelatedByTagsAndNotEnrolled(new ArrayList<>(tagTitles), menteeId, PageRequest.of(0, limit));
+        }
 
         if (matches.size() < limit) {
             int remaining = limit - matches.size();
