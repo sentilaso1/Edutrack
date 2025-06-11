@@ -47,4 +47,15 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     @Query("SELECT COUNT(s) FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
     int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);
 
+    @Query("""
+    SELECT s FROM EnrollmentSchedule s
+    WHERE s.date BETWEEN :startDate AND :endDate
+    AND s.enrollment.courseMentor.mentor = :mentor
+""")
+    List<EnrollmentSchedule> findByMentorAndDateBetween(
+            @Param("mentor") Mentor mentor,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
 }
