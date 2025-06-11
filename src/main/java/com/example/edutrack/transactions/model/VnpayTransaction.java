@@ -2,8 +2,8 @@ package com.example.edutrack.transactions.model;
 
 import com.example.edutrack.accounts.model.User;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "vnpay_transactions")
-public class VnpayTransaction {
+public class VnpayTransaction implements CommonTransaction {
     public static final int TRANSACTION_EXPIRATION_TIME = 15;  // minutes
     public static final int FRACTION_SHIFT = 100;
     public static final String ORDER_TYPE_OTHER = "other";
@@ -224,7 +224,7 @@ public class VnpayTransaction {
         this.user = user;
     }
 
-    public Boolean getDone() {
+    public Boolean isDone() {
         return isDone;
     }
 
@@ -280,8 +280,43 @@ public class VnpayTransaction {
         this.responseCode = responseCode;
     }
 
+    @Override
+    public UUID getTransactionId() {
+        return getTxnRef();
+    }
+
+    @Override
+    public String getTransactionInfo() {
+        return getOrderInfo();
+    }
+
+    @Override
+    public Double getTransactionAmount() {
+        return (double) getAmount() / FRACTION_SHIFT;
+    }
+
     public String getTransactionStatus() {
         return transactionStatus;
+    }
+
+    @Override
+    public Date getTransactionDate() {
+        Date date;
+        try {
+            if (payDate != null && !payDate.isEmpty()) {
+                date = dateFormat.parse(payDate);
+            } else {
+                date = dateFormat.parse(createdDate);
+            }
+            return date;
+        } catch (ParseException e) {
+            throw new RuntimeException("Failed to parse transaction date", e);
+        }
+    }
+
+    @Override
+    public UUID getUserId() {
+        return getUser().getId();
     }
 
     public void setTransactionStatus(String transactionStatus) {
