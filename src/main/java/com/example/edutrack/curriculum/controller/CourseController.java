@@ -10,6 +10,7 @@ import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -37,13 +38,14 @@ public class CourseController {
     private final CourseMentorService courseMentorService;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
     private final MentorAvailableTimeService mentorAvailableTimeService;
+    private final EnrollmentService enrollmentService;
 
     public CourseController(CourseServiceImpl courseServiceImpl,
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorServiceImpl mentorServiceImpl,
                             TagServiceImpl tagServiceImpl,
                             CourseTagService courseTagService,
-                            CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl, MentorAvailableTimeService mentorAvailableTimeService) {
+                            CourseMentorService courseMentorService, CourseMentorServiceImpl courseMentorServiceImpl, MentorAvailableTimeService mentorAvailableTimeService, EnrollmentService enrollmentService) {
         this.courseServiceImpl = courseServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
@@ -52,6 +54,7 @@ public class CourseController {
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.courseTagService = courseTagService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
+        this.enrollmentService = enrollmentService;
     }
 
     @GetMapping("/courses")

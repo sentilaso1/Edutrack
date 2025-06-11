@@ -9,14 +9,17 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
+import com.example.edutrack.curriculum.service.interfaces.DashboardService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Controller
 public class HomeControlller {
@@ -24,12 +27,14 @@ public class HomeControlller {
     private final EnrollmentService enrollmentService;
     private final CourseMentorService courseMentorService;
     private final MentorService mentorService;
+    private final DashboardService dashboardService;
 
-    public HomeControlller(CourseTagService courseTagService, EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService) {
+    public HomeControlller(CourseTagService courseTagService, EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService, DashboardService dashboardService) {
         this.courseTagService = courseTagService;
         this.enrollmentService = enrollmentService;
         this.courseMentorService = courseMentorService;
         this.mentorService = mentorService;
+        this.dashboardService = dashboardService;
     }
 
     @GetMapping("/home")
@@ -131,13 +136,24 @@ public class HomeControlller {
         model.addAttribute("headerCTA", "My Dashboard");
         model.addAttribute("headerCTALink", "/dashboard");
 
-        model.addAttribute("heroHeadline", "<span class=\"span\">Upcoming Sessions</span>");
-        model.addAttribute("heroSubHeadline", "Next session: Tomorrow, 10:00 AM");
-        model.addAttribute("heroCTA", "View schedule →");
-        model.addAttribute("heroCTALink", "/schedules");
-
+        if (dashboardService.isAllCoursesCompleted(user.getId())) {
+            model.addAttribute("heroHeadline", "<span class='span'>Well Done!</span>");
+            model.addAttribute("heroSubHeadline", "You've completed all your sessions. Explore more advanced topics.");
+            model.addAttribute("heroCTA", "Find New Courses");
+            model.addAttribute("heroCTALink", "/courses");
+        } else {
+            model.addAttribute("heroHeadline", "<span class='span'>Upcoming Sessions</span>");
+            model.addAttribute("heroSubHeadline", "Next session: " + dashboardService.getNextSessionTime(user.getId()));
+            model.addAttribute("heroCTA", "View schedule →");
+            model.addAttribute("heroCTALink", "/schedules");
+        }
         List<CourseMentor> inProgress = enrollmentService.getCourseInProgressMentee(user.getId());
-        CourseMentor baseCourse = inProgress.isEmpty() ? null : inProgress.get(0);
+        CourseMentor baseCourse = null;
+
+        if (!inProgress.isEmpty()) {
+            int randomIndex = ThreadLocalRandom.current().nextInt(inProgress.size()); //Get Random Course That Mentee Is Learning
+            baseCourse = inProgress.get(randomIndex);
+        }
 
         if (baseCourse != null) {
             model.addAttribute("sectionOneTitle", "Because You Learned " + baseCourse.getCourse().getName());
