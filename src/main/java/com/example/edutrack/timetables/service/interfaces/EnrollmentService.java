@@ -18,5 +18,5 @@ public interface EnrollmentService {
 
     List<CourseMentor> getCourseInProgressMentee(UUID menteeId);
 
-    List<Enrollment> findByStatus(Enrollment.EnrollmentStatus status);
+    List<Enrollment> findByStatus(Enrollment.EnrollmentStatus status, UUID menteeId);
 }
