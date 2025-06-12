@@ -108,6 +108,12 @@
 <body class="viewport">
 <h1 class="page-header">CV Approval List</h1>
 <main class="main-grid">
+    <div id="batch-timer">
+        <span th:if="${batchRunning}">AI verification is in progress...</span>
+        <span th:unless="${batchRunning}">
+        Next AI verification in <span id="timer"></span>
+    </span>
+    </div>
     <form class="filter-form" id="filter-form">
         <div class="filter-group">
             <h3 class="">
@@ -131,10 +137,10 @@
                 Pending
             </label>
 
-            <label for="pending">
+            <label for="aiapproved">
                 <input type="radio" name="filter" id="aiapproved" value="aiapproved"
                        th:checked="${filter != null && filter == 'aiapproved'}">
-                Pending
+                AI Approve
             </label>
 
             <label for="approved">
@@ -272,6 +278,56 @@
         tagCheckbox.addEventListener('change', () => {
             allTagsCheckbox.checked = countCheckBoxes() === [[${tags.size()}]];
         });
+    }
+
+    let wasRunning = false;
+
+    function pollBatchStatus() {
+        fetch('/api/batch/status')
+            .then(res => res.json())
+            .then(status => {
+                if (status.running) {
+                    wasRunning = true;
+                } else {
+                    if (wasRunning) {
+                        location.reload();
+                    }
+                    wasRunning = false;
+                }
+            })
+            .catch(console.error);
+    }
+
+    setInterval(pollBatchStatus, 10000);
+
+    pollBatchStatus();
+
+    const batchRunning = [[${batchRunning}]];
+    const nextBatchMillis = [[${nextBatchMillis}]];
+    const timerElement = document.getElementById('timer');
+
+    function formatMMSS(secs) {
+        let min = Math.floor(secs / 60);
+        let sec = secs % 60;
+        return min.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
+    }
+
+    function updateCountdown() {
+        if (batchRunning || nextBatchMillis < 0) return; // do not count down
+        const now = Date.now();
+        let secondsToNextBatch = Math.floor((nextBatchMillis - now) / 1000);
+        if (secondsToNextBatch < 0) secondsToNextBatch = 0;
+        timerElement.textContent = formatMMSS(secondsToNextBatch);
+
+        if (secondsToNextBatch === 0) {
+            clearInterval(timerInterval);
+            location.reload();
+        }
+    }
+
+    if (timerElement && !batchRunning && nextBatchMillis > 0) {
+        updateCountdown();
+        var timerInterval = setInterval(updateCountdown, 1000);
     }
     /*]]>*/
 </script>
