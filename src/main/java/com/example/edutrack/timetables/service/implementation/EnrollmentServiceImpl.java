@@ -64,4 +64,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.findByStatus(status, mentorId);
     }
 
+    @Override
+    public Enrollment findById(Long id) {
+        return enrollmentRepository.findById(id).get();
+    }
+
 }
