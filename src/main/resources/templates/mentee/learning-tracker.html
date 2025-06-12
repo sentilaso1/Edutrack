@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head xmlns:th="http://www.thymeleaf.org">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!--
+    - primary meta tags
+    -->
+    <title>Learning Progress Tracker - Youdemi</title>
+    <meta name="title" content="Youdemi"/>
+    <meta name="description" content="Track your learning progress and skill development"/>
+
+    <!--
+    - favicon
+    -->
+    <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!--
+    - custom css link
+    -->
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/learning-tracker.css}"/>
+</head>
+
+<body>
+<!--
+- #HEADER
+-->
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+
+<main>
+    <section class="section has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="dashboard-container">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Learning Progress Tracker</h1>
+                <p class="dashboard-subtitle">Track your skill development and learning milestones</p>
+            </div>
+
+            <!-- Progress Overview -->
+            <div class="progress-overview">
+                <!-- Overall Progress -->
+                <div class="overview-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Overall Progress</h3>
+                    </div>
+                    <div class="progress-circle overall"
+                         th:style="'background: conic-gradient(#ff6b6b ' + ${progressTracker.skillProcess} + '%, #f3f3f3 ' + ${progressTracker.skillProcess} + '% 100%)'">
+                        <div class="progress-inner" th:text="${progressTracker.skillProcess + '%'}">77%</div>
+                    </div>
+                    <div class="progress-label"
+                         th:text="|Across ${progressTracker.totalTrackedSkills} tracked skills|">
+                        Across 6 tracked skills
+                    </div>
+
+                </div>
+
+                <!-- Goals -->
+                <div class="overview-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Goals</h3>
+                    </div>
+                    <div class="progress-circle goals">
+                        <div class="progress-inner">1/3</div>
+                    </div>
+                    <div class="progress-label">Goals completed</div>
+                </div>
+
+                <!-- Sessions -->
+                <div class="overview-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Sessions</h3>
+                    </div>
+                    <div class="progress-circle sessions">
+                        <div class="progress-inner" th:text="${progressTracker.getTotalSkillsCompleted()}"></div>
+                    </div>
+                    <div class="progress-label">Mentoring Skills Completed</div>
+                </div>
+            </div>
+
+            <!-- Tab Container -->
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('skills')">Skills</button>
+                    <button class="tab-btn"
+                            th:classappend="${activeTab eq 'goals'} ? ' active' : ''"
+                            onclick="switchTab('goals')">
+                        Goals
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('sessions')">Session Notes</button>
+                </div>
+
+                <!-- Skills Tab -->
+                <div id="skills" class="tab-content"
+                     th:classappend="(${activeTab} == null or ${activeTab} == 'skills') ? ' active' : ''">
+                <div class="skills-header">
+                        <h2 class="skills-title">Your Skills</h2>
+                        <button class="add-skill-btn">Add New Skill</button>
+                    </div>
+
+                    <div class="skills-grid">
+                        <div class="skill-card" th:each="skill : ${skills}">
+                            <div class="skill-header">
+                                <div>
+                                    <div class="skill-name" th:text="${skill.courseTitle}">React</div>
+                                    <div class="skill-tags">
+                                        <span th:each="tag : ${skill.tags}" class="tag-badge" th:text="${tag}">Frontend</span>
+                                    </div>
+                                </div>
+                                <div class="progress-percentage" th:text="${skill.progressPercentage + '%'}">65%</div>
+                            </div>
+                            <div class="skill-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" th:style="'width:' + ${skill.progressPercentage} + '%'"></div>
+                                </div>
+                            </div>
+                            <div class="skill-details">
+                                <span th:text="'Sessions completed: ' + ${skill.sessionsCompleted}">10</span>
+                                <span th:text="'Total Sessions: ' + ${skill.totalSessions}">30</span>
+                            </div>
+                            <div class="skill-meta">
+                                <span th:text="'Latest Session: ' + ${#temporals.format(skill.lastSessionDate, 'M/d/yyyy')}">5/12/2025</span>
+                                <a class="details-link">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goals Tab -->
+                <div id="goals" class="tab-content"
+                     th:classappend="${activeTab eq 'goals'} ? ' active' : ''">
+                    <div class="skills-header">
+                        <h2 class="skills-title">Your Learning Goals</h2>
+                        <button class="add-skill-btn" onclick="toggleGoalForm()">Create Goal</button>
+                    </div>
+
+                    <!-- Goal Form -->
+                    <div id="goalFormContainer"
+                         th:classappend="${showGoalForm} ? 'show' : ''"
+                         class="goal-form-container">
+                        <form th:action="@{/goals/create}" method="post" th:object="${newGoal}">
+                            <div class="overview-card">
+                                <div class="form-group">
+                                    <label class="form-label">Goal Title</label>
+                                    <input type="text" th:field="*{title}"
+                                           class="form-input"
+                                           th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                                           placeholder="e.g., Do AI Agent Project" required>
+                                    <div class="error-text" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Description</label>
+                                    <input type="text" th:field="*{description}"
+                                           class="form-input"
+                                           th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"
+                                           placeholder="e.g., Learn LangChain, Rag, etc." required>
+                                    <div class="error-text" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Target Date</label>
+                                    <input type="date" th:field="*{targetDate}" class="form-input" required>
+                                </div>
+                                <div class="form-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button type="submit" class="create-goal-btn">Create Goal</button>
+                                    <button type="button" class="close-btn" onclick="toggleGoalForm()">Cancel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Goal List -->
+                    <div class="goals-list">
+                        <div class="goal-item" th:each="goal : ${goals}" th:classappend="${goal.status.name().toLowerCase().replace('_', '-')}">
+                            <div class="goal-header">
+                                <div class="goal-title" th:text="${goal.title}">Build Portfolio Website</div>
+                                <span th:text="'Due: ' + ${#temporals.format(goal.targetDate, 'M/d/yyyy')}">Due: 6/30/2025</span>
+                            </div>
+                            <div class="goal-description" th:text="${goal.description}">Description of the goal</div>
+
+                            <!-- Status buttons -->
+                            <div class="progress-buttons">
+                                <form th:action="@{/goals/update-status}" method="post" class="status-form">
+                                    <input type="hidden" name="goalId" th:value="${goal.id}" />
+                                    <input type="hidden" name="status" class="status-input" th:value="${goal.status}" />
+
+                                    <button type="button"
+                                            class="progress-btn todo"
+                                            th:classappend="${goal.status.name() == 'TODO'} ? 'active' : ''"
+                                            onclick="setGoalStatus(this, 'TODO')">To-do</button>
+
+                                    <button type="button"
+                                            class="progress-btn in-progress"
+                                            th:classappend="${goal.status.name() == 'IN_PROGRESS'} ? 'active' : ''"
+                                            onclick="setGoalStatus(this, 'IN_PROGRESS')">In Progress</button>
+
+                                    <button type="button"
+                                            class="progress-btn done"
+                                            th:classappend="${goal.status.name() == 'DONE'} ? 'active' : ''"
+                                            onclick="setGoalStatus(this, 'DONE')">Done</button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- Session Notes Tab -->
+                <div id="sessions" class="tab-content">
+                    <div class="skills-header">
+                        <h2 class="skills-title">Session Notes</h2>
+                    </div>
+
+                    <div class="sessions-timeline">
+                        <div class="session-item">
+                            <div class="session-date">
+                                <div style="font-weight: bold;">May</div>
+                                <div style="font-size: 1.5rem;">10</div>
+                            </div>
+                            <div class="session-content">
+                                <div class="session-title">Advanced React Patterns</div>
+                                <div class="session-mentor">with John Mentor • 90 minutes</div>
+                                <div class="session-notes">
+                                    Covered render props, HOCs, and compound components. Practiced building reusable UI components with proper abstraction.
+                                    Homework: Refactor previous project using compound component pattern.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="session-item">
+                            <div class="session-date">
+                                <div style="font-weight: bold;">May</div>
+                                <div style="font-size: 1.5rem;">03</div>
+                            </div>
+                            <div class="session-content">
+                                <div class="session-title">TypeScript Fundamentals</div>
+                                <div class="session-mentor">with Sarah M. • 120 minutes</div>
+                                <div class="session-notes">
+                                    Deep dive into TypeScript type system, generics, and utility types. Learned about conditional types and mapped types.
+                                    Practice exercises with real-world scenarios.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!--
+- #FOOTER
+-->
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+<!--
+- custom js link
+-->
+<script th:src="@{/assets/js/courlist.js}"></script>
+
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+<script>
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // Remove active class from all buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Show selected tab content
+        const tabContent = document.getElementById(tabName);
+        if (tabContent) {
+            tabContent.classList.add('active');
+        }
+
+        // Add active class to clicked button
+        const button = Array.from(document.querySelectorAll('.tab-btn'))
+            .find(btn => btn.textContent.trim().toLowerCase() === tabName.toLowerCase());
+        if (button) button.classList.add('active');
+    }
+
+    function toggleGoalForm() {
+        const form = document.getElementById("goalFormContainer");
+        form.classList.toggle("show");
+    }
+
+    (function () {
+        const hash = window.location.hash;
+        if (hash) {
+            const tab = hash.substring(1);
+            setTimeout(() => {
+                switchTab(tab);
+            }, 0);
+        }
+    })();
+
+    function setGoalStatus(clickedButton, status) {
+        const form = clickedButton.closest("form");
+        const goalItem = clickedButton.closest(".goal-item");
+        const allButtons = form.querySelectorAll(".progress-btn");
+        allButtons.forEach(btn => btn.classList.remove('active'));
+        clickedButton.classList.add('active');
+        goalItem.className = 'goal-item ' + status.toLowerCase().replace('_', '-');
+        form.querySelector(".status-input").value = status;
+        form.submit();
+    }
+</script>
+
+
+</body>
+</html>
