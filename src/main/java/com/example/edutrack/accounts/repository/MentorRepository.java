@@ -63,5 +63,5 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
 
     @Query("SELECT COUNT(DISTINCT e.courseMentor.mentor.id) FROM Enrollment e WHERE e.mentee.id = :menteeId")
     int countMentorsByMenteeId(@Param("menteeId") UUID menteeId);
-
+    Optional<Mentor> findByEmail(String email);
 }
