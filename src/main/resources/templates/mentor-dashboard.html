@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
 <div class="sidebar">
     <h2>Edutrack Mentor</h2>
     <button class="btn-new-project" onclick="openModal()">+ New Project</button>
-    <div class="nav-item">Dashboard</div>
-    <div class="nav-item">Schedule</div>
+    <div class="nav-item"><a href="/mentor"><i class="fa fa-home" aria-hidden="true"></i> Dashboard</a></div>
+    <div class="nav-item"><a href="/mentor/schedule"><i class="fa fa-calendar" aria-hidden="true"></i> Schedule</a></div>
+    <div class="nav-item"><a href="/mentor/sensor-class"><i class="fa fa-list" aria-hidden="true"></i> Request Class</a> <span>10</span></div>
 </div>
 <div class="main">
     <div class="dashboard-header">
