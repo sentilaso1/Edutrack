@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.example.edutrack.profiles.model.CV;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ public interface CvService {
 
     Page<CV> queryCVs(String filter, String sort, List<String> tags, Pageable pageable);
     List<String> getAllUniqueSkills();
+    List<Course> getCoursesForCV(CV cv);
 
     CV createCV(CVForm form);
     CV getCVById(UUID id);
@@ -29,8 +31,11 @@ public interface CvService {
     boolean acceptCV(UUID id);
     boolean rejectCV(UUID id);
 
-    void aiVerifyCV(CV cv);
-    String generatePrompt(CV cv);
+    void aiVerifyCV(CV cv, List<Course> courses);
+    String generatePrompt(CV cv, List<Course> courses);
     String callMistralAPI(String prompt);
     void processAIResponse(CV cv, String aiJson);
+    void scheduleAIVerification();
+    boolean isBatchRunning();
+    LocalDateTime getLastBatchEnd();
 }

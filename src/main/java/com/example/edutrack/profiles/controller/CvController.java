@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.UserServiceImpl;
 import com.example.edutrack.auth.service.UserService;
 import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.repository.CVCourseRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
@@ -20,22 +21,24 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 public class CvController {
     public static final int PAGE_SIZE = 15;
 
     private final CvService cvService;
-    private final UserService userService;
     private final CourseService courseService;
 
     @Autowired
-    public CvController(CvService cvService, UserService userService, CourseService courseService) {
+    public CvController(CvService cvService, CourseService courseService) {
         this.cvService = cvService;
-        this.userService = userService;
         this.courseService = courseService;
     }
 
@@ -49,11 +52,19 @@ public class CvController {
         String sort = params.getSort();
         List<String> tags = params.getTags();
         List<String> uniqueSkills = cvService.getAllUniqueSkills();
+        boolean running = cvService.isBatchRunning();
+        LocalDateTime lastEnd = cvService.getLastBatchEnd();
+        long delaySeconds = 60;
+        long nextBatchMillis = running
+                ? -1 // special flag for UI
+                : lastEnd.plusSeconds(delaySeconds).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
 
         // TODO: Optizimize case when all skills are already selected
         if (tags == null || tags.isEmpty() || tags.contains("all")) {
             tags = uniqueSkills;
         }
+
 
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
         Page<CV> cvPage = cvService.queryCVs(filter, sort, tags, pageable);
@@ -61,6 +72,8 @@ public class CvController {
         model.addAttribute("pageNumber", page);
         model.addAttribute("page", cvPage);
         model.addAttribute("skills", uniqueSkills);
+        model.addAttribute("nextBatchMillis", nextBatchMillis);
+        model.addAttribute("batchRunning", running);
 
         if (sort != null) {
             model.addAttribute("sort", sort);
@@ -112,7 +125,6 @@ public class CvController {
     @PostMapping("cv/create")
     public String handleCVFormSubmission(@ModelAttribute("cv") CVForm request, Model model) {
         CV saved = cvService.createCV(request);
-        cvService.aiVerifyCV(saved);
         model.addAttribute("message", "CV created successfully!");
         return "redirect:/admin/cv/list/1";
     }
