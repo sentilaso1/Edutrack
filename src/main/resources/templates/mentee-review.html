@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .main {
+
+            .upload-file-button {
+                background: rgba(255, 87, 34, 0.73);
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            .graph textarea {
+                width: 100%;
+                height: 100px;
+                border: 1px solid #ddd;
+                padding: 0.75rem;
+                border-radius: 0.5rem;
+                resize: none;
+            }
+
+            .graph table {
+                width: 100%;
+                margin-top: 1rem;
+                border-collapse: collapse;
+            }
+
+            .graph th, .graph td {
+                padding: 0.75rem;
+                text-align: left;
+            }
+
+            .graph th {
+                background: #f0f4f8;
+            }
+
+            .participate-button {
+                margin-right: 0.5rem;
+                padding: 0.3rem 0.75rem;
+                border: none;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            .present {
+                background: #34d399;
+                color: white;
+            }
+
+            .absent {
+                background: #ef4444;
+                color: white;
+            }
+
+            .submit-review {
+                margin-top: 1rem;
+                background: rgba(255, 87, 34, 0.86);
+                color: white;
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            .field{
+                margin: 1em 0;
+                display: grid;
+                grid-template-columns: 1fr 6fr;
+                gap: 0.5em;
+            }
+            .field .name{
+                width: 100%;
+                height: 50px;
+                border: 1px solid #ddd;
+                padding: 0.75rem;
+                border-radius: 0.5rem;
+                resize: none;
+            }
+            .input-score {
+                width: 60px;
+                padding: 4px;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>Edutrack Mentor</h2>
+    <button class="btn-new-project" onclick="openModal()">+ New Project</button>
+    <div class="nav-item"><a href="/mentor"><i class="fa fa-home" aria-hidden="true"></i> Dashboard</a></div>
+    <div class="nav-item"><a href="/mentor/schedule"><i class="fa fa-calendar" aria-hidden="true"></i> Schedule</a></div>
+    <div class="nav-item"><a href="/mentor/sensor-class"><i class="fa fa-list" aria-hidden="true"></i> Request Class</a> <span>10</span></div>
+</div>
+<div class="main">
+    <div class="dashboard-header">
+        <h1 th:text=" 'Class: ' + ${enrollmentSchedule.enrollment.courseMentor.course.name}">Class: Programming Fundamental with C</h1>
+        <div>
+            <strong>Date: </strong><span th:text="${enrollmentSchedule.date}"> 06/05/2025</span>
+            <button class="submit-review" style="margin-left: 1rem">☆ Mark as Test Day</button>
+        </div>
+    </div>
+    <h3 th:text=" 'Mentee: ' + ${enrollmentSchedule.enrollment.mentee.fullName}" style="margin-top: -1em; margin-bottom: 2em"></h3>
+    <div class="graph">
+        <button class="upload-file-button">⬆ Upload File</button>
+        <p style="margin-top: 1rem; color: #666">File upload here</p>
+    </div>
+
+    <div class="graph">
+        <h3>Lesson Summary</h3>
+        <div class="field">
+            <h5>Name of Lesson: </h5>
+            <textarea class="name"></textarea>
+        </div>
+        <div class="field">
+            <h5>Brief Description: </h5>
+            <textarea class="description"></textarea>
+        </div>
+    </div>
+
+    <div class="graph">
+        <h3>Progress</h3>
+        <table>
+            <tr><th>Mentee</th>
+                <th>Participation</th>
+                <th>Score</th>
+            </tr>
+            <tr>
+                <td>Le Phuong Linh Nga</td>
+                <td>
+                    <button class="participate-button present">Present</button>
+                    <button class="participate-button absent">Absent</button>
+                </td>
+                <td>
+                    <input type="number" class="input-score" placeholder="0-10" min="0" max="10">
+                </td>
+            </tr>
+        </table>
+        <textarea placeholder="Write your review here..." style="width: 100%; height: 100px; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ccc;"></textarea>
+        <button class="submit-review">Submit Review</button>
+    </div>
+    <div class="footer">
+        Designed | AC 2022
+    </div>
+</div>
+</body>
+</html>

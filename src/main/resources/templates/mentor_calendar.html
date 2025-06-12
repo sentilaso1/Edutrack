@@ -57,18 +57,16 @@
 
                 <td th:each="i : ${#numbers.sequence(0,6)}"
                     th:with="currentDate=${startDate.plusDays(i)}">
-
                     <div th:each="s : ${schedules}"
                          th:if="${s.slot == slot and s.date == currentDate}"
                          class="slot-card">
+                        <a th:href="@{/mentor/schedule/{eid}(eid=${s.id})}">
                         <p th:text="${s.enrollment.courseMentor.course.name}"></p>
-                        <p th:text="${s.enrollment.mentee.fullName}"></p>
+                            <p th:text="${s.enrollment.mentee.fullName}"></p>
+                        </a>
                     </div>
-
                 </td>
             </tr>
-
-
             </tbody>
         </table>
 
