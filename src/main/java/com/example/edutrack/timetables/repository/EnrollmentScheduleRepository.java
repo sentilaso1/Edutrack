@@ -17,11 +17,11 @@ import java.util.UUID;
 @Repository
 public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
     @Query("SELECT COUNT(e) > 0 FROM Enrollment e " +
-           "JOIN EnrollmentSchedule es ON es.enrollment = e " +
-           "WHERE e.courseMentor.mentor = :mentor " +
-           "AND es.slot = :slot " +
-           "AND FUNCTION('WEEKDAY', es.date) = :day " +
-           "AND es.date = :date")
+            "JOIN EnrollmentSchedule es ON es.enrollment = e " +
+            "WHERE e.courseMentor.mentor = :mentor " +
+            "AND es.slot = :slot " +
+            "AND FUNCTION('WEEKDAY', es.date) = :day " +
+            "AND es.date = :date")
     boolean isTakenSlot(@Param("mentor") Mentor mentor,
                         @Param("slot") Slot slot,
                         @Param("day") Day day,
@@ -29,11 +29,11 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
 
 
     @Query("SELECT COUNT(e) > 0 FROM Enrollment e " +
-           "JOIN EnrollmentSchedule es ON es.enrollment = e " +
-           "WHERE e.mentee = :user " +
-           "AND es.slot = :slot " +
-           "AND FUNCTION('WEEKDAY', es.date) = :day " +
-           "AND es.date = :date")
+            "JOIN EnrollmentSchedule es ON es.enrollment = e " +
+            "WHERE e.mentee = :user " +
+            "AND es.slot = :slot " +
+            "AND FUNCTION('WEEKDAY', es.date) = :day " +
+            "AND es.date = :date")
     boolean isLearningSlot(@Param("user") Mentee user,
                            @Param("slot") Slot slot,
                            @Param("day") Day day,
@@ -42,10 +42,6 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     // Author: Nguyen Thanh Vinh
     @Query("SELECT s FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
     List<EnrollmentSchedule> findAllByMenteeId(@Param("menteeId") UUID menteeId);
-
-    // Author: Nguyen Thanh Vinh
-    @Query("SELECT COUNT(s) FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
-    int countTotalSlotsByMenteeId(@Param("menteeId") UUID menteeId);
 
     @Query("""
                 SELECT s FROM EnrollmentSchedule s
@@ -58,15 +54,43 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
             @Param("endDate") LocalDate endDate
     );
 
+    // Author: Nguyen Thanh Vinh
     @Query("""
                 SELECT COUNT(s) FROM EnrollmentSchedule s
                 WHERE s.enrollment.mentee.id = :menteeId AND s.attendance = :status
             """)
     int countAttendedSlotsByMenteeId(@Param("menteeId") UUID menteeId, @Param("status") EnrollmentSchedule.Attendance status);
 
+    // Author: Nguyen Thanh Vinh
     @Query("""
                 SELECT COUNT(s) FROM EnrollmentSchedule s
                 WHERE s.enrollment.mentee.id = :menteeId AND s.attendance != :status
             """)
     int countUnfinishedSlotsByMentee(@Param("menteeId") UUID menteeId, @Param("status") EnrollmentSchedule.Attendance status);
+
+    // Author: Nguyen Thanh Vinh
+    @Query("""
+                SELECT COUNT(e)
+                FROM Enrollment e
+                WHERE e.mentee.id = :menteeId
+                AND e.status = 'ACCEPTED'
+                AND NOT EXISTS (
+                    SELECT es
+                    FROM EnrollmentSchedule es
+                    WHERE es.enrollment = e
+                    AND es.attendance <> 'PRESENT'
+                )
+            """)
+    int countCompletedCourseByMentee(@Param("menteeId") UUID menteeId);
+
+    // Author: Nguyen Thanh Vinh
+    int countByEnrollment_Id(Long enrollmentId);
+
+    // Author: Nguyen Thanh Vinh
+    int countByEnrollment_IdAndAttendance(Long enrollmentId, EnrollmentSchedule.Attendance attendance);
+
+    // Author: Nguyen Thanh Vinh
+    @Query("SELECT MAX(es.date) FROM EnrollmentSchedule es WHERE es.enrollment.id = :enrollmentId AND es.attendance = :status")
+    LocalDate findLastPresentSessionDate(@Param("enrollmentId") Long enrollmentId, @Param("status") EnrollmentSchedule.Attendance status);
+
 }

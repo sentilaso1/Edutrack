@@ -1,8 +1,14 @@
 package com.example.edutrack.curriculum.service.implementation;
 
 import com.example.edutrack.accounts.repository.MentorRepository;
+import com.example.edutrack.curriculum.dto.SkillProgressDTO;
+import com.example.edutrack.curriculum.dto.TrackerDTO;
+import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.interfaces.DashboardService;
+import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
+import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import org.springframework.stereotype.Service;
 
@@ -10,19 +16,25 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardServiceImpl implements DashboardService {
 
     private final EnrollmentScheduleRepository enrollmentScheduleRepository;
     private final MentorRepository mentorRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final TagRepository tagRepository;
 
 
-    public DashboardServiceImpl(EnrollmentScheduleRepository enrollmentRepository, MentorRepository mentorRepository) {
-        this.enrollmentScheduleRepository= enrollmentRepository;
+    public DashboardServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository, MentorRepository mentorRepository, EnrollmentRepository enrollmentRepository, TagRepository tagRepository) {
+        this.enrollmentScheduleRepository = enrollmentScheduleRepository;
         this.mentorRepository = mentorRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.tagRepository = tagRepository;
     }
 
     @Override
@@ -62,7 +74,11 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public int getLearningProgress(UUID menteeId) {
-        int total = enrollmentScheduleRepository.countTotalSlotsByMenteeId(menteeId);
+        List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+        int total = 0;
+        for (Enrollment e : enrollments) {
+            total += e.getTotalSlots();
+        }
         int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT);
         if (total == 0) return 0;
         return (int) Math.round((completed * 100.0) / total);
@@ -71,6 +87,35 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public boolean isAllCoursesCompleted(UUID menteeId) {
         return enrollmentScheduleRepository.countUnfinishedSlotsByMentee(menteeId, EnrollmentSchedule.Attendance.PRESENT) == 0;
+    }
+
+    @Override
+    public TrackerDTO convertToTrackerDto(UUID menteeId){
+        int learningProgres = getLearningProgress(menteeId);
+        int totalTrackedSkills = (enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED)).size();
+        String goalsCompleted = "1/3";
+        int skillsCompleted = enrollmentScheduleRepository.countCompletedCourseByMentee(menteeId);
+        return new TrackerDTO(learningProgres, goalsCompleted, totalTrackedSkills, skillsCompleted);
+    }
+
+
+    @Override
+    public List<SkillProgressDTO> getSkillProgressList(UUID menteeId) {
+        List<Enrollment> menteeEnrollment = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+        List<SkillProgressDTO> skillProgressList = new ArrayList<>();
+
+        for (Enrollment e : menteeEnrollment) {
+            Long enrollmentId = e.getId();
+            UUID courseId = e.getCourseMentor().getCourse().getId();
+            int total = e.getTotalSlots();
+            int completed = enrollmentScheduleRepository.countByEnrollment_IdAndAttendance(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
+            int percentage = (total == 0) ? 0 : (int) Math.round((completed * 100.0) / total);
+            LocalDate lastSession = enrollmentScheduleRepository.findLastPresentSessionDate(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
+            List<String> tags = tagRepository.findByCourseId(courseId).stream().map(Tag::getTitle).collect(Collectors.toList());
+            SkillProgressDTO skillProgress = new SkillProgressDTO(e.getCourseMentor().getCourse().getDescription(), lastSession, completed, percentage, tags, total);
+            skillProgressList.add(skillProgress);
+        }
+        return skillProgressList;
     }
 
 }
