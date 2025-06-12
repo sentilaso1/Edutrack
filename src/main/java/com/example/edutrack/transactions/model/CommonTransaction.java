@@ -7,6 +7,7 @@ public interface CommonTransaction {
     UUID getTransactionId();
     String getTransactionInfo();
     Double getTransactionAmount();
+    String getTransactionAmountFormatted();
     String getTransactionStatus();
     Date getTransactionDate();
     UUID getUserId();
