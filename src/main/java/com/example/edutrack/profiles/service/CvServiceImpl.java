@@ -24,9 +24,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -198,6 +201,11 @@ public class CvServiceImpl implements CvService {
     }
 
     @Override
+    public List<Course> getCoursesForCV(CV cv) {
+        return cvCourseRepository.findByIdCvId(cv.getId()).stream().map(CVCourse::getCourse).collect(Collectors.toList());
+    }
+
+    @Override
     public CV createCV(CVForm cvRequest) {
         User user = userRepository.findById(cvRequest.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -274,14 +282,14 @@ public class CvServiceImpl implements CvService {
     }
 
     @Override
-    public void aiVerifyCV(CV cv) {
-        String prompt = generatePrompt(cv);
+    public void aiVerifyCV(CV cv, List<Course> courses) {
+        String prompt = generatePrompt(cv, courses);
         String aiResponse = callMistralAPI(prompt);
         processAIResponse(cv, aiResponse);
     }
 
     @Override
-    public String generatePrompt(CV cv) {
+    public String generatePrompt(CV cv, List<Course> courses) {
         // Handle null or empty fields to prevent malformed JSON or prompt issues
         String summary = cv.getSummary() != null ? cv.getSummary() : "";
         String experienceYears = cv.getExperienceYears() != null ? cv.getExperienceYears().toString() : "0";
@@ -290,6 +298,12 @@ public class CvServiceImpl implements CvService {
         String experience = cv.getExperience() != null ? cv.getExperience() : "";
         String certifications = cv.getCertifications() != null ? cv.getCertifications() : "";
         String languages = cv.getLanguages() != null ? cv.getLanguages() : "";
+        String courseName = "";
+        StringBuilder sb = new StringBuilder();
+        for (Course course : courses) {
+            sb.append(course.getName()).append(", ");
+        }
+        courseName = sb.toString();
 
         // Escape double quotes to prevent JSON injection or malformed strings
         summary = summary.replace("\"", "\\\"");
@@ -298,22 +312,28 @@ public class CvServiceImpl implements CvService {
         experience = experience.replace("\"", "\\\"");
         certifications = certifications.replace("\"", "\\\"");
         languages = languages.replace("\"", "\\\"");
+        courseName = courseName.replace("\"", "\\\"");
+
 
         return """
-        You are a CV validation assistant for a mentoring platform. Your task is to review the provided CV data and determine:
-        1. Whether the skills and certifications are valid (i.e., relevant, realistic, and not fake, gibberish, or overly vague).
-        2. Whether the overall CV is consistent and credible based on the summary, experience, education, and languages.
+        You are an AI assistant responsible for validating CVs submitted to a mentoring platform. Your goal is to verify:
+        1. Skills and Certifications:
+            - Skills must be specific, clearly defined, and industry-relevant (e.g., "Java, Python, AWS" rather than "coding" or "expert").
+            - Certifications must be genuine and issued by reputable institutions or recognized platforms (e.g., AWS Certified Developer, Coursera certifications).
+        2. CV Consistency and Credibility:
+            - Check for logical coherence across the summary, experience, education, certifications, and languages (e.g., the experience aligns with age and skills).
+            - Flag inconsistencies such as improbable experience durations, unrealistic skills compared to stated experience, or incomplete/vague information.
+            - Languages should be plausible and pertinent to mentoring.
+        3. Course Relevance:
+            - Verify that the candidate's skills, certifications, and experience align specifically with the course they have registered for.
+            - Reject candidates whose expertise significantly mismatches the registered course, even if the CV is otherwise valid (e.g., candidate with Java expertise registering for a Python course)
 
-        Validation guidelines:
-        - Skills should be specific, industry-relevant (e.g., "Java, Python, AWS" instead of "coding" or "expert").
-        - Certifications should be from recognized institutions or platforms (e.g., AWS Certified Developer, Coursera, not "Supreme Certificate").
-        - Check for inconsistencies (e.g., 20 years of experience for a 20-year-old candidate, or skills not matching experience).
-        - If fields are empty or overly vague, consider them red flags unless justified by other sections.
-        - Languages should be plausible and relevant to the mentoring context.
+        Validation Guidelines:
+        - Treat empty or excessively vague fields as potential red flags unless clearly supported elsewhere in the CV.
+        - Verify credibility, realism, and clarity explicitly.
         
-
         Response requirements:
-        - Respond ONLY with valid JSON in the exact format:
+        - Provide responses strictly in valid JSON format:
           {
             "is-approve": "true" or "false",
             "reason": "A concise explanation (1-2 sentences) of why the CV was approved or rejected."
@@ -331,7 +351,8 @@ public class CvServiceImpl implements CvService {
           "educations": "%s",
           "experience": "%s",
           "certifications": "%s",
-          "languages": "%s"
+          "languages": "%s",
+          "course_registered": "%s"
         }
 
         Example valid responses:
@@ -344,7 +365,7 @@ public class CvServiceImpl implements CvService {
           "reason": "Skills are vague ('expert') and certification ('Supreme Certificate') is not recognized."
         }
         Respond ONLY with raw JSON, no markdown, no explanation, no code block.
-        """.formatted(summary, experienceYears, skills, education, experience, certifications, languages);
+        """.formatted(summary, experienceYears, skills, education, experience, certifications, languages, courseName);
     }
 
     public String callMistralAPI(String prompt) {
@@ -423,4 +444,31 @@ public class CvServiceImpl implements CvService {
             System.err.println("Unexpected error processing AI response: " + aiJson);
         }
     }
+
+    private volatile boolean batchRunning = false;
+    private volatile LocalDateTime lastBatchStart;
+    private volatile LocalDateTime lastBatchEnd;
+
+    @Override
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void scheduleAIVerification() {
+        batchRunning = true;
+        lastBatchStart = LocalDateTime.now();
+        List<CV> pendingCVs = cvRepository.findByStatus("pending");
+        if (pendingCVs.isEmpty()) {
+            lastBatchEnd = LocalDateTime.now();
+            batchRunning = false;
+            return;
+        }
+        for (CV cv : pendingCVs) {
+            List<Course> courses = getCoursesForCV(cv);
+            aiVerifyCV(cv, courses);
+        }
+        lastBatchEnd = LocalDateTime.now();
+        batchRunning = false;
+    }
+
+    public boolean isBatchRunning() { return batchRunning; }
+    public LocalDateTime getLastBatchEnd() { return lastBatchEnd; }
 }

@@ -9,6 +9,7 @@ public class CVFilterForm implements Serializable {
     public static final String FILTER_APPROVED = "approved";
     public static final String FILTER_REJECTED = "rejected";
     public static final String FILTER_PENDING = "pending";
+    public static final String FILTER_AIAPPROVED = "aiapproved";
 
     public static final String SORT_DATE_ASC = "date-asc";
     public static final String SORT_DATE_DESC = "date-desc";
@@ -52,7 +53,7 @@ public class CVFilterForm implements Serializable {
             return;
         }
 
-        if (!filter.equals(FILTER_APPROVED) && !filter.equals(FILTER_PENDING) && !filter.equals(FILTER_REJECTED)) {
+        if (!filter.equals(FILTER_APPROVED) && !filter.equals(FILTER_PENDING) && !filter.equals(FILTER_REJECTED) && !filter.equals(FILTER_AIAPPROVED)) {
             throw new IllegalArgumentException("Invalid filter: " + filter);
         }
         this.filter = filter;
