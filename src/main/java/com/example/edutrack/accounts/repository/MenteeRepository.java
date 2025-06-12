@@ -7,5 +7,6 @@ import com.example.edutrack.accounts.model.Mentee;
 
 public interface MenteeRepository extends JpaRepository<Mentee, UUID> {
     Optional<Mentee> findById(UUID id);
+    Optional<Mentee> findByEmail(String email);
 
 }

@@ -13,8 +13,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "vnpay_transactions")
 public class VnpayTransaction implements CommonTransaction {
+    public static final String TIME_ZONE = "Etc/GMT+7";
+    public static final String TIME_FORMAT = "yyyyMMddHHmmss";
+
     public static final int TRANSACTION_EXPIRATION_TIME = 15;  // minutes
     public static final int FRACTION_SHIFT = 100;
+    public static final int POINT_SHIFT = 1000;
     public static final String ORDER_TYPE_OTHER = "other";
 
     public static final String COMMAND_PAY = "pay";
@@ -29,9 +33,9 @@ public class VnpayTransaction implements CommonTransaction {
     public static final long AMOUNT_5000 = 5000000L;
 
     @Transient
-    private final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+    private final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE));
     @Transient
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
 
     private String version = "2.1.0";
     private String locale = "vn";
@@ -91,6 +95,7 @@ public class VnpayTransaction implements CommonTransaction {
     private String transactionStatus;
 
     public static boolean isValidAmount(Long amount) {
+        amount /= FRACTION_SHIFT;
         return amount == AMOUNT_100 || amount == AMOUNT_200 ||
                 amount == AMOUNT_500 || amount == AMOUNT_1000 ||
                 amount == AMOUNT_2000 || amount == AMOUNT_5000;
@@ -139,14 +144,6 @@ public class VnpayTransaction implements CommonTransaction {
     public void setCurrCode(String currCode) {
         this.currCode = currCode;
     }
-
-//    public String getBankCode() {
-//        return bankCode;
-//    }
-//
-//    public void setBankCode(String bankCode) {
-//        this.bankCode = bankCode;
-//    }
 
     public UUID getTxnRef() {
         return txnRef;
@@ -292,7 +289,7 @@ public class VnpayTransaction implements CommonTransaction {
 
     @Override
     public Double getTransactionAmount() {
-        return (double) getAmount() / FRACTION_SHIFT;
+        return (double) getAmount() / FRACTION_SHIFT / POINT_SHIFT;
     }
 
     public String getTransactionStatus() {
