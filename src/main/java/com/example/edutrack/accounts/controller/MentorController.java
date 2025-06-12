@@ -102,14 +102,20 @@ public class MentorController {
         model.addAttribute("enrollmentList", enrollmentList);
         return "skill-register-request";
     }
-    @GetMapping("/mentor/schedule/{eid}")
-    public String menteeReview(Model model, @PathVariable String eid, HttpSession session){
+    @GetMapping("/mentor/schedule/{esid}")
+    public String menteeReview(Model model, @PathVariable Integer esid, HttpSession session) {
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
         }
-
-
+        EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(esid);
+        if(enrollmentSchedule == null) {
+            return "redirect:/mentor/schedule?error=enrollmentNotFound";
+        }
+        if(!enrollmentSchedule.getEnrollment().getCourseMentor().getMentor().getId().equals(mentor.getId())) {
+            return "redirect:/mentor/schedule?error=notMentor";
+        }
+        model.addAttribute("enrollmentSchedule", enrollmentSchedule);
         return "mentee-review";
     }
 }
