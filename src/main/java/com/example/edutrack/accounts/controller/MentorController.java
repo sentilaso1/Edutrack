@@ -98,7 +98,7 @@ public class MentorController {
         if (mentor == null) {
             return "redirect:/login";
         }
-        List<Enrollment> enrollmentList = enrollmentService.findByStatus(status, mentor.getId());
+        List<Enrollment> enrollmentList = enrollmentService.findByStatusAndMentor(status, mentor.getId());
         model.addAttribute("enrollmentList", enrollmentList);
         return "skill-register-request";
     }
