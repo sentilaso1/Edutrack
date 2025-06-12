@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Ký Khóa Học - Lập Trình Web Cơ Bản</title>
+    <script th:src="@{/js/master.js}"></script>
+
     <style>
         :root {
             --keppei: #47c8ba;
@@ -493,7 +495,7 @@
                             </div>
                             <div class="summary-item">
                                 <span>Price per Slot</span>
-                                <span>30,000</span>
+                                <span th:text="${courseMentor.priceFormatted} + ' VND'" id="price-per-slot" th:data-price="${courseMentor.price}"></span>
                             </div>
                         </div>
 
@@ -838,11 +840,35 @@
                                                                     margin-top: 20px;
                                                                   "
                                                     >
-                                                        <input type="number" name="totalSlot" placeholder="Enter number of Slots">
+                                                        <input type="number" id="totalSlot" name="totalSlot" placeholder="Enter number of Slots">
                                                         <span>Start Time:
                                                             <p th:text="${startTime}"></p>
                                                         <button type="submit" name="action" value="checkStartDate">Check Start Date</button></span>
 
+                                                    </div>
+
+                                                    <div
+                                                            style="
+                                                                    grid-column: span 8;
+                                                                    text-align: left;
+                                                                    margin-top: 20px;
+                                                                    color: black;
+                                                                    display: block;
+                                                                  "
+                                                            th:if="${wallet != null}"
+                                                    >
+                                                        <p style="margin-bottom: 0.5em">Current balance: <span th:text="${wallet.balanceFormatted + ' VND (' + wallet.onHoldFormatted + ' VND on hold)'}"></span></p>
+                                                        <p>Total cost: <span id="total-cost">0 VND</span></p>
+
+                                                        <script th:inline="javascript">
+                                                            const pricePerSlot = document.getElementById("price-per-slot").getAttribute("data-price");
+                                                            const totalSlotInput = document.getElementById("totalSlot");
+
+                                                            totalSlotInput.addEventListener("input", function () {
+                                                                const totalCost = parseInt(pricePerSlot) * parseInt(totalSlotInput.value || 0);
+                                                                document.getElementById("total-cost").textContent = formatNumberWithSpaces(totalCost) + ' VND';
+                                                            });
+                                                        </script>
                                                     </div>
                                                 </div>
                                             </div>
@@ -852,10 +878,10 @@
                             </div>
                             <!-- Submit Section -->
                             <div class="submit-section">
-                                <button type="submit" class="submit-btn" id="submitBtn" name="action" value="submitForm">
+                                <button th:formaction="@{/courses/checkout/{cid}(cid=${courseMentor.id})}" type="submit" class="submit-btn" id="submitBtn" name="action" value="submitForm">
                                     Register Now
                                 </button>
-                            </div>
+                    </div>
                         </form>
                     </div>
                 </div>

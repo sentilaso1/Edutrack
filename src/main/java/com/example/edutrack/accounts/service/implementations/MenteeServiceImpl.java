@@ -5,6 +5,7 @@ import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.example.edutrack.accounts.model.Mentee;
@@ -30,5 +31,10 @@ public class MenteeServiceImpl implements MenteeService {
     @Override
     public List<Mentee> findAll() {
         return menteeRepository.findAll();
+    }
+
+    @Override
+    public Optional<Mentee> findById(UUID id) {
+        return menteeRepository.findById(id);
     }
 }

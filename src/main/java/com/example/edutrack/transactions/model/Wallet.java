@@ -1,6 +1,7 @@
 package com.example.edutrack.transactions.model;
 
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.common.model.CustomFormatter;
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -8,8 +9,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "wallets")
 public class Wallet {
-    public static final Double CONVERSION_RATE = 1000.0;
-
     @Id
     @Column(name = "user_id")
     private UUID id;
@@ -44,12 +43,20 @@ public class Wallet {
         return balance;
     }
 
+    public String getBalanceFormatted() {
+        return CustomFormatter.formatNumberWithSpaces(balance);
+    }
+
     public void setBalance(Double balance) {
         this.balance = balance;
     }
 
     public Double getOnHold() {
         return onHold;
+    }
+
+    public String getOnHoldFormatted() {
+        return CustomFormatter.formatNumberWithSpaces(onHold);
     }
 
     public void setOnHold(Double onHold) {

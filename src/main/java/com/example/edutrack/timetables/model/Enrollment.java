@@ -1,12 +1,12 @@
 package com.example.edutrack.timetables.model;
 
 import com.example.edutrack.accounts.model.Mentee;
-import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "enrollments")
@@ -49,18 +49,30 @@ public class Enrollment {
     @CreatedDate
     private Date createdDate = new Date();
 
-    @Column(name="schedule_summary")
+    @Lob
+    @Column(name="schedule_summary", columnDefinition = "TEXT")
     private String scheduleSummary; // mon-slot1, thu-slot2
+
+    private String formatScheduleList(List<Slot> slots, List<Day> days) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < days.size(); i++) {
+            sb.append(days.get(i)).append("-").append(slots.get(i).toString());
+            if (i < days.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
+    }
 
     public Enrollment() {
 
     }
 
-    public Enrollment(Mentee mentee, CourseMentor courseMentor, Integer totalSlots, Slot slot, Day day) {
+    public Enrollment(Mentee mentee, CourseMentor courseMentor, Integer totalSlots, List<Slot> slots, List<Day> days) {
         this.mentee = mentee;
         this.courseMentor = courseMentor;
         this.totalSlots = totalSlots;
-        this.scheduleSummary = day+"-"+slot;
+        this.scheduleSummary = formatScheduleList(slots, days);
     }
 
     public Long getId() {
