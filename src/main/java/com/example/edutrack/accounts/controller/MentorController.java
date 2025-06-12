@@ -2,15 +2,18 @@ package com.example.edutrack.accounts.controller;
 
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.DayOfWeek;
@@ -23,17 +26,25 @@ import java.util.stream.Collectors;
 @Controller(value="mentor")
 public class MentorController {
     private final EnrollmentScheduleService enrollmentScheduleService;
+    private final EnrollmentService enrollmentService;
 
-    public MentorController(EnrollmentScheduleService enrollmentScheduleService) {
+    public MentorController(EnrollmentScheduleService enrollmentScheduleService, EnrollmentService enrollmentService) {
         this.enrollmentScheduleService = enrollmentScheduleService;
+        this.enrollmentService = enrollmentService;
     }
 
-    @GetMapping("/mentor")
-    public String mentor(Model model) {
+    @RequestMapping("/mentor")
+    public String mentor(Model model,
+                         HttpSession session) {
+
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
         return "mentor-dashboard";
     }
 
-    @GetMapping("/mentor/schedule")
+    @GetMapping("mentor/schedule")
     public String viewWeek(@RequestParam(value = "weekStart", required = false) LocalDate weekStart,
                            HttpSession session,
                            Model model) {
@@ -82,5 +93,11 @@ public class MentorController {
         return "mentor_calendar";
     }
 
-
+    @GetMapping("/mentor/sensor-class")
+    public String viewSensorClassList(Model model,
+                                      @RequestParam(defaultValue = "PENDING") Enrollment.EnrollmentStatus status){
+        List<Enrollment> enrollmentList = enrollmentService.findByStatus(status);
+        model.addAttribute("enrollmentList", enrollmentList);
+        return "skill-register-request";
+    }
 }

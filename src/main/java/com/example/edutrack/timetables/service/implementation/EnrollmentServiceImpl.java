@@ -59,4 +59,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.findInProgressCourses(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
 
+    @Override
+    public List<Enrollment> findByStatus(Enrollment.EnrollmentStatus status) {
+        return enrollmentRepository.findByStatus(status);
+    }
+
 }
