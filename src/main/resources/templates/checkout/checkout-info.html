@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EduTrack - Checkout Success</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #fdfdfd;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px;
+        }
+
+        .checkout-header h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .success-body {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .success-message-box {
+            flex: 2;
+            background-color: #fff7f7;
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
+            border: 1px solid #f1dcdc;
+        }
+
+        .success-message-box h2 {
+            font-size: 28px;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .success-message-box p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .success-actions a {
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            margin: 0 8px;
+            border: 1px solid #aaa;
+            background-color: white;
+            color: #333;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .success-actions a:hover {
+            background-color: #f2f2f2;
+        }
+
+        .checkout-summary {
+            flex: 1;
+            padding: 24px;
+            background-color: #fff7f7;
+            border: 1px solid #f1dcdc;
+            border-radius: 8px;
+        }
+
+        .balance-box {
+            text-align: center;
+        }
+
+        .neuron-balance {
+            font-size: 32px;
+            color: #ff6666;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .link {
+            display: block;
+            margin-top: 4px;
+            color: #ff6666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="viewport">
+<div class="container">
+    <div class="checkout-header">
+        <h1>Checkout Information</h1>
+    </div>
+
+    <div class="success-body">
+        <div class="success-message-box">
+            <h2 th:if="${success != null && error == null}">Checkout Successful</h2>
+            <p th:if="${success != null && error == null}">Your learning schedule is now being processed.</p>
+
+            <h2 th:if="${error != null}">Checkout Failed</h2>
+            <p th:if="${error != null}" th:text="${error}">Checkout process failed. No neurons was deducted.</p>
+
+            <div class="success-actions">
+                <a th:href="@{/wallet/history}">Review Transaction</a>
+                <a th:href="@{/my-learning}">My Courses</a>
+            </div>
+        </div>
+
+        <div class="checkout-summary">
+            <div class="balance-box">
+                <p><strong>Current balance:</strong></p>
+                <p class="neuron-balance" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">250</p>
+                <p th:text="${'(' + wallet.onHoldFormatted + ' VND on hold)' }"></p>
+                <a th:href="@{/wallet}" class="link">View account details</a>
+                <a th:href="@{/wallet/recharge}" class="link">Add funds</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
