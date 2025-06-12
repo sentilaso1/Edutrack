@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <style>
+    .product-section {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border: none;
+      border-bottom: 3px solid transparent;
+      background: none;
+      cursor: pointer;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .tab.active {
+      border-bottom: 3px solid #ff2000;
+      color: #000;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .filter-select,
+    .sort-select {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .arrow-btn {
+      padding: 8px 12px;
+      background: #f1f1f1;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .product-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .product-table th,
+    .product-table td {
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      text-align: center;
+    }
+
+    .product-table th {
+      background: #f5f5f5;
+    }
+
+    .red-text {
+      color: red;
+      font-weight: bold;
+    }
+
+    .edit-btn,
+    .delete-btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      margin: 0 4px;
+      font-size: 16px;
+      padding: 0.5em 0.7em;
+      color: white;
+      width: 3em;
+      border-radius: 5px;
+    }
+
+    .edit-btn{
+      background-color: green;
+    }
+    .delete-btn{
+      background-color: #a6000f;
+    }
+    .nav-item span{
+      border-radius: 50%;
+      background-color: #cf0013;
+      color: white;
+      padding: 0.2em;
+      margin-left: 1em;
+    }
+  </style>
+  <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<div class="sidebar">
+  <h2>Edutrack Mentor</h2>
+  <button class="btn-new-project" onclick="openModal()">+ New Project</button>
+  <div class="nav-item"><a href="/mentor"><i class="fa fa-home" aria-hidden="true"></i> Dashboard</a></div>
+  <div class="nav-item"><a href="/mentor/schedule"><i class="fa fa-calendar" aria-hidden="true"></i> Schedule</a></div>
+  <div class="nav-item"><a href="/mentor/sensor-class"><i class="fa fa-list" aria-hidden="true"></i> Request Class</a><span>10</span></div>
+</div></div>
+</div>
+<div class="main">
+  <div class="graph">
+    <div class="product-section">
+      <div class="tabs">
+        <button class="tab active">Pending</button>
+        <button class="tab">Approved</button>
+        <button class="tab">Rejected</button>
+        <button class="tab">Cancel</button>
+      </div>
+
+      <div class="controls">
+        <input type="text" placeholder="Search a product" class="search-input">
+        <select class="filter-select">
+          <option>Filter by</option>
+        </select>
+        <select class="sort-select">
+          <option>Sort by</option>
+        </select>
+        <button class="arrow-btn">↓</button>
+      </div>
+
+      <table class="product-table">
+        <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Skill</th>
+          <th>Total slots</th>
+          <th>Start time</th>
+          <th>Created Date</th>
+          <th>Slot per Week</th>
+          <th style="min-width: 10em;">ACTION</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${enrollmentList}">
+          <td th:text="${item.mentee.fullName}">Monstera</td>
+          <td th:text="${item.courseMentor.course.name}">48.00</td>
+          <td th:text="${item.totalSlots}">39.02</td>
+          <td th:text="${item.startTime}">8.98</td>
+          <td th:text="${item.createdDate}">A/22</td>
+          <td class="red-text" th:text="${item.scheduleSummary}">10 pcs</td>
+          <td>
+            <button class="edit-btn"><i class="fa fa-check" aria-hidden="true"></i></button>
+            <button class="delete-btn"><i class="fa fa-times" aria-hidden="true"></i></button>
+          </td>
+        </tr>
+        <!-- Add more rows as needed -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
