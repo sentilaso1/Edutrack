@@ -35,25 +35,17 @@ public class WalletController {
 
         Optional<Wallet> wallet = walletService.findById(user.getId());
         if (wallet.isEmpty()) {
-            model.addAttribute("error", "Missing wallet information");
-        } else {
-            model.addAttribute("wallet", wallet.get());
-
-            System.out.println(
-
-                    commonTransactionRepository.findAllByUserIdLimit(
-                            user.getId(),
-                            RECENT_TRANSACTION_LIMIT
-                    )
-            );
-            model.addAttribute(
-                    "transactions",
-                    commonTransactionRepository.findAllByUserIdLimit(
-                            wallet.get().getId(),
-                            RECENT_TRANSACTION_LIMIT
-                    )
-            );
+            wallet = Optional.of(walletService.save(user));
         }
+
+        model.addAttribute("wallet", wallet.get());
+        model.addAttribute(
+                "transactions",
+                commonTransactionRepository.findAllByUserIdLimit(
+                        wallet.get().getId(),
+                        RECENT_TRANSACTION_LIMIT
+                )
+        );
 
         return "/wallet/my-wallet";
     }

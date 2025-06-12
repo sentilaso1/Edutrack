@@ -294,7 +294,7 @@ public class VnpayTransaction implements CommonTransaction {
 
     @Override
     public String getTransactionAmountFormatted() {
-        return CustomFormatter.formatNumberWithSpaces(getTransactionAmount());
+        return CustomFormatter.formatNumberWithSpaces(getTransactionAmount(), true);
     }
 
     public String getTransactionStatus() {

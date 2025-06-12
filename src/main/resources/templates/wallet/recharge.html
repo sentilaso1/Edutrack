@@ -224,6 +224,7 @@
                 <div>
                     <h3>Current balance:</h3>
                     <p class="balance" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '<null>'}"></p>
+                    <p class="on-hold" th:text="${wallet.onHold > 0 ? wallet.onHoldFormatted + ' VND on hold' : null}"></p>
                 </div>
 
                 <div>

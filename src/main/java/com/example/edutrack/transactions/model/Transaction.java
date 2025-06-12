@@ -29,7 +29,7 @@ public class Transaction implements CommonTransaction {
 
     @Override
     public String getTransactionAmountFormatted() {
-        return CustomFormatter.formatNumberWithSpaces(getAmount());
+        return CustomFormatter.formatNumberWithSpaces(getAmount(), true);
     }
 
     @Override

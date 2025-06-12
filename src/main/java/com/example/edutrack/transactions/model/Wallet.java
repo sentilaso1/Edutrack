@@ -55,6 +55,10 @@ public class Wallet {
         return onHold;
     }
 
+    public String getOnHoldFormatted() {
+        return CustomFormatter.formatNumberWithSpaces(onHold);
+    }
+
     public void setOnHold(Double onHold) {
         this.onHold = onHold;
     }
