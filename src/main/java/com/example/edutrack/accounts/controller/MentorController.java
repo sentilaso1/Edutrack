@@ -98,12 +98,17 @@ public class MentorController {
         if (mentor == null) {
             return "redirect:/login";
         }
-        List<Enrollment> enrollmentList = enrollmentService.findByStatus(status, mentor.getId());
+        List<Enrollment> enrollmentList = enrollmentService.findByStatusAndMentor(status, mentor.getId());
         model.addAttribute("enrollmentList", enrollmentList);
         return "skill-register-request";
     }
     @GetMapping("/mentor/schedule/{eid}")
-    public String menteeReview(Model model, @PathVariable String eid) {
+    public String menteeReview(Model model, @PathVariable String eid, HttpSession session){
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+
 
         return "mentee-review";
     }

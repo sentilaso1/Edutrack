@@ -60,7 +60,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public List<Enrollment> findByStatus(Enrollment.EnrollmentStatus status, UUID mentorId) {
+    public List<Enrollment> findByStatusAndMentor(Enrollment.EnrollmentStatus status, UUID mentorId) {
         return enrollmentRepository.findByStatus(status, mentorId);
     }
 
