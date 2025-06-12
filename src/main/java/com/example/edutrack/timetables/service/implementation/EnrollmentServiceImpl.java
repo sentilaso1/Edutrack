@@ -70,4 +70,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.findById(id).get();
     }
 
+    @Override
+    public Enrollment save(Enrollment enrollment) {
+        return enrollmentRepository.save(enrollment);
+    }
+
 }

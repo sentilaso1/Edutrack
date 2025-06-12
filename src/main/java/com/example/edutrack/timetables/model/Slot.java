@@ -27,9 +27,6 @@ public enum Slot {
 
     @Override
     public String toString() {
-        return "Slot{" +
-                "startTime=" + startTime +
-                ", endTime=" + endTime +
-                '}';
+        return name().toLowerCase();
     }
 }

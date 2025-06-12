@@ -21,4 +21,6 @@ public interface EnrollmentService {
     List<Enrollment> findByStatusAndMentor(Enrollment.EnrollmentStatus status, UUID mentorId);
 
     Enrollment findById(Long id);
+
+    Enrollment save(Enrollment enrollment);
 }
