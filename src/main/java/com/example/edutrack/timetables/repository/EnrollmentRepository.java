@@ -44,5 +44,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
            """)
     List<CourseMentor> findInProgressCourses(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
 
+    List<Enrollment> findByStatus(Enrollment.EnrollmentStatus status);
+
 
 }
