@@ -23,7 +23,7 @@
   --selective-yellow: hsl(42, 100%, 56%);
   --roman-silver: hsl(240, 6%, 51%);
   --roman-silver_10: hsla(240, 6%, 51%, 0.1);
-  --light-coral: hsl(357, 100%, 75%);
+  --light-coral: hsla(357, 100%, 75%, 0.99);
   --oxford-blue: hsl(224, 53%, 10%);
   --light-gray: hsl(0, 0%, 80%);
   --keppei: #369f93;
