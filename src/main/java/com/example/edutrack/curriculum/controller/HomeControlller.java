@@ -1,7 +1,9 @@
 package com.example.edutrack.curriculum.controller;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.TagEnrollmentCountDTO;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Controller
@@ -28,13 +31,15 @@ public class HomeControlller {
     private final CourseMentorService courseMentorService;
     private final MentorService mentorService;
     private final DashboardService dashboardService;
+    private final MenteeRepository menteeRepository;
 
-    public HomeControlller(CourseTagService courseTagService, EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService, DashboardService dashboardService) {
+    public HomeControlller(CourseTagService courseTagService, EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService, DashboardService dashboardService, MenteeRepository menteeRepository) {
         this.courseTagService = courseTagService;
         this.enrollmentService = enrollmentService;
         this.courseMentorService = courseMentorService;
         this.mentorService = mentorService;
         this.dashboardService = dashboardService;
+        this.menteeRepository = menteeRepository;
     }
 
     @GetMapping("/home")
@@ -128,6 +133,12 @@ public class HomeControlller {
 
         model.addAttribute("userType", "newUser");
         model.addAttribute("showSchedulesLink", false);
+
+        UUID userId = user.getId();
+        Mentee mentee = menteeRepository.findById(userId).orElse(null);
+        boolean showInterestModal = mentee != null && (mentee.getInterests() == null || mentee.getInterests().isEmpty());
+        model.addAttribute("userId", userId.toString());
+        model.addAttribute("showInterestModal", showInterestModal);
 
         return "mentee/mentee-landing-page";
     }
