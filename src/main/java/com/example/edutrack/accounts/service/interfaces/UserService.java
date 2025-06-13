@@ -3,8 +3,8 @@ package com.example.edutrack.accounts.service.interfaces;
 import com.example.edutrack.accounts.dto.UserStatsDTO;
 import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.model.User;
-import java.util.List;
-
+import com.example.edutrack.accounts.dto.LoginStats;
+import com.example.edutrack.accounts.dto.UserStats;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,4 +20,6 @@ public interface UserService {
         Staff getStaffByUserId(String userId);
         Page<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive, Pageable pageable);
         UserStatsDTO getUserStatistics();
+        UserStats getSummaryStats();
+        LoginStats getLoginStats();
 }
