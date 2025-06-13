@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 public class VnpayController {
@@ -46,7 +45,7 @@ public class VnpayController {
             return;
         }
 
-        if (!VnpayTransaction.isValidAmount(amount)) {
+        if (!VnpayTransaction.isValidAmount(amount * VnpayTransaction.FRACTION_SHIFT)) {
             response.sendRedirect("/wallet/recharge?error=Invalid amount");
             return;
         }

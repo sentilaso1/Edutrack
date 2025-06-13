@@ -1,19 +1,21 @@
 package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
-import com.example.edutrack.curriculum.dto.MentorDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.example.edutrack.transactions.model.Wallet;
+import com.example.edutrack.transactions.service.interfaces.WalletService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +42,9 @@ public class CourseController {
     private final CourseMentorServiceImpl courseMentorServiceImpl;
     private final MentorAvailableTimeService mentorAvailableTimeService;
     private final EnrollmentService enrollmentService;
+    private final WalletService walletService;
 
+    @Autowired
     public CourseController(CourseServiceImpl courseServiceImpl,
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorServiceImpl mentorServiceImpl,
@@ -49,7 +53,7 @@ public class CourseController {
                             CourseMentorService courseMentorService,
                             CourseMentorServiceImpl courseMentorServiceImpl,
                             MentorAvailableTimeService mentorAvailableTimeService,
-                            EnrollmentService enrollmentService) {
+                            EnrollmentService enrollmentService, WalletService walletService) {
         this.courseServiceImpl = courseServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
@@ -59,6 +63,7 @@ public class CourseController {
         this.courseTagService = courseTagService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.enrollmentService = enrollmentService;
+        this.walletService = walletService;
     }
 
     @GetMapping("/courses")
@@ -145,12 +150,22 @@ public class CourseController {
     }
 
     @GetMapping("courses/register/{cmid}")
-    public String registerCourse(@PathVariable UUID cmid,
+    public String registerCourse(@PathVariable UUID cmid, HttpSession session,
                                  Model model) {
         CourseMentor courseMentor = courseMentorService.findById(cmid);
         List <MentorAvailableTime> mentorAvailableTime = mentorAvailableTimeService.findByMentorId(courseMentor.getMentor());
         model.addAttribute("courseMentor", courseMentor);
         model.addAttribute("mentorAvailableTime", mentorAvailableTime);
+
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user != null) {
+            Optional<Wallet> walletOptional = walletService.findById(user.getId());
+            if (walletOptional.isEmpty()) {
+                walletOptional = Optional.of(walletService.save(user));
+            }
+            model.addAttribute("wallet", walletOptional.get());
+        }
+
         return "register-section";
     }
 }

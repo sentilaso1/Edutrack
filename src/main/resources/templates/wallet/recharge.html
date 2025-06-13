@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Recharge Neurons</title>
+    <title>EduTrack - Add Funds</title>
     <link rel="stylesheet" th:href="@{/css/master.css}"/>
     <link rel="stylesheet" th:href="@{/css/colors.css}"/>
 
@@ -138,30 +138,30 @@
 <body class="viewport">
     <div class="main-container">
         <header>
-            <h1>Recharge Neurons</h1>
-            <p>Stimulate your neurons to continue your learning journeys.</p>
+            <h1>Add Funds</h1>
+            <p>Add funds to your account to continue your learning journeys.</p>
         </header>
 
         <div class="horizontal-flex">
             <main class="fund-list">
                 <div class="fund-container">
                     <div class="fund-header">
-                        <h3>Add 100 Neurons</h3>
-                        <p>Minimum recharge level</p>
+                        <h3>Add 100.000 VND</h3>
+                        <p>Minimum fund level</p>
                     </div>
 
                     <div class="fund-form">
                         <span>100.000 VND</span>
                         <form th:action="@{/api/vnpay/pay}" method="post">
                             <input type="hidden" name="amount" value="100000"/>
-                            <button type="submit" class="">Recharge</button>
+                            <button type="submit" class="">Add Fund</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="fund-container">
                     <div class="fund-header">
-                        <h3>Add 200 Neurons</h3>
+                        <h3>Add 200.000 VND</h3>
                         <p class="invisible">Minimum recharge level</p>
                     </div>
 
@@ -169,14 +169,14 @@
                         <span>200.000 VND</span>
                         <form th:action="@{/api/vnpay/pay}" method="post">
                             <input type="hidden" name="amount" value="200000"/>
-                            <button type="submit" class="">Recharge</button>
+                            <button type="submit" class="">Add Fund</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="fund-container">
                     <div class="fund-header">
-                        <h3>Add 500 Neurons</h3>
+                        <h3>Add 500.000 VND</h3>
                         <p class="invisible">Minimum recharge level</p>
                     </div>
 
@@ -184,14 +184,14 @@
                         <span>500.000 VND</span>
                         <form th:action="@{/api/vnpay/pay}" method="post">
                             <input type="hidden" name="amount" value="500000"/>
-                            <button type="submit" class="">Recharge</button>
+                            <button type="submit" class="">Add Fund</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="fund-container">
                     <div class="fund-header">
-                        <h3>Add 1,000 Neurons</h3>
+                        <h3>Add 1.000.000 VND</h3>
                         <p class="invisible">Minimum recharge level</p>
                     </div>
 
@@ -199,14 +199,14 @@
                         <span>1.000.000 VND</span>
                         <form th:action="@{/api/vnpay/pay}" method="post">
                             <input type="hidden" name="amount" value="1000000"/>
-                            <button type="submit" class="">Recharge</button>
+                            <button type="submit" class="">Add Fund</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="fund-container">
                     <div class="fund-header">
-                        <h3>Add 2,000 Neurons</h3>
+                        <h3>Add 2.000.000 VND</h3>
                         <p class="invisible">Minimum recharge level</p>
                     </div>
 
@@ -214,7 +214,7 @@
                         <span>2.000.000 VND</span>
                         <form th:action="@{/api/vnpay/pay}" method="post">
                             <input type="hidden" name="amount" value="2000000"/>
-                            <button type="submit" class="">Recharge</button>
+                            <button type="submit" class="">Add Fund</button>
                         </form>
                     </div>
                 </div>
@@ -223,7 +223,8 @@
             <aside class="sidebar">
                 <div>
                     <h3>Current balance:</h3>
-                    <p class="balance" th:text="${wallet != null ? wallet.balance + ' Neurons' : '<null>'}">250 Neurons</p>
+                    <p class="balance" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '<null>'}"></p>
+                    <p class="on-hold" th:text="${wallet.onHold > 0 ? wallet.onHoldFormatted + ' VND on hold' : null}"></p>
                 </div>
 
                 <div>
@@ -232,9 +233,9 @@
                 </div>
 
                 <div>
-                    <h3>Recharge Instructions:</h3>
-                    <p>1. Select the amount of neurons you want to add.</p>
-                    <p>2. Click the "Recharge" button to proceed with the payment.</p>
+                    <h3>Add Fund Instructions:</h3>
+                    <p>1. Select the amount of funds you want to add.</p>
+                    <p>2. Click the "Add Fund" button to proceed with the payment.</p>
                     <p>3. Follow the instructions on the payment gateway.</p>
                 </div>
             </aside>

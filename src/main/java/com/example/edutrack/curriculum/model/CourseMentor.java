@@ -1,6 +1,7 @@
 package com.example.edutrack.curriculum.model;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.common.model.CustomFormatter;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,9 @@ public class CourseMentor {
 
     @ManyToOne
     private Course course;
+
+    @Column(name = "price", nullable = false)
+    private Double price = 0.0;
 
     @Column(name = "applied_date")
     private LocalDateTime appliedDate = LocalDateTime.now();
@@ -67,7 +71,19 @@ public class CourseMentor {
         this.id = id;
     }
 
+    public Double getPrice() {
+        return price;
+    }
+
+    public String getPriceFormatted() {
+        return CustomFormatter.formatNumberWithSpaces(getPrice());
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
     public String toString() {
-        return "MentorApplication [id=" + id + ", mentor=" + mentor + ", course=" + course + ", appliedDate=" + appliedDate + ", status=" + status + "]";
+        return "MentorApplication [id=" + id + ", mentor=" + mentor + ", course=" + course + ", price=" + price + ", appliedDate=" + appliedDate + ", status=" + status + "]";
     }
 }

@@ -1,32 +1,116 @@
 package com.example.edutrack.timetables.controller;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
+import com.example.edutrack.timetables.dto.EnrollmentRequestDTO;
 import com.example.edutrack.timetables.model.Day;
+import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
+import com.example.edutrack.transactions.model.Transaction;
+import com.example.edutrack.transactions.model.Wallet;
+import com.example.edutrack.transactions.service.interfaces.TransactionService;
+import com.example.edutrack.transactions.service.interfaces.WalletService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
 public class MenteeScheduleController {
+    private final MenteeService menteeService;
     private final MentorAvailableTimeService mentorAvailableTimeService;
+    private final EnrollmentService enrollmentService;
     private final EnrollmentScheduleService enrollmentScheduleService;
     private final CourseMentorServiceImpl courseMentorService;
+    private final WalletService walletService;
+    private final TransactionService transactionService;
 
-    public MenteeScheduleController(MentorAvailableTimeService mentorAvailableTimeService, EnrollmentScheduleService enrollmentScheduleService, CourseMentorServiceImpl courseMentorService) {
+    public MenteeScheduleController(MenteeService menteeService, MentorAvailableTimeService mentorAvailableTimeService, EnrollmentService enrollmentService, EnrollmentScheduleService enrollmentScheduleService, CourseMentorServiceImpl courseMentorService, WalletService walletService, TransactionService transactionService) {
+        this.menteeService = menteeService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
+        this.enrollmentService = enrollmentService;
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.courseMentorService = courseMentorService;
+        this.walletService = walletService;
+        this.transactionService = transactionService;
+    }
+
+    @PostMapping("/courses/checkout/{cmid}")
+    public String handleCheckout(
+            @PathVariable(value = "cmid") UUID courseMentorId,
+            @ModelAttribute EnrollmentRequestDTO params,
+            HttpSession session,
+            Model model
+    ) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        Optional<Mentee> menteeOpt = menteeService.findById(user.getId());
+        if (menteeOpt.isEmpty()) {
+            model.addAttribute("error", "Mentee not found");
+            return "/checkout/checkout-info";
+        }
+
+        CourseMentor courseMentor = courseMentorService.findById(courseMentorId);
+        if (courseMentor == null) {
+            model.addAttribute("error", "Course Mentor not found");
+            return "/checkout/checkout-info";
+        }
+        model.addAttribute("course", courseMentor.getCourse());
+        model.addAttribute("mentor", courseMentor.getMentor());
+
+        Optional<Wallet> walletOptional = walletService.findById(user.getId());
+        if (walletOptional.isEmpty()) {
+            walletOptional = Optional.of(walletService.save(user));
+        }
+        Wallet wallet = walletOptional.get();
+        model.addAttribute("wallet", wallet);
+
+        Double totalCost = courseMentor.getPrice() * params.getTotalSlot();
+        if (wallet.getBalance() < totalCost) {
+            model.addAttribute("error", "Insufficient balance in wallet");
+            return "/checkout/checkout-info";
+        }
+
+        System.out.println(params.getTotalSlot());
+        System.out.println(totalCost);
+        System.out.println(params.getTotalSlot());
+
+        wallet.setBalance(wallet.getBalance() - totalCost);
+        wallet.setOnHold(wallet.getOnHold() + totalCost);
+        walletService.save(wallet);
+        System.out.println(wallet);
+
+        Transaction transaction = new Transaction(
+                totalCost,
+                "Checkout for Course Mentor: " + courseMentor.getId(),
+                wallet
+        );
+        transactionService.save(transaction);
+
+        Enrollment enrollment = new Enrollment(
+                menteeOpt.get(),
+                courseMentor,
+                params.getTotalSlot(),
+                params.getSlot(),
+                params.getDay()
+        );
+        enrollmentService.save(enrollment);
+
+        model.addAttribute("success", "Checkout Successful");
+        return "/checkout/checkout-info";
     }
 
     @PostMapping("/courses/register/{cmid}")
@@ -41,14 +125,27 @@ public class MenteeScheduleController {
                                 HttpSession session,
                                 Model model,
                                 @RequestParam String action) {
-        Mentee user = (Mentee) session.getAttribute("loggedInUser");
+        User user = (User) session.getAttribute("loggedInUser");
         if (user == null) {
             return "redirect:/login";
         }
 
+        Optional<Mentee> menteeOpt = menteeService.findById(user.getId());
+        if (menteeOpt.isEmpty()) {
+            model.addAttribute("error", "Mentee not found");
+            return "register-section";
+        }
+        Mentee mentee = menteeOpt.get();
+
+        Optional<Wallet> walletOptional = walletService.findById(user.getId());
+        if (walletOptional.isEmpty()) {
+            walletOptional = Optional.of(walletService.save(user));
+        }
+        model.addAttribute("wallet", walletOptional.get());
+
         CourseMentor courseMentor = courseMentorService.findById(courseMentorId);
         if("checkStartDate".equals(action)){
-            String startTime = enrollmentScheduleService.findStartLearningTime(user, courseMentor, slot, day, totalSlot);
+            String startTime = enrollmentScheduleService.findStartLearningTime(mentee, courseMentor, slot, day, totalSlot);
             System.out.println(startTime);
             if(startTime == null){
                 startTime = "Cannot find start time";
@@ -56,8 +153,6 @@ public class MenteeScheduleController {
             model.addAttribute("startTime", startTime);
             model.addAttribute("courseMentor", courseMentor);
             return "register-section";
-        }else{
-            //dung d
         }
 
         return "register-section";

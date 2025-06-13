@@ -11,5 +11,7 @@ public interface WalletService {
     Optional<Wallet> findById(UUID id);
 
     Wallet save(User user);
+    Wallet save(Wallet wallet);
+
     Optional<Wallet> addFunds(User user, Double amount);
 }

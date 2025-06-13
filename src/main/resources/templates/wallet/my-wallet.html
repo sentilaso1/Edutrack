@@ -76,8 +76,12 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+        }
+
+        .wallet-balance-number .balance {
             font-size: 2em;
             font-weight: bold;
+            margin-bottom: 0.25em;
         }
 
         .history-section {
@@ -119,7 +123,7 @@
         <aside class="sidebar">
             <div>Account Details</div>
             <a th:href="@{/wallet/history}">Transaction History</a>
-            <a th:href="@{/wallet/recharge}">Recharge Neurons</a>
+            <a th:href="@{/wallet/recharge}">Add Funds</a>
         </aside>
 
         <!-- Main Content -->
@@ -129,7 +133,8 @@
                 <div class="wallet-balance">
                     <h3>Wallet Balance</h3>
                     <div class="wallet-balance-number">
-                        <p th:text="${wallet != null ? wallet.balance + ' Neurons' : '0 Neurons'}">250 Neurons</p>
+                        <p class="balance" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}"></p>
+                        <p class="on-hold" th:text="${wallet != null ? wallet.onHoldFormatted + ' VND on hold' : null}"></p>
                     </div>
                 </div>
                 <div class="wallet-chart">
@@ -155,8 +160,8 @@
                     <tbody>
                     <tr th:each="transaction : ${transactions}">
                         <td th:text="${transaction.transactionDate}"></td>
-                        <td th:text="${transaction.transactionInfo}">Recharge</td>
-                        <td th:text="${transaction.transactionAmount} + ' Neurons'"></td>
+                        <td th:text="${transaction.transactionInfo}"></td>
+                        <td th:text="${transaction.transactionAmountFormatted}"></td>
                     </tr>
                     </tbody>
                 </table>
