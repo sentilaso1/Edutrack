@@ -1,5 +1,7 @@
 package com.example.edutrack.transactions.model;
 
+import com.example.edutrack.common.model.CustomFormatter;
+import com.example.edutrack.curriculum.model.Course;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,6 +25,11 @@ public class Transaction implements CommonTransaction {
     @Override
     public Double getTransactionAmount() {
         return getAmount();
+    }
+
+    @Override
+    public String getTransactionAmountFormatted() {
+        return CustomFormatter.formatNumberWithSpaces(getAmount(), true);
     }
 
     @Override
@@ -75,11 +82,16 @@ public class Transaction implements CommonTransaction {
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
+
     public Transaction() {
     }
 
-    public Transaction(Double amount, Wallet wallet) {
+    public Transaction(Double amount, String info, Wallet wallet) {
         this.amount = amount;
+        this.info = info;
         this.wallet = wallet;
     }
 
@@ -139,6 +151,14 @@ public class Transaction implements CommonTransaction {
         this.wallet = wallet;
     }
 
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -148,6 +168,7 @@ public class Transaction implements CommonTransaction {
                 ", status='" + status + '\'' +
                 ", createdDate=" + createdDate +
                 ", updatedDate=" + updatedDate +
+                ", course=" + course +
                 ", wallet=" + wallet +
                 '}';
     }

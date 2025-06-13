@@ -1,6 +1,7 @@
 package com.example.edutrack.transactions.model;
 
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.common.model.CustomFormatter;
 import jakarta.persistence.*;
 
 import java.text.ParseException;
@@ -18,7 +19,6 @@ public class VnpayTransaction implements CommonTransaction {
 
     public static final int TRANSACTION_EXPIRATION_TIME = 15;  // minutes
     public static final int FRACTION_SHIFT = 100;
-    public static final int POINT_SHIFT = 1000;
     public static final String ORDER_TYPE_OTHER = "other";
 
     public static final String COMMAND_PAY = "pay";
@@ -289,7 +289,12 @@ public class VnpayTransaction implements CommonTransaction {
 
     @Override
     public Double getTransactionAmount() {
-        return (double) getAmount() / FRACTION_SHIFT / POINT_SHIFT;
+        return (double) getAmount() / FRACTION_SHIFT;
+    }
+
+    @Override
+    public String getTransactionAmountFormatted() {
+        return CustomFormatter.formatNumberWithSpaces(getTransactionAmount(), true);
     }
 
     public String getTransactionStatus() {

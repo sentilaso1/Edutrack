@@ -1,7 +1,9 @@
 package com.example.edutrack.curriculum.controller;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.TagEnrollmentCountDTO;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Controller
@@ -28,13 +31,15 @@ public class HomeControlller {
     private final CourseMentorService courseMentorService;
     private final MentorService mentorService;
     private final DashboardService dashboardService;
+    private final MenteeRepository menteeRepository;
 
-    public HomeControlller(CourseTagService courseTagService, EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService, DashboardService dashboardService) {
+    public HomeControlller(CourseTagService courseTagService, EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService, DashboardService dashboardService, MenteeRepository menteeRepository) {
         this.courseTagService = courseTagService;
         this.enrollmentService = enrollmentService;
         this.courseMentorService = courseMentorService;
         this.mentorService = mentorService;
         this.dashboardService = dashboardService;
+        this.menteeRepository = menteeRepository;
     }
 
     @GetMapping("/home")
@@ -89,16 +94,16 @@ public class HomeControlller {
 
         model.addAttribute("userType", "guest");
         model.addAttribute("showSchedulesLink", false);
-
+        model.addAttribute("showTracker", false);
         return "mentee/mentee-landing-page";
     }
 
 
     private String handleNewLoggedInUser(User user, Model model) {
-        model.addAttribute("headerCTA", "My Dashboard");
-        model.addAttribute("headerCTALink", "/dashboard");
+        model.addAttribute("headerCTA", "Logout");
+        model.addAttribute("headerCTALink", "/logout");
 
-        model.addAttribute("heroHeadline", "Welcome, <span class=\"span\">" + user.getFullName() + "</span>!");
+        model.addAttribute("heroHeadline", "Welcome, <span class=\"span\">" + user.getFullName() + "!</span>");
         model.addAttribute("heroSubHeadline", "Start your learning journey with personalized recommendations.");
         model.addAttribute("heroCTA", "Find Your First Course");
         model.addAttribute("heroCTALink", "/courses");
@@ -128,13 +133,19 @@ public class HomeControlller {
 
         model.addAttribute("userType", "newUser");
         model.addAttribute("showSchedulesLink", false);
+        model.addAttribute("showDashboard", true);
 
+        UUID userId = user.getId();
+        Mentee mentee = menteeRepository.findById(userId).orElse(null);
+        boolean showInterestModal = mentee != null && (mentee.getInterests() == null || mentee.getInterests().isEmpty());
+        model.addAttribute("userId", userId.toString());
+        model.addAttribute("showInterestModal", showInterestModal);
         return "mentee/mentee-landing-page";
     }
 
     private String handleExperiencedLoggedInUser(User user, Model model) {
-        model.addAttribute("headerCTA", "My Dashboard");
-        model.addAttribute("headerCTALink", "/dashboard");
+        model.addAttribute("headerCTA", "Logout");
+        model.addAttribute("headerCTALink", "/logout");
 
         if (dashboardService.isAllCoursesCompleted(user.getId())) {
             model.addAttribute("heroHeadline", "<span class='span'>Well Done!</span>");
@@ -187,6 +198,8 @@ public class HomeControlller {
 
         model.addAttribute("userType", "experiencedUser");
         model.addAttribute("showSchedulesLink", true);
+        model.addAttribute("showTracker", true);
+        model.addAttribute("showDashboard", true);
 
         return "mentee/mentee-landing-page";
     }

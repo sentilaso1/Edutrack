@@ -21,15 +21,18 @@ public interface CvRepository extends JpaRepository<CV, UUID> {
 
     Optional<CV> findByUserId(UUID userId);
 
+    List<CV> findByStatus(String status);
+
 
     @Query(value = """
             SELECT * FROM cv
-            WHERE status IN ('pending', 'approved', 'rejected')
+            WHERE status IN ('pending', 'aiapproved', 'approved', 'rejected')
             ORDER BY
               CASE status
                 WHEN 'pending' THEN 1
-                WHEN 'approved' THEN 2
-                WHEN 'rejected' THEN 3
+                WHEN 'aiapproved' THEN 2
+                WHEN 'approved' THEN 3
+                WHEN 'rejected' THEN 4
               END,
               created_date DESC
             """, nativeQuery = true)
@@ -38,12 +41,13 @@ public interface CvRepository extends JpaRepository<CV, UUID> {
 
     @Query(value = """
             SELECT * FROM cv
-            WHERE status IN ('pending', 'approved', 'rejected')
+            WHERE status IN ('pending', 'aiapproved', 'approved', 'rejected')
             ORDER BY
               CASE status
                 WHEN 'pending' THEN 1
-                WHEN 'approved' THEN 2
-                WHEN 'rejected' THEN 3
+                WHEN 'aiapproved' THEN 2
+                WHEN 'approved' THEN 3
+                WHEN 'rejected' THEN 4
               END,
               created_date
             """, nativeQuery = true)
@@ -51,4 +55,5 @@ public interface CvRepository extends JpaRepository<CV, UUID> {
 
     @Query("SELECT DISTINCT cv.skills FROM CV cv")
     List<String> findAllSkills();
+
 }

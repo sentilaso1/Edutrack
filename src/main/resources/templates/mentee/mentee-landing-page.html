@@ -27,6 +27,7 @@
       - custom css link
     -->
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/mentee-landing-page.css}"/>
     <style>
         html, body {
             overflow-x: hidden;
@@ -195,6 +196,77 @@
             display: block;
         }
 
+        #interest-modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 10000;
+            background: rgba(16,20,40, 0.45);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .interest-modal {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 6px 36px rgba(0,0,0,0.13);
+            padding: 2.5rem 2.5rem 2rem 2.5rem;
+            min-width: 370px;
+            max-width: 95vw;
+            text-align: center;
+            animation: modalFadeIn .38s;
+        }
+        @keyframes modalFadeIn {
+            from { transform: scale(0.98) translateY(30px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        #interest-modal-backdrop .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 18px 0 10px 0;
+            justify-content: center;
+        }
+        #interest-modal-backdrop .tag {
+            padding: 8px 19px;
+            border-radius: 25px;
+            background: #f2f7fb;
+            color: #222;
+            border: 1.5px solid #007bff;
+            cursor: pointer;
+            transition: all 0.16s;
+            font-size: 1.07em;
+        }
+        #interest-modal-backdrop .tag.selected {
+            background: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+        #interest-modal-backdrop .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 22px;
+            justify-content: center;
+        }
+        #interest-modal-backdrop .btn-primary {
+            background: #007bff; color: #fff; border: none;
+            border-radius: 7px; padding: 9px 26px; font-size: 1em; cursor: pointer;
+        }
+        #interest-modal-backdrop .btn-primary:disabled { background: #bbb; }
+        #interest-modal-backdrop .btn-secondary {
+            background: #eee; color: #444; border: none;
+            border-radius: 7px; padding: 9px 26px; font-size: 1em; cursor: pointer;
+        }
+        #interest-modal-backdrop input[type="text"] {
+            margin-top: 8px; width: 89%; padding: 7px 12px; border-radius: 6px; border: 1px solid #c0c0c0; font-size: 1em;
+        }
+        #interest-modal-backdrop #interest-msg {
+            color: #d22632;
+            margin-top: 14px;
+            min-height: 22px;
+            font-size: 1em;
+        }
+
 
     </style>
     <!-- Swiper CSS -->
@@ -234,6 +306,10 @@
                 <li class="navbar-item"><a th:href="@{/mentors}" class="navbar-link title-sm">Mentors</a></li>
                 <li class="navbar-item"><a th:href="@{/schedules}" class="navbar-link title-sm"
                                            th:if="${showSchedulesLink}">Schedules</a></li>
+                <li class="navbar-item"><a th:href="@{/dashboard}" class="navbar-link title-sm"
+                                           th:if="${showDashboard}">Dashboard</a></li>
+                <li class="navbar-item"><a th:href="@{/learning-tracker}" class="navbar-link title-sm"
+                                           th:if="${showTracker}">Learning Tracker</a></li>
                 <li class="navbar-item"><a href="#" class="navbar-link title-sm">Contacts</a></li>
             </ul>
         </nav>
@@ -574,7 +650,7 @@
   - #FOOTER
 -->
 
-<footer class="footer has-bg-image" th:style="|background-image: url(' + @{/assets/images/footer-bg.png} + ')|">
+<footer class="footer has-bg-image" th:style="|background-image: url('@{/assets/images/footer-bg.png}')|">
 
     <div class="section footer-top">
         <div class="container">
@@ -690,18 +766,21 @@
 
 </footer>
 
+<!-- Interest Selection Modal Layer -->
+<div id="interest-modal-backdrop" th:if="${showInterestModal}" style="display:flex;">
+    <div class="interest-modal">
+        <h2>Select Your Interests</h2>
+        <input id="interest-search" type="text" placeholder="Search tags..." autocomplete="off"/>
+        <div id="interest-tags" class="tag-list"></div>
+        <div class="modal-actions">
+            <button id="interest-save" class="btn btn-primary" disabled>Save</button>
+            <button id="interest-skip" class="btn btn-secondary">Skip</button>
+        </div>
+        <div id="interest-msg"></div>
+    </div>
+</div>
 
-<!--
- - custom js link
--->
-<script th:src="@{/assets/js/courlist.js}"></script>
-
-<!--
-  - ionicon
--->
-<script type="module" th:src="'https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js'"></script>
-<script nomodule th:src="'https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js'"></script>
-<script>
+<script th:inline="javascript">
     function moveCarousel(id, direction) {
         const container = document.getElementById(id);
         const wrapper = container.querySelector('.carousel-wrapper');
@@ -719,7 +798,98 @@
         wrapper.style.transform = `translateX(-${currentScroll}px)`;
         wrapper.dataset.scroll = currentScroll;
     }
+
+    const menteeUserId = /*[[${userId}]]*/ '0';
+
+    let allInterestTags = [];
+    let selectedInterestTagIds = new Set();
+
+    // Only run if modal is present
+    if (document.getElementById('interest-modal-backdrop')) {
+        // Fetch and render tags
+        async function fetchInterestTags(query) {
+            try {
+                const res = await fetch(`/api/tags?search=${encodeURIComponent(query)}`);
+                if (!res.ok) {
+                    allInterestTags = []; // fallback to empty array on error
+                } else {
+                    allInterestTags = await res.json();
+                }
+            } catch (e) {
+                allInterestTags = [];
+            }
+            renderInterestTags();
+        }
+
+        function renderInterestTags() {
+            const tagsDiv = document.getElementById('interest-tags');
+            tagsDiv.innerHTML = '';
+            if (!Array.isArray(allInterestTags)) return;
+            allInterestTags.forEach(tag => {
+                const tagDiv = document.createElement('div');
+                tagDiv.className = 'tag' + (selectedInterestTagIds.has(tag.id) ? ' selected' : '');
+                tagDiv.textContent = tag.title;
+                tagDiv.onclick = () => {
+                    if (selectedInterestTagIds.has(tag.id)) selectedInterestTagIds.delete(tag.id);
+                    else selectedInterestTagIds.add(tag.id);
+                    renderInterestTags();
+                    document.getElementById('interest-save').disabled = selectedInterestTagIds.size === 0;
+                };
+                tagsDiv.appendChild(tagDiv);
+            });
+            document.getElementById('interest-save').disabled = selectedInterestTagIds.size === 0;
+        }
+
+        document.getElementById('interest-search').addEventListener('input', function(e) {
+            fetchInterestTags(e.target.value);
+        });
+        document.getElementById('interest-save').onclick = async function() {
+            await submitInterestSelection(false);
+        };
+        document.getElementById('interest-skip').onclick = async function() {
+            await submitInterestSelection(true);
+        };
+
+        async function submitInterestSelection(skipped) {
+            document.getElementById('interest-save').disabled = true;
+            document.getElementById('interest-skip').disabled = true;
+            document.getElementById('interest-msg').textContent = '';
+            try {
+                const resp = await fetch('/api/mentees/' + menteeUserId + '/interests', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        tags: Array.from(selectedInterestTagIds),
+                        skipped: skipped
+                    })
+                });
+                if (resp.ok) {
+                    location.reload();
+                } else {
+                    const msg = await resp.text();
+                    document.getElementById('interest-msg').textContent = msg;
+                }
+            } catch (err) {
+                document.getElementById('interest-msg').textContent = 'Network error. Please try again.';
+            }
+            document.getElementById('interest-save').disabled = selectedInterestTagIds.size === 0;
+            document.getElementById('interest-skip').disabled = false;
+        }
+
+        // On open, fetch all tags
+        fetchInterestTags('');
+    }
 </script>
+<!--
+ - custom js link
+-->
+<script th:src="@{/assets/js/courlist.js}"></script>
+
+<!--
+  - ionicon
+-->
+<script type="module" th:src="'https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js'"></script>
+<script nomodule th:src="'https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js'"></script>
 
 </body>
 

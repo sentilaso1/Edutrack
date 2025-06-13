@@ -13,6 +13,7 @@ import java.util.UUID;
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Integer> {
     Optional<Tag> findByTitle(String title);
+    List<Tag> findByTitleContainingIgnoreCase(String title);
 
     @Query(
             value = "SELECT t.* FROM tags t " +
