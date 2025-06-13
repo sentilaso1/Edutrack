@@ -1,10 +1,10 @@
 package com.example.edutrack.accounts.service.interfaces;
 
 import com.example.edutrack.accounts.dto.ScheduledJobDTO;
-import com.example.edutrack.accounts.model.ScheduledJobLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
+import com.example.edutrack.accounts.dto.JobStats;
 
 public interface ScheduledJobService {
         Page<ScheduledJobDTO> getJobs(String search, Pageable pageable);
@@ -12,5 +12,5 @@ public interface ScheduledJobService {
         void updateJob(Long id, ScheduledJobDTO dto);
         void toggleJob(Long id, boolean active);
         void runJobNow(Long id);
-        List<ScheduledJobLog> getJobLogs(Long jobId);
+        JobStats getJobSummary();
 }
