@@ -27,6 +27,7 @@
       - custom css link
     -->
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/mentee-landing-page.css}"/>
     <style>
         html, body {
             overflow-x: hidden;
@@ -305,6 +306,10 @@
                 <li class="navbar-item"><a th:href="@{/mentors}" class="navbar-link title-sm">Mentors</a></li>
                 <li class="navbar-item"><a th:href="@{/schedules}" class="navbar-link title-sm"
                                            th:if="${showSchedulesLink}">Schedules</a></li>
+                <li class="navbar-item"><a th:href="@{/dashboard}" class="navbar-link title-sm"
+                                           th:if="${showDashboard}">Dashboard</a></li>
+                <li class="navbar-item"><a th:href="@{/learning-tracker}" class="navbar-link title-sm"
+                                           th:if="${showTracker}">Learning Tracker</a></li>
                 <li class="navbar-item"><a href="#" class="navbar-link title-sm">Contacts</a></li>
             </ul>
         </nav>

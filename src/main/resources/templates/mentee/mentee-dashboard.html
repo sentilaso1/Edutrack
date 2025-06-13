@@ -23,204 +23,7 @@
     -->
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
-
-    <style>
-        body {
-            background-color: #f4e7eb;
-        }
-
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .dashboard-header {
-            margin-bottom: 30px;
-        }
-
-        .dashboard-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .dashboard-subtitle {
-            color: #666;
-            font-size: 1rem;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .dashboard-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .card-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            color: #ff6b35;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .stat-number {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background-color: #e5e7eb;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: #ff6b35;
-            transition: width 0.3s ease;
-        }
-
-        .view-link {
-            color: #ff6b35;
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .view-link:hover {
-            text-decoration: underline;
-        }
-
-        .activity-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .activity-item {
-            display: flex;
-            align-items: flex-start;
-            padding: 15px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .activity-icon.session {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .activity-icon.goal {
-            background-color: #10b981;
-            color: white;
-        }
-
-        .activity-icon.notification {
-            background-color: #8b5cf6;
-            color: white;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .activity-description {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-
-        .activity-time {
-            color: #999;
-            font-size: 0.8rem;
-        }
-
-        .single-row-scroll {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 24px;
-            padding: 10px 0;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .single-row-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        .single-row-scroll > a.card {
-            flex: 0 0 auto;
-            scroll-snap-align: start;
-            width: 300px;
-            text-decoration: none;
-            color: inherit;
-            transition: transform 0.2s ease;
-        }
-
-        .single-row-scroll > a.card:hover {
-            transform: translateY(-4px);
-        }
-
-        .mentor-name{
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-    </style>
+    <link rel="stylesheet" th:href="@{/assets/css/mentee-dashboard.css}"/>
 </head>
 
 <body>
@@ -231,229 +34,334 @@
 
 <main>
     <section class="section has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
-        <div class="dashboard-container">
-            <!-- Dashboard Header -->
-            <div class="dashboard-header">
-                <h1 class="dashboard-title">Mentee Dashboard</h1>
-                <p class="dashboard-subtitle">Track your learning journey and connect with mentors</p>
-            </div>
+        <div th:if="${hasEnrollment}">
+            <div class="dashboard-container">
+                <!-- Dashboard Header -->
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">Mentee Dashboard</h1>
+                    <p class="dashboard-subtitle">Track your learning journey and connect with mentors</p>
+                </div>
 
-            <!-- Dashboard Statistics -->
-            <div class="dashboard-grid">
-                <!-- Upcoming Sessions -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <i class="fa fa-clock-o card-icon"></i>
-                        <h3 class="card-title" th:text="${isAllCompleted} ? 'All Sessions Completed' : 'Upcoming Session'">Upcoming Session</h3>
-                    </div>
-
-                    <!-- Styled and emphasized session info -->
-                    <div th:if="${isAllCompleted}">
-                        <div class="stat-label" style="font-weight: bold;">
-                            🎉 Congratulations! You’ve completed all sessions.
+                <!-- Dashboard Statistics -->
+                <div class="dashboard-grid">
+                    <!-- Upcoming Sessions -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fa fa-clock-o card-icon"></i>
+                            <h3 class="card-title" th:text="${isAllCompleted} ? 'All Sessions Completed' : 'Upcoming Session'">Upcoming Session</h3>
                         </div>
-                        <a href="#" th:href="@{/courses}" class="view-link">
-                            Find New Courses
-                            <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
-                        </a>
-                    </div>
 
-                    <div th:if="${!isAllCompleted}">
-                        <div class="stat-label">
-                            <span>Next session: </span>
-                            <span style="font-weight: bold; font-style: italic;"
-                                  th:text="${nextSessionTime} ?: 'No upcoming session'">
+                        <!-- Styled and emphasized session info -->
+                        <div th:if="${isAllCompleted}">
+                            <div class="stat-label" style="font-weight: bold;">
+                                🎉 Congratulations! You’ve completed all sessions.
+                            </div>
+                            <a href="#" th:href="@{/courses}" class="view-link">
+                                Find New Courses
+                                <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                            </a>
+                        </div>
+
+                        <div th:if="${!isAllCompleted}">
+                            <div class="stat-label">
+                                <span>Next session: </span>
+                                <span style="font-weight: bold; font-style: italic;"
+                                      th:text="${nextSessionTime} ?: 'No upcoming session'">
                             No upcoming session
                         </span>
-                        </div>
+                            </div>
 
-                        <a href="#" class="view-link" th:href="@{/mentee/schedule}">
-                            View schedule
+                            <a href="#" class="view-link" th:href="@{/mentee/schedule}">
+                                View schedule
+                                <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Learning Progress -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fa fa-bar-chart card-icon"></i>
+                            <h3 class="card-title">Learning Progress</h3>
+                        </div>
+                        <div class="stat-number" th:text="(${learningProgress ?: 65}) + '%'">65%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" th:style="'width: ' + (${learningProgress ?: 65}) + '%'"></div>
+                        </div>
+                        <div class="stat-label">Overall course completion</div>
+                        <a href="#" class="view-link" th:href="@{/learning-tracker}">
+                            View details
+                            <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                        </a>
+                    </div>
+
+                    <!-- My Mentors -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fa fa-users card-icon"></i>
+                            <h3 class="card-title">My Mentors</h3>
+                        </div>
+                        <div class="stat-number" th:text="${totalMentors ?: 3}">3</div>
+                        <div class="stat-label">Active mentorship relationships</div>
+                        <a href="#" class="view-link" th:href="@{/mentors}">
+                            Find more mentors
                             <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- Learning Progress -->
-                <div class="dashboard-card">
+                <!-- Recent Activity -->
+                <!--            Chưa có notification cho nhóm-->
+                <div class="dashboard-card" style="margin-bottom: 40px;">
                     <div class="card-header">
-                        <i class="fa fa-bar-chart card-icon"></i>
-                        <h3 class="card-title">Learning Progress</h3>
+                        <i class="fa fa-history card-icon"></i>
+                        <h3 class="card-title">Recent Activity</h3>
                     </div>
-                    <div class="stat-number" th:text="(${learningProgress ?: 65}) + '%'">65%</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" th:style="'width: ' + (${learningProgress ?: 65}) + '%'"></div>
-                    </div>
-                    <div class="stat-label">Overall course completion</div>
-                    <a href="#" class="view-link" th:href="@{/mentee/progress}">
-                        View details
-                        <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
-                    </a>
-                </div>
-
-                <!-- My Mentors -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <i class="fa fa-users card-icon"></i>
-                        <h3 class="card-title">My Mentors</h3>
-                    </div>
-                    <div class="stat-number" th:text="${totalMentors ?: 3}">3</div>
-                    <div class="stat-label">Active mentorship relationships</div>
-                    <a href="#" class="view-link" th:href="@{/mentors}">
-                        Find more mentors
-                        <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <!--            Chưa có notification cho nhóm-->
-            <div class="dashboard-card" style="margin-bottom: 40px;">
-                <div class="card-header">
-                    <i class="fa fa-history card-icon"></i>
-                    <h3 class="card-title">Recent Activity</h3>
-                </div>
-                <ul class="activity-list">
-                    <!-- Dynamic activities from backend -->
-                    <li class="activity-item" th:each="activity : ${recentActivities ?: {}}">
-                        <div class="activity-icon" th:classappend="${activity.type}">
-                            <i th:class="'fa fa-' + (${activity.icon})"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title" th:text="${activity.title}">Activity Title</div>
-                            <div class="activity-description" th:text="${activity.description}">Description</div>
-                            <div class="activity-time" th:text="${activity.time}">Time</div>
-                        </div>
-                    </li>
-
-                    <!-- Default activities based on actual schema -->
-                    <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                        <div class="activity-icon session">
-                            <i class="fa fa-calendar"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">
-                                <a th:href="@{/mentee/sessions}" class="view-link" style="text-decoration: none;">
-                                    Session completed with John Mentor
-                                </a>
+                    <ul class="activity-list">
+                        <!-- Dynamic activities from backend -->
+                        <li class="activity-item" th:each="activity : ${recentActivities ?: {}}">
+                            <div class="activity-icon" th:classappend="${activity.type}">
+                                <i th:class="'fa fa-' + (${activity.icon})"></i>
                             </div>
-                            <div class="activity-description">Introduction to Java - 90 minutes • Status: Present</div>
-                            <div class="activity-time">Yesterday at 2:00 PM</div>
-                        </div>
-                    </li>
-
-                    <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                        <div class="activity-icon enrollment">
-                            <i class="fa fa-check-circle"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">
-                                <a th:href="@{/mentee/enrollments}" class="view-link" style="text-decoration: none;">
-                                    Enrollment accepted
-                                </a>
+                            <div class="activity-content">
+                                <div class="activity-title" th:text="${activity.title}">Activity Title</div>
+                                <div class="activity-description" th:text="${activity.description}">Description</div>
+                                <div class="activity-time" th:text="${activity.time}">Time</div>
                             </div>
-                            <div class="activity-description">Web Development with React - 8 sessions with Sarah M.
+                        </li>
+
+                        <!-- Default activities based on actual schema -->
+                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
+                            <div class="activity-icon session">
+                                <i class="fa fa-calendar"></i>
                             </div>
-                            <div class="activity-time">2 days ago</div>
-                        </div>
-                    </li>
-
-                    <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                        <div class="activity-icon payment">
-                            <i class="fa fa-credit-card"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">
-                                <a th:href="@{/mentee/wallet}" class="view-link" style="text-decoration: none;">
-                                    Payment completed
-                                </a>
-                            </div>
-                            <div class="activity-description">$85.50 paid for Machine Learning Basics course</div>
-                            <div class="activity-time">3 days ago</div>
-                        </div>
-                    </li>
-
-                    <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                        <div class="activity-icon feedback">
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">
-                                <a th:href="@{/mentee/feedback}" class="view-link" style="text-decoration: none;">
-                                    Feedback submitted
-                                </a>
-                            </div>
-                            <div class="activity-description">Rated 5 stars for Cloud Computing with AWS course</div>
-                            <div class="activity-time">1 week ago</div>
-                        </div>
-                    </li>
-
-                    <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                        <div class="activity-icon bookmark">
-                            <i class="fa fa-bookmark"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">
-                                <a th:href="@{/mentee/bookmarks}" class="view-link" style="text-decoration: none;">
-                                    Course bookmarked
-                                </a>
-                            </div>
-                            <div class="activity-description">Added "Advanced JavaScript Patterns" to bookmarks</div>
-                            <div class="activity-time">1 week ago</div>
-                        </div>
-                    </li>
-                </ul>
-                <div style="text-align: center; margin-top: 20px;">
-                    <a th:href="@{/mentee/activity}" class="view-link">
-                        View all activity
-                        <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
-                    </a>
-                </div>
-            </div>
-
-            <section class="section course" aria-labelledby="recommended-label">
-                <div class="container">
-                    <p class="title-sm section-subtitle text-center">Recommended For You</p>
-
-                    <h2 class="headline-md section-title text-center" id="recommended-label">
-                        <span>Courses You Might Like</span>
-                    </h2>
-
-                    <div class="single-row-scroll">
-                        <a th:each="courseMentor : ${recommendedCourses}" th:href="@{'/courses/' + ${courseMentor.courseMentorId}}"
-                           class="card course-card">
-                            <figure class="card-banner">
-                                <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
-                                     class="img-cover" alt="Mentor Avatar"/>
-                            </figure>
-                            <div class="card-content">
-                                <div class="wrapper">
-                                    <p>Price</p>
-                                    <div class="rating-wrapper">
-                                        <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" alt="star"/>
-                                    </div>
+                            <div class="activity-content">
+                                <div class="activity-title">
+                                    <a th:href="@{/mentee/sessions}" class="view-link" style="text-decoration: none;">
+                                        Session completed with John Mentor
+                                    </a>
                                 </div>
-                                <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course Title</h3>
-                                <div class="card-meta wrapper">
-                                    <p class="title-sm">
-                                        <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt=""/>
-                                        <span th:text="${courseMentor.studentCount + ' Enrollments'}">0 Enrollments</span>
-                                    </p>
-                                </div>
-                                <p class="title-sm mentor-name">
-                                    <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor Name</span>
-                                </p>
+                                <div class="activity-description">Introduction to Java - 90 minutes • Status: Present</div>
+                                <div class="activity-time">Yesterday at 2:00 PM</div>
                             </div>
+                        </li>
+
+                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
+                            <div class="activity-icon enrollment">
+                                <i class="fa fa-check-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">
+                                    <a th:href="@{/mentee/enrollments}" class="view-link" style="text-decoration: none;">
+                                        Enrollment accepted
+                                    </a>
+                                </div>
+                                <div class="activity-description">Web Development with React - 8 sessions with Sarah M.
+                                </div>
+                                <div class="activity-time">2 days ago</div>
+                            </div>
+                        </li>
+
+                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
+                            <div class="activity-icon payment">
+                                <i class="fa fa-credit-card"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">
+                                    <a th:href="@{/mentee/wallet}" class="view-link" style="text-decoration: none;">
+                                        Payment completed
+                                    </a>
+                                </div>
+                                <div class="activity-description">$85.50 paid for Machine Learning Basics course</div>
+                                <div class="activity-time">3 days ago</div>
+                            </div>
+                        </li>
+
+                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
+                            <div class="activity-icon feedback">
+                                <i class="fa fa-star"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">
+                                    <a th:href="@{/mentee/feedback}" class="view-link" style="text-decoration: none;">
+                                        Feedback submitted
+                                    </a>
+                                </div>
+                                <div class="activity-description">Rated 5 stars for Cloud Computing with AWS course</div>
+                                <div class="activity-time">1 week ago</div>
+                            </div>
+                        </li>
+
+                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
+                            <div class="activity-icon bookmark">
+                                <i class="fa fa-bookmark"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">
+                                    <a th:href="@{/mentee/bookmarks}" class="view-link" style="text-decoration: none;">
+                                        Course bookmarked
+                                    </a>
+                                </div>
+                                <div class="activity-description">Added "Advanced JavaScript Patterns" to bookmarks</div>
+                                <div class="activity-time">1 week ago</div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a th:href="@{/mentee/activity}" class="view-link">
+                            View all activity
+                            <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                         </a>
                     </div>
+                </div>
 
-                    <div class="view-more-wrapper text-center" style="margin-top: 30px;">
-                        <a th:href="@{/courses}" class="btn btn-primary">View More</a>
+                <section class="section course" aria-labelledby="recommended-label">
+                    <div class="container">
+                        <p class="title-sm section-subtitle text-center">Recommended For You</p>
+
+                        <h2 class="headline-md section-title text-center" id="recommended-label">
+                            <span>Courses You Might Like</span>
+                        </h2>
+
+                        <div class="single-row-scroll">
+                            <a th:each="courseMentor : ${recommendedCourses}" th:href="@{'/courses/' + ${courseMentor.courseMentorId}}"
+                               class="card course-card">
+                                <figure class="card-banner">
+                                    <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
+                                         class="img-cover" alt="Mentor Avatar"/>
+                                </figure>
+                                <div class="card-content">
+                                    <div class="wrapper">
+                                        <p>Price</p>
+                                        <div class="rating-wrapper">
+                                            <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" alt="star"/>
+                                        </div>
+                                    </div>
+                                    <h3 class="title-lg card-title" th:text="${courseMentor.courseTitle}">Course Title</h3>
+                                    <div class="card-meta wrapper">
+                                        <p class="title-sm">
+                                            <img th:src="@{/assets/images/user-outline.svg}" width="20" height="20" alt=""/>
+                                            <span th:text="${courseMentor.studentCount + ' Enrollments'}">0 Enrollments</span>
+                                        </p>
+                                    </div>
+                                    <p class="title-sm mentor-name">
+                                        <span th:text="'Mentor: ' + ${courseMentor.mentor.fullName}">Mentor Name</span>
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="view-more-wrapper text-center" style="margin-top: 30px;">
+                            <a th:href="@{/courses}" class="btn btn-primary">View More</a>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+        <div th:unless="${hasEnrollment}" class="no-enrollment-container">
+            <div class="no-enrollment-content">
+                <!-- Main illustration/icon -->
+                <div class="illustration-container">
+                    <div class="illustration-circle">
+                        <i class="fa fa-graduation-cap illustration-icon"></i>
+                    </div>
+                    <div class="floating-elements">
+                        <div class="floating-element element-1">
+                            <i class="fa fa-book"></i>
+                        </div>
+                        <div class="floating-element element-2">
+                            <i class="fa fa-lightbulb-o"></i>
+                        </div>
+                        <div class="floating-element element-3">
+                            <i class="fa fa-users"></i>
+                        </div>
                     </div>
                 </div>
-            </section>
 
+                <!-- Main message -->
+                <div class="no-enrollment-message">
+                    <h2 class="empty-title">Ready to Start Your Learning Journey?</h2>
+                    <p class="empty-subtitle">
+                        You haven't enrolled in any courses yet. Discover amazing courses from expert mentors
+                        and begin building your skills today!
+                    </p>
+                </div>
+
+                <!-- Feature highlights -->
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fa fa-user-plus"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>1-on-1 Mentoring</h4>
+                            <p>Get personalized guidance from industry experts</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fa fa-calendar-check-o"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Flexible Scheduling</h4>
+                            <p>Book sessions that fit your busy schedule</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fa fa-line-chart"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Track Progress</h4>
+                            <p>Monitor your learning journey with detailed analytics</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call to action buttons -->
+                <div class="cta-buttons">
+                    <a th:href="@{/courses}" class="btn btn-primary btn-lg">
+                        <i class="fa fa-search" style="margin-right: 8px;"></i>
+                        Browse Courses
+                    </a>
+                    <a th:href="@{/mentors}" class="btn btn-secondary btn-lg">
+                        <i class="fa fa-users" style="margin-right: 8px;"></i>
+                        Find Mentors
+                    </a>
+                </div>
+
+                <!-- Popular categories -->
+                <div class="popular-categories">
+                    <h3 class="categories-title">Popular Categories</h3>
+                    <div class="categories-list">
+                        <a href="#" class="category-tag">
+                            <i class="fa fa-code"></i>
+                            Programming
+                        </a>
+                        <a href="#" class="category-tag">
+                            <i class="fa fa-paint-brush"></i>
+                            Design
+                        </a>
+                        <a href="#" class="category-tag">
+                            <i class="fa fa-bar-chart"></i>
+                            Data Science
+                        </a>
+                        <a href="#" class="category-tag">
+                            <i class="fa fa-briefcase"></i>
+                            Business
+                        </a>
+                        <a href="#" class="category-tag">
+                            <i class="fa fa-language"></i>
+                            Languages
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </section>
 </main>
 

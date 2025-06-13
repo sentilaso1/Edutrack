@@ -94,16 +94,16 @@ public class HomeControlller {
 
         model.addAttribute("userType", "guest");
         model.addAttribute("showSchedulesLink", false);
-
+        model.addAttribute("showTracker", false);
         return "mentee/mentee-landing-page";
     }
 
 
     private String handleNewLoggedInUser(User user, Model model) {
-        model.addAttribute("headerCTA", "My Dashboard");
-        model.addAttribute("headerCTALink", "/dashboard");
+        model.addAttribute("headerCTA", "Logout");
+        model.addAttribute("headerCTALink", "/logout");
 
-        model.addAttribute("heroHeadline", "Welcome, <span class=\"span\">" + user.getFullName() + "</span>!");
+        model.addAttribute("heroHeadline", "Welcome, <span class=\"span\">" + user.getFullName() + "!</span>");
         model.addAttribute("heroSubHeadline", "Start your learning journey with personalized recommendations.");
         model.addAttribute("heroCTA", "Find Your First Course");
         model.addAttribute("heroCTALink", "/courses");
@@ -133,19 +133,19 @@ public class HomeControlller {
 
         model.addAttribute("userType", "newUser");
         model.addAttribute("showSchedulesLink", false);
+        model.addAttribute("showDashboard", true);
 
         UUID userId = user.getId();
         Mentee mentee = menteeRepository.findById(userId).orElse(null);
         boolean showInterestModal = mentee != null && (mentee.getInterests() == null || mentee.getInterests().isEmpty());
         model.addAttribute("userId", userId.toString());
         model.addAttribute("showInterestModal", showInterestModal);
-
         return "mentee/mentee-landing-page";
     }
 
     private String handleExperiencedLoggedInUser(User user, Model model) {
-        model.addAttribute("headerCTA", "My Dashboard");
-        model.addAttribute("headerCTALink", "/dashboard");
+        model.addAttribute("headerCTA", "Logout");
+        model.addAttribute("headerCTALink", "/logout");
 
         if (dashboardService.isAllCoursesCompleted(user.getId())) {
             model.addAttribute("heroHeadline", "<span class='span'>Well Done!</span>");
@@ -198,6 +198,8 @@ public class HomeControlller {
 
         model.addAttribute("userType", "experiencedUser");
         model.addAttribute("showSchedulesLink", true);
+        model.addAttribute("showTracker", true);
+        model.addAttribute("showDashboard", true);
 
         return "mentee/mentee-landing-page";
     }
