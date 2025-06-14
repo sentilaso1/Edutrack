@@ -12,11 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
-public class VnpayTransactionImpl implements VnpayTransactionService {
+public class VnpayTransactionServiceImpl implements VnpayTransactionService {
     private final VnpayTransactionRepository vnpayTransactionRepository;
 
     @Autowired
-    public VnpayTransactionImpl(VnpayTransactionRepository vnpayTransactionRepository) {
+    public VnpayTransactionServiceImpl(VnpayTransactionRepository vnpayTransactionRepository) {
         this.vnpayTransactionRepository = vnpayTransactionRepository;
     }
 
