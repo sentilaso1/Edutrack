@@ -23,4 +23,8 @@ public interface EnrollmentScheduleService {
     List<EnrollmentSchedule> findByMentorAndDateBetween(Mentor mentor, LocalDate weekStart, LocalDate weekEnd);
 
     EnrollmentSchedule findById(Integer esid);
+
+    EnrollmentSchedule findById(int enrollmentScheduleId);
+
+    void save(EnrollmentSchedule schedule);
 }
