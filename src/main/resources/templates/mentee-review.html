@@ -98,13 +98,7 @@
     </style>
 </head>
 <body>
-<div class="sidebar">
-    <h2>Edutrack Mentor</h2>
-    <button class="btn-new-project" onclick="openModal()">+ New Project</button>
-    <div class="nav-item"><a href="/mentor"><i class="fa fa-home" aria-hidden="true"></i> Dashboard</a></div>
-    <div class="nav-item"><a href="/mentor/schedule"><i class="fa fa-calendar" aria-hidden="true"></i> Schedule</a></div>
-    <div class="nav-item"><a href="/mentor/sensor-class"><i class="fa fa-list" aria-hidden="true"></i> Request Class</a> <span>10</span></div>
-</div>
+<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
 <div class="main">
     <div class="dashboard-header">
         <h1 th:text=" 'Class: ' + ${enrollmentSchedule.enrollment.courseMentor.course.name}">Class: Programming Fundamental with C</h1>
@@ -139,7 +133,7 @@
                 <th>Score</th>
             </tr>
             <tr>
-                <td>Le Phuong Linh Nga</td>
+                <td th:text="${enrollmentSchedule.enrollment.mentee.fullName}">Le Phuong Linh Nga</td>
                 <td>
                     <button class="participate-button present">Present</button>
                     <button class="participate-button absent">Absent</button>
