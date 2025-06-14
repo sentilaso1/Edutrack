@@ -68,11 +68,12 @@ public class Enrollment {
 
     }
 
-    public Enrollment(Mentee mentee, CourseMentor courseMentor, Integer totalSlots, List<Slot> slots, List<Day> days) {
+    public Enrollment(Mentee mentee, CourseMentor courseMentor, Integer totalSlots, List<Slot> slots, List<Day> days, String startTime) {
         this.mentee = mentee;
         this.courseMentor = courseMentor;
         this.totalSlots = totalSlots;
         this.scheduleSummary = formatScheduleList(slots, days);
+        this.startTime = startTime;
     }
 
     public Long getId() {
