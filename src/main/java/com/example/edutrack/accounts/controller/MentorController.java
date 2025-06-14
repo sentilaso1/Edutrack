@@ -118,4 +118,28 @@ public class MentorController {
         model.addAttribute("enrollmentSchedule", enrollmentSchedule);
         return "mentee-review";
     }
+
+    @GetMapping("/mentor/sensor-class/{eid}")
+    public String rejectRegistration(@PathVariable Long eid,
+                                     @RequestParam String action,
+                                     HttpSession session){
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+        Enrollment enrollment = enrollmentService.findById(eid);
+        if(enrollment == null) {
+            return "redirect:/mentor/schedule?error=enrollmentNotFound";
+        }
+        if(!enrollment.getCourseMentor().getMentor().getId().equals(mentor.getId())) {
+            return "redirect:/mentor/schedule?error=notMentor";
+        }
+        if(action.equals("reject")) {
+            enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
+            enrollmentService.save(enrollment);
+            return "redirect:/mentor/sensor-class?reject=" + eid;
+        }
+        return "redirect:/mentor/sensor-class";
+    }
+
 }
