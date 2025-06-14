@@ -5,7 +5,7 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -43,11 +43,11 @@ public class Enrollment {
     private Integer totalSlots;
 
     @Column(name = "start_time")
-    private String startTime; //startDate,startSlot => many slots in a day
+    private String startTime;  //startDate,startSlot => many slots in a day
 
     @Column(name = "created_date", nullable = false)
     @CreatedDate
-    private Date createdDate = new Date();
+    private LocalDate createdDate = LocalDate.now();
 
     @Lob
     @Column(name="schedule_summary", columnDefinition = "TEXT")
@@ -124,11 +124,11 @@ public class Enrollment {
         this.startTime = startTime;
     }
 
-    public Date getCreatedDate() {
+    public LocalDate getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(LocalDate createdDate) {
         this.createdDate = createdDate;
     }
 
