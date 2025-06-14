@@ -39,7 +39,17 @@ public class GoogleAuthController {
     @GetMapping("/oauth2/callback")
     public String oauth2Callback(@RequestParam String code, HttpSession session) {
         String accessToken = googleOAuthService.exchangeCodeForAccessToken(code);
-        Map<String, Object> userInfo = googleOAuthService.fetchUserInfo(accessToken);
+        Map<String, Object> userInfo = null;
+        if (accessToken != null) {
+            try {
+                userInfo = googleOAuthService.fetchUserInfo(accessToken);
+            } catch (Exception e) {
+                userInfo = null;
+            }
+        }
+        if (userInfo == null) {
+            return "redirect:/404";
+        }
         session.setAttribute("googleUserInfo", userInfo);
         String email = (String) userInfo.get("email");
 
