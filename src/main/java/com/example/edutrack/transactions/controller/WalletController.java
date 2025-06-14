@@ -22,7 +22,7 @@ import java.util.Optional;
 @Controller
 public class WalletController {
     public static final int RECENT_TRANSACTION_LIMIT = 10;
-    public static final int HISTORY_SIZE = 1;
+    public static final int HISTORY_SIZE = 30;
 
     private final WalletService walletService;
     private final CommonTransactionService commonTransactionService;
