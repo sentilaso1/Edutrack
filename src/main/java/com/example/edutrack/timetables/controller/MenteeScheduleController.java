@@ -84,14 +84,10 @@ public class MenteeScheduleController {
         model.addAttribute("wallet", wallet);
 
         Double totalCost = courseMentor.getPrice() * params.getTotalSlot();
-        if (wallet.getBalance() < totalCost) {
+        if (wallet.getBalance() <= 0 || wallet.getBalance() < totalCost) {
             model.addAttribute("error", "Insufficient balance in wallet");
             return "/checkout/checkout-info";
         }
-
-        System.out.println(params.getTotalSlot());
-        System.out.println(totalCost);
-        System.out.println(params.getTotalSlot());
 
         wallet.setBalance(wallet.getBalance() - totalCost);
         wallet.setOnHold(wallet.getOnHold() + totalCost);
@@ -105,11 +101,6 @@ public class MenteeScheduleController {
         );
         transactionService.save(transaction);
 
-        System.out.println("mentee: " + menteeOpt.get());
-        System.out.println("courseMentor: " + courseMentor);
-        System.out.println("slot: " + params.getSlot());
-        System.out.println("day: " + params.getDay());
-        System.out.println("totalSlot: " + params.getTotalSlot());
         String startTime = enrollmentScheduleService.findStartLearningTime(
                 menteeOpt.get(),
                 courseMentor,
@@ -117,7 +108,6 @@ public class MenteeScheduleController {
                 params.getDay(),
                 params.getTotalSlot()
         );
-        System.out.println("startTime: " + startTime);
         if (startTime == null) {
             model.addAttribute("error", "Cannot find start time for the selected schedule");
             return "/checkout/checkout-info";
