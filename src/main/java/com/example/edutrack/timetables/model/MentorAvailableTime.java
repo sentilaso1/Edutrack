@@ -3,6 +3,8 @@ package com.example.edutrack.timetables.model;
 import com.example.edutrack.accounts.model.Mentor;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "mentor_available_time")
 public class MentorAvailableTime {
@@ -17,8 +19,8 @@ public class MentorAvailableTime {
     public MentorAvailableTime() {
     }
 
-    public MentorAvailableTime(Mentor mentor, Slot slot, Day day) {
-        this.id = new MentorAvailableTimeId(mentor.getId(), slot, day);
+    public MentorAvailableTime(Mentor mentor, Slot slot, Day day, LocalDate startDate, LocalDate endDate) {
+        this.id = new MentorAvailableTimeId(mentor.getId(), slot, day, startDate, endDate);
         this.mentor = mentor;
     }
 

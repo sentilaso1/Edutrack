@@ -7,6 +7,8 @@
         <title>Admin Dashboard</title>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
 
 <body class="bg-gray-100 flex">
@@ -23,47 +25,291 @@
 
         <!-- Main Content -->
         <div class="ml-64 flex-1 p-6">
-                <h1 class="text-2xl font-bold mb-6">Admin Dashboard</h1>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- System Status Cards -->
-                        <div class="bg-white p-4 rounded shadow">
-                                <h2 class="text-lg font-semibold">CPU Usage</h2>
-                                <p th:text="${systemStatus.cpuUsage}"></p>
+                <h1 class="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
+
+                <!-- System Usage Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg">
+                                <h2 class="text-xl font-semibold mb-2">CPU Usage</h2>
+                                <p class="text-3xl font-bold" th:text="${systemStatus.cpuUsage + '%'}"></p>
                         </div>
-                        <div class="bg-white p-4 rounded shadow">
-                                <h2 class="text-lg font-semibold">Memory Usage</h2>
-                                <p th:text="${systemStatus.memoryUsage}"></p>
-                                <p>Total: <span th:text="${systemStatus.totalMemory}"></span></p>
-                                <p>Available: <span th:text="${systemStatus.availableMemory}"></span></p>
+                        <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg shadow-lg">
+                                <h2 class="text-xl font-semibold mb-2">Memory Usage</h2>
+                                <p class="text-2xl font-bold" th:text="${systemStatus.memoryUsage}"></p>
+                                <p class="text-sm opacity-90">Total: <span th:text="${systemStatus.totalMemory}"></span></p>
+                                <p class="text-sm opacity-90">Available: <span th:text="${systemStatus.availableMemory}"></span></p>
                         </div>
-                        <div class="bg-white p-4 rounded shadow">
-                                <h2 class="text-lg font-semibold">Disk Usage</h2>
-                                <p th:text="${systemStatus.diskUsage}"></p>
-                                <p>Total: <span th:text="${systemStatus.totalDisk}"></span></p>
-                                <p>Used: <span th:text="${systemStatus.usedDisk}"></span></p>
+                        <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg shadow-lg">
+                                <h2 class="text-xl font-semibold mb-2">Disk Usage</h2>
+                                <p class="text-2xl font-bold" th:text="${systemStatus.diskUsage}"></p>
+                                <p class="text-sm opacity-90">Total: <span th:text="${systemStatus.totalDisk}"></span></p>
+                                <p class="text-sm opacity-90">Used: <span th:text="${systemStatus.usedDisk}"></span></p>
                         </div>
                 </div>
-                <div class="bg-white p-4 rounded shadow mt-6">
-                        <h2 class="text-lg font-semibold">Users Overview</h2>
-                        <p class="text-gray-700">👥 Total Users: <span th:text="${userStats.total}"></span></p>
-                        <p class="text-green-600">🟢 Active: <span th:text="${userStats.active}"></span></p>
-                        <p class="text-red-600">🔒 Locked: <span th:text="${userStats.locked}"></span></p>
-                </div>                    
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                                <h2 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                        RAM Usage
+                                </h2>
+                                <div class="relative h-64">
+                                        <canvas id="ramChart"></canvas>
+                                </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                                <h2 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                                        CPU Usage
+                                </h2>
+                                <div class="relative h-64">
+                                        <canvas id="cpuChart"></canvas>
+                                </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                                <h2 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                                        <span class="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
+                                        Disk Usage
+                                </h2>
+                                <div class="relative h-64">
+                                        <canvas id="diskChart"></canvas>
+                                </div>
+                        </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Users Overview -->
+                        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                                <h2 class="text-xl font-semibold mb-4 text-gray-800">Users Overview</h2>
+                                <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-gray-600">Total Users:</span>
+                                                <span class="font-bold text-lg" th:text="${userStats.total}"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-green-600">Active:</span>
+                                                <span class="font-bold text-green-600" th:text="${userStats.active}"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-red-600">Locked:</span>
+                                                <span class="font-bold text-red-600" th:text="${userStats.locked}"></span>
+                                        </div>
+                                </div>
+                        </div>
+
+                        <!-- Login Summary -->
+                        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                                <h2 class="text-xl font-semibold mb-4 text-gray-800">User Login Summary</h2>
+                                <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-gray-600">Today:</span>
+                                                <span class="font-bold text-lg" th:text="${loginStats.today}"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-gray-600">This Week:</span>
+                                                <span class="font-bold text-lg" th:text="${loginStats.week}"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-gray-600">This Month:</span>
+                                                <span class="font-bold text-lg" th:text="${loginStats.month}"></span>
+                                        </div>
+                                </div>
+                        </div>
+
+                        <!-- Scheduled Jobs Summary -->
+                        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                                <h2 class="text-xl font-semibold mb-4 text-gray-800">Scheduled Jobs</h2>
+                                <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-gray-600">Total:</span>
+                                                <span class="font-bold text-lg" th:text="${jobStats.total}"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-green-600">Successful:</span>
+                                                <span class="font-bold text-green-600" th:text="${jobStats.success}"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                                <span class="text-red-600">Failed:</span>
+                                                <span class="font-bold text-red-600" th:text="${jobStats.failed}"></span>
+                                        </div>
+                                </div>
+                        </div>
+                </div>
         </div>
 
         <script>
-                // SweetAlert2 for success messages
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('success')) {
-                        Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: urlParams.get('success'),
-                                timer: 3000,
-                                showConfirmButton: false
-                        });
-                }
+                const cpuUsageStr = '[[${systemStatus.cpuUsage}]]';
+                const memUsageStr = '[[${systemStatus.memoryUsage}]]';
+                const diskUsageStr = '[[${systemStatus.diskUsage}]]';
+
+                const cpuUsage = parseFloat(cpuUsageStr.replace('%', '')) || 0;
+                const memUsed = parseFloat(memUsageStr.replace('%', '')) || 0;
+                const memAvailable = 100 - memUsed;
+                const diskUsed = parseFloat(diskUsageStr.replace('%', '')) || 0;
+                const diskFree = 100 - diskUsed;
+
+                // Common chart options
+                const commonOptions = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                                legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                                padding: 20,
+                                                usePointStyle: true,
+                                                font: {
+                                                        size: 12,
+                                                        weight: '500'
+                                                }
+                                        }
+                                },
+                                tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleColor: 'white',
+                                        bodyColor: 'white',
+                                        cornerRadius: 8,
+                                        displayColors: true
+                                }
+                        }
+                };
+
+                // RAM Chart - Doughnut với gradient
+                const ramChart = new Chart(document.getElementById('ramChart'), {
+                        type: 'doughnut',
+                        data: {
+                                labels: ['Used', 'Available'],
+                                datasets: [{
+                                        data: [memUsed, memAvailable],
+                                        backgroundColor: [
+                                                'rgba(239, 68, 68, 0.8)',
+                                                'rgba(34, 197, 94, 0.8)'
+                                        ],
+                                        borderColor: [
+                                                'rgba(239, 68, 68, 1)',
+                                                'rgba(34, 197, 94, 1)'
+                                        ],
+                                        borderWidth: 2,
+                                        hoverOffset: 10
+                                }]
+                        },
+                        options: {
+                                ...commonOptions,
+                                cutout: '60%',
+                                plugins: {
+                                        ...commonOptions.plugins,
+                                        tooltip: {
+                                                ...commonOptions.plugins.tooltip,
+                                                callbacks: {
+                                                        label: function(context) {
+                                                                return context.label + ': ' + context.parsed + '%';
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                });
+
+                // CPU Chart - Horizontal Bar với gradient
+                const cpuChart = new Chart(document.getElementById('cpuChart'), {
+                        type: 'bar',
+                        data: {
+                                labels: ['CPU Usage'],
+                                datasets: [{
+                                        label: 'Usage (%)',
+                                        data: [cpuUsage],
+                                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                                        borderColor: 'rgba(59, 130, 246, 1)',
+                                        borderWidth: 2,
+                                        borderRadius: 8,
+                                        borderSkipped: false,
+                                }]
+                        },
+                        options: {
+                                ...commonOptions,
+                                indexAxis: 'y',
+                                scales: {
+                                        x: {
+                                                beginAtZero: true,
+                                                max: 100,
+                                                grid: {
+                                                        color: 'rgba(0, 0, 0, 0.1)'
+                                                },
+                                                ticks: {
+                                                        callback: function(value) {
+                                                                return value + '%';
+                                                        }
+                                                },
+                                                title: {
+                                                        display: true,
+                                                        text: 'Percentage (%)',
+                                                        font: {
+                                                                weight: 'bold'
+                                                        }
+                                                }
+                                        },
+                                        y: {
+                                                grid: {
+                                                        display: false
+                                                }
+                                        }
+                                },
+                                plugins: {
+                                        ...commonOptions.plugins,
+                                        tooltip: {
+                                                ...commonOptions.plugins.tooltip,
+                                                callbacks: {
+                                                        label: function(context) {
+                                                                return 'CPU Usage: ' + context.parsed.x + '%';
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                });
+
+                // Disk Chart - Pie với animation
+                const diskChart = new Chart(document.getElementById('diskChart'), {
+                        type: 'pie',
+                        data: {
+                                labels: ['Used', 'Free'],
+                                datasets: [{
+                                        data: [diskUsed, diskFree],
+                                        backgroundColor: [
+                                                'rgba(251, 191, 36, 0.8)',
+                                                'rgba(16, 185, 129, 0.8)'
+                                        ],
+                                        borderColor: [
+                                                'rgba(251, 191, 36, 1)',
+                                                'rgba(16, 185, 129, 1)'
+                                        ],
+                                        borderWidth: 2,
+                                        hoverOffset: 8
+                                }]
+                        },
+                        options: {
+                                ...commonOptions,
+                                animation: {
+                                        animateRotate: true,
+                                        animateScale: true
+                                },
+                                plugins: {
+                                        ...commonOptions.plugins,
+                                        tooltip: {
+                                                ...commonOptions.plugins.tooltip,
+                                                callbacks: {
+                                                        label: function(context) {
+                                                                return context.label + ': ' + context.parsed + '%';
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                });
         </script>
+            
 </body>
 
 </html>

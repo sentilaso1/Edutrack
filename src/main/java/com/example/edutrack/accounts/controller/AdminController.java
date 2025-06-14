@@ -163,6 +163,8 @@ public class AdminController {
         public String showDashboard(Model model) {
                 model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
                 model.addAttribute("userStats", userService.getUserStatistics());
+                model.addAttribute("loginStats", userService.getLoginStats());
+                model.addAttribute("jobStats", scheduledJobService.getJobSummary());
                 return "accounts/html/index.html";
         }
 
@@ -230,10 +232,10 @@ public class AdminController {
         }
 
         @GetMapping("/jobs")
-        public String viewJobs(@RequestParam(required = false) String search,
-                           @RequestParam(defaultValue = "0") int page,
-                           @RequestParam(defaultValue = "10") int size,
-                        Model model) {
+        public String viewJobs( @RequestParam(required = false) String search,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "10") int size,
+                                Model model) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<ScheduledJobDTO> jobPage = scheduledJobService.getJobs(search, pageable);
 
@@ -260,12 +262,6 @@ public class AdminController {
         public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto) {
                 scheduledJobService.updateJob(id, dto);
                 return "redirect:/admin/jobs";
-        }
-
-        @GetMapping("/jobs/{id}/logs")
-        public String viewJobLogs(@PathVariable Long id, Model model) {
-                model.addAttribute("logs", scheduledJobService.getJobLogs(id));
-                return "fragments/job-log :: logList";
         }
 }
 

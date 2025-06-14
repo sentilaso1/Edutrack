@@ -71,6 +71,11 @@ public class MenteeScheduleController {
         model.addAttribute("course", courseMentor.getCourse());
         model.addAttribute("mentor", courseMentor.getMentor());
 
+        if (params.getTotalSlot() == null || params.getSlot() == null || params.getDay() == null) {
+            model.addAttribute("error", "Invalid enrollment parameters");
+            return "/checkout/checkout-info";
+        }
+
         Optional<Wallet> walletOptional = walletService.findById(user.getId());
         if (walletOptional.isEmpty()) {
             walletOptional = Optional.of(walletService.save(user));
@@ -100,12 +105,31 @@ public class MenteeScheduleController {
         );
         transactionService.save(transaction);
 
+        System.out.println("mentee: " + menteeOpt.get());
+        System.out.println("courseMentor: " + courseMentor);
+        System.out.println("slot: " + params.getSlot());
+        System.out.println("day: " + params.getDay());
+        System.out.println("totalSlot: " + params.getTotalSlot());
+        String startTime = enrollmentScheduleService.findStartLearningTime(
+                menteeOpt.get(),
+                courseMentor,
+                params.getSlot(),
+                params.getDay(),
+                params.getTotalSlot()
+        );
+        System.out.println("startTime: " + startTime);
+        if (startTime == null) {
+            model.addAttribute("error", "Cannot find start time for the selected schedule");
+            return "/checkout/checkout-info";
+        }
+
         Enrollment enrollment = new Enrollment(
                 menteeOpt.get(),
                 courseMentor,
                 params.getTotalSlot(),
                 params.getSlot(),
-                params.getDay()
+                params.getDay(),
+                startTime
         );
         enrollmentService.save(enrollment);
 

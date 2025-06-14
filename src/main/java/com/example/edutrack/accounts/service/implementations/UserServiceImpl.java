@@ -2,10 +2,7 @@ package com.example.edutrack.accounts.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.example.edutrack.accounts.dto.UserStatsDTO;
-import com.example.edutrack.accounts.model.Mentee;
-import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.StaffRepository;
@@ -13,13 +10,12 @@ import com.example.edutrack.accounts.repository.UserRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.service.interfaces.UserService;
-
+import com.example.edutrack.accounts.dto.UserStats;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-
+import com.example.edutrack.accounts.dto.LoginStats;
 import java.util.UUID;
-import java.util.List;
 import java.util.Date;
 
 import org.springframework.data.domain.Page;
@@ -140,5 +136,13 @@ public class UserServiceImpl implements UserService{
                 long active = userRepository.countByIsActiveTrue();
                 long locked = userRepository.countByIsLockedTrue();
                 return new UserStatsDTO(total, active, locked);
+        }
+        
+        public UserStats getSummaryStats() {
+                return new UserStats(150, 120, 30);
+        }
+
+        public LoginStats getLoginStats() {
+                return new LoginStats(23, 150, 430);
         }
 }
