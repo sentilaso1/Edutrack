@@ -73,6 +73,9 @@ public class VnpayTransaction implements CommonTransaction {
     @Column(name = "is_done", nullable = false)
     private Boolean isDone = Boolean.FALSE;
 
+    @Column(name = "balance")
+    private Double balance;
+
     @Column(name = "bank_tran_no")
     private String bankTranNo;
 
@@ -229,6 +232,14 @@ public class VnpayTransaction implements CommonTransaction {
         isDone = done;
     }
 
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
+
     public String getBankTranNo() {
         return bankTranNo;
     }
@@ -317,6 +328,16 @@ public class VnpayTransaction implements CommonTransaction {
     }
 
     @Override
+    public Double getTransactionBalance() {
+        return getBalance();
+    }
+
+    @Override
+    public String getTransactionBalanceFormatted() {
+        return CustomFormatter.formatNumberWithSpaces(getBalance());
+    }
+
+    @Override
     public UUID getUserId() {
         return getUser().getId();
     }
@@ -337,6 +358,7 @@ public class VnpayTransaction implements CommonTransaction {
                 ", orderInfo='" + orderInfo + '\'' +
                 ", orderType='" + orderType + '\'' +
                 ", user=" + user +
+                ", balance=" + balance +
                 ", isDone=" + isDone +
                 ", bankTranNo='" + bankTranNo + '\'' +
                 ", cardType='" + cardType + '\'' +
