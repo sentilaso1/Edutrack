@@ -455,18 +455,19 @@ public class CvServiceImpl implements CvService {
     public void scheduleAIVerification() {
         batchRunning = true;
         lastBatchStart = LocalDateTime.now();
-        List<CV> pendingCVs = cvRepository.findByStatus("pending");
-        if (pendingCVs.isEmpty()) {
+        try {
+            List<CV> pendingCVs = cvRepository.findByStatus("pending");
+            if (pendingCVs.isEmpty()) {
+                return;
+            }
+            for (CV cv : pendingCVs) {
+                List<Course> courses = getCoursesForCV(cv);
+                aiVerifyCV(cv, courses);
+            }
+        } finally {
             lastBatchEnd = LocalDateTime.now();
             batchRunning = false;
-            return;
         }
-        for (CV cv : pendingCVs) {
-            List<Course> courses = getCoursesForCV(cv);
-            aiVerifyCV(cv, courses);
-        }
-        lastBatchEnd = LocalDateTime.now();
-        batchRunning = false;
     }
 
     public boolean isBatchRunning() { return batchRunning; }
