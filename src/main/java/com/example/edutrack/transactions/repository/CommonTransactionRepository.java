@@ -133,7 +133,7 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                               BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
                           AND user_id = UUID_TO_BIN(:userId)
                     ) AS combined
-                    ORDER BY date DESC
+                    ORDER BY date
                     """,
             countQuery = """
         SELECT COUNT(*) FROM (
