@@ -36,7 +36,7 @@ body {
     border: none;
     padding: 12px 16px;
     border-radius: 12px;
-    width: 100%;
+    width: fit-content;
     margin-bottom: 2rem;
     cursor: pointer;
     font-weight: 600;
@@ -202,50 +202,6 @@ h2 {
     text-align: center;
     margin-bottom: 20px;
 }
-.calendar1 {
-    max-width: 900px;
-    margin: auto;
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 6px;
-}
-.calendar1 > div {
-    background: white;
-    border: 1px solid #ddd;
-    padding: 8px 6px;
-    text-align: center;
-    font-weight: 500;
-    user-select: none;
-    color: #115293;
-}
-.calendar1 .time-header {
-    background: #f0f0f0;
-    font-weight: 600;
-}
-.day-header {
-    background: #1976d2;
-    color: white;
-    font-weight: 700;
-    font-size: 1rem;
-}
-.slot-button {
-    border: 1.5px solid #999;
-    border-radius: 6px;
-    background-color: white;
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 8px 4px;
-    transition: background-color 0.3s, border-color 0.3s;
-    user-select: none;
-}
-.slot-button:hover {
-    border-color: #1976d2;
-}
-.slot-button.active {
-    background-color: #1976d2;
-    border-color: #115293;
-    color: white;
-}
 .project-item {
     background-color: white;
     border-radius: 8px;
@@ -356,3 +312,12 @@ h2 {
 .icon {
     fill: currentColor;
 }
+
+.nav-item span {
+    border-radius: 50%;
+    background-color: #cf0013;
+    color: white;
+    padding: 0.2em;
+    margin-left: 1em;
+}
+

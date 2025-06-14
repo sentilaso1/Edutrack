@@ -2,6 +2,7 @@ package com.example.edutrack.accounts.controller;
 
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
@@ -103,7 +104,7 @@ public class MentorController {
         return "skill-register-request";
     }
     @GetMapping("/mentor/schedule/{esid}")
-    public String menteeReview(Model model, @PathVariable Integer esid, HttpSession session) {
+    public String menteeReview(Model model, @PathVariable Integer esid, HttpSession session){
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
@@ -140,6 +141,15 @@ public class MentorController {
             return "redirect:/mentor/sensor-class?reject=" + eid;
         }
         return "redirect:/mentor/sensor-class";
+    }
+
+    @GetMapping("/mentor/working-date")
+    public String workingDate(Model model,
+                              @RequestParam(required = false) String start,
+                              @RequestParam(required = false) String end){
+        model.addAttribute("slots", Slot.values());
+        model.addAttribute("dayLabels", Day.values());
+        return "mentor-working-date";
     }
 
 }
