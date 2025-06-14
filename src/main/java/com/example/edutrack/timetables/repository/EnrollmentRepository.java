@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.repository;
 
+import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Enrollment;
 import org.springframework.data.domain.Pageable;
@@ -47,5 +48,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT e FROM Enrollment e WHERE e.courseMentor.mentor.id = :mentorId AND e.status = :status")
     List<Enrollment> findByStatus(Enrollment.EnrollmentStatus status, UUID mentorId);
 
-
+    @Query("SELECT e.courseMentor.course FROM Enrollment e WHERE e.mentee.id = :menteeId AND e.status = :status ")
+    List<Course> findByMenteeIdAndEnrollmentStatus(@Param("menteeId") UUID menteeId, @Param("status") Enrollment.EnrollmentStatus status);
 }

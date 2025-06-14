@@ -40,6 +40,9 @@ public class EnrollmentSchedule {
     @Column(name = "attendance")
     private Attendance attendance = Attendance.NOT_YET;
 
+    @Column(name = "report", columnDefinition = "TEXT")
+    private String report;
+
     public EnrollmentSchedule() {
     }
 
@@ -47,6 +50,14 @@ public class EnrollmentSchedule {
         this.enrollment = enrollment;
         this.slot = slot;
         this.date = date;
+    }
+
+    public String getReport() {
+        return report;
+    }
+
+    public void setReport(String report) {
+        this.report = report;
     }
 
     public long getId() {
@@ -108,13 +119,13 @@ public class EnrollmentSchedule {
     @Override
     public String toString() {
         return "EnrollmentSchedule{" +
-               "id=" + id +
-               ", enrollment=" + enrollment +
-               ", slot=" + slot +
-               ", date=" + date +
-               ", isTest=" + isTest +
-               ", score=" + score +
-               ", attendance=" + attendance +
-               '}';
+                "id=" + id +
+                ", enrollment=" + enrollment +
+                ", slot=" + slot +
+                ", date=" + date +
+                ", isTest=" + isTest +
+                ", score=" + score +
+                ", attendance=" + attendance +
+                '}';
     }
 }

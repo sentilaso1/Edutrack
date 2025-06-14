@@ -5,6 +5,8 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -92,5 +94,22 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     // Author: Nguyen Thanh Vinh
     @Query("SELECT MAX(es.date) FROM EnrollmentSchedule es WHERE es.enrollment.id = :enrollmentId AND es.attendance = :status")
     LocalDate findLastPresentSessionDate(@Param("enrollmentId") Long enrollmentId, @Param("status") EnrollmentSchedule.Attendance status);
+
+    //Author: Nguyen Thanh Vinh
+    @Query("""
+    SELECT s FROM EnrollmentSchedule s
+    WHERE s.enrollment.mentee.id = :menteeId
+      AND MONTH(s.date) = :month
+      AND YEAR(s.date) = :year
+      AND (:courseId IS NULL OR s.enrollment.courseMentor.course.id = :courseId)
+""")
+    Page<EnrollmentSchedule> findByMenteeAndMonthWithCourseFilter(
+            @Param("menteeId") UUID menteeId,
+            @Param("month") int month,
+            @Param("year") int year,
+            @Param("courseId") UUID courseId,
+            Pageable pageable
+    );
+
 
 }

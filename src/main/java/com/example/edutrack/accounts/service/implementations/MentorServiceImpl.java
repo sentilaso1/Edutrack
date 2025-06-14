@@ -78,6 +78,18 @@ public class MentorServiceImpl implements MentorService {
             }
 
         }
+        if (mentorList.size() < limit) {
+            int remaining = limit - mentorList.size();
+            List<Mentor> topMentors = mentorRepository.findTopActiveMentors(PageRequest.of(0, remaining));
+            for (Mentor mentor : topMentors) {
+                if (seen.add(mentor.getId())) {
+                    mentorList.add(mentor);
+                    if (mentorList.size() >= limit) {
+                        break;
+                    }
+                }
+            }
+        }
         return mentorList;
 
     }
