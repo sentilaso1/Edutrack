@@ -3,8 +3,8 @@ package com.example.edutrack.timetables.model;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.UUID;
-import java.util.Date;
 
 @Embeddable
 public class MentorAvailableTimeId implements Serializable {
@@ -20,15 +20,15 @@ public class MentorAvailableTimeId implements Serializable {
     private Day day;
 
     @Column(name = "start_date", nullable = false)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    private Date endDate;
+    private LocalDate endDate;
 
     public MentorAvailableTimeId() {
     }
 
-    public MentorAvailableTimeId(UUID mentorId, Slot slot, Day day, Date startDate, Date endDate) {
+    public MentorAvailableTimeId(UUID mentorId, Slot slot, Day day, LocalDate startDate, LocalDate endDate) {
         this.mentorId = mentorId;
         this.slot = slot;
         this.day = day;
@@ -60,19 +60,19 @@ public class MentorAvailableTimeId implements Serializable {
         this.day = day;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

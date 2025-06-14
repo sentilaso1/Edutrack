@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Working date</title>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" th:href="@{/assets/css/working-date.css}">
@@ -22,16 +22,34 @@
             </div>
             <button class="add-btn" onclick="openModal()">+</button>
         </div>
+        <div class="todo-card">
+            <h3 th:text="'End Date: ' + ${param.end}"></h3>
+            <table class="schedule-table" th:if="${slotDayMatrix}">
+                <thead>
+                <tr>
+                    <th>Time Slot</th>
+                    <th th:each="day : ${days}" th:text="${day.name().toLowerCase()}"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="slot, iStat : ${slots}">
+                    <td th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
+                    <td th:each="day, jStat : ${days}">
+                        <div th:class="'slot-button' + (${slotDayMatrix[iStat.index][jStat.index]} ? ' active' : '')">
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
-        <a th:href="@{/mentor/working-date?date='bjjj'}">
-            <div class="todo-card">
-                <span class="todo-category designer">Working Date</span>
-                <h4>From 14/06/2025 to 20/07/2025</h4>
-            </div>
-        </a>
+        </div>
 
-
-
+        <div class="todo-card" th:each="time : ${setTime}">
+            <a th:href="@{/mentor/working-date(end=${time.endDate})}">
+            <span class="todo-category designer">Working Date</span>
+                <h4>From <span th:text="${time.getStartDate()}"></span> to <span th:text="${time.getEndDate()}"></span></h4>
+            </a>
+        </div>
     </div>
 
 
@@ -47,11 +65,11 @@
                         <div style="display: flex; justify-content: space-evenly; padding: 0 2em;">
                             <label>
                                 Start Date:
-                                <input type="date" name="start">
+                                <input type="date" name="start" required>
                             </label>
                             <label>
                                 End Date:
-                                <input type="date" name="end">
+                                <input type="date" name="end" required>
                             </label>
                         </div>
 
@@ -59,7 +77,8 @@
                             <thead>
                             <tr>
                                 <th>Time</th>
-                                <th th:each="day : ${dayLabels}" th:text="${#strings.capitalize(day.name().toLowerCase())}"></th>
+                                <th th:each="day : ${dayLabels}"
+                                    th:text="${#strings.capitalize(day.name().toLowerCase())}"></th>
                             </tr>
                             </thead>
                             <tbody>

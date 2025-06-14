@@ -1,18 +1,25 @@
 package com.example.edutrack.timetables.service.interfaces;
-
 import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.accounts.model.User;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.timetables.model.Day;
+import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
+import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.model.Slot;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public interface MentorAvailableTimeService {
-    public void insertWorkingSchedule(List<MentorAvailableTime> schedule);
+    void insertWorkingSchedule(List<MentorAvailableTime> schedule);
 
     List<MentorAvailableTime> findByMentorId(Mentor mentor);
+
+    String alertValidStartEndTime(LocalDate start, LocalDate end, Mentor mentor);
+
+    List<MentorAvailableTimeDTO> findAllDistinctStartEndDates(Mentor mentor);
+
+    List<MentorAvailableSlotDTO> findAllSlotByEndDate(Mentor mentor, LocalDate endDate);
+
+
+    LocalDate findMaxEndDate(Mentor mentor);
 }
