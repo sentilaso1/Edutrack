@@ -9,7 +9,9 @@ import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
+import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
+import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.transactions.model.Wallet;
@@ -27,6 +29,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.example.edutrack.curriculum.model.Course;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -156,6 +159,15 @@ public class CourseController {
         List <MentorAvailableTime> mentorAvailableTime = mentorAvailableTimeService.findByMentorId(courseMentor.getMentor());
         model.addAttribute("courseMentor", courseMentor);
         model.addAttribute("mentorAvailableTime", mentorAvailableTime);
+
+        LocalDate minDate = mentorAvailableTimeService.findMinStartDate(courseMentor.getMentor());
+        LocalDate maxDate = mentorAvailableTimeService.findMaxEndDate(courseMentor.getMentor());
+        model.addAttribute("minDate", minDate);
+        model.addAttribute("maxDate", maxDate);
+        model.addAttribute("slots", Slot.values());
+        model.addAttribute("dayLabels", Day.values());
+
+        model.addAttribute("startTime", session.getAttribute("startTime"));
 
         User user = (User) session.getAttribute("loggedInUser");
         if (user != null) {
