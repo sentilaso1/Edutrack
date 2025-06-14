@@ -147,7 +147,12 @@ public class MentorController {
         if (action.equals("reject")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
             enrollmentService.save(enrollment);
-            return "redirect:/mentor/sensor-class?reject=" + eid;
+            return "redirect:/mentor/sensor-class?status=REJECTED&reject=" + eid;
+        }
+        if(action.equals("approve")){
+            enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
+            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
+            return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
         }
         return "redirect:/mentor/sensor-class";
     }

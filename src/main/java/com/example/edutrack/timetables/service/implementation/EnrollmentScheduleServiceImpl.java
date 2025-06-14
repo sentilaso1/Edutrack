@@ -125,6 +125,85 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         return result;
     }
 
+    public static void parseDaySlotString(String input,
+                                          List<Day> days,
+                                          List<Slot> slots) {
+        String[] pairs = input.split(",");
+
+        for (String pair : pairs) {
+            String[] parts = pair.trim().split("-");
+
+            if (parts.length == 2) {
+                Day day = Day.valueOf(parts[0].trim().toUpperCase());
+                Slot slot = Slot.valueOf(parts[1].trim().toUpperCase());
+
+                days.add(day);
+                slots.add(slot);
+            } else {
+                throw new IllegalArgumentException("Invalid format: " + pair);
+            }
+        }
+    }
+
+    @Override
+    public void saveEnrollmentSchedule(Enrollment enrollment) {
+        String startTime = enrollment.getStartTime();
+        String[] strings = startTime.split("-");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate startDate = LocalDate.parse(strings[0], formatter);
+        Slot startingSlot = Slot.valueOf(strings[1]);
+
+        List<Slot> slot = new ArrayList<>();
+        List<Day> day = new ArrayList<>();
+        String scheduleSummary = enrollment.getScheduleSummary();
+
+        parseDaySlotString(scheduleSummary, day, slot);
+        sortDayByWeek(day, slot);
+
+        System.out.println("INITIAL: " + startDate);
+
+        int found = 0;
+        int i = day.indexOf(Day.valueOf(startDate.getDayOfWeek().name()));
+
+        for (int t = 0; t < day.size(); t++) {
+            Day targetDay = Day.valueOf(startDate.getDayOfWeek().name());
+            if (day.get(t) == targetDay && slot.get(t) == startingSlot) {
+                i = t;
+                break;
+            }
+        }
+
+        int totalSlot = enrollment.getTotalSlots();
+        while (found < totalSlot) {
+            Slot currentSlot = slot.get(i);
+            Day currentDay = day.get(i);
+            System.out.println("=============================================================");
+            System.out.println(startDate);
+            System.out.println(currentDay.name() + "-" + currentSlot.name());
+
+            EnrollmentSchedule schedule = new EnrollmentSchedule();
+            schedule.setEnrollment(enrollment);
+            schedule.setSlot(currentSlot);
+            schedule.setDate(startDate);
+            enrollmentScheduleRepository.save(schedule);
+
+            i++;
+            if (i == day.size()) {
+                i = 0;
+                startDate = startDate.plusDays(1);
+                while (!day.contains(Day.valueOf(startDate.getDayOfWeek().name()))) {
+                    startDate = startDate.plusDays(1);
+                }
+            } else if (!day.get(i).equals(day.get(i - 1))) {
+                startDate = startDate.plusDays(1);
+                while (!day.contains(Day.valueOf(startDate.getDayOfWeek().name()))) {
+                    startDate = startDate.plusDays(1);
+                }
+            }
+            found++;
+        }
+    }
+
     @Override
     public List<EnrollmentSchedule> findAll() {
         return enrollmentScheduleRepository.findAll();
