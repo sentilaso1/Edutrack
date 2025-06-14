@@ -10,5 +10,7 @@ public interface CommonTransaction {
     String getTransactionAmountFormatted();
     String getTransactionStatus();
     Date getTransactionDate();
+    Double getTransactionBalance();
+    String getTransactionBalanceFormatted();
     UUID getUserId();
 }
