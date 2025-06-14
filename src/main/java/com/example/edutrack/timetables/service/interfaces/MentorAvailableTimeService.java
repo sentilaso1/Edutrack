@@ -22,4 +22,6 @@ public interface MentorAvailableTimeService {
 
 
     LocalDate findMaxEndDate(Mentor mentor);
+
+    LocalDate findMinStartDate(Mentor mentor);
 }

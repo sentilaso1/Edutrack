@@ -23,13 +23,20 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
     @Query("SELECT  COUNT(mat) > 0 FROM MentorAvailableTime mat " +
            "WHERE mat.mentor = :mentor " +
            "AND mat.id.slot = :slot " +
-           "AND mat.id.day = :day ")
+           "AND mat.id.startDate <= :startDate " +
+           "AND mat.id.endDate >= :startDate " +
+           "AND FUNCTION('WEEKDAY', :startDate) = mat.id.day")
     boolean isMentorAvailableTime(@Param("mentor") Mentor mentor,
                                   @Param("slot") Slot slot,
-                                  @Param("day") Day day);
+                                  @Param("startDate") LocalDate startDate);
+
+
 
     @Query("SELECT MAX(mat.id.endDate) FROM MentorAvailableTime mat WHERE mat.mentor = :mentor")
     LocalDate findMaxEndDate(Mentor mentor);
+
+    @Query("SELECT MIN(mat.id.startDate) FROM MentorAvailableTime mat WHERE mat.mentor = :mentor")
+    LocalDate findMinStartDate(Mentor mentor);
 
     @Query("SELECT DISTINCT new com.example.edutrack.timetables.dto.MentorAvailableTimeDTO(mat.id.startDate, mat.id.endDate) " +
            "FROM MentorAvailableTime mat " +

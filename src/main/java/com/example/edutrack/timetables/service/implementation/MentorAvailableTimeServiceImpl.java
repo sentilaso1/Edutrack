@@ -60,4 +60,9 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
         return mentorAvailableTimeRepository.findMaxEndDate(mentor);
     }
 
+    @Override
+    public LocalDate findMinStartDate(Mentor mentor) {
+        return mentorAvailableTimeRepository.findMinStartDate(mentor);
+    }
+
 }
