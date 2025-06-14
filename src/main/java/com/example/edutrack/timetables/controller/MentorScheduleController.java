@@ -25,6 +25,7 @@ public class MentorScheduleController {
     @PostMapping("/add-new-schedule")
     public String addNewSchedule(@RequestParam List<Day> day,
                                  @RequestParam List<Slot> slot,
+
                                  HttpSession session) {
         if(day == null || slot == null || day.isEmpty() ||day.size() != slot.size()) {
             return "redirect:/mentor?error=invalid-day-slot";
@@ -35,6 +36,6 @@ public class MentorScheduleController {
             availableTimes.add(new MentorAvailableTime(mentor, slot.get(i), day.get(i)));
         }
         mentorAvailableTimeService.insertWorkingSchedule(availableTimes);
-        return "mentor-dashboard";
+        return "redirect:/mentor/working-date";
     }
 }
