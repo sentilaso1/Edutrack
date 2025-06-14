@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EduTrack - Wallet History</title>
+    <link rel="stylesheet" href="/css/master.css"/>
+    <link rel="stylesheet" href="/css/colors.css"/>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: linear-gradient(to right, #e6f7f9, #ffeef0);
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 250px;
+        }
+
+        .sort-dropdown select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #fff7f7;
+            color: #444;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .pagination button {
+            text-decoration: none;
+            color: #ff6666;
+            font-weight: 500;
+        }
+
+        .pagination span {
+            font-weight: 600;
+            color: #444;
+        }
+
+        .visible {
+            visibility: visible;
+        }
+
+        .invisible {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Wallet History</h1>
+
+    <form class="controls" id="filter-form">
+        <div class="search-bar">
+            <input type="text" id="search" name="search" placeholder="Search Transaction..." th:value="${search != null ? search : ''}"/>
+        </div>
+        <div class="sort-dropdown">
+            <label for="sort">Sorting Order: </label>
+            <select id="sort" name="sort">
+                <option value="desc" th:selected="${sort == null || sort.equals('desc')}">Date descending</option>
+                <option value="asc" th:selected="${sort != null && sort.equals('asc')}">Date ascending</option>
+            </select>
+        </div>
+    </form>
+
+    <table th:with="transactions = ${page.content}">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Status</th>
+            <th>Change</th>
+            <th>Balance</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tbody>
+        <tr th:each="tx : ${transactions}">
+            <td th:text="${#dates.format(tx.transactionDate, 'MMM dd yyyy hh:mm:ss a')}">May 29 2025 1:25:21PM</td>
+            <td th:text="${tx.transactionInfo}">Transaction Info</td>
+            <td th:text="${tx.transactionStatus}">Purchase</td>
+            <td th:text="${tx.transactionAmountFormatted}">
+                +250.000
+            </td>
+            <td th:text="${tx.transactionBalanceFormatted}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <button id="first-page" th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
+            first
+        </button>
+
+        <button id="previous-page" th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
+            previous
+        </button>
+
+        <span th:text="${'page ' + pageNumber + ' of ' + page.totalPages}"></span>
+
+        <button id="next-page" th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
+            next
+        </button>
+
+        <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? 'visible' : 'invisible'}">
+            last
+        </button>
+
+    </div>
+</div>
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const filterForm = document.getElementById("filter-form");
+    const sortInput = document.getElementById("sort");
+
+    sortInput.addEventListener("change", (e) => {
+        filterForm.submit();
+    });
+
+    document.getElementById('first-page').addEventListener('click', () => {
+        filterForm.action = '/wallet/history/1';
+        filterForm.submit();
+    });
+    document.getElementById('previous-page').addEventListener('click', () => {
+        filterForm.action = '/wallet/history/' + [[${pageNumber - 1}]];
+        filterForm.submit();
+    });
+    document.getElementById('next-page').addEventListener('click', () => {
+        filterForm.action = '/wallet/history/' + [[${pageNumber + 1}]];
+        filterForm.submit();
+    });
+    document.getElementById('last-page').addEventListener('click', () => {
+        filterForm.action = '/wallet/history/' + [[${page.totalPages}]];
+        filterForm.submit();
+    });
+
+    /*]]>*/
+</script>
+</body>
+</html>
