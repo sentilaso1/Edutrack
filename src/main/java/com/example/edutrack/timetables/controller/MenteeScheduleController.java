@@ -138,11 +138,7 @@ public class MenteeScheduleController {
     }
 
     @PostMapping("/courses/register/{cmid}")
-    public String registerSkill(@RequestParam String email,
-                                @RequestParam String fullName,
-                                @RequestParam String phone,
-                                @RequestParam Integer age,
-                                @RequestParam List<Slot> slot,
+    public String registerSkill(@RequestParam List<Slot> slot,
                                 @RequestParam List<Day> day,
                                 @PathVariable(value = "cmid") UUID courseMentorId,
                                 @RequestParam Integer totalSlot,
@@ -175,8 +171,8 @@ public class MenteeScheduleController {
                 startTime = "Cannot find start time";
             }
             model.addAttribute("startTime", startTime);
-            model.addAttribute("courseMentor", courseMentor);
-            return "register-section";
+            session.setAttribute("startTime", startTime);
+            return "redirect:/courses/register/{cmid}";
         }
 
         return "register-section";
