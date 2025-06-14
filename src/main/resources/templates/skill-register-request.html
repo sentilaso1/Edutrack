@@ -130,7 +130,7 @@
                 </select>
                 <button class="arrow-btn">↓</button>
             </div>
-
+            <p th:text="${param.status}"></p>
             <table class="product-table">
                 <thead>
                 <tr>
@@ -140,7 +140,7 @@
                     <th>Start time</th>
                     <th>Created Date</th>
                     <th>Slot per Week</th>
-                    <th style="min-width: 10em;">ACTION</th>
+                    <th style="min-width: 10em;" th:if="${param.status[0] == null or param.status[0] == 'PENDING'}">ACTION</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -151,7 +151,7 @@
                     <td th:text="${item.startTime}">8.98</td>
                     <td th:text="${item.createdDate}">A/22</td>
                     <td class="red-text" th:text="${item.scheduleSummary}">10 pcs</td>
-                    <td>
+                    <td  th:if="${param.status[0] == null or param.status[0] == 'PENDING'}">
                         <form th:action="@{/mentor/sensor-class/{eid}(eid=${item.id})}">
                             <button class="edit-btn" name="action" value="approve"><i class="fa fa-check"
                                                                                       aria-hidden="true"></i></button>
