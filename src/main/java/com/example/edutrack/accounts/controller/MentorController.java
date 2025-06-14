@@ -104,7 +104,7 @@ public class MentorController {
         return "skill-register-request";
     }
     @GetMapping("/mentor/schedule/{esid}")
-    public String menteeReview(Model model, @PathVariable Integer esid, HttpSession session){
+    public String menteeReview(Model model, @PathVariable Integer esid, HttpSession session) {
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
