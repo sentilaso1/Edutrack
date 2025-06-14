@@ -11,4 +11,8 @@ public interface GoalService {
     List<Goal> getGoalsByMentee(UUID menteeId);
 
     void updateGoalStatus(UUID goalId, Goal.Status newStatus, UUID menteeId);
+
+    Goal getGoalById(UUID goalId);
+
+    void deleteGoal(UUID goalId);
 }

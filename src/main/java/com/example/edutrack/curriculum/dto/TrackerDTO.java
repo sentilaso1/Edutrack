@@ -5,12 +5,22 @@ public class TrackerDTO {
     private int totalTrackedSkills;
     private String goalCompleted;
     private int totalSkillsCompleted;
+    private int goalPercent;
 
-    public TrackerDTO(int skillProcess, String goalCompleted, int totalTrackedSkills, int totalSkillsCompleted) {
+    public TrackerDTO(int skillProcess, String goalCompleted, int totalTrackedSkills, int totalSkillsCompleted, int goalPercent) {
         this.skillProcess = skillProcess;
         this.goalCompleted = goalCompleted;
         this.totalTrackedSkills = totalTrackedSkills;
         this.totalSkillsCompleted = totalSkillsCompleted;
+        this.goalPercent = goalPercent;
+    }
+
+    public int getGoalPercent() {
+        return goalPercent;
+    }
+
+    public void setGoalPercent(int goalPercent) {
+        this.goalPercent = goalPercent;
     }
 
     public int getSkillProcess() {

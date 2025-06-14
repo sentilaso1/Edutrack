@@ -4,7 +4,6 @@ import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Day;
-import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -220,5 +218,16 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     public EnrollmentSchedule findById(Integer esid) {
         return enrollmentScheduleRepository.findById(esid).get();
     }
+
+    @Override
+    public EnrollmentSchedule findById(int enrollmentScheduleId){
+        return enrollmentScheduleRepository.findById(enrollmentScheduleId).orElseThrow(() -> new RuntimeException("Enrollment not found with id: " + enrollmentScheduleId));
+    }
+
+    @Override
+    public void save(EnrollmentSchedule schedule){
+        enrollmentScheduleRepository.save(schedule);
+    }
+
 
 }

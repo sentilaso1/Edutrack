@@ -24,5 +24,10 @@ public interface EnrollmentScheduleService {
 
     EnrollmentSchedule findById(Integer esid);
 
+    EnrollmentSchedule findById(int enrollmentScheduleId);
+
+    void save(EnrollmentSchedule schedule);
+
     public void saveEnrollmentSchedule(Enrollment enrollment);
+
 }

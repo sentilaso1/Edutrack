@@ -44,4 +44,15 @@ public class GoalServiceImpl implements GoalService {
         goal.setStatus(newStatus);
         goalRepository.save(goal);
     }
+
+    @Override
+    public Goal getGoalById(UUID goalId) {
+        return goalRepository.findById(goalId).orElseThrow(() -> new IllegalArgumentException("Invalid goal"));
+    }
+
+    @Override
+    public void deleteGoal(UUID goalId){
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new IllegalArgumentException("Invalid goal"));
+        goalRepository.delete(goal);
+    }
 }
