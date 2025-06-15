@@ -89,18 +89,6 @@ public class MenteeScheduleController {
             return "/checkout/checkout-info";
         }
 
-        wallet.setBalance(wallet.getBalance() - totalCost);
-        wallet.setOnHold(wallet.getOnHold() + totalCost);
-        walletService.save(wallet);
-        System.out.println(wallet);
-
-        Transaction transaction = new Transaction(
-                totalCost,
-                "Checkout for Course Mentor: " + courseMentor.getId(),
-                wallet
-        );
-        transactionService.save(transaction);
-
         String startTime = enrollmentScheduleService.findStartLearningTime(
                 menteeOpt.get(),
                 courseMentor,
@@ -112,6 +100,18 @@ public class MenteeScheduleController {
             model.addAttribute("error", "Cannot find start time for the selected schedule");
             return "/checkout/checkout-info";
         }
+
+        wallet.setBalance(wallet.getBalance() - totalCost);
+        wallet.setOnHold(wallet.getOnHold() + totalCost);
+        walletService.save(wallet);
+
+        Transaction transaction = new Transaction(
+                totalCost,
+                "Checkout for Course Mentor: " + courseMentor.getId(),
+                wallet
+        );
+        transaction.setCourse(courseMentor.getCourse());
+        transactionService.save(transaction);
 
         Enrollment enrollment = new Enrollment(
                 menteeOpt.get(),
@@ -154,10 +154,10 @@ public class MenteeScheduleController {
         model.addAttribute("wallet", walletOptional.get());
 
         CourseMentor courseMentor = courseMentorService.findById(courseMentorId);
-        if("checkStartDate".equals(action)){
+        if ("checkStartDate".equals(action)) {
             String startTime = enrollmentScheduleService.findStartLearningTime(mentee, courseMentor, slot, day, totalSlot);
             System.out.println(startTime);
-            if(startTime == null){
+            if (startTime == null) {
                 startTime = "Cannot find start time";
             }
             model.addAttribute("startTime", startTime);
