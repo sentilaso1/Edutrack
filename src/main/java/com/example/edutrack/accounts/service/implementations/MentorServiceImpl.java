@@ -115,7 +115,7 @@ public class MentorServiceImpl implements MentorService {
         mentor.setExpertise(null);
         mentor.setRating(null);
 
-        mentor.setId(userId)
+        mentor.setId(userId);
         return Optional.ofNullable(entityManager.merge(mentor));
     }
 }
