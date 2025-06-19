@@ -174,3 +174,32 @@ tbody td {
     box-shadow: 0 0 6px rgba(242, 153, 74, 0.3);
     outline: none;
 }
+
+ .month-select-container {
+     display: flex;
+     flex-direction: column;
+     margin-bottom: 20px;
+     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ }
+
+.month-select-container label {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.month-select-container select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.month-select-container select:focus {
+    border-color: #6A1B9A; /* deep purple */
+    box-shadow: 0 0 5px rgba(106, 27, 154, 0.4);
+}
