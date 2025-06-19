@@ -81,6 +81,7 @@ public class AuthController {
     public String processSignup(@ModelAttribute("user") User user,
                                 @RequestParam("g-recaptcha-response") String recaptchaResponse,
                                 @RequestParam String confirm_password,
+                                @RequestParam String role,
                                 HttpServletRequest request,
                                 Model model) {
         System.out.println("g-recaptcha-response: " + recaptchaResponse);
@@ -107,8 +108,11 @@ public class AuthController {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hashed = encoder.encode(user.getPassword());
         user.setPassword(hashed);
-        userService.registerUser(user);
-        model.addAttribute("user", new User());
+        if("mentee".equals(role)){
+            userService.registerMentee(user);
+        }else if("admin".equals(role)){
+            userService.registerMentor(user);
+        }
         return "redirect:/login";
     }
 
@@ -136,7 +140,14 @@ public class AuthController {
                     cookie.setPath("/");
                     response.addCookie(cookie);
                 }
-                return "redirect:/home";
+                if(userService.isMentee(user)){
+                    session.setAttribute("role", "mentee");
+                    return "redirect:/home";
+                }if(userService.isMentor(user)){
+                    session.setAttribute("role", "mentor");
+                    return "redirect:/mentor";
+                }
+                return "redirect:/signup";
             }
         }
         model.addAttribute("error", "Invalid email or password");
