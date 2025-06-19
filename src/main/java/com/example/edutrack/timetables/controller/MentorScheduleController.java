@@ -26,32 +26,58 @@ public class MentorScheduleController {
     @PostMapping("/add-new-schedule")
     public String addNewSchedule(@RequestParam List<Day> day,
                                  @RequestParam List<Slot> slot,
-                                 @RequestParam String start,
-                                 @RequestParam String end,
+                                 @RequestParam String monthOption,
                                  HttpSession session) {
-        if (day == null || slot == null || day.isEmpty() || day.size() != slot.size() || start == null || start.isEmpty() || end == null || end.isEmpty()) {
+
+        if (day == null || slot == null || day.isEmpty() || day.size() != slot.size()) {
             return "redirect:/mentor/working-date?error=invalid-day-slot";
         }
 
+        LocalDate today = LocalDate.now();
+        LocalDate startDate;
+        LocalDate endDate;
 
-        Mentor mentor = session.getAttribute("loggedInUser") == null ? new Mentor() : (Mentor) session.getAttribute("loggedInUser");
-        List<MentorAvailableTime> availableTimes = new ArrayList<>();
+        if ("current".equals(monthOption)) {
+            startDate = today.withDayOfMonth(1);
+            endDate = today.withDayOfMonth(today.lengthOfMonth());
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate startLocal = LocalDate.parse(start, formatter);
-        LocalDate endLocal = LocalDate.parse(end, formatter);
+        } else if ("next".equals(monthOption)) {
+            LocalDate firstDayNextMonth = today.plusMonths(1).withDayOfMonth(1);
+            LocalDate lastDayThisMonth = today.withDayOfMonth(today.lengthOfMonth());
 
-        String error = mentorAvailableTimeService.alertValidStartEndTime(startLocal, endLocal, mentor);
+            // Tính tuần cuối cùng là 7 ngày cuối của tháng
+            LocalDate startOfLastWeekThisMonth = lastDayThisMonth.minusDays(6);
+
+            // Kiểm tra nếu hôm nay không thuộc tuần cuối cùng → từ chối đăng ký
+            if (today.isBefore(startOfLastWeekThisMonth)) {
+                return "redirect:/mentor/working-date?error=too-early-for-next-month";
+            }
+
+            startDate = firstDayNextMonth;
+            endDate = firstDayNextMonth.withDayOfMonth(firstDayNextMonth.lengthOfMonth());
+
+        } else {
+            return "redirect:/mentor/working-date?error=invalid-month-selection";
+        }
+
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+
+        String error = mentorAvailableTimeService.alertValidStartEndTime(startDate, endDate, mentor);
         if (error != null) {
             return "redirect:/mentor/working-date?error=" + error;
         }
 
+        List<MentorAvailableTime> availableTimes = new ArrayList<>();
         for (int i = 0; i < day.size(); i++) {
-            availableTimes.add(new MentorAvailableTime(mentor, slot.get(i), day.get(i), startLocal, endLocal));
+            availableTimes.add(new MentorAvailableTime(mentor, slot.get(i), day.get(i), startDate, endDate));
         }
 
         mentorAvailableTimeService.insertWorkingSchedule(availableTimes);
         return "redirect:/mentor/working-date";
     }
+
 
 }
