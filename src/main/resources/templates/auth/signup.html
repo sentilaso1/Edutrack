@@ -12,7 +12,7 @@
 
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
-<body>
+<body style="overflow: scroll;">
 <!--=============== LOGIN IMAGE ===============-->
 <svg class="login__blob" viewBox="0 0 566 840" xmlns="http://www.w3.org/2000/svg">
     <mask id="mask0" mask-type="alpha">
@@ -33,7 +33,7 @@
 </svg>
 
 <!--=============== LOGIN ===============-->
-<div class="login container grid" id="loginAccessRegister">
+<div class="login container grid" id="loginAccessRegister" style="overflow: scroll;">
     <!--===== LOGIN REGISTER =====-->
     <div class="login__access">
         <h1 class="login__title">Create new account.</h1>
@@ -79,6 +79,13 @@
                         <input type="email" th:field="*{email}" required placeholder=" " class="login__input">
                         <label class="login__label">Email</label>
                         <i class="ri-mail-fill login__icon"></i>
+                    </div>
+
+                    <div class="login__box">
+                        <select name="role" style="width: 100%; border-radius: 1rem; padding: 1em; border-color: white; background-color: inherit; color: hsl(220, 15%, 66%); font-weight: 600; font-family: inherit; font-size: inherit; height: 72px;">
+                            <option value="mentee">Mentee</option>
+                            <option value="mentor">Mentor</option>
+                        </select>
                     </div>
 
                     <div class="login__group grid">
