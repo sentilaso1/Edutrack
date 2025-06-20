@@ -1,191 +1,157 @@
 package com.example.edutrack.transactions.repository;
 
-import com.example.edutrack.transactions.model.CommonTransaction;
+
+import com.example.edutrack.transactions.model.CommonTransactionProjection;
 import com.example.edutrack.transactions.model.Transaction;
-import com.example.edutrack.transactions.model.VnpayTransaction;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
-@Repository
-public class CommonTransactionRepository {
-    @PersistenceContext
-    private EntityManager entityManager;
+public interface CommonTransactionRepository extends JpaRepository<Transaction, UUID> {
+    @Query(value = """
+                    SELECT *
+                    FROM (
+                        SELECT
+                            BIN_TO_UUID(id) AS id,
+                            info,
+                            amount,
+                            status,
+                            balance,
+                            updated_date AS date
+                        FROM transactions
+                        WHERE wallet_id = UUID_TO_BIN(:userId)
+                        
+                        UNION ALL
+                        
+                        SELECT
+                            BIN_TO_UUID(txn_ref) AS id,
+                            order_info AS info,
+                            (amount / 100) AS amount,
+                            IFNULL(transaction_status, 'pending') AS status,
+                            balance,
+                            IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) AS date
+                        FROM vnpay_transactions
+                        WHERE user_id = UUID_TO_BIN(:userId)
+                    ) AS combined
+            """,
+            countQuery = """
+                            SELECT COUNT(*) FROM (
+                                SELECT 1
+                                FROM transactions
+                                WHERE wallet_id = UUID_TO_BIN(:userId)
 
-    private final Comparator<CommonTransaction> descendingDateComparator = (t1, t2) -> {
-        if (t1.getTransactionDate() == null && t2.getTransactionDate() == null) {
-            return 0;
-        }
-        return t2.getTransactionDate().compareTo(t1.getTransactionDate());
-    };
+                                UNION ALL
 
-    private Transaction mapToTransaction(Object[] row) {
-        System.out.println(Arrays.toString(row));
-        Transaction transaction = new Transaction();
+                                SELECT 1
+                                FROM vnpay_transactions
+                                WHERE user_id = UUID_TO_BIN(:userId)
+                            ) AS combined
+                    """,
+            nativeQuery = true)
+    Page<CommonTransactionProjection> findAllTransactionByUser(@Param("userId") String userId, Pageable pageable);
 
-        transaction.setId(UUID.fromString(String.valueOf(row[0])));
-        transaction.setInfo(String.valueOf(row[1]));
-        transaction.setAmount(((Number) row[2]).doubleValue());
-        transaction.setStatus(Transaction.TransactionStatus.valueOf(String.valueOf(row[3])));
-        transaction.setUpdatedDate((java.util.Date) row[4]);
+    @Query(
+            value = """
+                    SELECT *
+                    FROM (
+                        SELECT
+                            BIN_TO_UUID(id) AS id,
+                            info,
+                            amount,
+                            status,
+                            balance,
+                            updated_date AS date
+                        FROM transactions
+                        WHERE wallet_id = UUID_TO_BIN(:userId)
+                          AND LOWER(info) LIKE LOWER(CONCAT('%', :keyword, '%'))
 
-        return transaction;
-    }
+                        UNION ALL
 
-    private VnpayTransaction mapToVnpayTransaction(Object[] row) {
-        System.out.println(Arrays.toString(row));
-        VnpayTransaction vnpayTransaction = new VnpayTransaction();
+                        SELECT 
+                            BIN_TO_UUID(txn_ref) AS id,
+                            order_info AS info,
+                            (amount / 100) AS amount,
+                            IFNULL(transaction_status, 'pending') AS status,
+                            balance,
+                            IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) AS date
+                        FROM vnpay_transactions
+                        WHERE user_id = UUID_TO_BIN(:userId)
+                          AND LOWER(order_info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    ) AS combined
+                    ORDER BY date DESC
+                    """,
+        countQuery = """
+                SELECT COUNT(*) FROM (
+                    SELECT 1
+                    FROM transactions
+                    WHERE wallet_id = UUID_TO_BIN(:userId)
+                      AND LOWER(info) LIKE LOWER(CONCAT('%', :keyword, '%'))
 
-        vnpayTransaction.setTxnRef(UUID.fromString(String.valueOf(row[0])));
-        vnpayTransaction.setOrderInfo(String.valueOf(row[1]));
-        vnpayTransaction.setAmount(((Number) row[2]).longValue());
-        vnpayTransaction.setTransactionStatus((String) row[3]);
-        vnpayTransaction.setPayDate((String) row[4]);
+                    UNION ALL
 
-        return vnpayTransaction;
-    }
+                    SELECT 1
+                    FROM vnpay_transactions
+                    WHERE user_id = UUID_TO_BIN(:userId)
+                      AND LOWER(order_info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                ) AS combined
+                """,
+        nativeQuery = true
+    )
+    Page<CommonTransactionProjection> findAllTransactionByUserContaining(@Param("userId") String userId, @Param("keyword") String query, Pageable pageable);
 
-    private String getTransactionSql(boolean isVnpay, UUID userId, int limit) {
-        String sql;
+    @Query(
+            value = """
+                    SELECT *
+                    FROM (
+                        SELECT 
+                            BIN_TO_UUID(id) AS id,
+                            info,
+                            amount,
+                            status,
+                            balance,
+                            updated_date AS date
+                        FROM transactions
+                        WHERE updated_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                          AND wallet_id = UUID_TO_BIN(:userId)
 
-        // TODO: Refactor to use a common method for both transaction types
-        if (!isVnpay) {
-            if (userId == null) {
-                sql = """
-                            SELECT
-                                BIN_TO_UUID(id) AS id,
-                                info,
-                                amount,
-                                status,
-                                updated_date AS date
-                            FROM transactions
-                            WHERE updated_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-                            ORDER BY date DESC
-                            %s
-                        """;
-            } else {
-                sql = """
-                            SELECT
-                                BIN_TO_UUID(id) AS id,
-                                info,
-                                amount,
-                                status,
-                                updated_date AS date
-                            FROM transactions
-                            WHERE updated_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-                            AND wallet_id = UUID_TO_BIN(:userId)
-                            ORDER BY date DESC
-                            %s
-                        """;
-                sql = sql.replace(":userId", "'" + userId + "'");
-            }
-        } else {
-            if (userId == null) {
-                sql = """
-                            SELECT
-                                BIN_TO_UUID(txn_ref) AS id,
-                                order_info AS info,
-                                (amount / 100) AS amount,
-                                IFNULL(transaction_status, 'pending') AS status,
-                                IFNULL(pay_date, created_date) AS date
-                            FROM vnpay_transactions
-                            WHERE IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-                            ORDER BY date DESC
-                            %s
-                        """;
-            } else {
-                sql = """
-                            SELECT
-                                BIN_TO_UUID(txn_ref) AS id,
-                                order_info AS info,
-                                (amount / 100) AS amount,
-                                IFNULL(transaction_status, 'pending') AS status,
-                                IFNULL(pay_date, created_date) AS date
-                            FROM vnpay_transactions
-                            WHERE IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-                            AND user_id = UUID_TO_BIN(:userId)
-                            ORDER BY date DESC
-                            %s
-                        """;
-                sql = sql.replace(":userId", "'" + userId + "'");
-            }
-        }
+                        UNION ALL
 
-        if (limit <= 0) {
-            sql = String.format(sql, "");
-        } else {
-            sql = String.format(sql, "LIMIT " + limit);
-        }
+                        SELECT 
+                            BIN_TO_UUID(txn_ref) AS id,
+                            order_info AS info,
+                            (amount / 100) AS amount,
+                            IFNULL(transaction_status, 'pending') AS status,
+                            balance,
+                            IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) AS date
+                        FROM vnpay_transactions
+                        WHERE IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME))
+                              BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                          AND user_id = UUID_TO_BIN(:userId)
+                    ) AS combined
+                    ORDER BY date
+                    """,
+            countQuery = """
+        SELECT COUNT(*) FROM (
+            SELECT 1
+            FROM transactions
+            WHERE updated_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+              AND wallet_id = UUID_TO_BIN(:userId)
 
-        return sql;
-    }
+            UNION ALL
 
-    private List<CommonTransaction> executeQuery(Query transactionQuery, Query vnpayTransactionQuery) {
-        List<CommonTransaction> transactionList = new ArrayList<>();
-
-        //noinspection unchecked
-        List<Object[]> transactionResults = (List<Object[]>) transactionQuery.getResultList();
-
-        //noinspection unchecked
-        List<Object[]> vnpayTransactionResults = (List<Object[]>) vnpayTransactionQuery.getResultList();
-
-        for (Object[] row : transactionResults) {
-            Transaction transaction = mapToTransaction(row);
-            transactionList.add(transaction);
-        }
-
-        for (Object[] row : vnpayTransactionResults) {
-            VnpayTransaction vnpayTransaction = mapToVnpayTransaction(row);
-            transactionList.add(vnpayTransaction);
-        }
-
-        transactionList.sort(descendingDateComparator);
-        return transactionList;
-    }
-
-    private List<CommonTransaction> getAllTransactions(UUID userId, int limit) {
-        String transactionSql = getTransactionSql(false, userId, limit / 2);
-        String vnpayTransactionSql = getTransactionSql(true, userId, limit / 2);
-
-        Query transactionQuery = entityManager.createNativeQuery(transactionSql);
-        Query vnpayTransactionQuery = entityManager.createNativeQuery(vnpayTransactionSql);
-
-        return executeQuery(transactionQuery, vnpayTransactionQuery);
-    }
-
-    private List<CommonTransaction> getAllTransactions(UUID userId) {
-        String transactionSql = getTransactionSql(false, userId, 0);
-        String vnpayTransactionSql = getTransactionSql(true, userId, 0);
-
-        Query transactionQuery = entityManager.createNativeQuery(transactionSql);
-        Query vnpayTransactionQuery = entityManager.createNativeQuery(vnpayTransactionSql);
-
-        return executeQuery(transactionQuery, vnpayTransactionQuery);
-    }
-
-    private List<CommonTransaction> getAllTransactions() {
-        String transactionSql = getTransactionSql(false, null, 0);
-        String vnpayTransactionSql = getTransactionSql(true, null, 0);
-
-        Query transactionQuery = entityManager.createNativeQuery(transactionSql);
-        Query vnpayTransactionQuery = entityManager.createNativeQuery(vnpayTransactionSql);
-
-        return executeQuery(transactionQuery, vnpayTransactionQuery);
-    }
-
-    public List<CommonTransaction> findAll() {
-        return getAllTransactions();
-    }
-
-    public List<CommonTransaction> findAllByUserId(UUID userId) {
-        return getAllTransactions(userId);
-    }
-
-    public List<CommonTransaction> findAllByUserIdLimit(UUID userId, int limit) {
-        return getAllTransactions(userId, limit);
-    }
+            SELECT 1
+            FROM vnpay_transactions
+            WHERE IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME))
+                  BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+              AND user_id = UUID_TO_BIN(:userId)
+        ) AS combined
+        """,
+        nativeQuery = true
+    )
+    List<CommonTransactionProjection> findAllRecentTransactionsByUser(@Param("userId") String userId);
 }

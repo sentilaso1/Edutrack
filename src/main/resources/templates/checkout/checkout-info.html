@@ -123,7 +123,7 @@
             <div class="balance-box">
                 <p><strong>Current balance:</strong></p>
                 <p class="neuron-balance" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">250</p>
-                <p th:text="${'(' + wallet.onHoldFormatted + ' VND on hold)' }"></p>
+                <p th:if="${wallet != null && wallet.onHold != null && wallet.onHold > 0}" th:text="${'(' + wallet.onHoldFormatted + ' VND on hold)' }"></p>
                 <a th:href="@{/wallet}" class="link">View account details</a>
                 <a th:href="@{/wallet/recharge}" class="link">Add funds</a>
             </div>

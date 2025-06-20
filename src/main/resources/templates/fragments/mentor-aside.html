@@ -1,0 +1,15 @@
+<div class="sidebar" th:fragment="aside">
+    <a class="logo">
+        <img style="width: 100%; aspect-ratio: 1/1;"
+                th:src="@{/assets/images/logo.svg}"
+                width="145"
+                height="27"
+                alt="Youdemi home"
+        />
+    </a>
+    <h2>Mentor Site</h2>
+    <div class="nav-item"><a href="/mentor"><i class="fa fa-home" aria-hidden="true"></i> Dashboard</a></div>
+    <div class="nav-item"><a href="/mentor/schedule"><i class="fa fa-calendar" aria-hidden="true"></i> Weekly Schedule</a></div>
+    <div class="nav-item"><a href="/mentor/sensor-class?status=PENDING"><i class="fa fa-list" aria-hidden="true"></i> Request Class</a> <span>10</span></div>
+    <div class="nav-item"><a href="/mentor/working-date"><i class="fa fa-briefcase" aria-hidden="true"></i> My Working Schedule</a></div>
+</div>

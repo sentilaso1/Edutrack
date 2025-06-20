@@ -43,6 +43,16 @@ public class Transaction implements CommonTransaction {
     }
 
     @Override
+    public Double getTransactionBalance() {
+        return getBalance();
+    }
+
+    @Override
+    public String getTransactionBalanceFormatted() {
+        return CustomFormatter.formatNumberWithSpaces(getBalance());
+    }
+
+    @Override
     public UUID getUserId() {
         return getWallet().getUser().getId();
     }
@@ -70,6 +80,9 @@ public class Transaction implements CommonTransaction {
     @Column(name = "status", nullable = false)
     private TransactionStatus status = TransactionStatus.PENDING;
 
+    @Column(name = "balance")
+    private Double balance;
+
     @Column(name = "created_date", nullable = false)
     @CreatedDate
     private Date createdDate = new Date();
@@ -93,6 +106,7 @@ public class Transaction implements CommonTransaction {
         this.amount = amount;
         this.info = info;
         this.wallet = wallet;
+        this.balance = wallet.getBalance() - amount;
     }
 
     public UUID getId() {
@@ -125,6 +139,14 @@ public class Transaction implements CommonTransaction {
 
     public void setStatus(TransactionStatus status) {
         this.status = status;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
     }
 
     public Date getCreatedDate() {
@@ -169,6 +191,7 @@ public class Transaction implements CommonTransaction {
                 ", createdDate=" + createdDate +
                 ", updatedDate=" + updatedDate +
                 ", course=" + course +
+                ", balance=" + balance +
                 ", wallet=" + wallet +
                 '}';
     }

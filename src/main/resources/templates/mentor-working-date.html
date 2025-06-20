@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Working date</title>
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/working-date.css}">
+</head>
+<body>
+<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+<div class="main">
+    <div class="dashboard-header">
+        <h1>Working Schedule</h1>
+    </div>
+
+    <div class="todo-container">
+        <div class="todo-header">
+            <div>
+                <h3>Add new Working Date</h3>
+                <p>Lorem ipsum dolor sit amet</p>
+            </div>
+            <button class="add-btn" onclick="openModal()">+</button>
+        </div>
+        <div class="todo-card">
+            <h3 th:text="'End Date: ' + ${param.end}"></h3>
+            <table class="schedule-table" th:if="${slotDayMatrix}">
+                <thead>
+                <tr>
+                    <th>Time Slot</th>
+                    <th th:each="day : ${days}" th:text="${day.name().toLowerCase()}"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="slot, iStat : ${slots}">
+                    <td th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
+                    <td th:each="day, jStat : ${days}">
+                        <div th:class="'slot-button' + (${slotDayMatrix[iStat.index][jStat.index]} ? ' active' : '')">
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="todo-card" th:each="time : ${setTime}">
+            <a th:href="@{/mentor/working-date(end=${time.endDate})}">
+            <span class="todo-category designer">Working Date</span>
+                <h4>From <span th:text="${time.getStartDate()}"></span> to <span th:text="${time.getEndDate()}"></span></h4>
+            </a>
+        </div>
+    </div>
+
+
+    <div class="modal" id="projectModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div>
+                <div class="modal-header">
+                    <h4 class="modal-title">Create Working Schedule</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="slotForm" method="POST" action="/add-new-schedule">
+                        <div class="month-select-container">
+                            <label for="monthOption">Choose Month:</label>
+                            <select name="monthOption" id="monthOption">
+                                <option value="current">This month</option>
+                                <option value="next">Next month</option>
+                            </select>
+                        </div>
+
+                        <table class="table table-bordered text-center align-middle" style="width: 100%;">
+                            <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th th:each="day : ${dayLabels}"
+                                    th:text="${#strings.capitalize(day.name().toLowerCase())}"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="slot : ${slots}">
+                                <!-- Cột thời gian bắt đầu - kết thúc -->
+                                <td class="time-cell" th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
+
+                                <!-- Cột các ngày -->
+                                <td th:each="day : ${dayLabels}">
+                                    <button
+                                            type="button"
+                                            class="slot-button"
+                                            th:attr="data-day=${day.name()}, data-slot=${slot.name()}">
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="text-center mt-3" style="display: flex; justify-content: center">
+                            <button
+                                    type="submit"
+                                    class="submit-button">
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('projectModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('projectModal').style.display = 'none';
+        }
+    </script>
+    <script>
+        const form = document.getElementById("slotForm");
+        const buttons = form.querySelectorAll(".slot-button");
+
+        buttons.forEach((button) => {
+            button.addEventListener("click", () => {
+                button.classList.toggle("active");
+                button.textContent = button.classList.contains("active") ? "✔" : "";
+
+                updateHiddenInputs();
+            });
+        });
+
+        function updateHiddenInputs() {
+            // Remove old hidden inputs
+            const oldInputs = form.querySelectorAll(
+                'input[type=hidden][data-generated="true"]'
+            );
+            oldInputs.forEach((i) => i.remove());
+
+            // Add new hidden inputs for each selected slot
+            buttons.forEach((btn) => {
+                if (btn.classList.contains("active")) {
+                    // Create slot input
+                    const slotInput = document.createElement("input");
+                    slotInput.type = "hidden";
+                    slotInput.name = "slot";
+                    slotInput.value = btn.dataset.slot;
+                    slotInput.dataset.generated = "true";
+                    form.appendChild(slotInput);
+
+                    // Create day input
+                    const dayInput = document.createElement("input");
+                    dayInput.type = "hidden";
+                    dayInput.name = "day";
+                    dayInput.value = btn.dataset.day;
+                    dayInput.dataset.generated = "true";
+                    form.appendChild(dayInput);
+                }
+            });
+        }
+
+        form.addEventListener("submit", function (e) {
+            const hasSelected = [...buttons].some((btn) =>
+                btn.classList.contains("active")
+            );
+            if (!hasSelected) {
+                e.preventDefault();
+                alert("Vui lòng chọn ít nhất 1 slot trước khi gửi");
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

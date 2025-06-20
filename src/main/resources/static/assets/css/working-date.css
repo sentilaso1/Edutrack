@@ -1,0 +1,205 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f6f9fc;
+    padding: 20px;
+}
+
+.todo-container {
+    max-width: 100%;
+    margin: auto;
+}
+
+.todo-header {
+    background: #ff4d30;
+    color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.todo-header h3 {
+    margin: 0;
+}
+
+.todo-header p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.add-btn {
+    background: #fff;
+    color: #ff4d30;
+    border: none;
+    font-size: 24px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+}
+
+.todo-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.todo-category {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.designer {
+    color: #ff7f50;
+}
+
+.engineer {
+    color: #dc3545;
+}
+
+.marketing {
+    color: #6f42c1;
+}
+
+.todo-card h4 {
+    font-size: 1rem;
+    margin: 0 0 8px;
+}
+
+.modal-body {
+    padding: 20px;
+    background-color: #fefefe;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    table-layout: fixed;
+}
+
+thead th {
+    background-color: #ff4d30;
+    color: white;
+    padding: 12px;
+    font-size: 0.8em;
+    text-transform: capitalize;
+}
+
+tbody td {
+    padding: 8px;
+}
+
+.slot-button {
+    width: 100%;
+    height: 50px;
+    background-color: #f0f0f0;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.slot-button:hover {
+    background-color: #ffe0b2;
+    border-color: #f7b267;
+}
+
+.slot-button.active {
+    background-color: #f7b267;
+    color: white;
+    border-color: #f2994a;
+}
+
+.time-cell {
+    font-weight: bold;
+    background-color: #fafafa;
+    border-right: 1px solid #ddd;
+}
+
+.submit-button {
+    margin: 0 auto;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #ff4d30;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #f2994a;
+}
+
+/* Scrollbar gọn */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+.modal-content input[type="date"] {
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fefefe;
+    font-size: 0.95rem;
+    font-family: inherit;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    margin-bottom: 1em;
+    color: #ff4d30;;
+}
+
+.modal-content input[type="date"]:focus {
+    border-color: #f7b267;
+    box-shadow: 0 0 6px rgba(242, 153, 74, 0.3);
+    outline: none;
+}
+
+ .month-select-container {
+     display: flex;
+     flex-direction: column;
+     margin-bottom: 20px;
+     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ }
+
+.month-select-container label {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.month-select-container select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.month-select-container select:focus {
+    border-color: #6A1B9A; /* deep purple */
+    box-shadow: 0 0 5px rgba(106, 27, 154, 0.4);
+}

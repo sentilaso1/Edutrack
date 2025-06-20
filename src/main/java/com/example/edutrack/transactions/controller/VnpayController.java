@@ -93,10 +93,21 @@ public class VnpayController {
                 User user = transactionOpt.get().getUser();
                 Long amount = transactionOpt.get().getAmount();
 
-                walletService.addFunds(
+                Optional<Wallet> wallet = walletService.addFunds(
                         user,
                         ((double) amount / VnpayTransaction.FRACTION_SHIFT)
                 );
+
+                if (wallet.isEmpty()) {
+                    walletService.save(user);
+                    wallet = walletService.addFunds(
+                            user,
+                            ((double) amount / VnpayTransaction.FRACTION_SHIFT)
+                    );
+                }
+
+                transactionOpt.get().setBalance(wallet.get().getBalance());
+                vnpayTransactionService.save(transactionOpt.get());
 
                 model.addAttribute(CommonModelAttribute.ERROR.toString(), "Payment successful!");
             } else {

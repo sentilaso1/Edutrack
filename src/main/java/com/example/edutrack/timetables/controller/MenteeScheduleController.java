@@ -71,6 +71,11 @@ public class MenteeScheduleController {
         model.addAttribute("course", courseMentor.getCourse());
         model.addAttribute("mentor", courseMentor.getMentor());
 
+        if (params.getTotalSlot() == null || params.getSlot() == null || params.getDay() == null) {
+            model.addAttribute("error", "Invalid enrollment parameters");
+            return "/checkout/checkout-info";
+        }
+
         Optional<Wallet> walletOptional = walletService.findById(user.getId());
         if (walletOptional.isEmpty()) {
             walletOptional = Optional.of(walletService.save(user));
@@ -79,25 +84,33 @@ public class MenteeScheduleController {
         model.addAttribute("wallet", wallet);
 
         Double totalCost = courseMentor.getPrice() * params.getTotalSlot();
-        if (wallet.getBalance() < totalCost) {
+        if (wallet.getBalance() <= 0 || wallet.getBalance() < totalCost) {
             model.addAttribute("error", "Insufficient balance in wallet");
             return "/checkout/checkout-info";
         }
 
-        System.out.println(params.getTotalSlot());
-        System.out.println(totalCost);
-        System.out.println(params.getTotalSlot());
+        String startTime = enrollmentScheduleService.findStartLearningTime(
+                menteeOpt.get(),
+                courseMentor,
+                params.getSlot(),
+                params.getDay(),
+                params.getTotalSlot()
+        );
+        if (startTime == null) {
+            model.addAttribute("error", "Cannot find start time for the selected schedule");
+            return "/checkout/checkout-info";
+        }
 
         wallet.setBalance(wallet.getBalance() - totalCost);
         wallet.setOnHold(wallet.getOnHold() + totalCost);
         walletService.save(wallet);
-        System.out.println(wallet);
 
         Transaction transaction = new Transaction(
                 totalCost,
                 "Checkout for Course Mentor: " + courseMentor.getId(),
                 wallet
         );
+        transaction.setCourse(courseMentor.getCourse());
         transactionService.save(transaction);
 
         Enrollment enrollment = new Enrollment(
@@ -105,7 +118,8 @@ public class MenteeScheduleController {
                 courseMentor,
                 params.getTotalSlot(),
                 params.getSlot(),
-                params.getDay()
+                params.getDay(),
+                startTime
         );
         enrollmentService.save(enrollment);
 
@@ -114,11 +128,7 @@ public class MenteeScheduleController {
     }
 
     @PostMapping("/courses/register/{cmid}")
-    public String registerSkill(@RequestParam String email,
-                                @RequestParam String fullName,
-                                @RequestParam String phone,
-                                @RequestParam Integer age,
-                                @RequestParam List<Slot> slot,
+    public String registerSkill(@RequestParam List<Slot> slot,
                                 @RequestParam List<Day> day,
                                 @PathVariable(value = "cmid") UUID courseMentorId,
                                 @RequestParam Integer totalSlot,
@@ -144,15 +154,15 @@ public class MenteeScheduleController {
         model.addAttribute("wallet", walletOptional.get());
 
         CourseMentor courseMentor = courseMentorService.findById(courseMentorId);
-        if("checkStartDate".equals(action)){
+        if ("checkStartDate".equals(action)) {
             String startTime = enrollmentScheduleService.findStartLearningTime(mentee, courseMentor, slot, day, totalSlot);
             System.out.println(startTime);
-            if(startTime == null){
+            if (startTime == null) {
                 startTime = "Cannot find start time";
             }
             model.addAttribute("startTime", startTime);
-            model.addAttribute("courseMentor", courseMentor);
-            return "register-section";
+            session.setAttribute("startTime", startTime);
+            return "redirect:/courses/register/{cmid}";
         }
 
         return "register-section";

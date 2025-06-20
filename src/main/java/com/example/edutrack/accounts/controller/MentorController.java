@@ -2,11 +2,15 @@ package com.example.edutrack.accounts.controller;
 
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
+import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
+import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
+import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,15 +23,20 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
-@Controller(value="mentor")
+@Controller(value = "mentor")
 public class MentorController {
     private final EnrollmentScheduleService enrollmentScheduleService;
     private final EnrollmentService enrollmentService;
+    private final MentorAvailableTimeService mentorAvailableTimeService;
 
-    public MentorController(EnrollmentScheduleService enrollmentScheduleService, EnrollmentService enrollmentService) {
+    public MentorController(EnrollmentScheduleService enrollmentScheduleService,
+                            EnrollmentService enrollmentService,
+                            MentorAvailableTimeService mentorAvailableTimeService) {
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.enrollmentService = enrollmentService;
+        this.mentorAvailableTimeService = mentorAvailableTimeService;
     }
 
     @RequestMapping("/mentor")
@@ -93,7 +102,7 @@ public class MentorController {
     @GetMapping("/mentor/sensor-class")
     public String viewSensorClassList(Model model,
                                       @RequestParam(defaultValue = "PENDING") Enrollment.EnrollmentStatus status,
-                                      HttpSession session){
+                                      HttpSession session) {
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
@@ -102,6 +111,7 @@ public class MentorController {
         model.addAttribute("enrollmentList", enrollmentList);
         return "skill-register-request";
     }
+
     @GetMapping("/mentor/schedule/{esid}")
     public String menteeReview(Model model, @PathVariable Integer esid, HttpSession session) {
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
@@ -109,13 +119,85 @@ public class MentorController {
             return "redirect:/login";
         }
         EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(esid);
-        if(enrollmentSchedule == null) {
+        if (enrollmentSchedule == null) {
             return "redirect:/mentor/schedule?error=enrollmentNotFound";
         }
-        if(!enrollmentSchedule.getEnrollment().getCourseMentor().getMentor().getId().equals(mentor.getId())) {
+        if (!enrollmentSchedule.getEnrollment().getCourseMentor().getMentor().getId().equals(mentor.getId())) {
             return "redirect:/mentor/schedule?error=notMentor";
         }
         model.addAttribute("enrollmentSchedule", enrollmentSchedule);
         return "mentee-review";
     }
+
+    @GetMapping("/mentor/sensor-class/{eid}")
+    public String rejectRegistration(@PathVariable Long eid,
+                                     @RequestParam String action,
+                                     HttpSession session) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+        Enrollment enrollment = enrollmentService.findById(eid);
+        if (enrollment == null) {
+            return "redirect:/mentor/schedule?error=enrollmentNotFound";
+        }
+        if (!enrollment.getCourseMentor().getMentor().getId().equals(mentor.getId())) {
+            return "redirect:/mentor/schedule?error=notMentor";
+        }
+        if (action.equals("reject")) {
+            enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
+            enrollmentService.save(enrollment);
+            return "redirect:/mentor/sensor-class?status=REJECTED&reject=" + eid;
+        }
+        if(action.equals("approve")){
+            enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
+            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
+            return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
+        }
+        return "redirect:/mentor/sensor-class";
+    }
+
+    @GetMapping("/mentor/working-date")
+    public String workingDate(Model model,
+                              @RequestParam(required = false) String end,
+                              HttpSession session) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("slots", Slot.values());
+        model.addAttribute("dayLabels", Day.values());
+
+        List<MentorAvailableTimeDTO> setTime = mentorAvailableTimeService.findAllDistinctStartEndDates(mentor);
+        model.addAttribute("setTime", setTime);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate endLocal;
+        if(end == null || end.isEmpty()){
+            endLocal = mentorAvailableTimeService.findMaxEndDate(mentor);
+        }else{
+            endLocal = LocalDate.parse(end, formatter);
+        }
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
+
+        for (MentorAvailableSlotDTO dto : setSlots) {
+            int slotIndex = dto.getSlot().ordinal();
+            int dayIndex = dto.getDay().ordinal();
+            slotDayMatrix[slotIndex][dayIndex] = true;
+        }
+
+        model.addAttribute("slotDayMatrix", slotDayMatrix);
+
+        System.out.println("SIZE: " + setSlots.size());
+
+        List<Slot> slots = Arrays.stream(Slot.values()).toList();
+        List<Day> days = Arrays.stream(Day.values()).toList();
+        model.addAttribute("slots", slots);
+        model.addAttribute("days", days);
+
+        return "mentor-working-date";
+    }
+
 }

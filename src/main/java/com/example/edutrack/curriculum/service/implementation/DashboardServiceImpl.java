@@ -3,13 +3,18 @@ package com.example.edutrack.curriculum.service.implementation;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.dto.SkillProgressDTO;
 import com.example.edutrack.curriculum.dto.TrackerDTO;
+import com.example.edutrack.curriculum.model.Goal;
 import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.curriculum.repository.GoalRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.interfaces.DashboardService;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,13 +34,15 @@ public class DashboardServiceImpl implements DashboardService {
     private final MentorRepository mentorRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final TagRepository tagRepository;
+    private final GoalRepository goalRepository;
 
 
-    public DashboardServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository, MentorRepository mentorRepository, EnrollmentRepository enrollmentRepository, TagRepository tagRepository) {
+    public DashboardServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository, MentorRepository mentorRepository, EnrollmentRepository enrollmentRepository, TagRepository tagRepository, GoalRepository goalRepository) {
         this.enrollmentScheduleRepository = enrollmentScheduleRepository;
         this.mentorRepository = mentorRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.tagRepository = tagRepository;
+        this.goalRepository = goalRepository;
     }
 
     @Override
@@ -93,9 +101,13 @@ public class DashboardServiceImpl implements DashboardService {
     public TrackerDTO convertToTrackerDto(UUID menteeId){
         int learningProgres = getLearningProgress(menteeId);
         int totalTrackedSkills = (enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED)).size();
-        String goalsCompleted = "1/3";
+        int completedGoals = goalRepository.countCompletedGoalsByMenteeId(menteeId, Goal.Status.DONE);
+        int totalGoals = goalRepository.findByMenteeIdOrderByTargetDateAsc(menteeId).size();
+        String goalsCompleted = completedGoals + "/" + totalGoals;
         int skillsCompleted = enrollmentScheduleRepository.countCompletedCourseByMentee(menteeId);
-        return new TrackerDTO(learningProgres, goalsCompleted, totalTrackedSkills, skillsCompleted);
+
+        int percent = (totalGoals == 0) ? 0 : (completedGoals * 100) / totalGoals;
+        return new TrackerDTO(learningProgres, goalsCompleted, totalTrackedSkills, skillsCompleted, percent);
     }
 
 
@@ -117,5 +129,40 @@ public class DashboardServiceImpl implements DashboardService {
         }
         return skillProgressList;
     }
+
+    @Override
+    public Page<EnrollmentSchedule> getFilteredSchedules(
+            UUID menteeId,
+            int month,
+            int year,
+            UUID courseId,
+            String status,
+            Pageable pageable
+    ) {
+
+        Page<EnrollmentSchedule> rawPage = enrollmentScheduleRepository
+                .findByMenteeAndMonthWithCourseFilter(menteeId, month, year, courseId, pageable);
+
+        List<EnrollmentSchedule> filteredList = new ArrayList<>();
+
+        for (EnrollmentSchedule schedule : rawPage.getContent()) {
+            boolean match = true;
+
+            if (status != null && !status.isBlank()) {
+                match = schedule.getAttendance().name().equalsIgnoreCase(status);
+            }
+
+            if (match) {
+                filteredList.add(schedule);
+            }
+        }
+
+        filteredList.sort(Comparator
+                .comparing(EnrollmentSchedule::getDate)
+                .thenComparing(s -> s.getSlot().getStartTime()));
+
+        return new PageImpl<>(filteredList, pageable, rawPage.getTotalElements());
+    }
+
 
 }

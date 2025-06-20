@@ -72,6 +72,22 @@ public class User {
         this.gender = gender;
     }
 
+    public User(User other) {
+        this.id = other.id;
+        this.email = other.email;
+        this.password = other.password;
+        this.fullName = other.fullName;
+        this.phone = other.phone;
+        this.gender = other.gender;
+        this.birthDate = other.birthDate != null ? new Date(other.birthDate.getTime()) : null;
+        this.avatar = other.avatar != null ? other.avatar.clone() : null;
+        this.bio = other.bio;
+        this.createdDate = other.createdDate != null ? new Date(other.createdDate.getTime()) : null;
+        this.isLocked = other.isLocked;
+        this.isActive = other.isActive;
+        this.resetToken = other.resetToken;
+    }
+
     public Boolean getIsLocked() {
         return isLocked;
     }

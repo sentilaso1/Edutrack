@@ -16,6 +16,14 @@ public class Mentee extends User  {
     @Column(length = 512)
     private String interests;
 
+    public Mentee() {
+
+    }
+
+    public Mentee(User user) {
+        super(user);
+    }
+
     public void setTotalSessions(Integer totalSessions) {
         this.totalSessions = totalSessions;
     }

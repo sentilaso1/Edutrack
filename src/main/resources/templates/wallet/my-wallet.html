@@ -66,6 +66,7 @@
         }
 
         .wallet-balance {
+            width: 25%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -82,6 +83,12 @@
             font-size: 2em;
             font-weight: bold;
             margin-bottom: 0.25em;
+        }
+
+        .wallet-chart {
+            width: 75%;
+            max-width: 100%;
+            max-height: 100%;
         }
 
         .history-section {
@@ -139,7 +146,7 @@
                 </div>
                 <div class="wallet-chart">
                     <h3>Wallet Change</h3>
-                    <canvas id="walletChart"></canvas> <!-- Placeholder -->
+                    <canvas id="wallet-chart"></canvas> <!-- Placeholder -->
                 </div>
             </div>
 
@@ -169,5 +176,47 @@
         </main>
     </div>
 </div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const recentTransactions = [[${recentTransactions}]];
+    console.log(recentTransactions);
+    new Chart(
+        document.getElementById("wallet-chart"),
+        {
+            type: "line",
+            data: {
+                labels: recentTransactions.map(row => row.date),
+                datasets: [
+                    {
+                        label: "Wallet Change Over Time",
+                        data: recentTransactions.map(row => row.balance)
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Wallet Change Over the Last Month',
+                        position: "bottom",
+                        padding: {
+                            top: 12
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            padding: 12
+                        },
+                        title: {
+                            padding: 12
+                        }
+                    }
+                }
+            }
+        }
+    );
+    /*]]>*/
+</script>
 </body>
 </html>

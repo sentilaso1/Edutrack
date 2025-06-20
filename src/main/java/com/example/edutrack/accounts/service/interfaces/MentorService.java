@@ -18,4 +18,6 @@ public interface MentorService {
     List<Mentor> getTopMentorsByRatingOrSessions(int limit);
 
     List<Mentor> findMentorsByMenteeInterest(UUID menteeId, int limit);
+
+    Optional<Mentor> promoteToMentor(UUID userId);
 }
