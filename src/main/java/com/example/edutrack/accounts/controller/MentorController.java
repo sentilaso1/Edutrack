@@ -183,7 +183,7 @@ public class MentorController {
     @GetMapping("/mentor/working-date")
     public String workingDate(Model model,
                               @RequestParam(required = false) String end,
-                              HttpSession session) {
+            HttpSession session) {
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
@@ -197,9 +197,9 @@ public class MentorController {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate endLocal;
-        if(end == null || end.isEmpty()){
+        if (end == null || end.isEmpty()) {
             endLocal = mentorAvailableTimeService.findMaxEndDate(mentor);
-        }else{
+        } else {
             endLocal = LocalDate.parse(end, formatter);
         }
         List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
@@ -223,4 +223,8 @@ public class MentorController {
         return "/mentor/mentor-working-date";
     }
 
+    @GetMapping("/mentor/stats")
+    public String mentorStats(Model model, HttpSession session) {
+        return "accounts/html/mentor-stats";
+    }
 }

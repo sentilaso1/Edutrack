@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard Thu Nhập - Mentor</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+        <style>
+                * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                }
+
+                body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+                        min-height: 100vh;
+                        color: #333;
+                }
+
+                .container {
+                        max-width: 1400px;
+                        margin: 0 auto;
+                        padding: 20px;
+                }
+
+                .header {
+                        text-align: center;
+                        margin-bottom: 30px;
+                }
+
+                .header h1 {
+                        color: white;
+                        font-size: 2.8rem;
+                        margin-bottom: 10px;
+                        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+                        font-weight: 700;
+                }
+
+                .header p {
+                        color: rgba(255, 255, 255, 0.9);
+                        font-size: 1.1rem;
+                        font-weight: 300;
+                }
+
+                .period-selector {
+                        display: flex;
+                        justify-content: center;
+                        gap: 10px;
+                        margin-bottom: 30px;
+                }
+
+                .period-btn {
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: 2px solid rgba(255, 255, 255, 0.3);
+                        padding: 12px 20px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-size: 14px;
+                        font-weight: 600;
+                        backdrop-filter: blur(10px);
+                }
+
+                .period-btn.active {
+                        background: rgba(255, 255, 255, 0.9);
+                        color: #ff6b9d;
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+                }
+
+                .period-btn:hover {
+                        background: rgba(255, 255, 255, 0.3);
+                        transform: translateY(-1px);
+                }
+
+                .stats-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                        gap: 25px;
+                        margin-bottom: 40px;
+                }
+
+                .stat-card {
+                        background: rgba(255, 255, 255, 0.95);
+                        backdrop-filter: blur(15px);
+                        border-radius: 20px;
+                        padding: 30px;
+                        text-align: center;
+                        box-shadow: 0 10px 40px rgba(255, 107, 157, 0.2);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        transition: all 0.4s ease;
+                        position: relative;
+                        overflow: hidden;
+                }
+
+                .stat-card::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 4px;
+                        background: linear-gradient(90deg, #ff9a9e, #fecfef);
+                }
+
+                .stat-card:hover {
+                        transform: translateY(-8px);
+                        box-shadow: 0 20px 60px rgba(255, 107, 157, 0.3);
+                }
+
+                .stat-card h3 {
+                        color: #666;
+                        font-size: 0.95rem;
+                        margin-bottom: 15px;
+                        text-transform: uppercase;
+                        letter-spacing: 1.2px;
+                        font-weight: 600;
+                }
+
+                .stat-card .value {
+                        font-size: 2.5rem;
+                        font-weight: bold;
+                        color: #ff6b9d;
+                        margin-bottom: 10px;
+                        text-shadow: 0 2px 4px rgba(255, 107, 157, 0.1);
+                }
+
+                .stat-card .change {
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        padding: 5px 12px;
+                        border-radius: 20px;
+                        display: inline-block;
+                }
+
+                .positive {
+                        color: #27ae60;
+                        background: rgba(39, 174, 96, 0.1);
+                }
+
+                .negative {
+                        color: #e74c3c;
+                        background: rgba(231, 76, 60, 0.1);
+                }
+
+                .charts-grid {
+                        display: grid;
+                        grid-template-columns: 2fr 1fr;
+                        gap: 25px;
+                        margin-bottom: 30px;
+                }
+
+                .chart-container {
+                        background: rgba(255, 255, 255, 0.95);
+                        backdrop-filter: blur(15px);
+                        border-radius: 20px;
+                        padding: 30px;
+                        box-shadow: 0 10px 40px rgba(255, 107, 157, 0.15);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        transition: all 0.3s ease;
+                }
+
+                .chart-container:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 15px 50px rgba(255, 107, 157, 0.2);
+                }
+
+                .chart-title {
+                        font-size: 1.4rem;
+                        font-weight: 600;
+                        color: #333;
+                        margin-bottom: 25px;
+                        text-align: center;
+                        position: relative;
+                }
+
+                .chart-title::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -8px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 60px;
+                        height: 3px;
+                        background: linear-gradient(90deg, #ff9a9e, #fecfef);
+                        border-radius: 2px;
+                }
+
+                .mentor-icon {
+                        font-size: 3rem;
+                        margin-bottom: 15px;
+                        display: block;
+                }
+
+                .performance-metrics {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 20px;
+                        margin-top: 30px;
+                }
+
+                .metric-card {
+                        background: rgba(255, 255, 255, 0.9);
+                        border-radius: 15px;
+                        padding: 20px;
+                        text-align: center;
+                        border-left: 4px solid #ff6b9d;
+                }
+
+                .metric-card h4 {
+                        color: #666;
+                        font-size: 0.9rem;
+                        margin-bottom: 8px;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                }
+
+                .metric-card .metric-value {
+                        font-size: 1.8rem;
+                        font-weight: bold;
+                        color: #ff6b9d;
+                }
+
+                @media (max-width: 768px) {
+                        .charts-grid {
+                                grid-template-columns: 1fr;
+                        }
+
+                        .header h1 {
+                                font-size: 2.2rem;
+                        }
+
+                        .stat-card .value {
+                                font-size: 2rem;
+                        }
+
+                        .stats-grid {
+                                grid-template-columns: 1fr;
+                        }
+                }
+
+                .loading {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 200px;
+                        color: #ff6b9d;
+                        font-size: 1.2rem;
+                }
+
+                .chart-loading {
+                        animation: pulse 2s infinite;
+                }
+
+                @keyframes pulse {
+                        0% {
+                                opacity: 0.5;
+                        }
+
+                        50% {
+                                opacity: 1;
+                        }
+
+                        100% {
+                                opacity: 0.5;
+                        }
+                }
+        </style>
+</head>
+
+<body>
+        <div class="container">
+                <div class="header">
+                        <h1>👨‍🏫 Dashboard Thu Nhập - Mentor</h1>
+                        <p>Theo dõi hiệu suất và thu nhập của bạn</p>
+                </div>
+
+                <div class="period-selector">
+                        <button class="period-btn active" onclick="updatePeriod('week')">7 ngày</button>
+                        <button class="period-btn" onclick="updatePeriod('month')">30 ngày</button>
+                        <button class="period-btn" onclick="updatePeriod('quarter')">3 tháng</button>
+                        <button class="period-btn" onclick="updatePeriod('year')">1 năm</button>
+                </div>
+
+                <div class="stats-grid">
+                        <div class="stat-card">
+                                <span class="mentor-icon">💰</span>
+                                <h3>Tổng Thu Nhập</h3>
+                                <div class="value" id="total-income">45,250,000₫</div>
+                                <div class="change positive">+12.5% so với tháng trước</div>
+                        </div>
+                        <div class="stat-card">
+                                <span class="mentor-icon">👥</span>
+                                <h3>Học Viên Đã Dạy</h3>
+                                <div class="value" id="total-students">127</div>
+                                <div class="change positive">+8 học viên mới</div>
+                        </div>
+                        <div class="stat-card">
+                                <span class="mentor-icon">📚</span>
+                                <h3>Khóa Học Hoàn Thành</h3>
+                                <div class="value" id="completed-courses">23</div>
+                                <div class="change positive">+3 khóa học</div>
+                        </div>
+                        <div class="stat-card">
+                                <span class="mentor-icon">⭐</span>
+                                <h3>Đánh Giá Trung Bình</h3>
+                                <div class="value" id="average-rating">4.8⭐</div>
+                                <div class="change positive">+0.2 điểm</div>
+                        </div>
+                </div>
+
+                <div class="charts-grid">
+                        <div class="chart-container">
+                                <div class="chart-title">📈 Thu Nhập Theo Thời Gian</div>
+                                <canvas id="incomeChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                                <div class="chart-title">🎯 Nguồn Thu Nhập</div>
+                                <canvas id="sourceChart"></canvas>
+                        </div>
+                </div>
+
+                <div class="charts-grid">
+                        <div class="chart-container">
+                                <div class="chart-title">👥 Số Lượng Học Viên Theo Tháng</div>
+                                <canvas id="studentsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                                <div class="chart-title">⏱️ Giờ Dạy Theo Tuần</div>
+                                <canvas id="hoursChart"></canvas>
+                        </div>
+                </div>
+
+                <div class="performance-metrics">
+                        <div class="metric-card">
+                                <h4>Tỷ Lệ Hoàn Thành</h4>
+                                <div class="metric-value">94.5%</div>
+                        </div>
+                        <div class="metric-card">
+                                <h4>Thời Gian Phản Hồi</h4>
+                                <div class="metric-value">2.3h</div>
+                        </div>
+                        <div class="metric-card">
+                                <h4>Tỷ Lệ Tái Đăng Ký</h4>
+                                <div class="metric-value">87.2%</div>
+                        </div>
+                        <div class="metric-card">
+                                <h4>Thu Nhập/Giờ</h4>
+                                <div class="metric-value">485k₫</div>
+                        </div>
+                </div>
+        </div>
+
+        <script>
+                // Mentor data
+                const mentorData = {
+                        income: [3200000, 3800000, 4100000, 3900000, 4500000, 4200000, 4800000],
+                        labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                        sources: {
+                                labels: ['Khóa Học Cá Nhân', 'Khóa Học Nhóm', 'Tư Vấn', 'Workshop'],
+                                data: [45, 30, 15, 10],
+                                colors: ['#ff6b9d', '#ff9a9e', '#fecfef', '#c7ceea']
+                        },
+                        students: [15, 18, 22, 20, 25, 23, 27, 30, 28, 32, 35, 38],
+                        studentLabels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                        hours: [25, 30, 28, 35, 32, 40, 38]
+                };
+
+                let charts = {};
+
+                function initCharts() {
+                        // Income Chart
+                        const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+                        charts.income = new Chart(incomeCtx, {
+                                type: 'line',
+                                data: {
+                                        labels: mentorData.labels,
+                                        datasets: [{
+                                                label: 'Thu Nhập (VNĐ)',
+                                                data: mentorData.income,
+                                                borderColor: '#ff6b9d',
+                                                backgroundColor: 'rgba(255, 107, 157, 0.1)',
+                                                fill: true,
+                                                tension: 0.4,
+                                                borderWidth: 4,
+                                                pointBackgroundColor: '#ff6b9d',
+                                                pointBorderColor: '#fff',
+                                                pointBorderWidth: 3,
+                                                pointRadius: 8,
+                                                pointHoverRadius: 10
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: { display: false },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(255, 107, 157, 0.9)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        borderColor: '#ff6b9d',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10
+                                                }
+                                        },
+                                        scales: {
+                                                y: {
+                                                        beginAtZero: true,
+                                                        ticks: {
+                                                                callback: function (value) {
+                                                                        return (value / 1000000).toFixed(1) + 'M₫';
+                                                                },
+                                                                color: '#666'
+                                                        },
+                                                        grid: {
+                                                                color: 'rgba(255, 107, 157, 0.1)'
+                                                        }
+                                                },
+                                                x: {
+                                                        ticks: { color: '#666' },
+                                                        grid: { display: false }
+                                                }
+                                        }
+                                }
+                        });
+
+                        // Source Chart
+                        const sourceCtx = document.getElementById('sourceChart').getContext('2d');
+                        charts.source = new Chart(sourceCtx, {
+                                type: 'doughnut',
+                                data: {
+                                        labels: mentorData.sources.labels,
+                                        datasets: [{
+                                                data: mentorData.sources.data,
+                                                backgroundColor: mentorData.sources.colors,
+                                                borderWidth: 0,
+                                                hoverOffset: 10
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: {
+                                                        position: 'bottom',
+                                                        labels: {
+                                                                padding: 20,
+                                                                usePointStyle: true,
+                                                                color: '#666',
+                                                                font: { size: 12 }
+                                                        }
+                                                },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(255, 107, 157, 0.9)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        borderColor: '#ff6b9d',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10,
+                                                        callbacks: {
+                                                                label: function (context) {
+                                                                        return context.label + ': ' + context.parsed + '%';
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        });
+
+                        // Students Chart
+                        const studentsCtx = document.getElementById('studentsChart').getContext('2d');
+                        charts.students = new Chart(studentsCtx, {
+                                type: 'bar',
+                                data: {
+                                        labels: mentorData.studentLabels,
+                                        datasets: [{
+                                                label: 'Số Học Viên',
+                                                data: mentorData.students,
+                                                backgroundColor: 'rgba(255, 107, 157, 0.8)',
+                                                borderColor: '#ff6b9d',
+                                                borderWidth: 2,
+                                                borderRadius: 8,
+                                                hoverBackgroundColor: '#ff6b9d'
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: { display: false },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(255, 107, 157, 0.9)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        borderColor: '#ff6b9d',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10
+                                                }
+                                        },
+                                        scales: {
+                                                y: {
+                                                        beginAtZero: true,
+                                                        ticks: { color: '#666' },
+                                                        grid: { color: 'rgba(255, 107, 157, 0.1)' }
+                                                },
+                                                x: {
+                                                        ticks: { color: '#666' },
+                                                        grid: { display: false }
+                                                }
+                                        }
+                                }
+                        });
+
+                        // Hours Chart
+                        const hoursCtx = document.getElementById('hoursChart').getContext('2d');
+                        charts.hours = new Chart(hoursCtx, {
+                                type: 'radar',
+                                data: {
+                                        labels: mentorData.labels,
+                                        datasets: [{
+                                                label: 'Giờ Dạy',
+                                                data: mentorData.hours,
+                                                borderColor: '#ff6b9d',
+                                                backgroundColor: 'rgba(255, 107, 157, 0.2)',
+                                                pointBackgroundColor: '#ff6b9d',
+                                                pointBorderColor: '#fff',
+                                                pointBorderWidth: 3,
+                                                pointRadius: 6,
+                                                borderWidth: 3
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: { display: false },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(255, 107, 157, 0.9)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        borderColor: '#ff6b9d',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10
+                                                }
+                                        },
+                                        scales: {
+                                                r: {
+                                                        beginAtZero: true,
+                                                        ticks: { color: '#666' },
+                                                        grid: { color: 'rgba(255, 107, 157, 0.2)' },
+                                                        pointLabels: { color: '#666' }
+                                                }
+                                        }
+                                }
+                        });
+                }
+
+                function updatePeriod(period) {
+                        document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+                        event.target.classList.add('active');
+
+                        // Simulate data update based on period
+                        console.log('Updating data for period:', period);
+
+                        // Add loading effect
+                        document.querySelectorAll('canvas').forEach(canvas => {
+                                canvas.parentElement.classList.add('chart-loading');
+                        });
+
+                        setTimeout(() => {
+                                document.querySelectorAll('.chart-container').forEach(container => {
+                                        container.classList.remove('chart-loading');
+                                });
+                        }, 1000);
+                }
+
+                // Initialize charts on page load
+                window.addEventListener('load', function () {
+                        setTimeout(initCharts, 500);
+                });
+
+                // Add entrance animations
+                document.addEventListener('DOMContentLoaded', function () {
+                        const elements = document.querySelectorAll('.stat-card, .chart-container, .metric-card');
+                        const observer = new IntersectionObserver((entries) => {
+                                entries.forEach((entry, index) => {
+                                        if (entry.isIntersecting) {
+                                                setTimeout(() => {
+                                                        entry.target.style.opacity = '1';
+                                                        entry.target.style.transform = 'translateY(0)';
+                                                }, index * 100);
+                                        }
+                                });
+                        });
+
+                        elements.forEach(element => {
+                                element.style.opacity = '0';
+                                element.style.transform = 'translateY(30px)';
+                                element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                                observer.observe(element);
+                        });
+                });
+
+                // Real-time updates simulation
+                setInterval(() => {
+                        const totalIncomeElement = document.getElementById('total-income');
+                        const currentValue = parseInt(totalIncomeElement.textContent.replace(/[^0-9]/g, ''));
+                        const newValue = currentValue + Math.floor(Math.random() * 100000);
+                        totalIncomeElement.textContent = newValue.toLocaleString('vi-VN') + '₫';
+                }, 30000); // Update every 30 seconds
+        </script>
+</body>
+
+</html>
