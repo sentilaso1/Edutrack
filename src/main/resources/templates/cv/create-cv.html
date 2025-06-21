@@ -5,18 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create CV - EduTrack</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
 
         .container {
             max-width: 1720px;
@@ -32,8 +21,8 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
-            padding: 30px;
             min-height: 80vh;
+            padding: 0 1.2rem;
         }
 
         .section-header {
@@ -88,7 +77,7 @@
 
         input:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #ff5722;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
             transform: translateY(-1px);
         }
@@ -103,7 +92,7 @@
         }
 
         .create-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #ff5722, #ff5722);
             color: white;
             border: none;
             padding: 15px 40px;
@@ -118,7 +107,7 @@
 
         .create-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 25px rgba(255, 87, 34, 0.36);
         }
 
         .course-card {
@@ -134,7 +123,7 @@
         .course-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-color: #667eea;
+            border-color: #ff5722;
         }
 
         .course-title {
@@ -175,8 +164,8 @@
 
         .tag.beginner {
             background: #d4edda;
-            border-color: #a3d9a4;
-            color: #155724;
+            border-color: rgba(255, 87, 34, 0.63);
+            color: #ff5722;
         }
 
         .tag.data {
@@ -202,7 +191,7 @@
         }
 
         .add-btn {
-            background: #28a745;
+            background: #ff5722;
             color: white;
             border: none;
             width: 40px;
@@ -217,7 +206,7 @@
         }
 
         .add-btn:hover {
-            background: #218838;
+            background: #ff5722;
             transform: scale(1.1);
         }
 
@@ -243,9 +232,9 @@
         }
 
         .pagination button.active {
-            background: #667eea;
+            background: #ff5722;
             color: white;
-            border-color: #667eea;
+            border-color: #ff5722;
         }
 
         @media (max-width: 1024px) {
@@ -268,14 +257,27 @@
                 padding: 20px;
             }
         }
+        .cv-section, .courses-section{
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
     </style>
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<div class="container">
+<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+<div class="main">
+    <div class="dashboard-header">
+        <h1>Create Your CV</h1>
+    </div>
     <div class="main-content">
         <!-- Create CV Section -->
         <div class="cv-section">
-            <div class="section-header">Create your CV</div>
+            <h2>Create your CV</h2>
 
             <form th:action="@{/cv/create}" method="post" id="cvForm">
                 <div class="form-row">
@@ -339,7 +341,7 @@
         <!-- Register Courses Section -->
         <!-- Courses Section -->
         <div class="courses-section">
-            <div class="section-header">Register Courses</div>
+            <h2>Register Courses</h2>
 
             <div th:if="${coursePage != null}">
                 <div th:each="course : ${coursePage.content}">
@@ -377,7 +379,7 @@
             if (selectedCourseIds.has(courseId)) {
                 selectedCourseIds.delete(courseId);
                 this.textContent = '+';
-                this.style.background = '#28a745';
+                this.style.background = '#ff5722';
             } else {
                 selectedCourseIds.add(courseId);
                 this.textContent = '✓';
