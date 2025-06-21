@@ -3,6 +3,7 @@ package com.example.edutrack.timetables.service.implementation;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
@@ -10,6 +11,7 @@ import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
+import org.apache.coyote.Request;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -53,11 +55,11 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     }
 
     @Override
-    public String findStartLearningTime(Mentee user,
-                                        CourseMentor courseMentor,
-                                        List<Slot> slot,
-                                        List<Day> day,
-                                        Integer totalSlot) {
+    public List<RequestedSchedule> findStartLearningTime(Mentee user,
+                                                         CourseMentor courseMentor,
+                                                         List<Slot> slot,
+                                                         List<Day> day,
+                                                         Integer totalSlot) {
 
         LocalDate startDate = LocalDate.now();
         sortDayByWeek(day, slot);
@@ -69,8 +71,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
         int found = 0;
         int i = day.indexOf(Day.valueOf(startDate.getDayOfWeek().name()));
-        String result = null;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        List<RequestedSchedule> requestedSchedules = new ArrayList<>();
 
         while (found < totalSlot) {
             Slot currentSlot = slot.get(i);
@@ -100,13 +101,13 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
             if (!clashMentor && !clashMentee) {
                 if (found == 0) {
-                    result = startDate.format(formatter) + "-" + currentSlot.name();
-                    System.out.println("FOUND: " + result);
+                    requestedSchedules.add(new RequestedSchedule(currentSlot, currentDay, startDate));
+                    System.out.println("FOUND: " + startDate);
                 }
                 found++;
             } else {
                 found = 0;
-                result = null;
+                requestedSchedules = new ArrayList<>();
             }
 
             i++;
@@ -123,7 +124,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
                 }
             }
         }
-        return result;
+        return requestedSchedules;
     }
 
     public static void parseDaySlotString(String input,

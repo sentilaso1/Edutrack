@@ -4,10 +4,12 @@ package com.example.edutrack.accounts.controller;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
+import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.service.implementation.EnrollmentScheduleServiceImpl;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
@@ -23,7 +25,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller(value = "mentor")
 public class MentorController {
@@ -47,7 +48,7 @@ public class MentorController {
         if (mentor == null) {
             return "redirect:/login";
         }
-        return "mentor-dashboard";
+        return "/mentor/mentor-dashboard";
     }
 
     @GetMapping("mentor/schedule")
@@ -109,7 +110,7 @@ public class MentorController {
         }
         List<Enrollment> enrollmentList = enrollmentService.findByStatusAndMentor(status, mentor.getId());
         model.addAttribute("enrollmentList", enrollmentList);
-        return "skill-register-request";
+        return "mentor/skill-register-request";
     }
 
     @GetMapping("/mentor/schedule/{esid}")
@@ -126,7 +127,7 @@ public class MentorController {
             return "redirect:/mentor/schedule?error=notMentor";
         }
         model.addAttribute("enrollmentSchedule", enrollmentSchedule);
-        return "mentee-review";
+        return "mentor/mentee-review";
     }
 
     @GetMapping("/mentor/sensor-class/{eid}")
@@ -153,8 +154,30 @@ public class MentorController {
             enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
             enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
             return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
+        }if(action.equals("view")){
+            return "redirect:/mentor/sensor-class/" + eid + "/view";
         }
         return "redirect:/mentor/sensor-class";
+    }
+
+    @GetMapping("/mentor/sensor-class/{eid}/view")
+    public String viewSensorClass(@PathVariable Long eid,
+                                  Model model,
+                                  HttpSession session) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+        Enrollment enrollment = enrollmentService.findById(eid);
+        List<Slot> slots = new ArrayList<>();
+        List<Day> days = new ArrayList<>();
+        String summary = enrollment.getScheduleSummary();
+
+        EnrollmentScheduleServiceImpl.parseDaySlotString(summary, days, slots);
+
+        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(enrollment.getMentee(), enrollment.getCourseMentor(), slots, days, enrollment.getTotalSlots());
+        model.addAttribute("startTime", startTime);
+        return "mentor/skill-register-request-detail";
     }
 
     @GetMapping("/mentor/working-date")
@@ -166,8 +189,8 @@ public class MentorController {
             return "redirect:/login";
         }
 
-        model.addAttribute("slots", Slot.values());
-        model.addAttribute("dayLabels", Day.values());
+        //model.addAttribute("slots", Slot.values());
+        //model.addAttribute("dayLabels", Day.values());
 
         List<MentorAvailableTimeDTO> setTime = mentorAvailableTimeService.findAllDistinctStartEndDates(mentor);
         model.addAttribute("setTime", setTime);
@@ -192,12 +215,12 @@ public class MentorController {
 
         System.out.println("SIZE: " + setSlots.size());
 
-        List<Slot> slots = Arrays.stream(Slot.values()).toList();
-        List<Day> days = Arrays.stream(Day.values()).toList();
-        model.addAttribute("slots", slots);
-        model.addAttribute("days", days);
+//        List<Slot> slots = Arrays.stream(Slot.values()).toList();
+//        List<Day> days = Arrays.stream(Day.values()).toList();
+        model.addAttribute("slots", Slot.values());
+        model.addAttribute("days", Day.values());
 
-        return "mentor-working-date";
+        return "/mentor/mentor-working-date";
     }
 
 }

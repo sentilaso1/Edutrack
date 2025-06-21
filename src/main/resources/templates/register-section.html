@@ -385,14 +385,38 @@
             color: #333;
         }
 
+        .mentor-button {
+            width: 100%;
+            height: 50px;
+            background-color: #f0f0f0;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .mentor-button:hover {
+            background-color: var(--keppei-light);
+            border-color: var(--keppei);
+        }
+
         .slot-button:hover {
             background-color: var(--coral-lighter);
             border-color: var(--coral-light);
         }
 
-        .slot-button.active {
-            background-color: var(--coral-light);
+        .mentor-button.active {
+            background-color: rgba(71, 200, 186, 0.69);
             color: white;
+            border-color: var(--keppei);
+        }
+
+        .slot-button.active {
+            background-color: #FF8F94A6;
+            color: white;
+            border-color: var(--coral-light);
         }
 
         .time-cell {
@@ -427,6 +451,7 @@
             background-color: #ccc;
             border-radius: 4px;
         }
+
         .modal-content input[type="date"] {
             padding: 10px 14px;
             border: 1px solid #ddd;
@@ -512,40 +537,54 @@
                             </div>
                         </div>
 
+                        <!-- Mentor Information -->
+                        <div class="section">
+                            <h3>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.5-12h-3c0 1.66-1.34 3-3 3s-3-1.34-3-3H7.5L5 16h2.5v6h3v-6h2v6h4z"/>
+                                </svg>
+                                Mentor Information
+                            </h3>
+
+                            <div class="mentor-info">
+                                <div class="mentor-profile">
+                                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+"
+                                         alt="Mentor Avatar" class="mentor-avatar">
+                                    <div class="mentor-details">
+                                        <h4>John Doe</h4>
+                                        <div class="mentor-rating">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                            </svg>
+                                            <span>4.9/5 (25 đánh giá)</span>
+                                        </div>
+                                        <p><strong>Expertises: </strong> Web Development, JavaScript, React</p>
+                                    </div>
+                                </div>
+                                <p><strong>Experience:</strong>None</p>
+                            </div>
+                            <h3>Available Schedule This Month:</h3>
+                            <table class="schedule-table" th:if="${slotDayMatrix}">
+                                <thead>
+                                <tr>
+                                    <th style="background-color: #369F93FF">Time Slot</th>
+                                    <th style="background-color: #369F93FF" th:each="day : ${dayLabels}"
+                                        th:text="${day.name().toLowerCase()}"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="slot, iStat : ${slots}">
+                                    <td th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
+                                    <td th:each="day, jStat : ${dayLabels}">
+                                        <div th:class="'mentor-button' + (${slotDayMatrix[iStat.index][jStat.index]} ? ' active' : '')">
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <form id="slotForm" method="post"
                               th:action="@{/courses/register/{cid}(cid=${courseMentor.id})}">
-
-                            <!-- Mentor Information -->
-                            <div class="section">
-                                <h3>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.5-12h-3c0 1.66-1.34 3-3 3s-3-1.34-3-3H7.5L5 16h2.5v6h3v-6h2v6h4z"/>
-                                    </svg>
-                                    Mentor Information
-                                </h3>
-
-                                <div class="mentor-info">
-                                    <div class="mentor-profile">
-                                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+"
-                                             alt="Mentor Avatar" class="mentor-avatar">
-                                        <div class="mentor-details">
-                                            <h4>John Doe</h4>
-                                            <div class="mentor-rating">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                                </svg>
-                                                <span>4.9/5 (25 đánh giá)</span>
-                                            </div>
-                                            <p><strong>Expertises: </strong> Web Development, JavaScript, React</p>
-                                        </div>
-                                    </div>
-                                    <p><strong>Experience:</strong>None</p>
-                                </div>
-                                <div class="mentor_info" th:each="mentor : ${mentorAvailableTime}">
-                                    <p th:text="${mentor.id.day.name() + mentor.id.slot.name()}"></p>
-                                </div>
-                            </div>
-
                             <!-- Schedule Selection -->
                             <div class="section">
                                 <h3>
@@ -564,18 +603,19 @@
                                                             Warning: Teaching Date is Available in
                                                         </p>
                                                         <p>
-                                                           <strong th:text="${minDate} + ' to ' + ${maxDate}"></strong>
+                                                            <strong th:text="${minDate} + ' to ' + ${maxDate}"></strong>
                                                         </p>
                                                     </div>
                                                     <div class="form-group" style="margin-top: 1em;">
-                                                        <input type="number" id="totalSlot" name="totalSlot" placeholder="Enter number of Slots">
+                                                        <input type="number" id="totalSlot" name="totalSlot"
+                                                               placeholder="Enter number of Slots">
                                                     </div>
 
                                                     <div style="display: flex; justify-content: end; align-items: center">
-                                                        <p th:text="'Start Time: ' + ${startTime}"></p>
                                                         <button
                                                                 type="submit"
-                                                                class="submit-button" name="action" value="checkStartDate">
+                                                                class="submit-button" name="action"
+                                                                value="checkStartDate">
                                                             Check Start Date
                                                         </button>
                                                     </div>
@@ -615,6 +655,27 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="section" th:if="${startTime}">
+                                <table class="schedule-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="background-color: #fac337">Session</th>
+                                            <th style="background-color: #fac337">Date</th>
+                                            <th style="background-color: #fac337">Day of Week</th>
+                                            <th style="background-color: #fac337">Slot</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="item, iStat : ${startTime}">
+                                        <td th:text="${iStat.index + 1}" style="text-align: center"></td>
+                                        <td th:text="${item.requestedDate}" style="text-align: center"></td>
+                                        <td th:text="${item.day}" style="text-align: center"></td>
+                                        <td th:text="${item.slot}" style="text-align: center"></td>
+                                    </tr>
+                                    </tbody>
+
+                                </table>
                             </div>
                             <!-- Submit Section -->
                             <div class="submit-section">
@@ -679,7 +740,7 @@
         );
         if (!hasSelected) {
             e.preventDefault();
-            alert("Vui lòng chọn ít nhất 1 slot trước khi gửi");
+            alert("Please choose at least one slot before submitting");
         }
     });
 </script>

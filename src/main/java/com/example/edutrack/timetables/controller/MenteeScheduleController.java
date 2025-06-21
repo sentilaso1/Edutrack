@@ -6,6 +6,7 @@ import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
 import com.example.edutrack.timetables.dto.EnrollmentRequestDTO;
+import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.Slot;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,14 +91,14 @@ public class MenteeScheduleController {
             return "/checkout/checkout-info";
         }
 
-        String startTime = enrollmentScheduleService.findStartLearningTime(
+        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(
                 menteeOpt.get(),
                 courseMentor,
                 params.getSlot(),
                 params.getDay(),
                 params.getTotalSlot()
         );
-        if (startTime == null) {
+        if (startTime == null || startTime.isEmpty()) {
             model.addAttribute("error", "Cannot find start time for the selected schedule");
             return "/checkout/checkout-info";
         }
@@ -113,13 +115,14 @@ public class MenteeScheduleController {
         transaction.setCourse(courseMentor.getCourse());
         transactionService.save(transaction);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         Enrollment enrollment = new Enrollment(
                 menteeOpt.get(),
                 courseMentor,
                 params.getTotalSlot(),
                 params.getSlot(),
                 params.getDay(),
-                startTime
+                startTime.get(0).getRequestedDate().format(formatter) + "-" + startTime.get(0).getSlot()
         );
         enrollmentService.save(enrollment);
 
@@ -155,11 +158,8 @@ public class MenteeScheduleController {
 
         CourseMentor courseMentor = courseMentorService.findById(courseMentorId);
         if ("checkStartDate".equals(action)) {
-            String startTime = enrollmentScheduleService.findStartLearningTime(mentee, courseMentor, slot, day, totalSlot);
+            List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(mentee, courseMentor, slot, day, totalSlot);
             System.out.println(startTime);
-            if (startTime == null) {
-                startTime = "Cannot find start time";
-            }
             model.addAttribute("startTime", startTime);
             session.setAttribute("startTime", startTime);
             return "redirect:/courses/register/{cmid}";

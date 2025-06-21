@@ -9,6 +9,7 @@ import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
+import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
 import com.example.edutrack.timetables.model.Slot;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.edutrack.curriculum.model.Course;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -166,6 +168,18 @@ public class CourseController {
         model.addAttribute("maxDate", maxDate);
         model.addAttribute("slots", Slot.values());
         model.addAttribute("dayLabels", Day.values());
+
+        LocalDate endLocal = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(courseMentor.getMentor(), endLocal);
+        boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
+
+        for (MentorAvailableSlotDTO dto : setSlots) {
+            int slotIndex = dto.getSlot().ordinal();
+            int dayIndex = dto.getDay().ordinal();
+            slotDayMatrix[slotIndex][dayIndex] = true;
+        }
+
+        model.addAttribute("slotDayMatrix", slotDayMatrix);
 
         model.addAttribute("startTime", session.getAttribute("startTime"));
 
