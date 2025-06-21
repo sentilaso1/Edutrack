@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -116,6 +117,57 @@ public class CourseController {
         model.addAttribute("selectedSkills", skill);
 
         return "mentee/courselist";
+    }
+
+    @GetMapping("/courses-only")
+    public String  coursesOnly(Model model,
+                           @RequestParam(defaultValue = "1") int page,
+                           @RequestParam(defaultValue = "6") int size_page,
+                           @RequestParam(required = false) List<Integer> subject,
+                           @RequestParam(required = false) List<UUID> skill,
+                           @RequestParam(required = false) String order_by) {
+
+        if (page < 1) {
+            return "redirect:/404";
+        }
+
+        List<Integer> subjectIds;
+        if(subject != null && !subject.isEmpty()) {
+            subjectIds = subject;
+        }else{
+            subjectIds = null;
+        }
+        List<UUID> skillIds;  if(skill != null && !skill.isEmpty()){
+            skillIds = skill;
+        }else{
+            skillIds = null;
+        }
+
+        Pageable pageable;
+        Page<Course> coursePage;
+
+        if (order_by != null && !order_by.isEmpty()) {
+            pageable = switch (order_by.toLowerCase()) {
+                case "newest" -> PageRequest.of(page - 1, size_page, Sort.by("createdDate").descending());
+                case "oldest" -> PageRequest.of(page - 1, size_page, Sort.by("createdDate"));
+                case "title_asc" -> PageRequest.of(page - 1, size_page, Sort.by("name"));
+                case "title_desc" -> PageRequest.of(page - 1, size_page, Sort.by("name").descending());
+                default -> PageRequest.of(page - 1, size_page);
+            };
+            coursePage = courseServiceImpl.getAll(pageable);
+        } else {
+            pageable = PageRequest.of(page - 1, size_page);
+            coursePage = courseServiceImpl.findFilteredCourses(skillIds, subjectIds, pageable);
+        }
+
+        model.addAttribute("coursePage", coursePage);
+        model.addAttribute("page", page);
+        model.addAttribute("subjectList", courseMentorServiceImpl.findAllTags());
+        model.addAttribute("skillList", courseMentorServiceImpl.findAllCourses());
+        model.addAttribute("selectedSubjects", subject);
+        model.addAttribute("selectedSkills", skill);
+
+        return "mentee/courselist_onlycourse";
     }
 
     @GetMapping("/courses/{courseMentorId}")
