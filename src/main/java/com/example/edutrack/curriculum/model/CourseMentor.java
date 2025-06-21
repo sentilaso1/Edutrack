@@ -23,6 +23,14 @@ public class CourseMentor {
     @Column(name = "price", nullable = false)
     private Double price = 0.0;
 
+    @Lob
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Lob
+    @Column(name = "syllabus", columnDefinition = "TEXT")
+    private String syllabus;
+
     @Column(name = "applied_date")
     private LocalDateTime appliedDate = LocalDateTime.now();
 
@@ -83,7 +91,33 @@ public class CourseMentor {
         this.price = price;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSyllabus() {
+        return syllabus;
+    }
+
+    public void setSyllabus(String syllabus) {
+        this.syllabus = syllabus;
+    }
+
+    @Override
     public String toString() {
-        return "MentorApplication [id=" + id + ", mentor=" + mentor + ", course=" + course + ", price=" + price + ", appliedDate=" + appliedDate + ", status=" + status + "]";
+        return "CourseMentor{" +
+                "id=" + id +
+                ", mentor=" + mentor +
+                ", course=" + course +
+                ", price=" + price +
+                ", description='" + description + '\'' +
+                ", syllabus='" + syllabus + '\'' +
+                ", appliedDate=" + appliedDate +
+                ", status=" + status +
+                '}';
     }
 }

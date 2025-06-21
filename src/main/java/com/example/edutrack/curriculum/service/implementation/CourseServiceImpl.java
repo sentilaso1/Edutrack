@@ -162,6 +162,16 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Page<Course> getAll(Pageable pageable) {
+        return courseRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Course> findFilteredCourses(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable) {
+        return courseRepository.findFilteredCourses(skillIds, subjectIds, pageable);
+    }
+
+    @Override
     public Page<Course> getFilteredCourses(String search,
                                            String mentorSearch,
                                            Boolean open,

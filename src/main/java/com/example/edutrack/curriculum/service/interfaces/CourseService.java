@@ -5,6 +5,7 @@ import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.model.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -29,6 +30,13 @@ public interface CourseService {
 
     List<Course> getAll();
 
+    Page<Course> getAll(Pageable pageable);
+
+    Page<Course> findFilteredCourses(
+            List<UUID> skillIds,
+            List<Integer> subjectIds,
+            Pageable pageable
+    );
 
     Page<Course> getFilteredCourses(String search,
                                     String mentorSearch,
