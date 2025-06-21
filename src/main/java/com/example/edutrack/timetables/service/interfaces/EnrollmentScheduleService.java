@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @Service
 public interface EnrollmentScheduleService {
-    String findStartLearningTime(Mentee user, CourseMentor courseMentor, List<Slot> slot, List<Day> day, Integer totalSlot);
+    List<RequestedSchedule> findStartLearningTime(Mentee user, CourseMentor courseMentor, List<Slot> slot, List<Day> day, Integer totalSlot);
 
     List<EnrollmentSchedule> findAll();
 
@@ -28,6 +29,6 @@ public interface EnrollmentScheduleService {
 
     void save(EnrollmentSchedule schedule);
 
-    public void saveEnrollmentSchedule(Enrollment enrollment);
+    void saveEnrollmentSchedule(Enrollment enrollment);
 
 }

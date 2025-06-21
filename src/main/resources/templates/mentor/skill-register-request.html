@@ -81,7 +81,8 @@
         }
 
         .edit-btn,
-        .delete-btn {
+        .delete-btn,
+        .more-btn{
             border: none;
             background: none;
             cursor: pointer;
@@ -99,6 +100,9 @@
 
         .delete-btn {
             background-color: #a6000f;
+        }
+        .more-btn {
+            background-color: #fac337;
         }
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
@@ -157,6 +161,8 @@
                                                                                       aria-hidden="true"></i></button>
                             <button class="delete-btn" name="action" value="reject"><i class="fa fa-times"
                                                                                        aria-hidden="true"></i></button>
+                            <button class="more-btn" name="action" value="view"><i class="fa fa-arrow-right"
+                                                                                     aria-hidden="true"></i></button>
                         </form>
                     </td>
                 </tr>
