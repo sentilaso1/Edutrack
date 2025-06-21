@@ -147,7 +147,7 @@ public class AuthController {
                     session.setAttribute("role", "mentor");
                     return "redirect:/mentor";
                 }
-                return "redirect:/signup";
+                return "redirect:/admin/login";
             }
         }
         model.addAttribute("error", "Invalid email or password");
