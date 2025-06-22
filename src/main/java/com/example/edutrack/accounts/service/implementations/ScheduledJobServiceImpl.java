@@ -42,7 +42,6 @@ public class ScheduledJobServiceImpl implements ScheduledJobService{
 
         @Override
         public void runJobNow(Long id) {
-                // Tùy hệ thống, gọi thực thi ngay 1 job hoặc đánh dấu để thread xử lý
                 ScheduledJob job = jobRepo.findById(id).orElseThrow();
                 job.setLastRunTime(java.time.LocalDateTime.now());
                 jobRepo.save(job);

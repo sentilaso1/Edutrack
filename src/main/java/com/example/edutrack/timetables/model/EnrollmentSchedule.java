@@ -1,8 +1,11 @@
 package com.example.edutrack.timetables.model;
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDate;
+import java.util.Date;
+
 @Entity
 @Table(name = "enrollment_schedule")
 public class EnrollmentSchedule {
@@ -42,6 +45,10 @@ public class EnrollmentSchedule {
 
     @Column(name = "report", columnDefinition = "TEXT")
     private String report;
+
+    @Column(name = "created_date")
+    @CreatedDate
+    private Date createdDate = new Date();
 
     public EnrollmentSchedule() {
     }
@@ -116,6 +123,14 @@ public class EnrollmentSchedule {
         this.attendance = attendance;
     }
 
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
     @Override
     public String toString() {
         return "EnrollmentSchedule{" +
@@ -126,6 +141,8 @@ public class EnrollmentSchedule {
                 ", isTest=" + isTest +
                 ", score=" + score +
                 ", attendance=" + attendance +
+                ", report='" + report + '\'' +
+                ", createdDate=" + createdDate +
                 '}';
     }
 }

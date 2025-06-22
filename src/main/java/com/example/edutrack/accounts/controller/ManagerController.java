@@ -37,5 +37,10 @@ public class ManagerController {
         model.addAttribute("mentors", mentorService.findAll());
         return "manager/mentors";
     }
+
+    @GetMapping("/manager/stats")
+    public String showStats(Model model) {
+        return "accounts/html/manager-stats";
+    }
 }
 
