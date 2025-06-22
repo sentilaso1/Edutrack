@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.dto;
 
+import com.example.edutrack.accounts.model.Mentor;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
@@ -11,12 +12,24 @@ public class MentorAvailableTimeDTO implements Serializable {
     @NotNull
     LocalDate endDate;
 
+    public Mentor getMentor() {
+        return mentor;
+    }
+
+    public void setMentor(Mentor mentor) {
+        this.mentor = mentor;
+    }
+
+    @NotNull
+    Mentor mentor;
+
     public MentorAvailableTimeDTO() {
     }
 
-    public MentorAvailableTimeDTO(LocalDate startDate, LocalDate endDate) {
+    public MentorAvailableTimeDTO(LocalDate startDate, LocalDate endDate, Mentor mentor) {
         this.startDate = startDate;
         this.endDate = endDate;
+        this.mentor = mentor;
     }
 
     public LocalDate getStartDate() {

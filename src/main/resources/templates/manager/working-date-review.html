@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+<!-- Sidebar -->
+<div class="w-64 bg-blue-800 text-white h-screen fixed">
+    <div class="p-6 text-2xl font-bold border-b border-blue-600">EduTrack Manager</div>
+    <nav class="mt-6 space-y-1 px-4">
+        <a th:href="@{/manager/dashboard}" class="block py-2 px-3 rounded hover:bg-blue-700">Dashboard</a>
+        <a th:href="@{/manager/mentees}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentees</a>
+        <a th:href="@{/manager/mentors}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentors</a>
+        <a th:href="@{/manager/payments}" class="block py-2 px-3 rounded hover:bg-blue-700">Payments</a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="ml-64 min-h-screen p-10">
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-semibold text-blue-800 mb-6">Pending Mentor Requests</h2>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto border-collapse rounded-md overflow-hidden">
+                <thead class="bg-blue-600 text-white text-sm uppercase">
+                <tr>
+                    <th class="px-6 py-3 text-left">Mentor Name</th>
+                    <th class="px-6 py-3 text-left">Start Date</th>
+                    <th class="px-6 py-3 text-left">End Date</th>
+                    <th class="px-6 py-3 text-center">Action</th>
+                </tr>
+                </thead>
+                <tbody class="bg-white text-gray-700 text-sm divide-y divide-gray-200">
+                <tr th:each="item : ${mentorRequest}" class="hover:bg-blue-50 transition">
+                    <td class="px-6 py-4" th:text="${item.mentor.fullName}"></td>
+                    <td class="px-6 py-4" th:text="${item.startDate}"></td>
+                    <td class="px-6 py-4" th:text="${item.endDate}"></td>
+                    <td class="px-6 py-4 text-center space-x-2">
+                        <a href="#" class="bg-yellow-500 text-white text-sm px-4 py-1 rounded hover:bg-yellow-600 transition">>>View</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
