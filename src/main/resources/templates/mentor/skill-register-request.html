@@ -116,12 +116,36 @@
     <div class="graph">
         <div class="product-section">
             <div class="tabs">
-                <form th:action="@{/mentor/sensor-class}">
-                    <button class="tab active" name="status" value="PENDING">Pending</button>
-                    <button class="tab" name="status" value="APPROVED">Approved</button>
-                    <button class="tab" name="status" value="REJECTED">Rejected</button>
-                    <button class="tab" name="status" value="CANCELLED">Cancel</button>
+                <form th:action="@{/mentor/sensor-class}" method="get">
+                    <button class="tab"
+                            name="status"
+                            value="PENDING"
+                            th:classappend="${status.name() == 'PENDING'} ? ' active' : ''">
+                        Pending
+                    </button>
+
+                    <button class="tab"
+                            name="status"
+                            value="APPROVED"
+                            th:classappend="${status.name() == 'APPROVED'} ? ' active' : ''">
+                        Approved
+                    </button>
+
+                    <button class="tab"
+                            name="status"
+                            value="REJECTED"
+                            th:classappend="${status.name() == 'REJECTED'} ? ' active' : ''">
+                        Rejected
+                    </button>
+
+                    <button class="tab"
+                            name="status"
+                            value="CANCELLED"
+                            th:classappend="${status.name() == 'CANCELLED'} ? ' active' : ''">
+                        Cancel
+                    </button>
                 </form>
+
             </div>
 
             <div class="controls">
