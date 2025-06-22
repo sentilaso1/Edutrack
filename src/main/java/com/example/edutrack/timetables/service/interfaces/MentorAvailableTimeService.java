@@ -20,8 +20,9 @@ public interface MentorAvailableTimeService {
 
     List<MentorAvailableSlotDTO> findAllSlotByEndDate(Mentor mentor, LocalDate endDate);
 
-
     LocalDate findMaxEndDate(Mentor mentor);
 
     LocalDate findMinStartDate(Mentor mentor);
+
+    List<MentorAvailableTimeDTO> findAllDistinctStartEndDates();
 }

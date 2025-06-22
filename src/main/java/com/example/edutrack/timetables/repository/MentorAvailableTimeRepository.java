@@ -38,7 +38,7 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
     @Query("SELECT MIN(mat.id.startDate) FROM MentorAvailableTime mat WHERE mat.mentor = :mentor")
     LocalDate findMinStartDate(Mentor mentor);
 
-    @Query("SELECT DISTINCT new com.example.edutrack.timetables.dto.MentorAvailableTimeDTO(mat.id.startDate, mat.id.endDate) " +
+    @Query("SELECT DISTINCT new com.example.edutrack.timetables.dto.MentorAvailableTimeDTO(mat.id.startDate, mat.id.endDate, mat.mentor) " +
            "FROM MentorAvailableTime mat " +
            "WHERE mat.mentor = :mentor " +
            "ORDER BY mat.id.startDate DESC")
@@ -50,4 +50,9 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
            "AND mat.id.endDate = :endDate")
     List<MentorAvailableSlotDTO> findAllSlotByEndDate(Mentor mentor, LocalDate endDate);
 
+    @Query("SELECT DISTINCT new com.example.edutrack.timetables.dto.MentorAvailableTimeDTO(mat.id.startDate, mat.id.endDate, mat.mentor) " +
+           "FROM MentorAvailableTime mat " +
+           "WHERE mat.status = 'PENDING' " +
+           "ORDER BY mat.id.startDate DESC")
+    List<MentorAvailableTimeDTO> findAllDistinctStartEndDates();
 }

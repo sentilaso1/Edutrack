@@ -65,4 +65,9 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
         return mentorAvailableTimeRepository.findMinStartDate(mentor);
     }
 
+    @Override
+    public List<MentorAvailableTimeDTO> findAllDistinctStartEndDates() {
+        return mentorAvailableTimeRepository.findAllDistinctStartEndDates();
+    }
+
 }
