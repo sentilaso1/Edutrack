@@ -1,14 +1,20 @@
 package com.example.edutrack.profiles.controller;
 
+import com.example.edutrack.accounts.controller.MentorController;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.service.implementations.UserServiceImpl;
 import com.example.edutrack.auth.service.UserService;
 import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CVCourseRepository;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
+import com.example.edutrack.profiles.repository.CvRepository;
 import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.profiles.service.interfaces.CvService;
 import jakarta.servlet.http.HttpSession;
@@ -26,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -37,7 +44,19 @@ public class CvController {
     private final CourseService courseService;
 
     @Autowired
-    public CvController(CvService cvService, CourseService courseService) {
+    public CourseMentorRepository courseMentorRepository;
+
+    @Autowired
+    public CvRepository cvRepository;
+
+    @Autowired
+    public MentorRepository mentorRepository;
+    @Autowired
+    private MentorController mentor;
+
+    @Autowired
+    public CvController(CvService cvService,
+                        CourseService courseService) {
         this.cvService = cvService;
         this.courseService = courseService;
     }
@@ -95,7 +114,7 @@ public class CvController {
         return "redirect:/admin/cv/list/1";
     }
 
-    @GetMapping("cv/create")
+    @GetMapping("mentor/cv/create")
     // Show the CV form
     public String showCVForm(Model model,
                              @RequestParam(defaultValue = "1") int page,
@@ -111,6 +130,7 @@ public class CvController {
 
         UUID userId = user.getId();
 
+        Optional<CV> existingCv = cvRepository.findByUserId(userId);
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Course> coursePage = courseService.findAll(pageable);
 
@@ -118,18 +138,42 @@ public class CvController {
         model.addAttribute("coursePage", coursePage);
         model.addAttribute("pageNumber", page);
         model.addAttribute("userId", userId);
-        return "cv/create-cv";
+
+        if (existingCv.isPresent()) {
+            CV cv = existingCv.get();
+            if (!cv.getStatus().equalsIgnoreCase("rejected")) {
+                return "redirect:/mentor/cv/edit/" + userId;
+            } else {
+
+                return "cv/create-cv";
+            }
+        } else {
+            return "cv/create-cv";
+        }
     }
 
     // Handle the form submit
-    @PostMapping("cv/create")
-    public String handleCVFormSubmission(@ModelAttribute("cv") CVForm request, Model model) {
-        CV saved = cvService.createCV(request);
+    @PostMapping("mentor/cv/create")
+    public String handleCVFormSubmission(@ModelAttribute("cv") CVForm request, Model model, HttpSession session) {
+        try {
+            request.parseSelectedCourses();
+        } catch (Exception e) {
+            model.addAttribute("error", "Failed to read course details. Please try again.");
+            return "redirect:/404";
+        }
+
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        cvService.createCV(request, user.getId());
+
         model.addAttribute("message", "CV created successfully!");
         return "redirect:/admin/cv/list/1";
     }
 
-    @GetMapping("/cv/edit/{id}")
+    @GetMapping("mentor/cv/edit/{id}")
     public String editCV(@PathVariable("id") UUID id, Model model) {
         CV cv = null;
         try {
@@ -142,25 +186,33 @@ public class CvController {
         return "cv/edit-cv";
     }
 
-    @PostMapping("/cv/edit/{id}")
-    public String handleEditCV(@PathVariable("id") UUID id, @ModelAttribute("cv") CVForm cvForm, RedirectAttributes redirectAttributes) {
+    @PostMapping("mentor/cv/edit/{id}")
+    public String handleEditCV(@PathVariable("id") UUID id, @ModelAttribute("cv") CVForm cvForm, RedirectAttributes redirectAttributes, HttpSession session) {
         try {
             cvForm.setUserId(id);
-            CV updatedCV = cvService.createCV(cvForm);
+            User user = (User) session.getAttribute("loggedInUser");
+            if (user == null) {
+                return "redirect:/login";
+            }
+            cvService.createCV(cvForm, user.getId());
             redirectAttributes.addFlashAttribute("success", "CV updated successfully.");
-            return "redirect:/cv/edit/" + id;
+            return "redirect:mentor/cv/edit/" + id;
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", "Error updating CV: " + e.getMessage());
-            return "redirect:/cv/edit/" + id;
+            return "redirect:mentor/cv/edit/" + id;
         }
     }
 
     @GetMapping("/admin/cv/detail/{id}")
     public String detailCV(@PathVariable("id") UUID id, Model model) {
         CV cv = cvService.getCVById(id);
-        List<Course> registeredCourses = cvService.getCoursesForCV(id);
-        model.addAttribute("cv", cv);
-        model.addAttribute("registeredCourses", registeredCourses);
+        Optional<Mentor> mentorOpt = mentorRepository.findById(cv.getId());
+        if (mentorOpt.isPresent()) {
+            List<CourseMentor> registeredCourses = courseMentorRepository.findAllByMentor(mentorOpt.get());
+            System.out.println("Courses found: " + registeredCourses.size());
+            model.addAttribute("cv", cv);
+            model.addAttribute("registeredCourses", registeredCourses);
+        }
         return "cv/cv-detail";
     }
 

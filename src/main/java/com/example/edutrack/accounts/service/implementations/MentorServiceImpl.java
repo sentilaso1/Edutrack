@@ -7,6 +7,8 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
+import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -19,13 +21,15 @@ import com.example.edutrack.accounts.model.Mentor;
 public class MentorServiceImpl implements MentorService {
     private final MentorRepository mentorRepository;
     private final MenteeRepository menteeRepository;
+    private final CourseMentorRepository courseMentorRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public MentorServiceImpl(MentorRepository mentorRepository, MenteeRepository menteeRepository) {
+    public MentorServiceImpl(MentorRepository mentorRepository, MenteeRepository menteeRepository, CourseMentorRepository courseMentorRepository) {
         this.mentorRepository = mentorRepository;
         this.menteeRepository = menteeRepository;
+        this.courseMentorRepository = courseMentorRepository;
     }
 
     public Mentor getMentorById(String id) {
@@ -117,5 +121,12 @@ public class MentorServiceImpl implements MentorService {
 
         mentor.setId(userId);
         return Optional.ofNullable(entityManager.merge(mentor));
+    }
+
+    @Override
+    public List<CourseMentor> getCourseMentorRelations(UUID mentorId) {
+        Mentor mentor = mentorRepository.findById(mentorId)
+                .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
+        return courseMentorRepository.findAllByMentor(mentor);
     }
 }

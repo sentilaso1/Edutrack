@@ -1,5 +1,6 @@
 package com.example.edutrack.curriculum.repository;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -120,6 +122,9 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
             @Param("menteeId") UUID menteeId,
             Pageable pageable
     );
+
+    Optional<CourseMentor> findByMentorAndCourse(Mentor mentor, Course course);
+    List<CourseMentor> findAllByMentor(Mentor mentor);
 
 
 }

@@ -6,6 +6,9 @@ import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.profiles.model.CV;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -30,8 +33,8 @@ public class MentorService {
     }
 
     // Filter mentors
-    public List<Mentor> searchMentors(String name, String[] expertise, Double rating, Integer totalSessions, Boolean isAvailable) {
-        List<Mentor> mentors = mentorRepository.searchMentorsBasic(name, rating, totalSessions, isAvailable);
+    public Page<Mentor> searchMentors(String name, String[] expertise, Double rating, Integer totalSessions, Boolean isAvailable, Pageable pageable) {
+        Page<Mentor> mentorPage = mentorRepository.searchMentorsBasic(name, rating, totalSessions, isAvailable, pageable);
 
         if (expertise != null && expertise.length > 0) {
             List<String> expertiseList = Arrays.stream(expertise)
@@ -39,17 +42,16 @@ public class MentorService {
                     .toList();
 
 
-
-            mentors = mentors.stream()
+            List<Mentor> filteredList = mentorPage.getContent().stream()
                     .filter(m -> {
                         String mentorExpertise = m.getExpertise().toLowerCase();
                         return expertiseList.stream().allMatch(mentorExpertise::contains);
                     })
                     .collect(Collectors.toList());
+            return new PageImpl<>(filteredList, pageable, mentorPage.getTotalElements());
         }
 
-
-        return mentors;
+        return mentorPage;
     }
 
 
@@ -68,4 +70,5 @@ public class MentorService {
     public Optional<CV> getCVById(UUID id) {
         return mentorRepository.findCVByMentorId(id);
     }
+
 }

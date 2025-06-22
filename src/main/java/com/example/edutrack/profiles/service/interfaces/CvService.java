@@ -24,7 +24,7 @@ public interface CvService {
     List<String> getAllUniqueSkills();
     List<Course> getCoursesForCV(CV cv);
 
-    CV createCV(CVForm form);
+    void createCV(CVForm form, UUID mentorId);
     CV getCVById(UUID id);
 
     List<Course> getCoursesForCV(UUID cvId);

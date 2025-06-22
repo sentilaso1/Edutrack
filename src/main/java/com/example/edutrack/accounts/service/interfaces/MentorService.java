@@ -1,6 +1,7 @@
 package com.example.edutrack.accounts.service.interfaces;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.curriculum.model.CourseMentor;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,4 +21,5 @@ public interface MentorService {
     List<Mentor> findMentorsByMenteeInterest(UUID menteeId, int limit);
 
     Optional<Mentor> promoteToMentor(UUID userId);
+    List<CourseMentor> getCourseMentorRelations(UUID mentorId);
 }
