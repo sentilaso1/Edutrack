@@ -97,7 +97,7 @@ public class MentorController {
         model.addAttribute("nextWeek", weekStart.plusWeeks(1));
         model.addAttribute("slots", Slot.values());
 
-        return "mentor_calendar";
+        return "/mentor/mentor_calendar";
     }
 
     @GetMapping("/mentor/sensor-class")
@@ -189,9 +189,6 @@ public class MentorController {
         if (mentor == null) {
             return "redirect:/login";
         }
-
-        //model.addAttribute("slots", Slot.values());
-        //model.addAttribute("dayLabels", Day.values());
 
         List<MentorAvailableTimeDTO> setTime = mentorAvailableTimeService.findAllDistinctStartEndDates(mentor);
         model.addAttribute("setTime", setTime);
