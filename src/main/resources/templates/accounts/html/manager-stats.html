@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard Hệ Thống - Manager</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+        <style>
+                * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                }
+
+                body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #a8edea 100%);
+                        min-height: 100vh;
+                        color: #333;
+                }
+
+                .container {
+                        max-width: 1600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                }
+
+                .header {
+                        text-align: center;
+                        margin-bottom: 30px;
+                }
+
+                .header h1 {
+                        color: white;
+                        font-size: 3rem;
+                        margin-bottom: 10px;
+                        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+                        font-weight: 700;
+                }
+
+                .header p {
+                        color: rgba(255, 255, 255, 0.9);
+                        font-size: 1.2rem;
+                        font-weight: 300;
+                }
+
+                .period-selector {
+                        display: flex;
+                        justify-content: center;
+                        gap: 10px;
+                        margin-bottom: 30px;
+                }
+
+                .period-btn {
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: 2px solid rgba(255, 255, 255, 0.3);
+                        padding: 12px 20px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-size: 14px;
+                        font-weight: 600;
+                        backdrop-filter: blur(10px);
+                }
+
+                .period-btn.active {
+                        background: rgba(255, 255, 255, 0.9);
+                        color: #667eea;
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+                }
+
+                .period-btn:hover {
+                        background: rgba(255, 255, 255, 0.3);
+                        transform: translateY(-1px);
+                }
+
+                .stats-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 25px;
+                        margin-bottom: 40px;
+                }
+
+                .stat-card {
+                        background: rgba(255, 255, 255, 0.95);
+                        backdrop-filter: blur(15px);
+                        border-radius: 20px;
+                        padding: 35px;
+                        text-align: center;
+                        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        transition: all 0.4s ease;
+                        position: relative;
+                        overflow: hidden;
+                }
+
+                .stat-card::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 4px;
+                        background: linear-gradient(90deg, #667eea, #764ba2);
+                }
+
+                .stat-card:hover {
+                        transform: translateY(-8px);
+                        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+                }
+
+                .stat-card h3 {
+                        color: #666;
+                        font-size: 1rem;
+                        margin-bottom: 15px;
+                        text-transform: uppercase;
+                        letter-spacing: 1.2px;
+                        font-weight: 600;
+                }
+
+                .stat-card .value {
+                        font-size: 2.8rem;
+                        font-weight: bold;
+                        color: #667eea;
+                        margin-bottom: 10px;
+                        text-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+                }
+
+                .stat-card .change {
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                        padding: 6px 14px;
+                        border-radius: 20px;
+                        display: inline-block;
+                }
+
+                .positive {
+                        color: #27ae60;
+                        background: rgba(39, 174, 96, 0.1);
+                }
+
+                .negative {
+                        color: #e74c3c;
+                        background: rgba(231, 76, 60, 0.1);
+                }
+
+                .charts-grid {
+                        display: grid;
+                        grid-template-columns: 2fr 1fr;
+                        gap: 25px;
+                        margin-bottom: 30px;
+                }
+
+                .chart-container {
+                        background: rgba(255, 255, 255, 0.95);
+                        backdrop-filter: blur(15px);
+                        border-radius: 20px;
+                        padding: 30px;
+                        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        transition: all 0.3s ease;
+                }
+
+                .chart-container:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 15px 50px rgba(102, 126, 234, 0.2);
+                }
+
+                .chart-title {
+                        font-size: 1.5rem;
+                        font-weight: 600;
+                        color: #333;
+                        margin-bottom: 25px;
+                        text-align: center;
+                        position: relative;
+                }
+
+                .chart-title::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -8px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 60px;
+                        height: 3px;
+                        background: linear-gradient(90deg, #667eea, #764ba2);
+                        border-radius: 2px;
+                }
+
+                .full-width {
+                        grid-column: 1 / -1;
+                }
+
+                .manager-icon {
+                        font-size: 3.5rem;
+                        margin-bottom: 15px;
+                        display: block;
+                }
+
+                .kpi-dashboard {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 20px;
+                        margin-top: 30px;
+                }
+
+                .kpi-card {
+                        background: rgba(255, 255, 255, 0.9);
+                        border-radius: 15px;
+                        padding: 25px;
+                        text-align: center;
+                        border-left: 4px solid #667eea;
+                        transition: all 0.3s ease;
+                }
+
+                .kpi-card:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+                }
+
+                .kpi-card h4 {
+                        color: #666;
+                        font-size: 0.9rem;
+                        margin-bottom: 10px;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                }
+
+                .kpi-card .kpi-value {
+                        font-size: 2rem;
+                        font-weight: bold;
+                        color: #667eea;
+                        margin-bottom: 5px;
+                }
+
+                .kpi-card .kpi-trend {
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                }
+
+                .system-overview {
+                        background: rgba(255, 255, 255, 0.95);
+                        border-radius: 20px;
+                        padding: 30px;
+                        margin-bottom: 30px;
+                        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+                }
+
+                .overview-title {
+                        font-size: 1.8rem;
+                        font-weight: 700;
+                        color: #333;
+                        margin-bottom: 20px;
+                        text-align: center;
+                }
+
+                .overview-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                        gap: 20px;
+                }
+
+                .overview-item {
+                        text-align: center;
+                        padding: 15px;
+                        border-radius: 10px;
+                        background: rgba(102, 126, 234, 0.05);
+                }
+
+                .overview-item .number {
+                        font-size: 2.2rem;
+                        font-weight: bold;
+                        color: #667eea;
+                        display: block;
+                }
+
+                .overview-item .label {
+                        font-size: 0.9rem;
+                        color: #666;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        margin-top: 5px;
+                }
+
+                @media (max-width: 768px) {
+                        .charts-grid {
+                                grid-template-columns: 1fr;
+                        }
+
+                        .header h1 {
+                                font-size: 2.5rem;
+                        }
+
+                        .stat-card .value {
+                                font-size: 2.2rem;
+                        }
+
+                        .stats-grid {
+                                grid-template-columns: 1fr;
+                        }
+                }
+
+                .loading {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 200px;
+                        color: #667eea;
+                        font-size: 1.2rem;
+                }
+
+                .chart-loading {
+                        animation: pulse 2s infinite;
+                }
+
+                @keyframes pulse {
+                        0% {
+                                opacity: 0.5;
+                        }
+
+                        50% {
+                                opacity: 1;
+                        }
+
+                        100% {
+                                opacity: 0.5;
+                        }
+                }
+
+                .alert-panel {
+                        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+                        color: white;
+                        border-radius: 15px;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                        box-shadow: 0 8px 32px rgba(238, 90, 36, 0.3);
+                }
+
+                .alert-title {
+                        font-size: 1.2rem;
+                        font-weight: 600;
+                        margin-bottom: 10px;
+                }
+
+                .alert-content {
+                        font-size: 0.95rem;
+                        opacity: 0.9;
+                }
+        </style>
+</head>
+
+<body>
+        <div class="container">
+                <div class="header">
+                        <h1>👩‍💼 Dashboard Hệ Thống - Manager</h1>
+                        <p>Quản lý và theo dõi hiệu suất toàn hệ thống</p>
+                </div>
+
+                <div class="period-selector">
+                        <button class="period-btn active" onclick="updatePeriod('week')">7 ngày</button>
+                        <button class="period-btn" onclick="updatePeriod('month')">30 ngày</button>
+                        <button class="period-btn" onclick="updatePeriod('quarter')">3 tháng</button>
+                        <button class="period-btn" onclick="updatePeriod('year')">1 năm</button>
+                </div>
+
+                <div class="alert-panel">
+                        <div class="alert-title">⚠️ Thông Báo Quan Trọng</div>
+                        <div class="alert-content">Doanh thu tháng này đã vượt mục tiêu 15%. Cần xem xét mở rộng đội ngũ
+                                mentor.</div>
+                </div>
+
+                <div class="stats-grid">
+                        <div class="stat-card">
+                                <span class="manager-icon">💰</span>
+                                <h3>Tổng Doanh Thu Hệ Thống</h3>
+                                <div class="value" id="system-revenue">2,850,750,000₫</div>
+                                <div class="change positive">+18.3% so với tháng trước</div>
+                        </div>
+                        <div class="stat-card">
+                                <span class="manager-icon">👨‍🏫</span>
+                                <h3>Tổng Số Mentor</h3>
+                                <div class="value" id="total-mentors">156</div>
+                                <div class="change positive">+12 mentor mới</div>
+                        </div>
+                        <div class="stat-card">
+                                <span class="manager-icon">👥</span>
+                                <h3>Tổng Học Viên</h3>
+                                <div class="value" id="total-students">8,429</div>
+                                <div class="change positive">+284 học viên</div>
+                        </div>
+                        <div class="stat-card">
+                                <span class="manager-icon">✅</span>
+                                <h3>Tỷ Lệ Hoàn Thành</h3>
+                                <div class="value" id="completion-rate">87.5%</div>
+                                <div class="change positive">+2.1%</div>
+                        </div>
+                </div>
+
+                <div class="system-overview">
+                        <div class="overview-title">📊 Tổng Quan Hệ Thống</div>
+                        <div class="overview-grid">
+                                <div class="overview-item">
+                                        <span class="number">1,247</span>
+                                        <div class="label">Khóa Học Hoạt Động</div>
+                                </div>
+                                <div class="overview-item">
+                                        <span class="number">94.2%</span>
+                                        <div class="label">Độ Hài Lòng</div>
+                                </div>
+                                <div class="overview-item">
+                                        <span class="number">2.8M₫</span>
+                                        <div class="label">Doanh Thu TB/Mentor</div>
+                                </div>
+                                <div class="overview-item">
+                                        <span class="number">54</span>
+                                        <div class="label">Học Viên TB/Mentor</div>
+                                </div>
+                                <div class="overview-item">
+                                        <span class="number">4.7⭐</span>
+                                        <div class="label">Đánh Giá TB</div>
+                                </div>
+                                <div class="overview-item">
+                                        <span class="number">82.3%</span>
+                                        <div class="label">Tỷ Lệ Tái Đăng Ký</div>
+                                </div>
+                        </div>
+                </div>
+
+                <div class="charts-grid">
+                        <div class="chart-container">
+                                <div class="chart-title">💰 Doanh Thu Hệ Thống Theo Thời Gian</div>
+                                <canvas id="systemRevenueChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                                <div class="chart-title">🏆 Top 5 Mentor Theo Doanh Thu</div>
+                                <canvas id="topMentorsChart"></canvas>
+                        </div>
+                </div>
+
+                <div class="charts-grid">
+                        <div class="chart-container full-width">
+                                <div class="chart-title">📊 Phân Tích Doanh Thu Theo Danh Mục</div>
+                                <canvas id="categoryRevenueChart"></canvas>
+                        </div>
+                </div>
+
+                <div class="charts-grid">
+                        <div class="chart-container">
+                                <div class="chart-title">📈 Tăng Trưởng Học Viên</div>
+                                <canvas id="studentGrowthChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                                <div class="chart-title">⚡ Hiệu Suất Mentor</div>
+                                <canvas id="mentorPerformanceChart"></canvas>
+                        </div>
+                </div>
+
+                <div class="kpi-dashboard">
+                        <div class="kpi-card">
+                                <h4>Lợi Nhuận Ròng</h4>
+                                <div class="kpi-value">1.2B₫</div>
+                                <div class="kpi-trend positive">+22.4%</div>
+                        </div>
+                        <div class="kpi-card">
+                                <h4>Chi Phí Vận Hành</h4>
+                                <div class="kpi-value">850M₫</div>
+                                <div class="kpi-trend positive">-5.2%</div>
+                        </div>
+                        <div class="kpi-card">
+                                <h4>ROI Trung Bình</h4>
+                                <div class="kpi-value">340%</div>
+                                <div class="kpi-trend positive">+18.7%</div>
+                        </div>
+                        <div class="kpi-card">
+                                <h4>Churn Rate</h4>
+                                <div class="kpi-value">12.5%</div>
+                                <div class="kpi-trend positive">-3.1%</div>
+                        </div>
+                        <div class="kpi-card">
+                                <h4>CAC (Customer Acquisition Cost)</h4>
+                                <div class="kpi-value">285k₫</div>
+                                <div class="kpi-trend negative">+8.3%</div>
+                        </div>
+                        <div class="kpi-card">
+                                <h4>LTV (Lifetime Value)</h4>
+                                <div class="kpi-value">2.8M₫</div>
+                                <div class="kpi-trend positive">+15.6%</div>
+                        </div>
+                </div>
+        </div>
+
+        <script>
+                // System data
+                const systemData = {
+                        revenue: [180000000, 210000000, 245000000, 230000000, 275000000, 260000000, 285000000],
+                        labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5', 'Tuần 6', 'Tuần 7'],
+                        topMentors: {
+                                labels: ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Phạm Thị D', 'Hoàng Văn E'],
+                                data: [45250000, 38500000, 35200000, 32800000, 29500000],
+                                colors: ['#667eea', '#764ba2', '#a8edea', '#ffeaa7', '#fd79a8']
+                        },
+                        categories: {
+                                labels: ['Lập Trình', 'Design', 'Marketing', 'Ngôn Ngữ', 'Kinh Doanh', 'Khác'],
+                                data: [850000000, 520000000, 380000000, 320000000, 280000000, 500000000],
+                                colors: ['#667eea', '#764ba2', '#a8edea', '#ffeaa7', '#fd79a8', '#55a3ff']
+                        },
+                        studentGrowth: [6200, 6580, 6920, 7300, 7680, 8050, 8429],
+                        mentorPerformance: {
+                                labels: ['Hiệu Suất Cao', 'Hiệu Suất TB', 'Cần Cải Thiện', 'Mới Gia Nhập'],
+                                data: [45, 38, 12, 5],
+                                colors: ['#00b894', '#fdcb6e', '#e84393', '#74b9ff']
+                        }
+                };
+
+                let charts = {};
+
+                function initCharts() {
+                        // System Revenue Chart
+                        const revenueCtx = document.getElementById('systemRevenueChart').getContext('2d');
+                        charts.revenue = new Chart(revenueCtx, {
+                                type: 'line',
+                                data: {
+                                        labels: systemData.labels,
+                                        datasets: [{
+                                                label: 'Doanh Thu (VNĐ)',
+                                                data: systemData.revenue,
+                                                borderColor: '#667eea',
+                                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                                fill: true,
+                                                tension: 0.4,
+                                                borderWidth: 4,
+                                                pointBackgroundColor: '#667eea',
+                                                pointBorderColor: '#fff',
+                                                pointBorderWidth: 3,
+                                                pointRadius: 8,
+                                                pointHoverRadius: 10
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: { display: false },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(102, 126, 234, 0.9)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        borderColor: '#667eea',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10,
+                                                        callbacks: {
+                                                                label: function (context) {
+                                                                        return 'Doanh thu: ' + (context.parsed.y / 1000000).toFixed(0) + 'M₫';
+                                                                }
+                                                        }
+                                                }
+                                        },
+                                        scales: {
+                                                y: {
+                                                        beginAtZero: true,
+                                                        ticks: {
+                                                                callback: function (value) {
+                                                                        return (value / 1000000).toFixed(0) + 'M₫';
+                                                                },
+                                                                color: '#666'
+                                                        },
+                                                        grid: { color: 'rgba(102, 126, 234, 0.1)' }
+                                                },
+                                                x: {
+                                                        ticks: { color: '#666' },
+                                                        grid: { display: false }
+                                                }
+                                        }
+                                }
+                        });
+
+                        // Top Mentors Chart
+                        const topMentorsCtx = document.getElementById('topMentorsChart').getContext('2d');
+                        charts.topMentors = new Chart(topMentorsCtx, {
+                                type: 'bar',
+                                data: {
+                                        labels: systemData.topMentors.labels,
+                                        datasets: [{
+                                                label: 'Doanh Thu (VNĐ)',
+                                                data: systemData.topMentors.data,
+                                                backgroundColor: systemData.topMentors.colors,
+                                                borderRadius: 8,
+                                                borderSkipped: false
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: { display: false },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(102, 126, 234, 0.9)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        borderColor: '#667eea',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10,
+                                                        callbacks: {
+                                                                label: function (context) {
+                                                                        return 'Doanh thu: ' + (context.parsed.y / 1000000).toFixed(1) + 'M₫';
+                                                                }
+                                                        }
+                                                }
+                                        },
+                                        scales: {
+                                                y: {
+                                                        beginAtZero: true,
+                                                        ticks: {
+                                                                callback: function (value) {
+                                                                        return (value / 1000000).toFixed(0) + 'M₫';
+                                                                },
+                                                                color: '#666'
+                                                        },
+                                                        grid: { color: 'rgba(102, 126, 234, 0.1)' }
+                                                },
+                                                x: {
+                                                        ticks: {
+                                                                color: '#666',
+                                                                maxRotation: 45
+                                                        },
+                                                        grid: { display: false }
+                                                }
+                                        }
+                                }
+                        });
+
+                        // Category Revenue Chart
+                        const categoryCtx = document.getElementById('categoryRevenueChart').getContext('2d');
+                        charts.category = new Chart(categoryCtx, {
+                                type: 'bar',
+                                data: {
+                                        labels: systemData.categories.labels,
+                                        datasets: [{
+                                                label: 'Doanh Thu (VNĐ)',
+                                                data: systemData.categories.data,
+                                                backgroundColor: systemData.categories.colors,
+                                                borderRadius: 10,
+                                                borderSkipped: false
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: { display: false },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(102, 126, 234, 0.9)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        borderColor: '#667eea',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10,
+                                                        callbacks: {
+                                                                label: function (context) {
+                                                                        return 'Doanh thu: ' + (context.parsed.y / 1000000).toFixed(0) + 'M₫';
+                                                                }
+                                                        }
+                                                }
+                                        },
+                                        scales: {
+                                                y: {
+                                                        beginAtZero: true,
+                                                        ticks: {
+                                                                callback: function (value) {
+                                                                        return (value / 1000000).toFixed(0) + 'M₫';
+                                                                },
+                                                                color: '#666'
+                                                        },
+                                                        grid: { color: 'rgba(102, 126, 234, 0.1)' }
+                                                },
+                                                x: {
+                                                        ticks: { color: '#666' },
+                                                        grid: { display: false }
+                                                }
+                                        }
+                                }
+                        });
+
+                        // Student Growth Chart
+                        const studentGrowthCtx = document.getElementById('studentGrowthChart').getContext('2d');
+                        charts.studentGrowth = new Chart(studentGrowthCtx, {
+                                type: 'line',
+                                data: {
+                                        labels: systemData.labels,
+                                        datasets: [{
+                                                label: 'Số Học Viên',
+                                                data: systemData.studentGrowth,
+                                                borderColor: '#a8edea',
+                                                backgroundColor: 'rgba(168, 237, 234, 0.2)',
+                                                fill: true,
+                                                tension: 0.4,
+                                                borderWidth: 3,
+                                                pointBackgroundColor: '#a8edea',
+                                                pointBorderColor: '#fff',
+                                                pointBorderWidth: 2,
+                                                pointRadius: 6
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: { display: false },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(168, 237, 234, 0.9)',
+                                                        titleColor: '#333',
+                                                        bodyColor: '#333',
+                                                        borderColor: '#a8edea',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10
+                                                }
+                                        },
+                                        scales: {
+                                                y: {
+                                                        beginAtZero: false,
+                                                        ticks: { color: '#666' },
+                                                        grid: { color: 'rgba(168, 237, 234, 0.2)' }
+                                                },
+                                                x: {
+                                                        ticks: { color: '#666' },
+                                                        grid: { display: false }
+                                                }
+                                        }
+                                }
+                        });
+
+                        // Mentor Performance Chart
+                        const mentorPerformanceCtx = document.getElementById('mentorPerformanceChart').getContext('2d');
+                        charts.mentorPerformance = new Chart(mentorPerformanceCtx, {
+                                type: 'doughnut',
+                                data: {
+                                        labels: systemData.mentorPerformance.labels,
+                                        datasets: [{
+                                                data: systemData.mentorPerformance.data,
+                                                backgroundColor: systemData.mentorPerformance.colors,
+                                                borderWidth: 0,
+                                                hoverOffset: 10
+                                        }]
+                                },
+                                options: {
+                                        responsive: true,
+                                        plugins: {
+                                                legend: {
+                                                        position: 'bottom',
+                                                        labels: {
+                                                                padding: 20,
+                                                                usePointStyle: true,
+                                                                color: '#666',
+                                                                font: { size: 11 }
+                                                        }
+                                                },
+                                                tooltip: {
+                                                        backgroundColor: 'rgba(102, 126, 234, 0.9)',
+                                                        titleColor: '#fff',
+                                                        bodyColor: '#fff',
+                                                        borderColor: '#667eea',
+                                                        borderWidth: 2,
+                                                        cornerRadius: 10,
+                                                        callbacks: {
+                                                                label: function (context) {
+                                                                        return context.label + ': ' + context.parsed + '%';
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        });
+                }
+
+                function updatePeriod(period) {
+                        document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+                        event.target.classList.add('active');
+
+                        // Simulate data update based on period
+                        console.log('Updating system data for period:', period);
+
+                        // Add loading effect
+                        document.querySelectorAll('canvas').forEach(canvas => {
+                                canvas.parentElement.classList.add('chart-loading');
+                        });
+
+                        setTimeout(() => {
+                                document.querySelectorAll('.chart-container').forEach(container => {
+                                        container.classList.remove('chart-loading');
+                                });
+                        }, 1000);
+                }
+
+                // Initialize charts on page load
+                window.addEventListener('load', function () {
+                        setTimeout(initCharts, 500);
+                });
+
+                // Add entrance animations
+                document.addEventListener('DOMContentLoaded', function () {
+                        const elements = document.querySelectorAll('.stat-card, .chart-container, .kpi-card, .system-overview, .alert-panel');
+                        const observer = new IntersectionObserver((entries) => {
+                                entries.forEach((entry, index) => {
+                                        if (entry.isIntersecting) {
+                                                setTimeout(() => {
+                                                        entry.target.style.opacity = '1';
+                                                        entry.target.style.transform = 'translateY(0)';
+                                                }, index * 100);
+                                        }
+                                });
+                        });
+
+                        elements.forEach(element => {
+                                element.style.opacity = '0';
+                                element.style.transform = 'translateY(30px)';
+                                element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                                observer.observe(element);
+                        });
+                });
+
+                // Real-time updates simulation
+                setInterval(() => {
+                        const revenueElement = document.getElementById('system-revenue');
+                        const currentValue = parseInt(revenueElement.textContent.replace(/[^0-9]/g, ''));
+                        const newValue = currentValue + Math.floor(Math.random() * 10000000);
+                        revenueElement.textContent = newValue.toLocaleString('vi-VN') + '₫';
+                }, 45000); // Update every 45 seconds
+
+                // Auto-refresh data every 5 minutes
+                setInterval(() => {
+                        console.log('Auto-refreshing dashboard data...');
+                        // Here you would typically fetch new data from your API
+                }, 300000);
+        </script>
+</body>
+
+</html>
