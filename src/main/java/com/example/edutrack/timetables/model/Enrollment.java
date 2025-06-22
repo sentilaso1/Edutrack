@@ -15,6 +15,7 @@ public class Enrollment {
         PENDING,
         APPROVED,
         REJECTED,
+        CREATED,
         CANCELLED;
 
         @Override

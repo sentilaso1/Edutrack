@@ -228,4 +228,17 @@ public class MentorController {
     public String mentorStats(Model model, HttpSession session) {
         return "accounts/html/mentor-stats";
     }
+
+    @GetMapping("mentor/classes")
+    public String mentorClasses(Model model, HttpSession session) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+
+        List<Enrollment> ongoingEnrollments = enrollmentService.findOngoingEnrollments(mentor.getId());
+        model.addAttribute("ongoingEnrollments", ongoingEnrollments);
+        return "mentor/mentor-class";
+    }
+
 }

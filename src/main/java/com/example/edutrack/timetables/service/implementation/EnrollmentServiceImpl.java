@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,6 +76,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public Enrollment save(Enrollment enrollment) {
         return enrollmentRepository.save(enrollment);
+    }
+
+    @Override
+    public List<Enrollment> findOngoingEnrollments(UUID mentor) {
+        LocalDate today = LocalDate.now();
+        return enrollmentRepository.findOngoingEnrollments(today, mentor);
     }
 
     @Override

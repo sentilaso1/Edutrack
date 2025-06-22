@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EnrollmentService {
-    public List<CourseMentor> getPopularCoursesForGuest(int topPopular);
+    List<CourseMentor> getPopularCoursesForGuest(int topPopular);
 
     CourseCardDTO mapToCourseCardDTO(CourseMentor courseMentor);
 
@@ -26,4 +26,6 @@ public interface EnrollmentService {
     List<Course> findCourseByMenteeIdAndEnrollmentStatus(UUID menteeId);
 
     Enrollment save(Enrollment enrollment);
+
+    List<Enrollment> findOngoingEnrollments(UUID mentor);
 }
