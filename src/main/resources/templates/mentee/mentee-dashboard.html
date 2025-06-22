@@ -337,25 +337,12 @@
                 <div class="popular-categories">
                     <h3 class="categories-title">Popular Categories</h3>
                     <div class="categories-list">
-                        <a href="#" class="category-tag">
-                            <i class="fa fa-code"></i>
-                            Programming
-                        </a>
-                        <a href="#" class="category-tag">
-                            <i class="fa fa-paint-brush"></i>
-                            Design
-                        </a>
-                        <a href="#" class="category-tag">
-                            <i class="fa fa-bar-chart"></i>
-                            Data Science
-                        </a>
-                        <a href="#" class="category-tag">
-                            <i class="fa fa-briefcase"></i>
-                            Business
-                        </a>
-                        <a href="#" class="category-tag">
-                            <i class="fa fa-language"></i>
-                            Languages
+                        <a th:each="tag : ${topTags}"
+                           th:href="@{/courses(size_page=6, subject=${tag.tag.id})}"
+                           class="category-tag"
+                           aria-label="Browse courses in this category">
+                            <i class="fa fa-tag"></i>
+                            <span th:text="${tag.tag.title}">Category</span>
                         </a>
                     </div>
                 </div>
