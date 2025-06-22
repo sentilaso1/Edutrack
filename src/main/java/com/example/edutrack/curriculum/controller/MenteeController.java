@@ -3,14 +3,12 @@ package com.example.edutrack.curriculum.controller;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
+import com.example.edutrack.curriculum.dto.ReviewDTO;
 import com.example.edutrack.curriculum.dto.SkillProgressDTO;
 import com.example.edutrack.curriculum.dto.TrackerDTO;
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.Goal;
-import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
-import com.example.edutrack.curriculum.service.interfaces.DashboardService;
-import com.example.edutrack.curriculum.service.interfaces.GoalService;
+import com.example.edutrack.curriculum.model.*;
+import com.example.edutrack.curriculum.service.interfaces.*;
+import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
@@ -39,18 +37,27 @@ public class MenteeController {
     private final GoalService goalService;
     private final MenteeRepository menteeRepository;
     private final EnrollmentScheduleService enrollmentScheduleService;
+    private final HomeControlller homeControlller;
+    private final CourseTagService courseTagService;
+    private final FeedbackService feedbackService;
 
-    public MenteeController(DashboardService dashboardService, GoalService goalService, CourseMentorService courseMentorService, EnrollmentService enrollmentService, MenteeRepository menteeRepository, EnrollmentScheduleService enrollmentScheduleService) {
+    public MenteeController(FeedbackService feedbackService, DashboardService dashboardService, GoalService goalService, CourseMentorService courseMentorService, EnrollmentService enrollmentService, MenteeRepository menteeRepository, EnrollmentScheduleService enrollmentScheduleService, HomeControlller homeControlller, CourseTagService courseTagService) {
         this.dashboardService = dashboardService;
         this.courseMentorService = courseMentorService;
         this.enrollmentService = enrollmentService;
         this.goalService = goalService;
         this.menteeRepository = menteeRepository;
         this.enrollmentScheduleService = enrollmentScheduleService;
+        this.homeControlller = homeControlller;
+        this.courseTagService = courseTagService;
+        this.feedbackService = feedbackService;
     }
 
-    private UUID getSessionMentee(HttpSession session){
+    private UUID getSessionMentee(HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return null;
+        }
         return loggedInUser.getId();
     }
 
@@ -68,6 +75,13 @@ public class MenteeController {
     @GetMapping("/dashboard")
     public String showDashboard(HttpSession session, Model model) {
         UUID menteeId = getSessionMentee(session);
+        if (menteeId == null) {
+            return "redirect:/404";
+        }
+        homeControlller.addTopTagsToModel(model, 5);
+        List<Tag> allCourseTags = courseTagService.getAllTags();
+        List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
+        model.addAttribute("allCourseTagIds", allCourseTagIds);
         model.addAttribute("nextSessionTime", dashboardService.getNextSessionTime(menteeId));
         model.addAttribute("totalMentors", dashboardService.getTotalMentors(menteeId));
         model.addAttribute("learningProgress", dashboardService.getLearningProgress(menteeId));
@@ -82,12 +96,51 @@ public class MenteeController {
     public String showLearningTracker(
             HttpSession session,
             @RequestParam(name = "activeTab", required = false) String activeTab,
-            Model model) {
-
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "mentorId", required = false) UUID mentorId,
+            @RequestParam(name = "month", required = false) String month,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "6") int size,
+            @RequestParam(name = "goalStatus", required = false) String goalStatus,
+            @RequestParam(name = "editGoalId", required = false) UUID editGoalId,
+            @RequestParam(name = "reviewKeyword", required = false) String reviewKeyword,
+            @RequestParam(name = "ratingFilter", required = false) Integer ratingFilter,
+            Model model
+    ) {
         UUID menteeId = getSessionMentee(session);
-        addLearningTrackerAttributes(model, menteeId);
+        if (menteeId == null) return "redirect:/404";
 
-        // Nếu là tab attendance thì load schedule
+        List<Course> enrolledCourses = enrollmentService.findCourseByMenteeIdAndEnrollmentStatus(menteeId);
+        if (enrolledCourses == null || enrolledCourses.isEmpty()) {
+            return "redirect:/dashboard";
+        }
+
+        YearMonth selectedMonth = null;
+        if (month != null && !month.isBlank()) {
+            try {
+                selectedMonth = YearMonth.parse(month);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        TrackerDTO tracker = dashboardService.convertToTrackerDto(menteeId);
+
+        // SKILLS TAB
+        if (activeTab == null || activeTab.equals("skills")) {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<SkillProgressDTO> skillPage = dashboardService.getSkillProgressList(menteeId, keyword, selectedMonth, mentorId, pageable);
+
+            model.addAttribute("skills", skillPage.getContent());
+            model.addAttribute("totalPages", skillPage.getTotalPages());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("selectedMentorId", mentorId);
+            model.addAttribute("filterMonth", (selectedMonth != null) ? selectedMonth.toString() : null);
+            model.addAttribute("mentorList", enrollmentService.findMentorsByMentee(menteeId));
+        }
+
+        // SESSIONS TAB
         if ("sessions".equals(activeTab)) {
             LocalDate now = LocalDate.now();
             YearMonth currentMonth = YearMonth.from(now);
@@ -101,44 +154,101 @@ public class MenteeController {
                     null,
                     pageable
             );
-
-            List<Course> foundCourseMentor = enrollmentService.findCourseByMenteeIdAndEnrollmentStatus(menteeId);
             model.addAttribute("schedules", schedulePage.getContent());
             model.addAttribute("currentPage", 0);
             model.addAttribute("totalPages", schedulePage.getTotalPages());
             model.addAttribute("filterMonth", currentMonth.toString());
             model.addAttribute("selectedCourseId", null);
             model.addAttribute("selectedStatus", null);
-            model.addAttribute("courseList", foundCourseMentor);
+            model.addAttribute("courseList", enrolledCourses);
+        }
+
+        // GOALS TAB
+        if ("goals".equals(activeTab)) {
+            Pageable goalPageable = PageRequest.of(page, size);
+            Goal.Status selectedStatusEnum = null;
+            if (goalStatus != null) {
+                try {
+                    selectedStatusEnum = Goal.Status.valueOf(goalStatus);
+                } catch (IllegalArgumentException e) {
+                    selectedStatusEnum = null;
+                }
+            }
+
+            Page<Goal> goalPage = goalService.getGoalsByMenteeAndStatus(menteeId, selectedStatusEnum, goalPageable);
+            model.addAttribute("goals", goalPage.getContent());
+            model.addAttribute("goalTotalPages", goalPage.getTotalPages());
+            model.addAttribute("goalCurrentPage", page);
+            model.addAttribute("selectedGoalStatus", goalStatus);
+            if (!model.containsAttribute("editGoal")) {
+                if (editGoalId != null) {
+                    Goal goalToEdit = goalService.getGoalById(editGoalId);
+                    if (goalToEdit != null) {
+                        model.addAttribute("editGoal", goalToEdit);
+                    } else {
+                        model.addAttribute("editGoal", new Goal());
+                    }
+                } else {
+                    model.addAttribute("editGoal", new Goal());
+                }
+            }
+            if (!model.containsAttribute("editGoalId")) {
+                model.addAttribute("editGoalId", editGoalId);
+            }
+            model.addAttribute("size", size);
+
+        }
+
+        // Feedback tab
+        if ("reviews".equals(activeTab)) {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<ReviewDTO> reviewPage = feedbackService.getFilteredReviewsByMentee(
+                    menteeId,
+                    reviewKeyword,
+                    ratingFilter,
+                    pageable
+            );
+
+            model.addAttribute("reviewList", reviewPage.getContent());
+            model.addAttribute("reviewPage", reviewPage);
+            model.addAttribute("reviewKeyword", reviewKeyword);
+            model.addAttribute("ratingFilter", ratingFilter);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", reviewPage.getTotalPages());
+        }
+
+        model.addAttribute("progressTracker", tracker);
+
+        if (!model.containsAttribute("newGoal")) {
+            model.addAttribute("newGoal", new Goal());
         }
 
         model.addAttribute("activeTab", activeTab != null ? activeTab : "skills");
         return "mentee/learning-tracker";
     }
 
-
     @PostMapping("/goals/create")
     public String createGoal(
             HttpSession session,
             @ModelAttribute("newGoal") @Valid Goal goal,
             BindingResult result,
-            Model model
+            RedirectAttributes redirectAttributes
     ) {
-        if (result.hasErrors()) {
-            UUID menteeId = getSessionMentee(session);
-            model.addAttribute("progressTracker", dashboardService.convertToTrackerDto(menteeId));
-            model.addAttribute("skills", dashboardService.getSkillProgressList(menteeId));
-            model.addAttribute("goals", goalService.getGoalsByMentee(menteeId));
-            model.addAttribute("activeTab", "goals");
-            model.addAttribute("showGoalForm", true);
-            return "mentee/learning-tracker";
-        }
         UUID menteeId = getSessionMentee(session);
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.newGoal", result);
+            redirectAttributes.addFlashAttribute("newGoal", goal);
+            redirectAttributes.addFlashAttribute("showGoalForm", true);
+            return "redirect:/learning-tracker?activeTab=goals";
+        }
+
         goal.setMentee(menteeRepository.findById(menteeId).orElse(null));
         goal.setStatus(Goal.Status.TODO);
         goalService.saveGoal(menteeId, goal);
-        return "redirect:/learning-tracker#goals";
+
+        return "redirect:/learning-tracker?activeTab=goals";
     }
+
 
     @PostMapping("/goals/update-status")
     public String updateGoalStatus(HttpSession session,
@@ -146,36 +256,44 @@ public class MenteeController {
                                    @RequestParam("status") String status) {
         UUID menteeId = getSessionMentee(session);
         goalService.updateGoalStatus(goalId, Goal.Status.valueOf(status), menteeId);
-        return "redirect:/learning-tracker#goals";
+        return "redirect:/learning-tracker?activeTab=goals";
     }
-
 
     @PostMapping("/goals/edit")
     public String editGoal(
             HttpSession session,
-            @RequestParam("goalId") UUID goalId,
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam("targetDate") String targetDateStr,
-            Model model
+            @ModelAttribute("editGoal") @Valid Goal goal,
+            BindingResult result,
+            RedirectAttributes redirectAttributes
     ) {
         UUID menteeId = getSessionMentee(session);
-        Goal existingGoal = goalService.getGoalById(goalId);
-        if (existingGoal == null) {
-            return "redirect:/learning-tracker#goals";
+
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.editGoal", result);
+            redirectAttributes.addFlashAttribute("editGoal", goal);
+            redirectAttributes.addFlashAttribute("editGoalId", goal.getId());
+            return "redirect:/learning-tracker?activeTab=goals";
         }
-        existingGoal.setTitle(title);
-        existingGoal.setDescription(description);
-        existingGoal.setTargetDate(LocalDate.parse(targetDateStr));
+
+        Goal existingGoal = goalService.getGoalById(goal.getId());
+        if (existingGoal == null) {
+            return "redirect:/learning-tracker?activeTab=goals";
+        }
+
+        existingGoal.setTitle(goal.getTitle());
+        existingGoal.setDescription(goal.getDescription());
+        existingGoal.setTargetDate(goal.getTargetDate());
         goalService.saveGoal(menteeId, existingGoal);
-        return "redirect:/learning-tracker#goals";
+
+        return "redirect:/learning-tracker?activeTab=goals";
     }
+
 
 
     @PostMapping("/goals/delete/{id}")
     public String deleteGoal(@PathVariable("id") UUID goalId) {
         goalService.deleteGoal(goalId);
-        return "redirect:/learning-tracker#goals";
+        return "redirect:/learning-tracker?activeTab=goals";
     }
 
     @GetMapping("/attendance")
