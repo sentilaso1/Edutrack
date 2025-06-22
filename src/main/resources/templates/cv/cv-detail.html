@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -626,12 +626,19 @@
             <div class="section-header">Registered Courses</div>
 
             <div th:if="${registeredCourses != null}">
-                <div th:each="course : ${registeredCourses}">
+                <div th:each="cm : ${registeredCourses}">
                     <div class="course-card">
-                        <div class="course-title" th:text="${course.name}"></div>
-                        <div class="course-description" th:text="${course.description}"></div>
-                        <div class="course-meta">
-                            <span th:text="'Created date: ' + ${#dates.format(course.createdDate, 'dd/MM/yyyy')}"></span>
+                        <div class="course-title" th:text="${cm.course.name}"></div>
+                        <div class="course-description" th:text="${cm.course.description}"></div>
+
+                        <div class="info-item">
+                            <div class="info-label">Price (VND):</div>
+                            <div class="info-value" th:text="${cm.price} + ' VND'"></div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Teaching Description:</div>
+                            <div class="info-value" th:text="${cm.description}"></div>
                         </div>
                     </div>
                 </div>
