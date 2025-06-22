@@ -3,6 +3,7 @@ package com.example.edutrack.timetables.repository;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.model.Day;
+import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import org.springframework.data.domain.Page;
@@ -110,6 +111,8 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
             @Param("courseId") UUID courseId,
             Pageable pageable
     );
+
+    List<EnrollmentSchedule> findEnrollmentScheduleByEnrollment(Enrollment enrollment);
 
 
 }
