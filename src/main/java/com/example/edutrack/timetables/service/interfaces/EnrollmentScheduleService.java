@@ -31,4 +31,6 @@ public interface EnrollmentScheduleService {
 
     void saveEnrollmentSchedule(Enrollment enrollment);
 
+    List<EnrollmentSchedule> findEnrollmentScheduleByEnrollment(Enrollment enrollment);
+
 }
