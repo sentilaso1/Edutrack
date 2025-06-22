@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.repository;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Enrollment;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,4 +52,22 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @Query("SELECT e.courseMentor.course FROM Enrollment e WHERE e.mentee.id = :menteeId AND e.status = :status ")
     List<Course> findByMenteeIdAndEnrollmentStatus(@Param("menteeId") UUID menteeId, @Param("status") Enrollment.EnrollmentStatus status);
+
+    @Query(value = """
+    SELECT DISTINCT e.* FROM enrollments e
+    JOIN enrollment_schedule es ON e.id = es.enrollment_id
+    JOIN course_mentor cm ON e.course_mentor_id = cm.id
+    WHERE e.status = 'APPROVED'
+      AND cm.mentor_user_id = :mentorId
+      AND es.date <= :today
+      AND (
+          SELECT COUNT(*) FROM enrollment_schedule
+          WHERE enrollment_id = e.id
+            AND date <= :today
+            AND attendance <> 'CANCELLED'
+      ) < e.total_slots
+""", nativeQuery = true)
+    List<Enrollment> findOngoingEnrollments(@Param("today") LocalDate today, @Param("mentorId") UUID mentorId);
+
+
 }
