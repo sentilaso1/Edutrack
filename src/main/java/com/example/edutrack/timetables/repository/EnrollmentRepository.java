@@ -69,5 +69,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 """, nativeQuery = true)
     List<Enrollment> findOngoingEnrollments(@Param("today") LocalDate today, @Param("mentorId") UUID mentorId);
 
+    @Query("SELECT e FROM Enrollment e WHERE e.status = 'APPROVED'")
+    List<Enrollment> findAllApprovedEnrollments();
 
 }
