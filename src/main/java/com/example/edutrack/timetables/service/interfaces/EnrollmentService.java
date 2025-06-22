@@ -28,4 +28,6 @@ public interface EnrollmentService {
     Enrollment save(Enrollment enrollment);
 
     List<Enrollment> findOngoingEnrollments(UUID mentor);
+
+    List<Enrollment> findAllApprovedEnrollments();
 }
