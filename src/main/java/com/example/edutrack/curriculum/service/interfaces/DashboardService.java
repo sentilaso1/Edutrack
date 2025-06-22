@@ -6,6 +6,7 @@ import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +22,10 @@ public interface DashboardService {
     TrackerDTO convertToTrackerDto(UUID menteeI);
 
     List<SkillProgressDTO> getSkillProgressList(UUID menteeId);
+
+    Page<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId, Pageable pageable);
+
+    List<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId);
 
     Page<EnrollmentSchedule> getFilteredSchedules(
             UUID menteeId,

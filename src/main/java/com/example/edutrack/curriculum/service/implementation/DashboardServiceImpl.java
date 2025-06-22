@@ -1,8 +1,11 @@
 package com.example.edutrack.curriculum.service.implementation;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.dto.SkillProgressDTO;
 import com.example.edutrack.curriculum.dto.TrackerDTO;
+import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Goal;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.repository.GoalRepository;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -110,23 +114,77 @@ public class DashboardServiceImpl implements DashboardService {
         return new TrackerDTO(learningProgres, goalsCompleted, totalTrackedSkills, skillsCompleted, percent);
     }
 
-
     @Override
     public List<SkillProgressDTO> getSkillProgressList(UUID menteeId) {
+        return getSkillProgressList(menteeId, null, null, null);
+    }
+
+    @Override
+    public Page<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId, Pageable pageable){
+        List<SkillProgressDTO> fullList = getSkillProgressList(menteeId, keyword, selectedMonth, mentorId);
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), fullList.size());
+        List<SkillProgressDTO> pageContent = (start <= end) ? fullList.subList(start, end) : List.of();
+        return new PageImpl<>(pageContent, pageable, fullList.size());
+    }
+
+    @Override
+    public List<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId) {
         List<Enrollment> menteeEnrollment = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
         List<SkillProgressDTO> skillProgressList = new ArrayList<>();
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+
         for (Enrollment e : menteeEnrollment) {
+            CourseMentor courseMentor = e.getCourseMentor();
+            Course course = courseMentor.getCourse();
+            Mentor mentor = courseMentor.getMentor();
+
+            // --- Lọc theo từ khóa ---
+            if (keyword != null && !keyword.isBlank()) {
+                if (!course.getName().toLowerCase().contains(keyword.toLowerCase())) {
+                    continue;
+                }
+            }
+
+            // --- Lọc theo mentor ---
+            if (mentorId != null && mentor != null && !mentor.getId().equals(mentorId)) {
+                continue;
+            }
+
+            // --- Lọc theo tháng từ startTime ---
+            try {
+                LocalDateTime parsedStart = LocalDateTime.parse(e.getStartTime(), formatter);
+                if (selectedMonth != null && !YearMonth.from(parsedStart).equals(selectedMonth)) {
+                    continue;
+                }
+            } catch (Exception ex) {
+                continue;
+            }
+
             Long enrollmentId = e.getId();
-            UUID courseId = e.getCourseMentor().getCourse().getId();
-            int total = e.getTotalSlots();
+            UUID courseId = course.getId();
+
+            int total = e.getTotalSlots() != null ? e.getTotalSlots() : 1;
             int completed = enrollmentScheduleRepository.countByEnrollment_IdAndAttendance(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
             int percentage = (total == 0) ? 0 : (int) Math.round((completed * 100.0) / total);
+
             LocalDate lastSession = enrollmentScheduleRepository.findLastPresentSessionDate(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
-            List<String> tags = tagRepository.findByCourseId(courseId).stream().map(Tag::getTitle).collect(Collectors.toList());
-            SkillProgressDTO skillProgress = new SkillProgressDTO(e.getCourseMentor().getCourse().getDescription(), lastSession, completed, percentage, tags, total);
-            skillProgressList.add(skillProgress);
+            List<String> tags = tagRepository.findByCourseId(courseId)
+                    .stream()
+                    .map(Tag::getTitle)
+                    .collect(Collectors.toList());
+
+            String mentorName = (mentor != null) ? mentor.getFullName() : "Unknown";
+            UUID mentorUuid = (mentor != null) ? mentor.getId() : null;
+
+            SkillProgressDTO dto = new SkillProgressDTO(
+                    course.getName(), lastSession, completed, percentage, tags, total, mentorName, mentorUuid
+            );
+
+            skillProgressList.add(dto);
         }
+
         return skillProgressList;
     }
 

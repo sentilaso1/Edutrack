@@ -5,6 +5,8 @@ import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.model.Goal;
 import com.example.edutrack.curriculum.repository.GoalRepository;
 import com.example.edutrack.curriculum.service.interfaces.GoalService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,4 +57,14 @@ public class GoalServiceImpl implements GoalService {
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new IllegalArgumentException("Invalid goal"));
         goalRepository.delete(goal);
     }
+
+    @Override
+    public Page<Goal> getGoalsByMenteeAndStatus(UUID menteeId, Goal.Status status, Pageable pageable) {
+        if (status != null) {
+            return goalRepository.findByMentee_IdAndStatus(menteeId, status, pageable);
+        } else {
+            return goalRepository.findByMentee_Id(menteeId, pageable);
+        }
+    }
+
 }

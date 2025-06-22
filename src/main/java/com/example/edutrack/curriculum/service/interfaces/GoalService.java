@@ -1,6 +1,8 @@
 package com.example.edutrack.curriculum.service.interfaces;
 
 import com.example.edutrack.curriculum.model.Goal;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,4 +17,6 @@ public interface GoalService {
     Goal getGoalById(UUID goalId);
 
     void deleteGoal(UUID goalId);
+
+    Page<Goal> getGoalsByMenteeAndStatus(UUID menteeId, Goal.Status status, Pageable pageable);
 }
