@@ -46,10 +46,6 @@ public class EnrollmentSchedule {
     @Column(name = "report", columnDefinition = "TEXT")
     private String report;
 
-    @Column(name = "created_date")
-    @CreatedDate
-    private Date createdDate = new Date();
-
     public EnrollmentSchedule() {
     }
 
@@ -123,14 +119,6 @@ public class EnrollmentSchedule {
         this.attendance = attendance;
     }
 
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
     @Override
     public String toString() {
         return "EnrollmentSchedule{" +
@@ -142,7 +130,6 @@ public class EnrollmentSchedule {
                 ", score=" + score +
                 ", attendance=" + attendance +
                 ", report='" + report + '\'' +
-                ", createdDate=" + createdDate +
                 '}';
     }
 }
