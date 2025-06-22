@@ -48,14 +48,38 @@ public class HomeControlller {
 
         if (loggedInUser == null) {
             return handleGuestUser(model);
-        } else if (enrollmentService.getEnrollmentsByMenteeId(loggedInUser.getId()).isEmpty()) {
-            return handleNewLoggedInUser(loggedInUser, model);
+        }
+
+        if (loggedInUser instanceof Mentor) {
+            return "redirect:/mentor/dashboard";
+        }
+
+        if (loggedInUser.getClass().getSimpleName().equals("Manager")) {
+            return "redirect:/manager/dashboard";
+        }
+
+        Mentee mentee = (Mentee) loggedInUser;
+        if (enrollmentService.getEnrollmentsByMenteeId(mentee.getId()).isEmpty()) {
+            return handleNewLoggedInUser(mentee, model);
         } else {
-            return handleExperiencedLoggedInUser(loggedInUser, model);
+            return handleExperiencedLoggedInUser(mentee, model);
         }
     }
 
-    private void addTopTagsToModel(Model model, int limit) {
+
+    private String handleMentorUser(Mentor mentor, Model model) {
+        model.addAttribute("mentor", mentor);
+        return "mentor/dashboard";
+    }
+
+    private String handleManagerUser(User manager, Model model) {
+        model.addAttribute("manager", manager);
+        return "manager/dashboard";
+    }
+
+
+
+    public void addTopTagsToModel(Model model, int limit) {
         List<TagEnrollmentCountDTO> topTags = courseTagService.getTopTags(limit);
         model.addAttribute("topTags", topTags);
     }
