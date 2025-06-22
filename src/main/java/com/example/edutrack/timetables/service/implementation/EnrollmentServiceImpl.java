@@ -85,6 +85,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public List<Enrollment> findAllApprovedEnrollments() {
+        return enrollmentRepository.findAllApprovedEnrollments();
+    }
+
+    @Override
     public List<Course> findCourseByMenteeIdAndEnrollmentStatus(UUID menteeId){
         return enrollmentRepository.findByMenteeIdAndEnrollmentStatus(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }

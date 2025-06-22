@@ -3,6 +3,9 @@ package com.example.edutrack.accounts.controller;
 import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
+import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,12 +20,14 @@ public class ManagerController {
     private final MentorService mentorService;
     private final MenteeService menteeService;
     private final MentorAvailableTimeService mentorAvailableTimeService;
+    private final EnrollmentService enrollmentService;
 
     @Autowired
-    public ManagerController(MentorService mentorService, MenteeService menteeService, MentorAvailableTimeService mentorAvailableTimeService) {
+    public ManagerController(MentorService mentorService, MenteeService menteeService, MentorAvailableTimeService mentorAvailableTimeService, EnrollmentService enrollmentServiceImpl) {
         this.mentorService = mentorService;
         this.menteeService = menteeService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
+        this.enrollmentService = enrollmentServiceImpl;
     }
 
     @GetMapping("/manager/dashboard")
@@ -59,7 +64,9 @@ public class ManagerController {
 
     @GetMapping("/manager/create-class")
     public String showCreateClass(Model model) {
-        return "manager/createclass";
+        List<Enrollment> enrollmentRequests = enrollmentService.findAllApprovedEnrollments();
+        model.addAttribute("enrollmentRequests", enrollmentRequests);
+        return "manager/create-class";
     }
 }
 
