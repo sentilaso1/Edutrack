@@ -241,4 +241,16 @@ public class MentorController {
         return "mentor/mentor-class";
     }
 
+    @GetMapping("mentor/classes/{eid}")
+    public String detailClass(@PathVariable Long eid, Model model, HttpSession session) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+        Enrollment enrollment = enrollmentService.findById(eid);
+        List<EnrollmentSchedule> enrollmentSchedule = enrollmentScheduleService.findEnrollmentScheduleByEnrollment(enrollment);
+        model.addAttribute("enrollmentSchedules", enrollmentSchedule);
+        return "mentor/mentor-detail-class";
+
+    }
 }

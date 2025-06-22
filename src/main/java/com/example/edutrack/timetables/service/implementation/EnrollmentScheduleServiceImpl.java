@@ -207,6 +207,11 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     }
 
     @Override
+    public List<EnrollmentSchedule> findEnrollmentScheduleByEnrollment(Enrollment enrollment) {
+        return enrollmentScheduleRepository.findEnrollmentScheduleByEnrollment(enrollment);
+    }
+
+    @Override
     public List<EnrollmentSchedule> findAll() {
         return enrollmentScheduleRepository.findAll();
     }
