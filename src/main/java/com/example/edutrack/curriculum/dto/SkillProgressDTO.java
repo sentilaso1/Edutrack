@@ -2,6 +2,7 @@ package com.example.edutrack.curriculum.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public class SkillProgressDTO {
     private String courseTitle;
@@ -10,14 +11,22 @@ public class SkillProgressDTO {
     private int sessionsCompleted;
     private int totalSessions;
     private LocalDate lastSessionDate;
+    private String mentorName;
+    private UUID mentorId;
+    private LocalDate startDate;
 
-    public SkillProgressDTO(String courseTitle, LocalDate lastSessionDate, int sessionsCompleted, int progressPercentage, List<String> tags, int totalSessions) {
+    public SkillProgressDTO(String courseTitle, LocalDate lastSessionDate, int sessionsCompleted, int progressPercentage,
+                            List<String> tags, int totalSessions,
+                            String mentorName, UUID mentorId) {
         this.courseTitle = courseTitle;
         this.lastSessionDate = lastSessionDate;
         this.sessionsCompleted = sessionsCompleted;
         this.progressPercentage = progressPercentage;
         this.tags = tags;
         this.totalSessions = totalSessions;
+        this.mentorName = mentorName;
+        this.mentorId = mentorId;
+        this.startDate = startDate;
     }
 
     public int getTotalSessions() {
@@ -30,6 +39,28 @@ public class SkillProgressDTO {
     public String getCourseTitle() {
         return courseTitle;
     }
+
+    public String getMentorName() {
+        return mentorName;
+    }
+    public void setMentorName(String mentorName) {
+        this.mentorName = mentorName;
+    }
+
+    public UUID getMentorId() {
+        return mentorId;
+    }
+    public void setMentorId(UUID mentorId) {
+        this.mentorId = mentorId;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
 
     public void setCourseTitle(String courseTitle) {
         this.courseTitle = courseTitle;
