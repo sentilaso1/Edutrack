@@ -56,10 +56,12 @@ public class GoogleAuthController {
         if (menteeRepository.findByEmail(email).isPresent()) {
             Mentee mentee = menteeRepository.findByEmail(email).get();
             session.setAttribute("loggedInUser", mentee);
+            session.setAttribute("role", "mentee");
             return "redirect:/home";
         } else if (mentorRepository.findByEmail(email).isPresent()) {
             Mentor mentor = mentorRepository.findByEmail(email).get();
             session.setAttribute("loggedInUser", mentor);
+            session.setAttribute("role", "mentor");
             return "redirect:/mentor";
         }
         return "redirect:/choose-role";

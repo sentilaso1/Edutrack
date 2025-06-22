@@ -4,6 +4,10 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.MentorService;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,17 +35,48 @@ public class MentorController {
             @RequestParam(required = false) Double rating,
             @RequestParam(required = false) Integer totalSessions,
             @RequestParam(required = false) Boolean isAvailable,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "6") int size_page,
+            @RequestParam(required = false) String order_by,
             Model model) {
 
-        List<Mentor> mentorList = mentorService.searchMentors(name, expertise, rating, totalSessions, isAvailable);
+        if (page < 1) {
+            return "redirect:/404";
+        }
+        Sort sort;
+        if ("newest".equalsIgnoreCase(order_by)) {
+            sort = Sort.by(Sort.Direction.DESC, "createdDate");
+        } else if ("oldest".equalsIgnoreCase(order_by)) {
+            sort = Sort.by(Sort.Direction.ASC, "createdDate");
+        } else if ("name_asc".equalsIgnoreCase(order_by)) {
+            sort = Sort.by(Sort.Direction.ASC, "fullName");
+        } else if ("name_desc".equalsIgnoreCase(order_by)) {
+            sort = Sort.by(Sort.Direction.DESC, "fullName");
+        } else if ("rating_desc".equalsIgnoreCase(order_by)) {
+            sort = Sort.by(Sort.Direction.DESC, "rating");
+        } else if ("rating_asc".equalsIgnoreCase(order_by)) {
+            sort = Sort.by(Sort.Direction.ASC, "rating");
+        } else {
+            sort = Sort.unsorted();
+        }
 
-        model.addAttribute("mentors", mentorList);
+        Pageable pageable = PageRequest.of(page - 1, size_page, sort);
+
+        // Now, assuming your mentorService supports pagination:
+        Page<Mentor> mentorPage = mentorService.searchMentors(
+                name, expertise, rating, totalSessions, isAvailable, pageable
+        );
+
+        model.addAttribute("mentorPage", mentorPage);
+        model.addAttribute("page", page);
         model.addAttribute("name", name);
         model.addAttribute("expertise", expertise);
         model.addAttribute("rating", rating);
         model.addAttribute("totalSessions", totalSessions);
         model.addAttribute("expertiseInput", String.join(", ", expertise));
         model.addAttribute("isAvailable", isAvailable);
+        model.addAttribute("order_by", order_by);
+
         return "mentee/mentor-list";
     }
 

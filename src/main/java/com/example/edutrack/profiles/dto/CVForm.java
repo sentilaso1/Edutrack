@@ -1,8 +1,11 @@
 package com.example.edutrack.profiles.dto;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class CVForm {
@@ -24,6 +27,26 @@ public class CVForm {
     private String portfolioUrl;
 
     private String selectedCourses;
+    private Map<UUID, CourseApplicationDetail> courseDetails;
+
+    public Map<UUID, CourseApplicationDetail> getCourseDetails() {
+        return courseDetails;
+    }
+
+    public void setCourseDetails(Map<UUID, CourseApplicationDetail> courseDetails) {
+        this.courseDetails = courseDetails;
+    }
+
+    public void parseSelectedCourses() {
+        if (selectedCourses == null || selectedCourses.isEmpty()) return;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            courseDetails = mapper.readValue(selectedCourses,
+                    new TypeReference<Map<UUID, CourseApplicationDetail>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @NotNull
     private UUID userId;

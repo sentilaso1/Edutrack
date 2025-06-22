@@ -2,6 +2,9 @@ package com.example.edutrack.accounts.controller;
 
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.repository.MentorRepository;
+import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
@@ -14,6 +17,7 @@ import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleServ
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +35,12 @@ public class MentorController {
     private final EnrollmentScheduleService enrollmentScheduleService;
     private final EnrollmentService enrollmentService;
     private final MentorAvailableTimeService mentorAvailableTimeService;
+
+    @Autowired
+    public MentorRepository mentorRepository;
+
+    @Autowired
+    public CourseMentorRepository courseMentorRepository;
 
     public MentorController(EnrollmentScheduleService enrollmentScheduleService,
                             EnrollmentService enrollmentService,
@@ -252,5 +262,15 @@ public class MentorController {
         model.addAttribute("enrollmentSchedules", enrollmentSchedule);
         return "mentor/mentor-detail-class";
 
+    }
+
+    @GetMapping("/mentors/{id}/courses")
+    public String mentorRelatedCourses(@PathVariable UUID id, Model model) {
+        Optional<Mentor> mentorOpt = mentorRepository.findById(id);
+        if (mentorOpt.isPresent()) {
+            List<CourseMentor> courseMentors = courseMentorRepository.findAllByMentor(mentorOpt.get());
+            model.addAttribute("courseMentors", courseMentors);
+        }
+        return "/mentee/mentor-related-courses";
     }
 }

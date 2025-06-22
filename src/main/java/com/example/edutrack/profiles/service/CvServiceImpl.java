@@ -1,13 +1,19 @@
 package com.example.edutrack.profiles.service;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.UserRepository;
+import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.CVCourse;
 import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CVCourseRepository;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
+import com.example.edutrack.profiles.dto.CourseApplicationDetail;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.repository.CvRepository;
 import com.example.edutrack.profiles.service.interfaces.CvService;
@@ -41,15 +47,25 @@ public class CvServiceImpl implements CvService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final CVCourseRepository cvCourseRepository;
+    private final MentorRepository mentorRepository;
+    private final CourseMentorRepository courseMentorRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
-    public CvServiceImpl(EntityManager entityManager, CvRepository cvRepository, UserRepository userRepository, CourseRepository courseRepository, CVCourseRepository cvCourseRepository) {
+    public CvServiceImpl(EntityManager entityManager,
+                         CvRepository cvRepository,
+                         UserRepository userRepository,
+                         CourseRepository courseRepository,
+                         CVCourseRepository cvCourseRepository,
+                         MentorRepository mentorRepository,
+                         CourseMentorRepository courseMentorRepository) {
         this.entityManager = entityManager;
         this.cvRepository = cvRepository;
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.cvCourseRepository = cvCourseRepository;
+        this.mentorRepository = mentorRepository;
+        this.courseMentorRepository = courseMentorRepository;
     }
 
     @Override
@@ -206,7 +222,7 @@ public class CvServiceImpl implements CvService {
     }
 
     @Override
-    public CV createCV(CVForm cvRequest) {
+    public void createCV(CVForm cvRequest, UUID mentorId) {
         User user = userRepository.findById(cvRequest.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -225,18 +241,57 @@ public class CvServiceImpl implements CvService {
 
         cvRepository.save(cv);
 
-        if (cvRequest.getSelectedCourses() != null && !cvRequest.getSelectedCourses().isEmpty()) {
-            String[] courseIds = cvRequest.getSelectedCourses().split(";");
-            for (String courseIdStr : courseIds) {
-                UUID courseId = UUID.fromString(courseIdStr);
-                Course course = courseRepository.findById(courseId)
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid course ID: " + courseId));
-                CVCourse cvCourse = new CVCourse(cv, course);
-                cvCourseRepository.save(cvCourse);
-            }
-        }
+        cvRequest.parseSelectedCourses();
 
-        return cv;
+        Mentor mentor = mentorRepository.findById(mentorId)
+                .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
+
+        Map<UUID, CourseApplicationDetail> details = cvRequest.getCourseDetails();
+        if (details == null || details.isEmpty()) return;
+
+        for (Map.Entry<UUID, CourseApplicationDetail> entry : details.entrySet()) {
+            UUID courseId = entry.getKey();
+            CourseApplicationDetail detail = entry.getValue();
+
+            if (detail.getPrice() == null || detail.getPrice() <= 0) {
+                throw new IllegalArgumentException("Invalid price for course: " + courseId);
+            }
+            if (detail.getDescription() == null || detail.getDescription().trim().isEmpty()) {
+                throw new IllegalArgumentException("Missing description for course: " + courseId);
+            }
+
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
+            CVCourse cvCourse = new CVCourse(cv, course);
+            cvCourseRepository.save(cvCourse);
+
+            Optional<CourseMentor> existingOpt = courseMentorRepository.findByMentorAndCourse(mentor, course);
+
+            CourseMentor cm;
+            if (existingOpt.isPresent()) {
+                cm = existingOpt.get();
+
+                if (cm.getStatus() != ApplicationStatus.REJECTED) {
+                    continue;
+                }
+
+                cm.setPrice(detail.getPrice());
+                cm.setDescription(detail.getDescription());
+                cm.setStatus(ApplicationStatus.PENDING);
+                cm.setAppliedDate(LocalDateTime.now());
+            } else {
+                cm = new CourseMentor();
+                cm.setMentor(mentor);
+                cm.setCourse(course);
+                cm.setPrice(detail.getPrice());
+                cm.setDescription(detail.getDescription());
+                cm.setStatus(ApplicationStatus.PENDING);
+                cm.setAppliedDate(LocalDateTime.now());
+            }
+
+            courseMentorRepository.save(cm);
+        }
     }
 
     @Override
@@ -433,6 +488,17 @@ public class CvServiceImpl implements CvService {
 
             boolean approved = approveNode.asText().equalsIgnoreCase("true");
             String reason = reasonNode.asText();
+
+            if (!approved) {
+                Mentor mentor = mentorRepository.findById(cv.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Mentor not found for user"));
+
+                List<CourseMentor> mentorCourses = courseMentorRepository.findAllByMentor(mentor);
+                for (CourseMentor cm : mentorCourses) {
+                    cm.setStatus(ApplicationStatus.REJECTED);
+                    courseMentorRepository.save(cm);
+                }
+            }
 
             System.out.println("Result: " + aiJson);
 
