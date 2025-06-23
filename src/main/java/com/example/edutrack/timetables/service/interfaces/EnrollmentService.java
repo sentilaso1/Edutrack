@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.service.interfaces;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -23,11 +24,13 @@ public interface EnrollmentService {
 
     Enrollment findById(Long id);
 
+    List<Enrollment> findOngoingEnrollments(UUID mentor);
+
     List<Course> findCourseByMenteeIdAndEnrollmentStatus(UUID menteeId);
 
     Enrollment save(Enrollment enrollment);
 
-    List<Enrollment> findOngoingEnrollments(UUID mentor);
+    List<Mentor> findMentorsByMentee(UUID menteeId);
 
     List<Enrollment> findAllApprovedEnrollments();
 }

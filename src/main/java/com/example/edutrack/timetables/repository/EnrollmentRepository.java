@@ -72,4 +72,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT e FROM Enrollment e WHERE e.status = 'APPROVED'")
     List<Enrollment> findAllApprovedEnrollments();
 
+
+    @Query("SELECT DISTINCT e.courseMentor.mentor FROM Enrollment e WHERE e.mentee.id = :menteeId AND e.status = :status")
+    List<Mentor> findDistinctMentorsByMenteeId(@Param("menteeId") UUID menteeId, @Param("status") Enrollment.EnrollmentStatus status);
+
 }

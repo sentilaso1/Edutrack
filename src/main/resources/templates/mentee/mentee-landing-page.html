@@ -315,6 +315,9 @@
         </nav>
 
         <!-- CTA button: Sign Up / Dashboard / My Learning -->
+        <div th:if="${session.loggedInUser != null}">
+            <span style="color: #ff6b6b; font-weight: bold" class="title-sm" th:text="'👋 Hi, ' + ${session.loggedInUser.fullName}">Hi, User</span>
+        </div>
         <a th:href="@{${headerCTALink}}" class="btn btn-secondary" th:text="${headerCTA}">Start Free Trial</a>
 
         <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>

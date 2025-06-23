@@ -1,11 +1,11 @@
 package com.example.edutrack.timetables.service.implementation;
 
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import org.springframework.data.domain.PageRequest;
@@ -94,5 +94,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.findByMenteeIdAndEnrollmentStatus(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
 
+
+    @Override
+    public List<Mentor> findMentorsByMentee(UUID menteeId) {
+        return enrollmentRepository.findDistinctMentorsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+    }
 
 }
