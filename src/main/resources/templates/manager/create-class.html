@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>User Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 
 <body class="bg-gray-100 font-sans">
@@ -47,7 +48,29 @@
                     <td class="px-6 py-4" th:text="${item.totalSlots}"></td>
                     <td class="px-6 py-4" th:text="${item.startTime}"></td>
                     <td class="px-6 py-4 text-center space-x-2">
-                        <a href="#" class="bg-yellow-500 text-white text-sm px-4 py-1 rounded hover:bg-yellow-600 transition">>>View</a>
+                        <form th:action="@{/manager/create-class/{eid}(eid=${item.id})}" class="flex gap-2">
+                            <!-- Approve Button -->
+                            <button name="action" value="approve"
+                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded shadow transition duration-200"
+                                    title="Approve">
+                                <i class="fa fa-check"></i>
+                            </button>
+
+                            <!-- Reject Button -->
+                            <button name="action" value="reject"
+                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded shadow transition duration-200"
+                                    title="Reject">
+                                <i class="fa fa-times"></i>
+                            </button>
+
+                            <!-- View Button -->
+                            <button name="action" value="view"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded shadow transition duration-200"
+                                    title="View">
+                                <i class="fa fa-arrow-right"></i>
+                            </button>
+                        </form>
+
                     </td>
                 </tr>
                 </tbody>
