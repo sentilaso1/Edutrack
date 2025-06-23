@@ -114,5 +114,19 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
 
     List<EnrollmentSchedule> findEnrollmentScheduleByEnrollment(Enrollment enrollment);
 
+    @Query("""
+            SELECT s FROM EnrollmentSchedule s
+            WHERE s.enrollment.mentee.id = :menteeId
+            AND s.enrollment.courseMentor.id = :courseMentorId
+            """)
+    List<EnrollmentSchedule> findEnrollmentScheduleByMenteeAndCourseMentor(
+            @Param("menteeId") UUID menteeId,
+            @Param("courseMentorId") UUID courseMentorId);
 
+    @Query("""
+           SELECT COUNT(s) FROM EnrollmentSchedule s 
+           WHERE s.enrollment.mentee.id = :menteeId
+           AND s.isTest = TRUE 
+            """)
+    int countTestSlotsByEnrollment(@Param("menteeId") UUID menteeId);
 }

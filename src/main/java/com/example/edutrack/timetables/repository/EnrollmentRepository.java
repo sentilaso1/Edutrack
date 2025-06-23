@@ -76,4 +76,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT DISTINCT e.courseMentor.mentor FROM Enrollment e WHERE e.mentee.id = :menteeId AND e.status = :status")
     List<Mentor> findDistinctMentorsByMenteeId(@Param("menteeId") UUID menteeId, @Param("status") Enrollment.EnrollmentStatus status);
 
+    @Query("""
+            SELECT DISTINCT e.courseMentor
+            FROM Enrollment e
+            JOIN EnrollmentSchedule s ON s.enrollment.mentee = e.mentee AND s.enrollment.courseMentor.course = e.courseMentor.course
+            WHERE e.mentee.id = :menteeId
+              AND e.status = :enrollmentStatus
+           """)
+    List<CourseMentor> findCourseMentorByMentee(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
 }

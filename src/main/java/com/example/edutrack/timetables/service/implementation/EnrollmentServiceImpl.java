@@ -100,4 +100,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.findDistinctMentorsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
 
+    @Override
+    public List<CourseMentor> getCourseMentorsByMentee(UUID menteeId) {
+        return enrollmentRepository.findCourseMentorByMentee(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+    }
+
 }
