@@ -4,13 +4,17 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.common.model.CommonModelAttribute;
 import com.example.edutrack.common.model.WebUtils;
 import com.example.edutrack.config.VnpayConfig;
+import com.example.edutrack.transactions.model.VnpayPayTransaction;
+import com.example.edutrack.transactions.model.VnpayRefundTransaction;
 import com.example.edutrack.transactions.model.VnpayTransaction;
 import com.example.edutrack.transactions.model.Wallet;
-import com.example.edutrack.transactions.service.interfaces.VnpayTransactionService;
-import com.example.edutrack.transactions.service.interfaces.WalletService;
+import com.example.edutrack.transactions.service.VnpayTransactionService;
+import com.example.edutrack.transactions.service.WalletService;
+import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.apache.coyote.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +22,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -45,29 +54,116 @@ public class VnpayController {
             return;
         }
 
-        if (!VnpayTransaction.isValidAmount(amount * VnpayTransaction.FRACTION_SHIFT)) {
+        if (amount <= 0) {
             response.sendRedirect("/wallet/recharge?error=Invalid amount");
             return;
         }
 
-        VnpayTransaction transaction = new VnpayTransaction(
-                VnpayTransaction.COMMAND_PAY,
-                amount,
-                WebUtils.getRealClientIp(request),
-                VnpayTransaction.ORDER_TYPE_OTHER,
-                user
-        );
+        Optional<Wallet> walletOpt = walletService.findByUser(user);
+        if (walletOpt.isEmpty()) {
+            walletOpt = Optional.of(walletService.save(user));
+        }
+        Wallet wallet = walletOpt.get();
+
+        VnpayPayTransaction transaction = vnpayTransactionService.createBasePayTransaction();
+        transaction.setAmount(amount);
+        transaction.setIpAddr(WebUtils.getRealClientIp(request));
+        transaction.setWallet(wallet);
+        transaction.setOrderInfo(String.format(
+                "Nap tien EduTrack tai khoan %s. So tien %d %s",
+                user.getEmail(),
+                amount / VnpayTransaction.FRACTION_SHIFT,
+                transaction.getCurrCode()
+        ));
         vnpayTransactionService.save(transaction);
 
         response.sendRedirect(
-                vnpayTransactionService.prepareTransactionUrl(transaction, vnpayConfig)
+                vnpayTransactionService.preparePayUrl(transaction)
         );
+    }
+
+    @PostMapping("/api/vnpay/refund")
+    public void refund(HttpSession session, HttpServletRequest request, HttpServletResponse response, @RequestParam("txnRef") String txnRef) throws IOException {
+        User user = (User) session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString());
+        if (user == null) {
+            response.sendRedirect("/login");
+            return;
+        }
+
+        Optional<VnpayPayTransaction> payTransactionOpt = vnpayTransactionService.findPayTransaction(txnRef);
+        if (payTransactionOpt.isEmpty()) {
+            response.sendRedirect("/wallet/recharge?error=No matching payment");
+            return;
+        }
+        VnpayPayTransaction payTransaction = payTransactionOpt.get();
+
+        if (payTransaction.getAmount() <= 0) {
+            response.sendRedirect("/wallet/recharge?error=Invalid amount");
+            return;
+        }
+
+
+        Optional<Wallet> walletOpt = walletService.findByUser(user);
+        if (walletOpt.isEmpty()) {
+            walletOpt = Optional.of(walletService.save(user));
+        }
+        Wallet wallet = walletOpt.get();
+
+        VnpayRefundTransaction transaction = vnpayTransactionService.createBaseRefundTransaction();
+        transaction.setAmount(payTransaction.getAmount() / VnpayTransaction.FRACTION_SHIFT);
+        transaction.setIpAddr(WebUtils.getRealClientIp(request));
+        transaction.setWallet(wallet);
+        transaction.setCreateBy(user.getEmail());
+        transaction.setTransactionDate(payTransaction.getCreateDate());
+        transaction.setTxnRef(payTransaction.getTxnRef());
+        transaction.setTransactionNo(payTransaction.getTransactionNo());
+        transaction.setOrderInfo(String.format(
+                "Hoan tien EduTrack giao dich %s. So tien %d VND",
+                payTransaction.getTxnRef(),
+                payTransaction.getAmount() / VnpayTransaction.FRACTION_SHIFT
+        ));
+
+        vnpayTransactionService.save(transaction);
+        JsonObject json = vnpayTransactionService.prepareRefundJson(transaction);
+
+        URL url = new URL(vnpayConfig.vnpRefundUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+
+        DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+        wr.writeBytes(json.toString());
+        wr.flush();
+        wr.close();
+
+        int responseCode = connection.getResponseCode();
+        System.out.println("Sending POST request to URL: " + url);
+        System.out.println("Post data: " + json);
+        System.out.println("Response code: " + responseCode);
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String output;
+        StringBuffer responseBuffer = new StringBuffer();
+        while ((output = br.readLine()) != null) {
+            responseBuffer.append(output);
+        }
+        br.close();
+
+        Optional<VnpayRefundTransaction> refundTransactionOpt = vnpayTransactionService.finalizeRefundTransaction(responseBuffer.toString());
+        if (refundTransactionOpt.isEmpty()) {
+            response.sendRedirect("/wallet/recharge?error=Refund process error");
+            return;
+        }
+
+        System.out.println(responseBuffer);
+        System.out.println(refundTransactionOpt.get());
     }
 
     @GetMapping("/api/vnpay/return")
     public String paymentReturn(HttpServletRequest request, Model model) {
         Map<String, String> fields = new HashMap<>();
-        for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
+        for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements(); ) {
             String fieldName = URLEncoder.encode(params.nextElement(), StandardCharsets.US_ASCII);
             String fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII);
 
@@ -81,7 +177,7 @@ public class VnpayController {
         fields.remove("vnp_SecureHash");
         String computedHash = vnpayConfig.hashAllFields(fields);
 
-        Optional<VnpayTransaction> transactionOpt = vnpayTransactionService.finalizeTransaction(fields);
+        Optional<VnpayPayTransaction> transactionOpt = vnpayTransactionService.finalizePayTransaction(fields);
         if (transactionOpt.isEmpty()) {
             model.addAttribute(CommonModelAttribute.ERROR.toString(), "Transaction not found or already processed.");
             return "redirect:/404";
@@ -90,7 +186,7 @@ public class VnpayController {
         if (computedHash.equals(secureHash)) {
             String responseCode = fields.get("vnp_ResponseCode");
             if ("00".equals(responseCode)) {
-                User user = transactionOpt.get().getUser();
+                User user = transactionOpt.get().getWallet().getUser();
                 Long amount = transactionOpt.get().getAmount();
 
                 Optional<Wallet> wallet = walletService.addFunds(
