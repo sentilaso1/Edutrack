@@ -142,7 +142,7 @@ public class AuthController {
                 }
                 if(userService.isMentee(user)){
                     session.setAttribute("role", "mentee");
-                    return "redirect:/home";
+                    return "redirect:/";
                 }if(userService.isMentor(user)){
                     session.setAttribute("role", "mentor");
                     return "redirect:/mentor";
