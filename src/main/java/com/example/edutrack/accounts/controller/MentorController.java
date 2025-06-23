@@ -231,7 +231,7 @@ public class MentorController {
         return "/mentor/mentor-working-date";
     }
 
-    @GetMapping("/mentor/stats")
+    @GetMapping("/mentor/income-stats")
     public String mentorStats(Model model, HttpSession session) {
         return "accounts/html/mentor-stats";
     }
