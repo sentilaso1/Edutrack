@@ -222,9 +222,7 @@ public class MentorController {
         model.addAttribute("slotDayMatrix", slotDayMatrix);
 
         System.out.println("SIZE: " + setSlots.size());
-
-//        List<Slot> slots = Arrays.stream(Slot.values()).toList();
-//        List<Day> days = Arrays.stream(Day.values()).toList();
+        
         model.addAttribute("slots", Slot.values());
         model.addAttribute("days", Day.values());
 

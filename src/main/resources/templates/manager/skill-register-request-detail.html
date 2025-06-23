@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule Table</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- Sidebar -->
+<div class="w-64 bg-blue-800 text-white h-screen fixed">
+    <div class="p-6 text-2xl font-bold border-b border-blue-600">EduTrack Manager</div>
+    <nav class="mt-6 space-y-1 px-4">
+        <a th:href="@{/manager/dashboard}" class="block py-2 px-3 rounded hover:bg-blue-700">Dashboard</a>
+        <a th:href="@{/manager/mentees}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentees</a>
+        <a th:href="@{/manager/mentors}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentors</a>
+        <a th:href="@{/manager/payments}" class="block py-2 px-3 rounded hover:bg-blue-700">Payments</a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="ml-64 p-8">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6" th:text="${param.status}">Class Schedule</h1>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full text-sm text-gray-700">
+            <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="py-3 px-4 text-left">Session</th>
+                <th class="py-3 px-4 text-left">Date</th>
+                <th class="py-3 px-4 text-left">Day of Week</th>
+                <th class="py-3 px-4 text-left">Slot</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item, iStat : ${startTime}" class="hover:bg-blue-50 border-b">
+                <td th:text="${iStat.index + 1}" class="py-3 px-4"></td>
+                <td th:text="${item.requestedDate}" class="py-3 px-4"></td>
+                <td th:text="${item.day}" class="py-3 px-4"></td>
+                <td th:text="${item.slot}" class="py-3 px-4"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
