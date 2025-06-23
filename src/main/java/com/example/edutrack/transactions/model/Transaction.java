@@ -11,52 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "transactions")
-public class Transaction implements CommonTransaction {
-    @Override
-    public UUID getTransactionId() {
-        return getId();
-    }
-
-    @Override
-    public String getTransactionInfo() {
-        return getInfo();
-    }
-
-    @Override
-    public Double getTransactionAmount() {
-        return getAmount();
-    }
-
-    @Override
-    public String getTransactionAmountFormatted() {
-        return CustomFormatter.formatNumberWithSpaces(getAmount(), true);
-    }
-
-    @Override
-    public String getTransactionStatus() {
-        return getStatus().toString();
-    }
-
-    @Override
-    public Date getTransactionDate() {
-        return getUpdatedDate();
-    }
-
-    @Override
-    public Double getTransactionBalance() {
-        return getBalance();
-    }
-
-    @Override
-    public String getTransactionBalanceFormatted() {
-        return CustomFormatter.formatNumberWithSpaces(getBalance());
-    }
-
-    @Override
-    public UUID getUserId() {
-        return getWallet().getUser().getId();
-    }
-
+public class Transaction {
     public enum TransactionStatus {
         PENDING, COMPLETED, FAILED;
 

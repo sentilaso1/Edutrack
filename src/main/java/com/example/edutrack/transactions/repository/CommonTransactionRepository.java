@@ -1,7 +1,7 @@
 package com.example.edutrack.transactions.repository;
 
 
-import com.example.edutrack.transactions.model.CommonTransactionProjection;
+import com.example.edutrack.transactions.dto.CommonTransactionProjection;
 import com.example.edutrack.transactions.model.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,30 +14,28 @@ import java.util.UUID;
 
 public interface CommonTransactionRepository extends JpaRepository<Transaction, UUID> {
     @Query(value = """
-                    SELECT *
-                    FROM (
-                        SELECT
-                            BIN_TO_UUID(id) AS id,
-                            info,
-                            amount,
-                            status,
-                            balance,
-                            updated_date AS date
-                        FROM transactions
-                        WHERE wallet_id = UUID_TO_BIN(:userId)
-                        
-                        UNION ALL
-                        
-                        SELECT
-                            BIN_TO_UUID(txn_ref) AS id,
-                            order_info AS info,
-                            (amount / 100) AS amount,
-                            IFNULL(transaction_status, 'pending') AS status,
-                            balance,
-                            IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) AS date
-                        FROM vnpay_transactions
-                        WHERE user_id = UUID_TO_BIN(:userId)
-                    ) AS combined
+            SELECT *
+            FROM (
+                     SELECT
+                         info,
+                         amount,
+                         status,
+                         balance,
+                         updated_date AS date
+                     FROM transactions
+                     WHERE wallet_id = UUID_TO_BIN(:userId)
+
+                     UNION ALL
+
+                     SELECT
+                         vnp_order_info AS info,
+                         (vnp_amount / 100) AS amount,
+                         IFNULL(vnp_transaction_status, 'pending') AS status,
+                         balance,
+                         CONVERT(vnp_create_date, DATETIME) AS date
+                     FROM vnpay_transactions
+                     WHERE wallet_id = UUID_TO_BIN(:userId)
+                 ) AS combined
             """,
             countQuery = """
                             SELECT COUNT(*) FROM (
@@ -49,7 +47,7 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
 
                                 SELECT 1
                                 FROM vnpay_transactions
-                                WHERE user_id = UUID_TO_BIN(:userId)
+                                WHERE wallet_id = UUID_TO_BIN(:userId)
                             ) AS combined
                     """,
             nativeQuery = true)
@@ -59,31 +57,28 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
             value = """
                     SELECT *
                     FROM (
-                        SELECT
-                            BIN_TO_UUID(id) AS id,
-                            info,
-                            amount,
-                            status,
-                            balance,
-                            updated_date AS date
-                        FROM transactions
-                        WHERE wallet_id = UUID_TO_BIN(:userId)
-                          AND LOWER(info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                             SELECT
+                                 info,
+                                 amount,
+                                 status,
+                                 balance,
+                                 updated_date AS date
+                             FROM transactions
+                             WHERE wallet_id = UUID_TO_BIN(:userId)
+                               AND LOWER(info) LIKE LOWER(CONCAT('%', :keyword, '%'))
 
-                        UNION ALL
+                             UNION ALL
 
-                        SELECT 
-                            BIN_TO_UUID(txn_ref) AS id,
-                            order_info AS info,
-                            (amount / 100) AS amount,
-                            IFNULL(transaction_status, 'pending') AS status,
-                            balance,
-                            IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) AS date
-                        FROM vnpay_transactions
-                        WHERE user_id = UUID_TO_BIN(:userId)
-                          AND LOWER(order_info) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                    ) AS combined
-                    ORDER BY date DESC
+                             SELECT
+                                 vnp_order_info AS info,
+                                 (vnp_amount / 100) AS amount,
+                                 IFNULL(vnp_transaction_status, 'pending') AS status,
+                                 balance,
+                                 CONVERT(vnp_create_date, DATETIME) AS date
+                             FROM vnpay_transactions
+                             WHERE wallet_id = UUID_TO_BIN(:userId)
+                               AND LOWER(vnp_order_info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                         ) AS combined
                     """,
         countQuery = """
                 SELECT COUNT(*) FROM (
@@ -96,8 +91,8 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
 
                     SELECT 1
                     FROM vnpay_transactions
-                    WHERE user_id = UUID_TO_BIN(:userId)
-                      AND LOWER(order_info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    WHERE wallet_id = UUID_TO_BIN(:userId)
+                      AND LOWER(vnp_order_info) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 ) AS combined
                 """,
         nativeQuery = true
@@ -108,49 +103,44 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
             value = """
                     SELECT *
                     FROM (
-                        SELECT 
-                            BIN_TO_UUID(id) AS id,
-                            info,
-                            amount,
-                            status,
-                            balance,
-                            updated_date AS date
+                             SELECT
+                                 info,
+                                 amount,
+                                 status,
+                                 balance,
+                                 updated_date AS date
+                             FROM transactions
+                             WHERE wallet_id = UUID_TO_BIN(:userId)
+                               AND created_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+
+                             UNION ALL
+
+                             SELECT
+                                 vnp_order_info AS info,
+                                 (vnp_amount / 100) AS amount,
+                                 IFNULL(vnp_transaction_status, 'pending') AS status,
+                                 balance,
+                                 CONVERT(vnp_create_date, DATETIME) AS date
+                             FROM vnpay_transactions
+                             WHERE wallet_id = UUID_TO_BIN(:userId)
+                               AND CONVERT(vnp_create_date, DATETIME) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                         ) AS combined
+                    """,
+            countQuery = """
+                    SELECT COUNT(*) FROM (
+                        SELECT 1
                         FROM transactions
-                        WHERE updated_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                        WHERE created_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
                           AND wallet_id = UUID_TO_BIN(:userId)
 
                         UNION ALL
 
-                        SELECT 
-                            BIN_TO_UUID(txn_ref) AS id,
-                            order_info AS info,
-                            (amount / 100) AS amount,
-                            IFNULL(transaction_status, 'pending') AS status,
-                            balance,
-                            IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME)) AS date
+                        SELECT 1
                         FROM vnpay_transactions
-                        WHERE IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME))
-                              BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-                          AND user_id = UUID_TO_BIN(:userId)
+                        WHERE CONVERT(vnp_create_date, DATETIME) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                          AND wallet_id = UUID_TO_BIN(:userId)
                     ) AS combined
-                    ORDER BY date
                     """,
-            countQuery = """
-        SELECT COUNT(*) FROM (
-            SELECT 1
-            FROM transactions
-            WHERE updated_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-              AND wallet_id = UUID_TO_BIN(:userId)
-
-            UNION ALL
-
-            SELECT 1
-            FROM vnpay_transactions
-            WHERE IFNULL(CONVERT(pay_date, DATETIME), CONVERT(created_date, DATETIME))
-                  BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
-              AND user_id = UUID_TO_BIN(:userId)
-        ) AS combined
-        """,
         nativeQuery = true
     )
     List<CommonTransactionProjection> findAllRecentTransactionsByUser(@Param("userId") String userId);

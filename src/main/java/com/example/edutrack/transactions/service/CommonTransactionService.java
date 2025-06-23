@@ -1,55 +1,48 @@
 package com.example.edutrack.transactions.service;
 
-import com.example.edutrack.transactions.dto.CommonTransactionDTO;
-import com.example.edutrack.transactions.model.CommonTransaction;
-import com.example.edutrack.transactions.model.CommonTransactionProjection;
+import com.example.edutrack.transactions.dto.CommonTransaction;
+import com.example.edutrack.transactions.dto.CommonTransactionProjection;
 import com.example.edutrack.transactions.repository.CommonTransactionRepository;
-import com.example.edutrack.transactions.service.interfaces.CommonTransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
-public class CommonTransactionServiceImpl implements CommonTransactionService {
+public class CommonTransactionService {
 
     private final CommonTransactionRepository commonTransactionRepository;
 
     @Autowired
-    public CommonTransactionServiceImpl(CommonTransactionRepository commonTransactionRepository) {
+    public CommonTransactionService(CommonTransactionRepository commonTransactionRepository) {
         this.commonTransactionRepository = commonTransactionRepository;
     }
 
-    private CommonTransactionDTO mapToCommonTransactionDTO(CommonTransactionProjection projection) {
-        return new CommonTransactionDTO(
-                UUID.fromString(projection.getId()),
+    private CommonTransaction mapToCommonTransaction(CommonTransactionProjection projection) {
+        return new CommonTransaction(
+                String.valueOf(projection.getId()),
                 projection.getInfo(),
                 projection.getAmount(),
                 projection.getStatus(),
                 projection.getDate(),
-                projection.getBalance(),
-                null
+                projection.getBalance()
         );
     }
 
-    @Override
     public Page<CommonTransaction> findAllByUser(Pageable pageable, String userId) {
         Page<CommonTransactionProjection> projections = commonTransactionRepository.findAllTransactionByUser(userId, pageable);
-        return projections.map(this::mapToCommonTransactionDTO);
+        return projections.map(this::mapToCommonTransaction);
     }
 
-    @Override
     public Page<CommonTransaction> findAllByUserContaining(Pageable pageable, String userId, String query) {
         Page<CommonTransactionProjection> projections = commonTransactionRepository.findAllTransactionByUserContaining(userId, query, pageable);
-        return projections.map(this::mapToCommonTransactionDTO);
+        return projections.map(this::mapToCommonTransaction);
     }
 
-    @Override
-    public List<CommonTransactionDTO> findAllRecentTransactionsByUser(String userId) {
+    public List<CommonTransaction> findAllRecentTransactionsByUser(String userId) {
         List<CommonTransactionProjection> projections = commonTransactionRepository.findAllRecentTransactionsByUser(userId);
-        return projections.stream().map(this::mapToCommonTransactionDTO).toList();
+        return projections.stream().map(this::mapToCommonTransaction).toList();
     }
 }
