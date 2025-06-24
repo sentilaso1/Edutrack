@@ -1,7 +1,6 @@
 package com.example.edutrack.transactions.model;
 
-import com.example.edutrack.common.model.CustomFormatter;
-import com.example.edutrack.curriculum.model.Course;
+import com.example.edutrack.curriculum.model.CourseMentor;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -51,8 +50,8 @@ public class Transaction {
     private Wallet wallet;
 
     @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
+    @JoinColumn(name = "course_mentor_id")
+    private CourseMentor course;
 
     public Transaction() {
     }
@@ -128,11 +127,11 @@ public class Transaction {
         this.wallet = wallet;
     }
 
-    public Course getCourse() {
+    public CourseMentor getCourse() {
         return course;
     }
 
-    public void setCourse(Course course) {
+    public void setCourse(CourseMentor course) {
         this.course = course;
     }
 
