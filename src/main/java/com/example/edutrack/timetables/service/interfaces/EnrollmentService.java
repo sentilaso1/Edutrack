@@ -33,4 +33,6 @@ public interface EnrollmentService {
     List<Mentor> findMentorsByMentee(UUID menteeId);
 
     List<Enrollment> findAllApprovedEnrollments();
+
+    List<CourseMentor> getCourseMentorsByMentee(UUID menteeId);
 }

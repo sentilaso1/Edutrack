@@ -286,7 +286,7 @@
 
 <header class="header" data-header>
     <div class="container">
-        <a th:href="@{/home}" class="logo">
+        <a th:href="@{/}" class="logo">
             <img th:src="@{/assets/images/logo.svg}" width="145" height="27" alt="Youdemi home">
         </a>
 
@@ -301,7 +301,7 @@
             </div>
 
             <ul class="navbar-list">
-                <li class="navbar-item"><a th:href="@{/home}" class="navbar-link title-sm">Home</a></li>
+                <li class="navbar-item"><a th:href="@{/}" class="navbar-link title-sm">Home</a></li>
                 <li class="navbar-item"><a th:href="@{/courses}" class="navbar-link title-sm">Courses</a></li>
                 <li class="navbar-item"><a th:href="@{/mentors}" class="navbar-link title-sm">Mentors</a></li>
                 <li class="navbar-item"><a th:href="@{/schedules}" class="navbar-link title-sm"
@@ -318,7 +318,15 @@
         <div th:if="${session.loggedInUser != null}">
             <span style="color: #ff6b6b; font-weight: bold" class="title-sm" th:text="'👋 Hi, ' + ${session.loggedInUser.fullName}">Hi, User</span>
         </div>
-        <a th:href="@{${headerCTALink}}" class="btn btn-secondary" th:text="${headerCTA}">Start Free Trial</a>
+
+        <div class="cta-buttons" th:if="${session.loggedInUser == null}" style="display: flex">
+            <a th:href="@{/login}" class="btn btn-secondary" style="background-color: hsla(357, 100%, 75%, 0.99);">Sign In</a>
+            <a th:href="@{${headerCTALink}}" class="btn btn-secondary" th:text="${headerCTA}">Start Free Trial</a>
+        </div>
+
+        <div class="cta-buttons" th:if="${session.loggedInUser != null}">
+            <a th:href="@{${headerCTALink}}" class="btn btn-secondary" th:text="${headerCTA}">Go to Dashboard</a>
+        </div>
 
         <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
             <ion-icon name="menu-outline" aria-hidden="true"></ion-icon>

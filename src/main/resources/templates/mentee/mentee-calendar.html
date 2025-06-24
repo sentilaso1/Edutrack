@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>Learning Progress Tracker - Youdemi</title>
+    <meta name="title" content="Youdemi"/>
+    <meta name="description" content="Track your learning progress and skill development"/>
+
+    <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/mentee-calendar-style.css}"/>
+
+</head>
+<body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<main>
+    <section class="section has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="container">
+            <h2 class="section-title">Learning Schedule</h2>
+            <div class="schedule-page">
+                <div class="schedule-sidebar">
+                    <h4><i class="fas fa-calendar-check"></i> Upcoming meeting</h4>
+                    <div class="upcoming-meeting">
+                        <p th:text="${upcomingMeeting}">No upcoming session</p>
+                    </div>
+
+                    <div class="quick-stats">
+                        <h4><i class="fas fa-chart-line"></i> This Week</h4>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" th:text="${stats['classes']}">0</div>
+                                <div class="stat-label">Classes</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" th:text="${testCount}">0</div>
+                                <div class="stat-label">Tests</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="schedule-grid-container">
+                    <div class="controls">
+                        <form method="get" th:action="@{/schedules}" class="course-filter">
+                            <select name="courseId" onchange="this.form.submit()">
+                                <option value="" th:selected="${selectedCourseId == null}">All Courses</option>
+                                <option th:each="course : ${courses}"
+                                        th:value="${course.id}"
+                                        th:text="${course.course.name}"
+                                        th:selected="${course.id == selectedCourseId}">
+                                </option>
+                            </select>
+                        </form>
+                    </div>
+
+                    <div class="week-nav">
+                        <a th:href="@{/schedules(weekOffset=${weekOffset - 1}, courseId=${selectedCourseId})}"
+                           class="week-button">← Previous Week</a>
+                        <span class="week-label">
+                            Week of <span th:text="${#temporals.format(mondayOfWeek, 'MMM dd')}"></span>
+                        </span>
+                        <a th:href="@{/schedules(weekOffset=${weekOffset + 1}, courseId=${selectedCourseId})}"
+                           class="week-button">Next Week →</a>
+                    </div>
+
+                    <div class="schedule-grid">
+                        <!-- Header row -->
+                        <div class="time-header">Time</div>
+                        <div class="day-header"
+                             th:each="day : ${days}"
+                             th:classappend="${day == todayDay} ? ' today-border' : ''"
+                             th:text="${day}">
+                        </div>
+                        <!-- Thay vì hard-code từng slot, lặp từ backend -->
+                        <th:block th:each="slot : ${slots}">
+                            <div class="time-cell" th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></div>
+
+                            <th:block th:each="day : ${days}">
+                                <div class="slot-cell"
+                                     th:data-slot="${slot.name()}"
+                                     th:data-day="${day}">
+
+                                    <div th:each="schedule : ${schedules}"
+                                         th:if="${schedule.day} == ${day} and ${schedule.slot} == ${slot.name()}"
+                                         class="schedule-event"
+                                         th:data-course="${schedule.courseName}"
+                                         th:data-mentor="${schedule.mentorName}"
+                                         th:data-slot="${schedule.slot}"
+                                         th:data-day="${day}"
+                                         th:data-start-time="${schedule.startTime}"
+                                         th:data-end-time="${schedule.endTime}"
+                                         th:data-has-test="${schedule.hasTest}"
+                                         onclick="showEventDetails(this)">
+
+                                        <div class="event-title" th:text="${schedule.courseName}"></div>
+                                        <div class="event-subtitle" th:text="${schedule.mentorName}"></div>
+                                    </div>
+                                </div>
+                            </th:block>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<div id="eventModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-button" onclick="toggleModal(false)">&times;</span>
+        <h3 id="modalCourse"></h3>
+        <p id="modalMentor"></p>
+        <p id="modalTime"></p>
+        <p id="modalDay"></p>
+
+        <div id="testButtonWrapper" style="margin-top: 10px;">
+            <a id="takeTestLink" class="btnTest" th:href="@{'/tests/take?slot=' + __slot__ + '&day=' + __day__}" style="display: none;">Take Test</a>
+        </div>
+    </div>
+</div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+<script th:src="@{/assets/js/courlist.js}"></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+<script>
+    function toggleModal(show) {
+        const modal = document.getElementById('eventModal');
+        if (show) {
+            modal.classList.remove('hidden');
+        } else {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function showEventDetails(eventElement) {
+        const course = eventElement.dataset.course;
+        const mentor = eventElement.dataset.mentor;
+        const slot = eventElement.dataset.slot;
+        const day = eventElement.dataset.day;
+        const hasTest = eventElement.dataset.hasTest === "true";
+        const startTime = eventElement.dataset.startTime;
+        const endTime = eventElement.dataset.endTime;
+
+        document.getElementById('modalCourse').textContent = course;
+        document.getElementById('modalMentor').textContent = `Mentor: ${mentor}`;
+        document.getElementById('modalDay').textContent = `Day: ${day}`;
+        document.getElementById('modalTime').textContent = `Time: ${startTime} - ${endTime}`;
+
+        const testLink = document.getElementById('takeTestLink');
+        if (hasTest) {
+            testLink.style.display = 'inline-block';
+            testLink.href = `/tests/take?slot=${slot}&day=${day}`;
+        } else {
+            testLink.style.display = 'none';
+        }
+
+        toggleModal(true);
+    }
+
+
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.UserRepository;
 import com.example.edutrack.transactions.model.Wallet;
-import com.example.edutrack.transactions.service.interfaces.WalletService;
+import com.example.edutrack.transactions.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
