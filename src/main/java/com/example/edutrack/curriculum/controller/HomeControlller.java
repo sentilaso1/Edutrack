@@ -42,7 +42,7 @@ public class HomeControlller {
         this.menteeRepository = menteeRepository;
     }
 
-    @GetMapping("/home")
+    @GetMapping("/")
     public String home(HttpSession session, Model model) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
 

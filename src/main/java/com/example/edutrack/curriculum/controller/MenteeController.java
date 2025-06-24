@@ -2,14 +2,12 @@ package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
-import com.example.edutrack.curriculum.dto.CourseCardDTO;
-import com.example.edutrack.curriculum.dto.ReviewDTO;
-import com.example.edutrack.curriculum.dto.SkillProgressDTO;
-import com.example.edutrack.curriculum.dto.TrackerDTO;
+import com.example.edutrack.curriculum.dto.*;
 import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.service.interfaces.*;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
+import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -355,4 +354,47 @@ public class MenteeController {
         }
         return "redirect:/learning-tracker?activeTab=sessions";
     }
+
+    @GetMapping("/schedules")
+    public String showSchedulesPage(
+            HttpSession session,
+            @RequestParam(value = "courseId", required = false) UUID courseId,
+            @RequestParam(value = "weekOffset", defaultValue = "0") int weekOffset,
+            Model model
+    ) {
+        UUID menteeId = getSessionMentee(session);
+        LocalDate mondayOfWeek = LocalDate.now().plusWeeks(weekOffset).with(java.time.DayOfWeek.MONDAY);
+
+        List<EnrollmentSchedule> schedules;
+        if (courseId != null) {
+            schedules = enrollmentScheduleService.getEnrollmentSchedulesByCourseAndMentee(courseId, menteeId);
+        } else {
+            schedules = enrollmentScheduleService.getEnrollmentSchedulesByMentee(menteeId);
+        }
+
+        // Lọc schedule theo tuần
+        LocalDate start = mondayOfWeek;
+        LocalDate end = mondayOfWeek.plusDays(6);
+        schedules = schedules.stream()
+                .filter(s -> !s.getDate().isBefore(start) && !s.getDate().isAfter(end))
+                .toList();
+        DayOfWeek today = LocalDate.now().getDayOfWeek();
+        List<ScheduleDTO> scheduleDTOs = enrollmentScheduleService.getScheduleDTOs(schedules, menteeId);
+        List<CourseMentor> courses = enrollmentService.getCourseMentorsByMentee(menteeId);
+        int testCount = enrollmentScheduleService.countTestSlot(menteeId);
+        model.addAttribute("courses", courses);
+        model.addAttribute("selectedCourseId", courseId);
+        model.addAttribute("slots", Slot.values());
+        model.addAttribute("days", List.of("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"));
+        model.addAttribute("schedules", scheduleDTOs);
+        model.addAttribute("stats", enrollmentScheduleService.getWeeklyStats(menteeId));
+        model.addAttribute("upcomingMeeting", dashboardService.getNextSessionTime(menteeId));
+        model.addAttribute("weekOffset", weekOffset);
+        model.addAttribute("mondayOfWeek", mondayOfWeek);
+        model.addAttribute("testCount", testCount);
+        model.addAttribute("todayDay", today.name());
+        return "mentee/mentee-calendar";
+    }
+
+
 }
