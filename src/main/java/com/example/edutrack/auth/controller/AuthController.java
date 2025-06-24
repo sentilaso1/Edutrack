@@ -110,7 +110,7 @@ public class AuthController {
         user.setPassword(hashed);
         if("mentee".equals(role)){
             userService.registerMentee(user);
-        }else if("admin".equals(role)){
+        }else if("mentor".equals(role)){
             userService.registerMentor(user);
         }
         return "redirect:/login";
