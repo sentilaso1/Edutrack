@@ -15,8 +15,8 @@ import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.transactions.model.Transaction;
 import com.example.edutrack.transactions.model.Wallet;
-import com.example.edutrack.transactions.service.interfaces.TransactionService;
-import com.example.edutrack.transactions.service.interfaces.WalletService;
+import com.example.edutrack.transactions.service.TransactionService;
+import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -112,8 +112,6 @@ public class MenteeScheduleController {
                 "Checkout for Course Mentor: " + courseMentor.getId(),
                 wallet
         );
-        transaction.setCourse(courseMentor.getCourse());
-        transactionService.save(transaction);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         Enrollment enrollment = new Enrollment(
@@ -125,6 +123,8 @@ public class MenteeScheduleController {
                 startTime.get(0).getRequestedDate().format(formatter) + "-" + startTime.get(0).getSlot()
         );
         enrollmentService.save(enrollment);
+
+        transactionService.save(transaction);
 
         model.addAttribute("success", "Checkout Successful");
         return "/checkout/checkout-info";
