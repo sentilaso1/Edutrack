@@ -1,19 +1,15 @@
 package com.example.edutrack.transactions.model;
 
-import com.example.edutrack.accounts.model.User;
-import com.example.edutrack.common.model.CustomFormatter;
 import jakarta.persistence.*;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
-import java.util.UUID;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "vnpay_transactions")
-public class VnpayTransaction implements CommonTransaction {
+public abstract class VnpayTransaction {
     public static final String TIME_ZONE = "Etc/GMT+7";
     public static final String TIME_FORMAT = "yyyyMMddHHmmss";
 
@@ -25,103 +21,88 @@ public class VnpayTransaction implements CommonTransaction {
     public static final String COMMAND_QUERY = "querydr";
     public static final String COMMAND_REFUND = "refund";
 
-    public static final long AMOUNT_100 = 100000L;
-    public static final long AMOUNT_200 = 200000L;
-    public static final long AMOUNT_500 = 500000L;
-    public static final long AMOUNT_1000 = 1000000L;
-    public static final long AMOUNT_2000 = 2000000L;
-    public static final long AMOUNT_5000 = 5000000L;
-
     @Transient
-    private final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE));
+    public final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE));
     @Transient
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
-
-    private String version = "2.1.0";
-    private String locale = "vn";
-    private String currCode = "VND";
+    public final SimpleDateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID txnRef;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "command", nullable = false)
+    @Column(name = "vnp_version", nullable = false)
+    private String version;
+
+    @Column(name = "vnp_command", nullable = false)
     private String command;
 
-    @Column(name = "amount", nullable = false)
+    @Transient
+    private String tmnCode;
+
+    @Column(name = "vnp_txn_ref")
+    private String txnRef;
+
+    @Column(name = "vnp_amount", nullable = false)
     private Long amount;
 
-    @Column(name = "created_date", nullable = false)
-    private String createdDate = dateFormat.format(calendar.getTime());
+    @Column(name = "vnp_create_date", nullable = false)
+    private String createDate;
 
-    @Column(name = "expire_date", nullable = false)
-    private String expireDate;
+    @Column(name = "vnp_ip_addr", nullable = false)
+    private String ipAddr;
 
-    @Column(name = "ip_address", nullable = false)
-    private String ipAddress;
+    @Column(name = "vnp_transaction_no")
+    private String transactionNo;
 
-    @Column(name = "order_info", nullable = false)
+    @Column(name = "vnp_response_code")
+    private String responseCode;
+
+    @Column(name = "vnp_transaction_status")
+    private String transactionStatus;
+
+    @Column(name = "vnp_secure_hash")
+    private String secureHash;
+
+    @Column(name = "vnp_order_info")
     private String orderInfo;
 
-    @Column(name = "order_type", nullable = false)
-    private String orderType;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @Column(name = "is_done", nullable = false)
+    @Column(name = "is_done")
     private Boolean isDone = Boolean.FALSE;
 
     @Column(name = "balance")
     private Double balance;
 
-    @Column(name = "bank_tran_no")
-    private String bankTranNo;
-
-    @Column(name = "card_type")
-    private String cardType;
-
-    @Column(name = "transaction_no")
-    private String transactionNo;
-
-    @Column(name = "bank_code")
-    private String bankCode;
-
-    @Column(name = "pay_date")
-    private String payDate;
-
-    @Column(name = "response_code")
-    private String responseCode;
-
-    @Column(name = "transaction_status")
-    private String transactionStatus;
-
-    public static boolean isValidAmount(Long amount) {
-        amount /= FRACTION_SHIFT;
-        return amount == AMOUNT_100 || amount == AMOUNT_200 ||
-                amount == AMOUNT_500 || amount == AMOUNT_1000 ||
-                amount == AMOUNT_2000 || amount == AMOUNT_5000;
-    }
+    @ManyToOne
+    @JoinColumn(name = "wallet_id", nullable = false)
+    private Wallet wallet;
 
     public VnpayTransaction() {
     }
 
-    public VnpayTransaction(String command, Long amount, String ipAddress, String orderType, User user) {
+    public VnpayTransaction(Long id, String version, String command, String tmnCode, String txnRef, Long amount, String createDate, String ipAddr, String transactionNo, String responseCode, String transactionStatus, String secureHash, String orderInfo, Boolean isDone, Wallet wallet) {
+        this.id = id;
+        this.version = version;
         this.command = command;
-        this.amount = amount * FRACTION_SHIFT;
-        this.ipAddress = ipAddress;
-        this.orderType = orderType;
-        this.user = user;
-        this.orderInfo = String.format(
-                "Nap tien EduTrack tai khoan %s. So tien %d %s",
-                user.getEmail(),
-                amount,
-                this.currCode
-        );
+        this.tmnCode = tmnCode;
+        this.txnRef = txnRef;
+        this.amount = amount;
+        this.createDate = createDate;
+        this.ipAddr = ipAddr;
+        this.transactionNo = transactionNo;
+        this.responseCode = responseCode;
+        this.transactionStatus = transactionStatus;
+        this.secureHash = secureHash;
+        this.orderInfo = orderInfo;
+        this.isDone = isDone;
+        this.wallet = wallet;
+    }
 
-        calendar.add(Calendar.MINUTE, TRANSACTION_EXPIRATION_TIME);
-        this.expireDate = dateFormat.format(calendar.getTime());
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getVersion() {
@@ -132,30 +113,6 @@ public class VnpayTransaction implements CommonTransaction {
         this.version = version;
     }
 
-    public String getLocale() {
-        return locale;
-    }
-
-    public void setLocale(String locale) {
-        this.locale = locale;
-    }
-
-    public String getCurrCode() {
-        return currCode;
-    }
-
-    public void setCurrCode(String currCode) {
-        this.currCode = currCode;
-    }
-
-    public UUID getTxnRef() {
-        return txnRef;
-    }
-
-    public void setTxnRef(UUID txnRef) {
-        this.txnRef = txnRef;
-    }
-
     public String getCommand() {
         return command;
     }
@@ -164,40 +121,79 @@ public class VnpayTransaction implements CommonTransaction {
         this.command = command;
     }
 
+    public String getTmnCode() {
+        return tmnCode;
+    }
+
+    public void setTmnCode(String tmnCode) {
+        this.tmnCode = tmnCode;
+    }
+
+    public String getTxnRef() {
+        return txnRef;
+    }
+
+    public void setTxnRef(String txnRef) {
+        this.txnRef = txnRef;
+    }
+
     public Long getAmount() {
         return amount;
     }
 
     public void setAmount(Long amount) {
-        amount *= FRACTION_SHIFT;
-        if (!isValidAmount(amount)) {
-            throw new IllegalArgumentException("Invalid amount for VNPAY transaction");
+        if (amount == null || amount <= 0) {
+            throw new IllegalArgumentException();
         }
-        this.amount = amount;
+        this.amount = amount * FRACTION_SHIFT;
     }
 
-    public String getCreatedDate() {
-        return createdDate;
+    public String getCreateDate() {
+        return createDate;
     }
 
-    public void setCreatedDate(String createdDate) {
-        this.createdDate = createdDate;
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
     }
 
-    public String getExpireDate() {
-        return expireDate;
+    public String getIpAddr() {
+        return ipAddr;
     }
 
-    public void setExpireDate(String expireDate) {
-        this.expireDate = expireDate;
+    public void setIpAddr(String ipAddr) {
+        this.ipAddr = ipAddr;
     }
 
-    public String getIpAddress() {
-        return ipAddress;
+    public String getTransactionNo() {
+        return transactionNo;
     }
 
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
+    public void setTransactionNo(String transactionNo) {
+        this.transactionNo = transactionNo;
+    }
+
+    public String getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(String responseCode) {
+        this.responseCode = responseCode;
+    }
+
+    public String getTransactionStatus() {
+        return transactionStatus;
+    }
+
+    public void setTransactionStatus(String transactionStatus) {
+        this.transactionStatus = transactionStatus;
+    }
+
+    public String getSecureHash() {
+        return secureHash;
+    }
+
+    public void setSecureHash(String secureHash) {
+        this.secureHash = secureHash;
     }
 
     public String getOrderInfo() {
@@ -208,23 +204,7 @@ public class VnpayTransaction implements CommonTransaction {
         this.orderInfo = orderInfo;
     }
 
-    public String getOrderType() {
-        return orderType;
-    }
-
-    public void setOrderType(String orderType) {
-        this.orderType = orderType;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Boolean isDone() {
+    public Boolean getDone() {
         return isDone;
     }
 
@@ -240,133 +220,33 @@ public class VnpayTransaction implements CommonTransaction {
         this.balance = balance;
     }
 
-    public String getBankTranNo() {
-        return bankTranNo;
+    public Wallet getWallet() {
+        return wallet;
     }
 
-    public void setBankTranNo(String bankTranNo) {
-        this.bankTranNo = bankTranNo;
-    }
-
-    public String getCardType() {
-        return cardType;
-    }
-
-    public void setCardType(String cardType) {
-        this.cardType = cardType;
-    }
-
-    public String getTransactionNo() {
-        return transactionNo;
-    }
-
-    public void setTransactionNo(String transactionNo) {
-        this.transactionNo = transactionNo;
-    }
-
-    public String getBankCode() {
-        return bankCode;
-    }
-
-    public void setBankCode(String bankCode) {
-        this.bankCode = bankCode;
-    }
-
-    public String getPayDate() {
-        return payDate;
-    }
-
-    public void setPayDate(String payDate) {
-        this.payDate = payDate;
-    }
-
-    public String getResponseCode() {
-        return responseCode;
-    }
-
-    public void setResponseCode(String responseCode) {
-        this.responseCode = responseCode;
-    }
-
-    @Override
-    public UUID getTransactionId() {
-        return getTxnRef();
-    }
-
-    @Override
-    public String getTransactionInfo() {
-        return getOrderInfo();
-    }
-
-    @Override
-    public Double getTransactionAmount() {
-        return (double) getAmount() / FRACTION_SHIFT;
-    }
-
-    @Override
-    public String getTransactionAmountFormatted() {
-        return CustomFormatter.formatNumberWithSpaces(getTransactionAmount(), true);
-    }
-
-    public String getTransactionStatus() {
-        return transactionStatus;
-    }
-
-    @Override
-    public Date getTransactionDate() {
-        Date date;
-        try {
-            if (payDate != null && !payDate.isEmpty()) {
-                date = dateFormat.parse(payDate);
-            } else {
-                date = dateFormat.parse(createdDate);
-            }
-            return date;
-        } catch (ParseException e) {
-            throw new RuntimeException("Failed to parse transaction date", e);
-        }
-    }
-
-    @Override
-    public Double getTransactionBalance() {
-        return getBalance();
-    }
-
-    @Override
-    public String getTransactionBalanceFormatted() {
-        return CustomFormatter.formatNumberWithSpaces(getBalance());
-    }
-
-    @Override
-    public UUID getUserId() {
-        return getUser().getId();
-    }
-
-    public void setTransactionStatus(String transactionStatus) {
-        this.transactionStatus = transactionStatus;
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 
     @Override
     public String toString() {
         return "VnpayTransaction{" +
-                "txnRef=" + txnRef +
-                ", amount=" + amount +
-                ", createdDate='" + createdDate + '\'' +
+                "id=" + id +
+                ", version='" + version + '\'' +
                 ", command='" + command + '\'' +
-                ", expireDate='" + expireDate + '\'' +
-                ", ipAddress='" + ipAddress + '\'' +
-                ", orderInfo='" + orderInfo + '\'' +
-                ", orderType='" + orderType + '\'' +
-                ", user=" + user +
-                ", balance=" + balance +
-                ", isDone=" + isDone +
-                ", bankTranNo='" + bankTranNo + '\'' +
-                ", cardType='" + cardType + '\'' +
+                ", tmnCode='" + tmnCode + '\'' +
+                ", txnRef='" + txnRef + '\'' +
+                ", amount=" + amount +
+                ", createDate='" + createDate + '\'' +
+                ", ipAddr='" + ipAddr + '\'' +
                 ", transactionNo='" + transactionNo + '\'' +
-                ", bankCode='" + bankCode + '\'' +
-                ", payDate='" + payDate + '\'' +
                 ", responseCode='" + responseCode + '\'' +
                 ", transactionStatus='" + transactionStatus + '\'' +
+                ", secureHash='" + secureHash + '\'' +
+                ", orderInfo='" + orderInfo + '\'' +
+                ", isDone=" + isDone +
+                ", balance=" + balance +
+                ", wallet=" + wallet +
                 '}';
     }
 }

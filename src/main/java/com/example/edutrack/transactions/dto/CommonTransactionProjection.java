@@ -1,4 +1,4 @@
-package com.example.edutrack.transactions.model;
+package com.example.edutrack.transactions.dto;
 
 import java.util.Date;
 

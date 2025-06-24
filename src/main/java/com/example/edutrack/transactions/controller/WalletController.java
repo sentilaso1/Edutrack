@@ -2,10 +2,10 @@ package com.example.edutrack.transactions.controller;
 
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.common.model.CommonModelAttribute;
-import com.example.edutrack.transactions.model.CommonTransaction;
+import com.example.edutrack.transactions.dto.CommonTransaction;
 import com.example.edutrack.transactions.model.Wallet;
-import com.example.edutrack.transactions.service.interfaces.CommonTransactionService;
-import com.example.edutrack.transactions.service.interfaces.WalletService;
+import com.example.edutrack.transactions.service.CommonTransactionService;
+import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -67,8 +67,7 @@ public class WalletController {
 
         Optional<Wallet> wallet = walletService.findById(user.getId());
         if (wallet.isEmpty()) {
-            model.addAttribute("error", "Missing wallet information");
-            return "/wallet/recharge";
+            wallet = Optional.of(walletService.save(user));
         }
 
         model.addAttribute("wallet", wallet.get());
@@ -78,6 +77,11 @@ public class WalletController {
     @GetMapping("/wallet/history")
     public String redirectShowTransactionHistory() {
         return "redirect:/wallet/history/1";
+    }
+
+    @GetMapping("/wallet/refund")
+    public String showRefundPage() {
+        return "/wallet/refund";
     }
 
     @GetMapping("/wallet/history/{page}")
