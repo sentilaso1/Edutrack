@@ -92,22 +92,26 @@ public class VnpayController {
 
         Optional<VnpayPayTransaction> payTransactionOpt = vnpayTransactionService.findPayTransaction(txnRef);
         if (payTransactionOpt.isEmpty()) {
-            response.sendRedirect("/wallet/recharge?error=No matching payment");
+            response.sendRedirect("/wallet/refund?error=No matching payment");
             return;
         }
         VnpayPayTransaction payTransaction = payTransactionOpt.get();
 
         if (payTransaction.getAmount() <= 0) {
-            response.sendRedirect("/wallet/recharge?error=Invalid amount");
+            response.sendRedirect("/wallet/refund?error=Invalid amount");
             return;
         }
-
 
         Optional<Wallet> walletOpt = walletService.findByUser(user);
         if (walletOpt.isEmpty()) {
             walletOpt = Optional.of(walletService.save(user));
         }
         Wallet wallet = walletOpt.get();
+
+        if (wallet.getBalance() < payTransaction.getBalance() / VnpayTransaction.FRACTION_SHIFT) {
+            response.sendRedirect("/wallet/refund?error=Insufficient balance for refund");
+            return;
+        }
 
         VnpayRefundTransaction transaction = vnpayTransactionService.createBaseRefundTransaction();
         transaction.setAmount(payTransaction.getAmount() / VnpayTransaction.FRACTION_SHIFT);
@@ -128,19 +132,12 @@ public class VnpayController {
 
         URL url = new URL(vnpayConfig.vnpRefundUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoOutput(true);
 
         DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
         wr.writeBytes(json.toString());
         wr.flush();
         wr.close();
-
-        int responseCode = connection.getResponseCode();
-        System.out.println("Sending POST request to URL: " + url);
-        System.out.println("Post data: " + json);
-        System.out.println("Response code: " + responseCode);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String output;
@@ -152,12 +149,22 @@ public class VnpayController {
 
         Optional<VnpayRefundTransaction> refundTransactionOpt = vnpayTransactionService.finalizeRefundTransaction(responseBuffer.toString());
         if (refundTransactionOpt.isEmpty()) {
-            response.sendRedirect("/wallet/recharge?error=Refund process error");
+            response.sendRedirect("/wallet/refund?error=Refund process error");
+            return;
+        }
+        VnpayRefundTransaction refundTransaction = refundTransactionOpt.get();
+
+        if (!refundTransaction.getResponseCode().equals(VnpayRefundTransaction.RESPONSE_SUCCESS)) {
+            response.sendRedirect("/wallet/refund?error=VNPAY refund process error");
             return;
         }
 
-        System.out.println(responseBuffer);
-        System.out.println(refundTransactionOpt.get());
+        wallet.setBalance(wallet.getBalance() - (refundTransaction.getAmount() / VnpayRefundTransaction.FRACTION_SHIFT));
+        walletService.save(wallet);
+        refundTransaction.setBalance(wallet.getBalance());
+        vnpayTransactionService.save(refundTransaction);
+
+        response.sendRedirect("/wallet/refund?success=true");
     }
 
     @GetMapping("/api/vnpay/return")

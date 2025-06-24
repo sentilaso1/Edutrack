@@ -112,6 +112,7 @@ public class MenteeScheduleController {
                 "Checkout for Course Mentor: " + courseMentor.getId(),
                 wallet
         );
+        transactionService.save(transaction);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         Enrollment enrollment = new Enrollment(
@@ -122,9 +123,8 @@ public class MenteeScheduleController {
                 params.getDay(),
                 startTime.get(0).getRequestedDate().format(formatter) + "-" + startTime.get(0).getSlot()
         );
+        enrollment.setTransaction(transaction);
         enrollmentService.save(enrollment);
-
-        transactionService.save(transaction);
 
         model.addAttribute("success", "Checkout Successful");
         return "/checkout/checkout-info";
