@@ -8,6 +8,7 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.repository.ApplicantsRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.timetables.model.Enrollment;
@@ -31,9 +32,17 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     private final MentorRepository mentorRepository;
     private final EnrollmentServiceImpl enrollmentServiceImpl;
     private final EnrollmentRepository enrollmentRepository;
+    private final FeedbackRepository feedbackRepository;
 
     @Autowired
-    public CourseMentorServiceImpl(CourseMentorRepository courseMentorRepository, ApplicantsRepository applicantsRepository, MenteeRepository menteeRepository, TagRepository tagRepository, MentorRepository mentorRepository, EnrollmentServiceImpl enrollmentServiceImpl, EnrollmentRepository enrollmentRepository) {
+    public CourseMentorServiceImpl(CourseMentorRepository courseMentorRepository,
+                                   ApplicantsRepository applicantsRepository,
+                                   MenteeRepository menteeRepository,
+                                   TagRepository tagRepository,
+                                   MentorRepository mentorRepository,
+                                   EnrollmentServiceImpl enrollmentServiceImpl,
+                                   EnrollmentRepository enrollmentRepository,
+                                   FeedbackRepository feedbackRepository) {
         this.courseMentorRepository = courseMentorRepository;
         this.applicantsRepository = applicantsRepository;
         this.menteeRepository = menteeRepository;
@@ -41,6 +50,7 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         this.mentorRepository = mentorRepository;
         this.enrollmentServiceImpl = enrollmentServiceImpl;
         this.enrollmentRepository = enrollmentRepository;
+        this.feedbackRepository = feedbackRepository;
     }
 
     @Override
@@ -197,6 +207,19 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         }
 
         return recommendations;
+    }
+
+    @Override
+    public List<CourseMentor> getReviewablePairsForMentee(UUID menteeId) {
+        List<Enrollment> enrollments = enrollmentRepository.findAllByMenteeId(menteeId);
+
+        Set<CourseMentor> allPairs = enrollments.stream()
+                .map(Enrollment::getCourseMentor)
+                .collect(Collectors.toSet());
+
+        return allPairs.stream()
+                .filter(cm -> feedbackRepository.findByMenteeIdAndCourseMentorId(menteeId, cm.getId()).isEmpty())
+                .collect(Collectors.toList());
     }
 }
 

@@ -138,4 +138,7 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
 
     @Query("SELECT COUNT(DISTINCT cm.mentor.id) FROM CourseMentor cm WHERE cm.status = 'ACCEPTED'")
     Long getActiveMentorCount();
+
+    List<CourseMentor> findByMentorId(UUID mentorId);
+    Optional<CourseMentor> findByCourse_IdAndMentor_Id(UUID courseId, UUID mentorId);
 }
