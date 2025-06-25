@@ -60,7 +60,7 @@ public class Transaction {
         this.amount = amount;
         this.info = info;
         this.wallet = wallet;
-        this.balance = wallet.getBalance() - amount;
+        this.balance = wallet.getBalance();
     }
 
     public UUID getId() {
