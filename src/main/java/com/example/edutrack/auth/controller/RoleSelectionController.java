@@ -57,6 +57,7 @@ public class RoleSelectionController {
             mentee.setInterests("");
             menteeRepository.save(mentee);
             session.setAttribute("loggedInUser", mentee);
+            session.setAttribute("role", "mentee");
             session.removeAttribute("googleUserInfo");
             return "redirect:/home";
         }
@@ -75,6 +76,7 @@ public class RoleSelectionController {
             mentor.setRating(0.0);
             mentorRepository.save(mentor);
             session.setAttribute("loggedInUser", mentor);
+            session.setAttribute("role", "mentor");
             session.removeAttribute("googleUserInfo");
             return "redirect:/mentor";
         }
