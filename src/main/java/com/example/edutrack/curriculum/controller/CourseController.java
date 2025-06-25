@@ -16,7 +16,7 @@ import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.transactions.model.Wallet;
-import com.example.edutrack.transactions.service.interfaces.WalletService;
+import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

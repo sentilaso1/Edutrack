@@ -74,8 +74,12 @@ VALUES (UUID_TO_BIN('33333333-3333-3333-3333-333333333333'),
         'female',
         '1999-09-25');
 
-INSERT INTO users (id, avatar, bio, birth_date, created_date, email, full_name, gender, is_active, is_locked, password, phone, reset_token)
-VALUES (0x70319B79576841CB8A9D1664658972D1, null, null, '2025-05-29 00:00:00.000000', '2025-05-29 14:10:24.329000', 'admin@edutrack.com', 'admin', 'male', true, false, '$2a$10$RYk7.ZaYvgRK1mDpWu.SvOKqfGpTBfnQnWhCAr65vsr0kLJr5vyjG', '0198332567', null);
+INSERT INTO users (id, avatar, bio, birth_date, created_date, email, full_name, gender, is_active, is_locked, password,
+                   phone, reset_token)
+VALUES (0x70319B79576841CB8A9D1664658972D1, null, null, '2025-05-29 00:00:00.000000', '2025-05-29 14:10:24.329000',
+        'admin@edutrack.com', 'admin', 'male', true, false,
+        '$2a$10$kI0U44Dk90s6Mu9bC29zPeR5m8NsoPtlPcsDyNyJEWPCtfqwX3o9S',
+        '0198332567', null);
 
 
 INSERT INTO mentees (interests, total_sessions, user_id)
@@ -94,7 +98,7 @@ INSERT INTO staffs (role, user_id)
 VALUES ('admin', UUID_TO_BIN('33333333-3333-3333-3333-333333333333'));
 
 INSERT INTO staffs (role, user_id)
-VALUES ('admin', 0x70319B79576841CB8A9D1664658972D1);
+VALUES ('manager', 0x70319B79576841CB8A9D1664658972D1);
 
 -- COURSES
 INSERT INTO courses (id, name, description, is_open, created_date)
@@ -288,83 +292,90 @@ VALUES ('2024-05-01 10:15:00.000000', UUID_TO_BIN('d1111111-dddd-dddd-dddd-ddddd
         UUID_TO_BIN('22222222-2222-2222-2222-222222222222'));
 
 INSERT INTO course_mentor (id, applied_date, status, course_id, mentor_user_id, price)
-VALUES
-    (UUID_TO_BIN('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1'), '2024-05-01 09:00:00.000000', 'PENDING',
-     UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 30000),
+VALUES (UUID_TO_BIN('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1'), '2024-05-01 09:00:00.000000', 'PENDING',
+        UUID_TO_BIN('d1111111-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222'),
+        30000),
 
-    (UUID_TO_BIN('aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2'), '2024-05-02 14:30:00.000000', 'ACCEPTED',
-     UUID_TO_BIN('d2222222-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 40000),
+       (UUID_TO_BIN('aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2'), '2024-05-02 14:30:00.000000', 'ACCEPTED',
+        UUID_TO_BIN('d2222222-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222'),
+        40000),
 
-    (UUID_TO_BIN('aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3'), '2024-05-03 11:15:00.000000', 'REJECTED',
-     UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 50000),
+       (UUID_TO_BIN('aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3'), '2024-05-03 11:15:00.000000', 'REJECTED',
+        UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('22222222-2222-2222-2222-222222222222'),
+        50000),
 
-    (UUID_TO_BIN('aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4'), '2024-05-01 10:00:00.000000', 'PENDING',
-     UUID_TO_BIN('d5555555-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 60000),
+       (UUID_TO_BIN('aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4'), '2024-05-01 10:00:00.000000', 'PENDING',
+        UUID_TO_BIN('d5555555-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('55555555-5555-5555-5555-555555555555'),
+        60000),
 
-    (UUID_TO_BIN('aaaaaaa5-aaaa-aaaa-aaaa-aaaaaaaaaaa5'), '2024-05-05 16:00:00.000000', 'ACCEPTED',
-     UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 100000);
+       (UUID_TO_BIN('aaaaaaa5-aaaa-aaaa-aaaa-aaaaaaaaaaa5'), '2024-05-05 16:00:00.000000', 'ACCEPTED',
+        UUID_TO_BIN('d7777777-dddd-dddd-dddd-dddddddddddd'), UUID_TO_BIN('55555555-5555-5555-5555-555555555555'),
+        100000);
 
 INSERT INTO properties (id, prop_key, prop_value, description, created_date)
-VALUES 
-(
-    UNHEX(REPLACE(UUID(), '-', '')),
-    'app.name',
-    'EduTrack',
-    'Application name',
-    NOW()
-),
-(
-    UNHEX(REPLACE(UUID(), '-', '')),
-    'app.email',
-    'lephuonglinhnga1801@gmail.com',
-    'Sender email used in system notifications',
-    NOW()
-),
-(
-    UNHEX(REPLACE(UUID(), '-', '')),
-    'smtp.host',
-    'smtp.gmail.com',
-    'SMTP server host',
-    NOW()
-),
-(
-    UNHEX(REPLACE(UUID(), '-', '')),
-    'smtp.port',
-    '587',
-    'SMTP server port',
-    NOW()
-);
+VALUES (UNHEX(REPLACE(UUID(), '-', '')),
+        'app.name',
+        'EduTrack',
+        'Application name',
+        NOW()),
+       (UNHEX(REPLACE(UUID(), '-', '')),
+        'app.email',
+        'lephuonglinhnga1801@gmail.com',
+        'Sender email used in system notifications',
+        NOW()),
+       (UNHEX(REPLACE(UUID(), '-', '')),
+        'smtp.host',
+        'smtp.gmail.com',
+        'SMTP server host',
+        NOW()),
+       (UNHEX(REPLACE(UUID(), '-', '')),
+        'smtp.port',
+        '587',
+        'SMTP server port',
+        NOW());
 
 INSERT INTO enrollments (mentee_id, course_mentor_id, total_slots, start_time, created_date, schedule_summary, status)
-VALUES
-    (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1'), 5, '08:00', NOW(), 'MONDAY-SLOT_1, THURSDAY-SLOT_2', 'PENDING'),
-    (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2'), 4, '09:00', NOW(), 'TUESDAY-SLOT_3, FRIDAY-SLOT_4', 'APPROVED'),
-    (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3'), 3, '10:00', NOW(), 'WEDNESDAY-SLOT_1, SATURDAY-SLOT_3', 'PENDING'),
-    (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4'), 6, '11:00', NOW(), 'THURSDAY-SLOT_2, SUNDAY-SLOT_4', 'APPROVED'),
-    (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa5-aaaa-aaaa-aaaa-aaaaaaaaaaa5'), 5, '12:00', NOW(), 'MONDAY-SLOT_1, WEDNESDAY-SLOT_3', 'PENDING');
+VALUES (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1'), 5,
+        '08:00', NOW(), 'MONDAY-SLOT_1, THURSDAY-SLOT_2', 'PENDING'),
+       (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2'), 4,
+        '09:00', NOW(), 'TUESDAY-SLOT_3, FRIDAY-SLOT_4', 'APPROVED'),
+       (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3'), 3,
+        '10:00', NOW(), 'WEDNESDAY-SLOT_1, SATURDAY-SLOT_3', 'PENDING'),
+       (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4'), 6,
+        '11:00', NOW(), 'THURSDAY-SLOT_2, SUNDAY-SLOT_4', 'APPROVED'),
+       (UUID_TO_BIN('66666666-6666-6666-6666-666666666666'), UUID_TO_BIN('aaaaaaa5-aaaa-aaaa-aaaa-aaaaaaaaaaa5'), 5,
+        '12:00', NOW(), 'MONDAY-SLOT_1, WEDNESDAY-SLOT_3', 'PENDING');
 
 INSERT INTO enrollment_schedule (enrollment_id, slot, date, is_test, score, attendance)
-VALUES
-    (6, 'SLOT_1', '2025-06-15', FALSE, NULL, 'NOT_YET'),
-    (6, 'SLOT_2', '2025-06-17', FALSE, NULL, 'PRESENT'),
-    (7, 'SLOT_3', '2025-06-16', FALSE, NULL, 'NOT_YET'),
-    (7, 'SLOT_4', '2025-06-18', TRUE, 90, 'PRESENT'),
-    (8, 'SLOT_1', '2025-06-19', FALSE, NULL, 'NOT_YET'),
-    (8, 'SLOT_3', '2025-06-21', TRUE, 85, 'PRESENT'),
-    (9, 'SLOT_2', '2025-06-22', FALSE, NULL, 'ABSENT'),
-    (9, 'SLOT_4', '2025-06-24', FALSE, NULL, 'PRESENT'),
-    (10, 'SLOT_1', '2025-06-25', FALSE, NULL, 'NOT_YET'),
-    (10, 'SLOT_3', '2025-06-27', TRUE, 80, 'PRESENT');
+VALUES (6, 'SLOT_1', '2025-06-15', FALSE, NULL, 'NOT_YET'),
+       (6, 'SLOT_2', '2025-06-17', FALSE, NULL, 'PRESENT'),
+       (7, 'SLOT_3', '2025-06-16', FALSE, NULL, 'NOT_YET'),
+       (7, 'SLOT_4', '2025-06-18', TRUE, 90, 'PRESENT'),
+       (8, 'SLOT_1', '2025-06-19', FALSE, NULL, 'NOT_YET'),
+       (8, 'SLOT_3', '2025-06-21', TRUE, 85, 'PRESENT'),
+       (9, 'SLOT_2', '2025-06-22', FALSE, NULL, 'ABSENT'),
+       (9, 'SLOT_4', '2025-06-24', FALSE, NULL, 'PRESENT'),
+       (10, 'SLOT_1', '2025-06-25', FALSE, NULL, 'NOT_YET'),
+       (10, 'SLOT_3', '2025-06-27', TRUE, 80, 'PRESENT');
 
-INSERT INTO mentor_available_time (mentor_id, slot, day)
-VALUES
-    (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_1', 'MONDAY'),
-    (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_2', 'TUESDAY'),
-    (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_3', 'WEDNESDAY'),
-    (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_4', 'THURSDAY'),
-    (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_5', 'FRIDAY'),
-    (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_1', 'MONDAY'),
-    (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_3', 'WEDNESDAY'),
-    (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_4', 'THURSDAY'),
-    (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_5', 'FRIDAY'),
-    (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_2', 'TUESDAY');
+INSERT INTO mentor_available_time (mentor_id, slot, day, start_date, end_date, created_date, reason, status)
+VALUES (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_1', 'MONDAY',
+        '2025-06-25', '2025-07-30', '2025-06-25 10:00:00.000000', 'Weekly availability', 'APPROVED'),
+       (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_2', 'TUESDAY',
+        '2025-06-25', '2025-08-01', '2025-06-25 10:05:00.000000', 'Summer session', 'PENDING'),
+       (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_3', 'WEDNESDAY',
+        '2025-06-25', '2025-08-05', '2025-06-25 10:10:00.000000', 'Student requests', 'DRAFT'),
+       (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_4', 'THURSDAY',
+        '2025-06-25', '2025-08-10', '2025-06-25 10:15:00.000000', 'Regular schedule', 'APPROVED'),
+       (UUID_TO_BIN('22222222-2222-2222-2222-222222222222'), 'SLOT_5', 'FRIDAY',
+        '2025-06-25', '2025-08-15', '2025-06-25 10:20:00.000000', 'Availability for project work', 'CANCELLED'),
+       (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_1', 'MONDAY',
+        '2025-06-25', '2025-07-31', '2025-06-25 10:25:00.000000', 'New student onboarding', 'PENDING'),
+       (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_3', 'WEDNESDAY',
+        '2025-06-25', '2025-08-03', '2025-06-25 10:30:00.000000', 'Training sessions', 'APPROVED'),
+       (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_4', 'THURSDAY',
+        '2025-06-25', '2025-08-08', '2025-06-25 10:35:00.000000', 'Group coaching', 'REJECTED'),
+       (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_5', 'FRIDAY',
+        '2025-06-25', '2025-08-12', '2025-06-25 10:40:00.000000', 'Office hours', 'APPROVED'),
+       (UUID_TO_BIN('55555555-5555-5555-5555-555555555555'), 'SLOT_2', 'TUESDAY',
+        '2025-06-25', '2025-08-02', '2025-06-25 10:45:00.000000', 'Availability adjustment', 'PENDING');

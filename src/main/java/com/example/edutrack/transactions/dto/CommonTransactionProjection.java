@@ -9,4 +9,5 @@ public interface CommonTransactionProjection {
     String getStatus();
     Double getBalance();
     Date getDate();
+    String getType();
 }

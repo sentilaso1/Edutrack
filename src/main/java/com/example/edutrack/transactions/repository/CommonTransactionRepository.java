@@ -21,9 +21,11 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                          amount,
                          status,
                          balance,
-                         updated_date AS date
+                         updated_date AS date,
+                         'system' AS type
                      FROM transactions
                      WHERE wallet_id = UUID_TO_BIN(:userId)
+                       AND balance IS NOT NULL
 
                      UNION ALL
 
@@ -32,9 +34,11 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                          (vnp_amount / 100) AS amount,
                          IFNULL(vnp_transaction_status, 'pending') AS status,
                          balance,
-                         CONVERT(vnp_create_date, DATETIME) AS date
+                         CONVERT(vnp_create_date, DATETIME) AS date,
+                         vnp_command AS type
                      FROM vnpay_transactions
                      WHERE wallet_id = UUID_TO_BIN(:userId)
+                       AND balance IS NOT NULL
                  ) AS combined
             """,
             countQuery = """
@@ -42,12 +46,14 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                                 SELECT 1
                                 FROM transactions
                                 WHERE wallet_id = UUID_TO_BIN(:userId)
+                                  AND balance IS NOT NULL
 
                                 UNION ALL
 
                                 SELECT 1
                                 FROM vnpay_transactions
                                 WHERE wallet_id = UUID_TO_BIN(:userId)
+                                  AND balance IS NOT NULL
                             ) AS combined
                     """,
             nativeQuery = true)
@@ -62,10 +68,12 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                                  amount,
                                  status,
                                  balance,
-                                 updated_date AS date
+                                 updated_date AS date,
+                                 'system' AS type
                              FROM transactions
                              WHERE wallet_id = UUID_TO_BIN(:userId)
                                AND LOWER(info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                               AND balance IS NOT NULL
 
                              UNION ALL
 
@@ -74,10 +82,12 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                                  (vnp_amount / 100) AS amount,
                                  IFNULL(vnp_transaction_status, 'pending') AS status,
                                  balance,
-                                 CONVERT(vnp_create_date, DATETIME) AS date
+                                 CONVERT(vnp_create_date, DATETIME) AS date,
+                                 vnp_command AS type
                              FROM vnpay_transactions
                              WHERE wallet_id = UUID_TO_BIN(:userId)
                                AND LOWER(vnp_order_info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                               AND balance IS NOT NULL
                          ) AS combined
                     """,
         countQuery = """
@@ -86,6 +96,7 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                     FROM transactions
                     WHERE wallet_id = UUID_TO_BIN(:userId)
                       AND LOWER(info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                      AND balance IS NOT NULL
 
                     UNION ALL
 
@@ -93,6 +104,7 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                     FROM vnpay_transactions
                     WHERE wallet_id = UUID_TO_BIN(:userId)
                       AND LOWER(vnp_order_info) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                      AND balance IS NOT NULL
                 ) AS combined
                 """,
         nativeQuery = true
@@ -108,10 +120,12 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                                  amount,
                                  status,
                                  balance,
-                                 updated_date AS date
+                                 updated_date AS date,
+                                 'system' AS type
                              FROM transactions
                              WHERE wallet_id = UUID_TO_BIN(:userId)
                                AND created_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                               AND balance IS NOT NULL
 
                              UNION ALL
 
@@ -120,10 +134,12 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                                  (vnp_amount / 100) AS amount,
                                  IFNULL(vnp_transaction_status, 'pending') AS status,
                                  balance,
-                                 CONVERT(vnp_create_date, DATETIME) AS date
+                                 CONVERT(vnp_create_date, DATETIME) AS date,
+                                 vnp_command AS type
                              FROM vnpay_transactions
                              WHERE wallet_id = UUID_TO_BIN(:userId)
                                AND CONVERT(vnp_create_date, DATETIME) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+                               AND balance IS NOT NULL
                          ) AS combined
                     """,
             countQuery = """
@@ -132,6 +148,7 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                         FROM transactions
                         WHERE created_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
                           AND wallet_id = UUID_TO_BIN(:userId)
+                          AND balance IS NOT NULL
 
                         UNION ALL
 
@@ -139,6 +156,7 @@ public interface CommonTransactionRepository extends JpaRepository<Transaction, 
                         FROM vnpay_transactions
                         WHERE CONVERT(vnp_create_date, DATETIME) BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
                           AND wallet_id = UUID_TO_BIN(:userId)
+                          AND balance IS NOT NULL
                     ) AS combined
                     """,
         nativeQuery = true

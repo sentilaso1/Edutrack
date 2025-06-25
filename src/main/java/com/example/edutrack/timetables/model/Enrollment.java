@@ -2,6 +2,7 @@ package com.example.edutrack.timetables.model;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.transactions.model.Transaction;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -53,6 +54,10 @@ public class Enrollment {
     @Lob
     @Column(name="schedule_summary", columnDefinition = "TEXT")
     private String scheduleSummary; // mon-slot1, thu-slot2
+
+    @OneToOne
+    @JoinColumn(name = "transaction_id")
+    private Transaction transaction;
 
     private String formatScheduleList(List<Slot> slots, List<Day> days) {
         StringBuilder sb = new StringBuilder();
@@ -141,17 +146,26 @@ public class Enrollment {
         this.scheduleSummary = scheduleSummary;
     }
 
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
     @Override
     public String toString() {
         return "Enrollment{" +
-               "id=" + id +
-               ", status=" + status +
-               ", mentee=" + mentee +
-               ", courseMentor=" + courseMentor +
-               ", totalSlots=" + totalSlots +
-               ", startTime='" + startTime + '\'' +
-               ", createdDate=" + createdDate +
-               ", scheduleSummary='" + scheduleSummary + '\'' +
-               '}';
+                "id=" + id +
+                ", status=" + status +
+                ", mentee=" + mentee +
+                ", courseMentor=" + courseMentor +
+                ", totalSlots=" + totalSlots +
+                ", startTime='" + startTime + '\'' +
+                ", createdDate=" + createdDate +
+                ", scheduleSummary='" + scheduleSummary + '\'' +
+                ", transaction=" + transaction +
+                '}';
     }
 }

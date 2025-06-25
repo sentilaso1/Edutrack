@@ -2,6 +2,7 @@ package com.example.edutrack.transactions.dto;
 
 import com.example.edutrack.common.model.CustomFormatter;
 import com.example.edutrack.transactions.model.Transaction;
+import com.example.edutrack.transactions.model.VnpayResult;
 
 import java.util.Date;
 
@@ -32,7 +33,8 @@ public record CommonTransaction(String id, String info, Double amount, String st
             return status;
         }
 
-        if ("00".equals(status)) {
+        VnpayResult result = VnpayResult.fromCode(status);
+        if (result == VnpayResult.TRANSACTION_SUCCESS || result == VnpayResult.TRANSACTION_REFUND_PROCESSING) {
             return Transaction.TransactionStatus.COMPLETED.toString();
         }
 

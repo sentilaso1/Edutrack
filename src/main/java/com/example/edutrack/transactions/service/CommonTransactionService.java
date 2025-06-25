@@ -24,7 +24,7 @@ public class CommonTransactionService {
         return new CommonTransaction(
                 String.valueOf(projection.getId()),
                 projection.getInfo(),
-                projection.getAmount(),
+                (projection.getType().equals("refund")) ? (- projection.getAmount()) : projection.getAmount(),
                 projection.getStatus(),
                 projection.getDate(),
                 projection.getBalance()

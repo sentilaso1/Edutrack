@@ -8,8 +8,10 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "vnpay_refund_transactions")
 public class VnpayRefundTransaction extends VnpayTransaction {
+    public static final String RESPONSE_SUCCESS = "00";
+
     public static final String TYPE_FULL_REFUND = "02";
-    public static final  String TYPE_PARTIAL_REFUND = "03";
+    public static final String TYPE_PARTIAL_REFUND = "03";
 
     @Column(name = "vnp_request_id", nullable = false, unique = true)
     private String requestId;
