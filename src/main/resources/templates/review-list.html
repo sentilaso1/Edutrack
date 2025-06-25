@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Review Your Courses</title>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}" />
+    <style>
+        /* Make the background cover the whole page, always */
+        body {
+            min-height: 100vh;
+            /* Use the same gradient or image as your course list page: */
+            background: url('/assets/images/course-bg.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            /* Fallback gradient for browsers that don’t support the image or for faster loading: */
+            /* background: linear-gradient(120deg, #e0f7fa 0%, #ffe4ec 100%); */
+        }
+        .review-list-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 2rem 1rem;
+        }
+        .review-list-header {
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 2.5rem;
+            font-size: 4rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .review-card-list {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            justify-content: center;
+        }
+        .review-card {
+            min-width: 350px;
+            background: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: box-shadow 0.2s;
+        }
+        .review-card strong {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #222;
+        }
+        .review-card .mentor-name {
+            color: #fa6262;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .review-card .course-description {
+            margin: 1rem 0 1.5rem 0;
+            color: #555;
+        }
+        .review-card .write-review-btn {
+            align-self: flex-end;
+            background: #121633;
+            color: #fff;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+        .review-card .write-review-btn:hover {
+            background: #fa6262;
+            color: #fff;
+        }
+        /* Add horizontal scroll bar styling if you want */
+        .review-card-list::-webkit-scrollbar {
+            height: 10px;
+        }
+        .review-card-list::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="review-list-container">
+    <h2 class="review-list-header">Courses & Mentors You Can Review</h2>
+    <div class="review-card-list">
+
+        <div th:if="${reviewPairs == null or #lists.isEmpty(reviewPairs)}" style="padding: 2rem; color: #888; text-align: center;">
+            <p>No courses or mentors available for review.</p>
+        </div>
+
+        <div class="review-card"
+             th:each="pair : ${reviewPairs}"
+             th:if="${reviewPairs != null and !#lists.isEmpty(reviewPairs)}">
+            <div>
+                <strong th:text="${pair.course.name}">Course Name</strong>
+                <span>by</span>
+                <span class="mentor-name" th:text="${pair.mentor.fullName}">Mentor Name</span>
+            </div>
+            <p class="course-description" th:text="${pair.course.description}">Course description goes here.</p>
+            <a th:href="@{'/mentors/' + ${pair.mentor.id} + '/review?courseId=' + ${pair.course.id}}"
+               class="write-review-btn">
+                Write a review for this
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

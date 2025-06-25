@@ -463,4 +463,104 @@ nav {
   .portfolio__banner {
     grid-template-columns: repeat(3, 1fr);
   }
+
+
+  .review__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .review__card.course-card {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 2rem 2rem 1.2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .review-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .review-avatar {
+    flex: 0 0 auto;
+  }
+  .mentee-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2.5px solid #fa6262;
+    background: #f6f8fb;
+  }
+  .review-info-main {
+    flex: 1 1 auto;
+  }
+  .mentee-course-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.13rem;
+  }
+  .mentee-name {
+    font-weight: 600;
+    color: #121633;
+    font-size: 1.08rem;
+  }
+  .review-course-name {
+    font-size: 1rem;
+    color: #fa6262;
+    background: #fbe4e4;
+    border-radius: 0.75rem;
+    padding: 0.18em 0.85em;
+    font-weight: 500;
+  }
+  .review-rating-stars {
+    margin-bottom: 0.1rem;
+    font-size: 1.33rem;
+    color: #fa6262;
+    display: flex;
+    align-items: center;
+    gap: 0.1em;
+  }
+  .review-rating-stars i.ri-star-fill,
+  .review-rating-stars i.ri-star-half-fill {
+    color: #fa6262;
+  }
+  .review-rating-stars i.ri-star-line {
+    color: #e2e2e2;
+  }
+  .review-rating-number {
+    font-size: 1rem;
+    color: #444;
+    margin-left: 0.7em;
+  }
+  .review-date {
+    margin-left: auto;
+    font-size: 0.97rem;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    white-space: nowrap;
+  }
+  .review-card-content {
+    margin-top: 0.5rem;
+    font-size: 1.08rem;
+    color: #444;
+    line-height: 1.6;
+    padding: 0.3rem;
+    word-break: break-word;
+    background: #f7f7f9;
+    border-radius: 0.5rem;
+  }
 }
