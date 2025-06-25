@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -126,5 +127,15 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     Optional<CourseMentor> findByMentorAndCourse(Mentor mentor, Course course);
     List<CourseMentor> findAllByMentor(Mentor mentor);
 
+    @Query("SELECT COUNT(cm) FROM CourseMentor cm WHERE cm.status = 'ACCEPTED'")
+    Long getAcceptedCourseMentorCount();
 
+    @Query("SELECT cm FROM CourseMentor cm WHERE cm.status = 'ACCEPTED' AND cm.appliedDate >= :startDate")
+    List<CourseMentor> getActiveCourseMentorsFromDate(@Param("startDate") LocalDateTime startDate);
+
+    @Query("SELECT AVG(cm.price) FROM CourseMentor cm WHERE cm.status = 'ACCEPTED'")
+    Double getAveragePrice();
+
+    @Query("SELECT COUNT(DISTINCT cm.mentor.id) FROM CourseMentor cm WHERE cm.status = 'ACCEPTED'")
+    Long getActiveMentorCount();
 }

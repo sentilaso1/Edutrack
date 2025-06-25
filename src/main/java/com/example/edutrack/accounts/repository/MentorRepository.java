@@ -1,7 +1,6 @@
 package com.example.edutrack.accounts.repository;
 
 import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.profiles.model.CV;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -62,5 +62,11 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
                                     @Param("rating") Double rating,
                                     @Param("totalSessions") Integer totalSessions,
                                     @Param("isAvailable") Boolean isAvailable,
-                                    Pageable pageable);
+                    Pageable pageable);
+
+        @Query("SELECT COUNT(m) FROM Mentor m WHERE m.createdDate >= :startDate")
+        Long getNewMentorCountFromDate(@Param("startDate") LocalDateTime startDate);
+
+        @Query("SELECT AVG(m.rating) FROM Mentor m WHERE m.rating IS NOT NULL")
+        Double getAverageRating();
 }
