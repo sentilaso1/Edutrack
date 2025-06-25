@@ -11,6 +11,11 @@ import java.util.UUID;
 @Table(name = "feedbacks")
 public class Feedback {
 
+    public enum Status {
+        ACTIVE,
+        HIDDEN
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -34,6 +39,10 @@ public class Feedback {
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.ACTIVE;
+
     public Feedback() {}
 
     public Feedback(String content, Double rating, Mentee mentee, CourseMentor courseMentor) {
@@ -41,6 +50,7 @@ public class Feedback {
         this.rating = rating;
         this.mentee = mentee;
         this.courseMentor = courseMentor;
+        this.status = Status.ACTIVE;
     }
 
     public UUID getId() {
@@ -89,5 +99,13 @@ public class Feedback {
 
     public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }
