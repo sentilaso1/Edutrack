@@ -144,7 +144,6 @@ public class CvController {
             if (!cv.getStatus().equalsIgnoreCase("rejected")) {
                 return "redirect:/mentor/cv/edit/" + userId;
             } else {
-
                 return "cv/create-cv";
             }
         } else {

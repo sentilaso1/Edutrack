@@ -33,7 +33,6 @@ public interface CvService {
 
     void aiVerifyCV(CV cv, List<Course> courses);
     String generatePrompt(CV cv, List<Course> courses);
-    String callMistralAPI(String prompt);
     void processAIResponse(CV cv, String aiJson);
     void scheduleAIVerification();
     boolean isBatchRunning();

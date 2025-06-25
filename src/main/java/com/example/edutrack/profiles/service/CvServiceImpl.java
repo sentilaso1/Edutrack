@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.UserRepository;
+import com.example.edutrack.common.service.interfaces.LLMService;
 import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.CVCourse;
 import com.example.edutrack.curriculum.model.Course;
@@ -49,7 +50,7 @@ public class CvServiceImpl implements CvService {
     private final CVCourseRepository cvCourseRepository;
     private final MentorRepository mentorRepository;
     private final CourseMentorRepository courseMentorRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final LLMService llmService;
 
     @Autowired
     public CvServiceImpl(EntityManager entityManager,
@@ -58,7 +59,8 @@ public class CvServiceImpl implements CvService {
                          CourseRepository courseRepository,
                          CVCourseRepository cvCourseRepository,
                          MentorRepository mentorRepository,
-                         CourseMentorRepository courseMentorRepository) {
+                         CourseMentorRepository courseMentorRepository,
+                         LLMService llmService) {
         this.entityManager = entityManager;
         this.cvRepository = cvRepository;
         this.userRepository = userRepository;
@@ -66,6 +68,7 @@ public class CvServiceImpl implements CvService {
         this.cvCourseRepository = cvCourseRepository;
         this.mentorRepository = mentorRepository;
         this.courseMentorRepository = courseMentorRepository;
+        this.llmService = llmService;
     }
 
     @Override
@@ -339,7 +342,7 @@ public class CvServiceImpl implements CvService {
     @Override
     public void aiVerifyCV(CV cv, List<Course> courses) {
         String prompt = generatePrompt(cv, courses);
-        String aiResponse = callMistralAPI(prompt);
+        String aiResponse = llmService.callModel(prompt);
         processAIResponse(cv, aiResponse);
     }
 
@@ -421,29 +424,6 @@ public class CvServiceImpl implements CvService {
         }
         Respond ONLY with raw JSON, no markdown, no explanation, no code block.
         """.formatted(summary, experienceYears, skills, education, experience, certifications, languages, courseName);
-    }
-
-    public String callMistralAPI(String prompt) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth("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");
-
-        Map<String, Object> body = Map.of(
-                "model", "mistralai/devstral-small:free",
-                "messages", List.of(
-                        Map.of("role", "user", "content", prompt)
-                )
-        );
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "https://openrouter.ai/api/v1/chat/completions",
-                entity,
-                String.class
-        );
-
-        return response.getBody();
     }
 
     public void processAIResponse(CV cv, String aiJson) {
