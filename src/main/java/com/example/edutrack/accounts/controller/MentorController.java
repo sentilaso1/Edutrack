@@ -16,6 +16,10 @@ import com.example.edutrack.timetables.service.implementation.EnrollmentSchedule
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
+import com.example.edutrack.transactions.model.Transaction;
+import com.example.edutrack.transactions.model.Wallet;
+import com.example.edutrack.transactions.service.TransactionService;
+import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,6 +39,8 @@ public class MentorController {
     private final EnrollmentScheduleService enrollmentScheduleService;
     private final EnrollmentService enrollmentService;
     private final MentorAvailableTimeService mentorAvailableTimeService;
+    private final WalletService walletService;
+    private final TransactionService transactionService;
 
     @Autowired
     public MentorRepository mentorRepository;
@@ -42,12 +48,15 @@ public class MentorController {
     @Autowired
     public CourseMentorRepository courseMentorRepository;
 
+    @Autowired
     public MentorController(EnrollmentScheduleService enrollmentScheduleService,
                             EnrollmentService enrollmentService,
-                            MentorAvailableTimeService mentorAvailableTimeService) {
+                            MentorAvailableTimeService mentorAvailableTimeService, WalletService walletService, TransactionService transactionService) {
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.enrollmentService = enrollmentService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
+        this.walletService = walletService;
+        this.transactionService = transactionService;
     }
 
     @RequestMapping("/mentor")
@@ -159,6 +168,20 @@ public class MentorController {
         if (action.equals("reject")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
             enrollmentService.save(enrollment);
+
+            Optional<Wallet> walletOpt = walletService.findByUser(enrollment.getMentee());
+            if (walletOpt.isEmpty()) {
+                walletOpt = Optional.of(walletService.save(enrollment.getMentee()));
+            }
+
+            Wallet wallet = walletOpt.get();
+            wallet.setOnHold(wallet.getOnHold() - enrollment.getTransaction().getAmount());
+            wallet.setBalance(wallet.getBalance() + enrollment.getTransaction().getAmount());
+            walletService.save(wallet);
+
+            enrollment.getTransaction().setStatus(Transaction.TransactionStatus.FAILED);
+            transactionService.save(enrollment.getTransaction());
+
             return "redirect:/mentor/sensor-class?status=REJECTED&reject=" + eid;
         }
         if(action.equals("approve")){
