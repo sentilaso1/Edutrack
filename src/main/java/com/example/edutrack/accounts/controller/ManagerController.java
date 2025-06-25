@@ -84,7 +84,7 @@ public class ManagerController {
         return "accounts/html/manager-stats";
     }
 
-    @GetMapping("/api/revenue-chart")
+    @GetMapping("/manager/api/revenue-chart")
     @ResponseBody
     public ResponseEntity<List<RevenueChartDTO>> getRevenueChart(
             @RequestParam(defaultValue = "week") String period) {
@@ -93,7 +93,7 @@ public class ManagerController {
         return ResponseEntity.ok(chartData);
     }
     
-    @GetMapping("/api/top-mentors")
+    @GetMapping("/manager/api/top-mentors")
     @ResponseBody
     public ResponseEntity<List<TopMentorDTO>> getTopMentors(
             @RequestParam(defaultValue = "week") String period) {
@@ -102,7 +102,7 @@ public class ManagerController {
         return ResponseEntity.ok(topMentors);
     }
     
-    @GetMapping("/api/summary-stats")
+    @GetMapping("/manager/api/summary-stats")
     @ResponseBody
     public ResponseEntity<ManagerStatsDTO> getSummaryStats(
             @RequestParam(defaultValue = "week") String period) {
