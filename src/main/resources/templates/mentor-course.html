@@ -67,6 +67,63 @@
   </div>
 </section>
 
+<section class="section__container review__container" id="reviews">
+  <h2 class="section__header">Mentee Reviews</h2>
+  <div class="review__grid">
+    <div style="text-align: center" th:if="${feedbacks == null or #lists.isEmpty(feedbacks)}">
+      <p>No reviews yet.</p>
+    </div>
+    <div class="review__card course-card" th:each="feedback : ${feedbacks}" th:if="${feedbacks != null and !#lists.isEmpty(feedbacks)}">
+      <div class="review-card-header">
+        <div class="review-avatar">
+          <img th:src="@{'/mentees/' + ${feedback.mentee.id} + '/avatar'}"
+               th:alt="${feedback.mentee.fullName}"
+               class="mentee-avatar"/>
+        </div>
+        <div class="review-info-main">
+          <div class="mentee-course-row">
+            <span class="mentee-name" th:text="${feedback.mentee.fullName}">Mentee Name</span>
+            <div style="display: flex; gap: 0.5rem">
+              <span class="review-date" style="margin-left: 0.3rem">for</span>
+              <span class="review-course-name" th:text="${feedback.courseMentor.course.name}">Course Name</span>
+            </div>
+          </div>
+          <!----->
+          <div th:with="
+      rating=${feedback.rating != null ? feedback.rating : 0},
+      fullStars=${T(java.lang.Math).floor(rating)},
+      hasHalfStar=${(rating - fullStars) >= 0.5},
+      emptyStars=${5 - fullStars - (hasHalfStar ? 1 : 0)}">
+            <div class="review-rating-stars">
+                <span th:if="${fullStars > 0}">
+                  <span th:each="star : ${#numbers.sequence(1, fullStars)}">
+                    <i class="ri-star-fill"></i>
+                  </span>
+                </span>
+                <span th:if="${hasHalfStar}">
+                  <i class="ri-star-half-fill"></i>
+                </span>
+              <span th:if="${emptyStars > 0}">
+                <span th:each="star : ${#numbers.sequence(0, emptyStars - 1)}">
+                  <i class="ri-star-line"></i>
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="review-date">
+          <span th:text="${#temporals.format(feedback.createdDate, 'dd/MM/yyyy')}">Date</span>
+          <i class="ri-star-half-fill" style="font-size: 2rem; color: orange;"></i>
+        </div>
+      </div>
+      <div class="review-card-content" th:text="${feedback.content}">
+        Review content...
+      </div>
+    </div>
+  </div>
+</section>
+
+
 <script src="https://unpkg.com/scrollreveal"></script>
 <script th:src="@{/main.js}"></script>
 </body>
