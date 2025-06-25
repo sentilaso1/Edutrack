@@ -16,6 +16,7 @@ import com.example.edutrack.accounts.dto.ManagerStatsDTO;
 import com.example.edutrack.accounts.dto.RevenueChartDTO;
 import com.example.edutrack.accounts.dto.TopMentorDTO;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.accounts.service.interfaces.ManagerStatsService;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.MenteeRepository;
@@ -33,6 +34,9 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
 
         @Autowired
         private MenteeRepository menteeRepository;
+
+        @Autowired
+        public CourseRepository courseRepository;
         
         private final NumberFormat vndFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
@@ -88,6 +92,10 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
                         stats.setAvgStudentsPerMentor(0.0);
                 }
 
+                //đếm số lượng khóa học active
+                Long activeCourses = courseRepository.countByIsOpen(true);
+                stats.setActiveCourses(activeCourses != null ? activeCourses.intValue() : 0);
+
                 // Dữ liệu mẫu cho các thống kê khác
                 setMockData(stats);
 
@@ -101,7 +109,6 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
         }
         
         private void setMockData(ManagerStatsDTO stats) {
-                stats.setActiveCourses(1247);
                 stats.setSatisfactionRate(94.2);
                 stats.setNetProfit(1200000000.0);
                 stats.setNetProfitGrowth(22.4);

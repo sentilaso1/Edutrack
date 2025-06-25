@@ -110,4 +110,6 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             @Param("subjectIds") List<Integer> subjectIds,
             Pageable pageable
     );
+
+    Long countByIsOpen(Boolean isOpen);
 }
