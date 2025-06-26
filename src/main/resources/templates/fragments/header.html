@@ -52,7 +52,7 @@
 
                 <!-- Bookmark: chỉ hiện nếu đã login -->
                 <li class="navbar-item" th:if="${session.loggedInUser != null}">
-                    <a th:href="@{/bookmarks}" class="navbar-link title-sm" data-nav-link>Bookmark</a>
+                    <a th:href="@{/bookmark/list}" class="navbar-link title-sm" data-nav-link>Bookmark</a>
                 </li>
 
                 <li class="navbar-item">
@@ -80,6 +80,9 @@
 
             <div th:if="${session.loggedInUser != null}" style="display: flex; align-items: center; gap: 12px;">
                 <span style="color: #ff6b6b; font-weight: bold" class="title-sm" th:text="'👋 Hi, ' + ${session.loggedInUser.fullName}">Hi, User</span>
+                <th:block th:with="wallet = ${@walletService.findByUser(session.loggedInUser)}">
+                    <span th:if="${wallet.isPresent()}" style="" class="title-sm" th:text="${wallet.get().balanceFormatted} + ' VND'">0 VND</span>
+                </th:block>
                 <a th:href="@{/logout}" class="btn btn-secondary">Logout</a>
             </div>
         </div>
