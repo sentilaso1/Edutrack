@@ -151,8 +151,6 @@
                         More</a>
                 </div>
 
-                <p th:text="${transactions}"></p>
-
                 <table>
                     <thead>
                     <tr>
@@ -176,6 +174,7 @@
                 <h4>Quick Actions</h4>
                 <a th:href="@{/wallet}"><i class="fas fa-wallet"></i> Account Details</a>
                 <a th:href="@{/wallet/recharge}"><i class="fas fa-plus-circle"></i> Add Funds</a>
+                <a th:href="@{/wallet/withdraw}"><i class="fas fa-minus-circle"></i> Withdraw Funds</a>
                 <a th:href="@{/wallet/history}"><i class="fas fa-history"></i> Full Transaction History</a>
             </div>
         </div>
