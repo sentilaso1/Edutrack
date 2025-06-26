@@ -141,4 +141,5 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
 
     List<CourseMentor> findByMentorId(UUID mentorId);
     Optional<CourseMentor> findByCourse_IdAndMentor_Id(UUID courseId, UUID mentorId);
+    List<CourseMentor> findByCourse_Id(UUID courseId);
 }

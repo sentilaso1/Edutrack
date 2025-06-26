@@ -6,6 +6,8 @@ import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
@@ -36,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 public class CourseController {
@@ -49,6 +52,8 @@ public class CourseController {
     private final MentorAvailableTimeService mentorAvailableTimeService;
     private final EnrollmentService enrollmentService;
     private final WalletService walletService;
+    private final CourseRepository courseRepository;
+    private final CourseMentorRepository courseMentorRepository;
 
     @Autowired
     public CourseController(CourseServiceImpl courseServiceImpl,
@@ -59,7 +64,10 @@ public class CourseController {
                             CourseMentorService courseMentorService,
                             CourseMentorServiceImpl courseMentorServiceImpl,
                             MentorAvailableTimeService mentorAvailableTimeService,
-                            EnrollmentService enrollmentService, WalletService walletService) {
+                            EnrollmentService enrollmentService,
+                            WalletService walletService,
+                            CourseRepository courseRepository,
+                            CourseMentorRepository courseMentorRepository) {
         this.courseServiceImpl = courseServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
@@ -70,6 +78,8 @@ public class CourseController {
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.enrollmentService = enrollmentService;
         this.walletService = walletService;
+        this.courseRepository = courseRepository;
+        this.courseMentorRepository = courseMentorRepository;
     }
 
     @GetMapping("/courses")
@@ -245,5 +255,21 @@ public class CourseController {
         }
 
         return "register-section";
+    }
+
+    @GetMapping("/courses/{courseId}/list")
+    public String courseMentorList(@PathVariable("courseId") UUID courseId, Model model) {
+
+        Course course = courseRepository.findById(courseId).get();
+        List<CourseMentor> courseMentors = courseMentorRepository.findByCourse_Id(courseId);
+        List<Mentor> relatedMentors = courseMentors.stream()
+                .map(CourseMentor::getMentor)
+                .distinct()
+                .collect(Collectors.toList());
+
+        model.addAttribute("relatedMentors", relatedMentors);
+        model.addAttribute("course", course);
+
+        return "course-related-mentor";
     }
 }
