@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -138,4 +137,144 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
 
     @Query("SELECT COUNT(DISTINCT cm.mentor.id) FROM CourseMentor cm WHERE cm.status = 'ACCEPTED'")
     Long getActiveMentorCount();
+
+    /**
+     * Tính tổng thu nhập của mentor từ các transaction đã hoàn thành
+     */
+    @Query("""
+                    SELECT COALESCE(SUM(t.amount), 0)
+                    FROM Transaction t
+                    JOIN Enrollment e ON e.transaction.id = t.id
+                    JOIN CourseMentor cm ON e.courseMentor.id = cm.id
+                    WHERE cm.mentor.id = :mentorId
+                    AND t.status = 'COMPLETED'
+                    AND e.status = 'APPROVED'
+                    """)
+    Long getTotalIncomeByMentorId(@Param("mentorId") UUID mentorId);
+
+    /**
+     * Tính thu nhập theo từng tháng trong 12 tháng gần nhất
+     */
+    @Query("""
+                    SELECT COALESCE(SUM(t.amount), 0)
+                    FROM Transaction t
+                    JOIN Enrollment e ON e.transaction.id = t.id
+                    JOIN CourseMentor cm ON e.courseMentor.id = cm.id
+                    WHERE cm.mentor.id = :mentorId
+                    AND t.status = 'COMPLETED'
+                    AND e.status = 'APPROVED'
+                    AND EXTRACT(YEAR FROM t.createdDate) = :year
+                    AND EXTRACT(MONTH FROM t.createdDate) = :month
+                    """)
+    Long getMonthlyIncome(@Param("mentorId") UUID mentorId,
+                    @Param("year") int year,
+                    @Param("month") int month);
+
+    /**
+     * Tính tổng số slot đã dạy của mentor
+     */
+    @Query("""
+                    SELECT COALESCE(SUM(e.totalSlots), 0)
+                    FROM Enrollment e
+                    JOIN CourseMentor cm ON e.courseMentor.id = cm.id
+                    WHERE cm.mentor.id = :mentorId
+                    AND e.status = 'APPROVED'
+                    """)
+    Long getTotalSlotsByMentorId(@Param("mentorId") UUID mentorId);
+
+    /**
+     * Lấy danh sách thu nhập 12 tháng gần nhất (dùng cho biểu đồ)
+     */
+    @Query(value = """
+                    WITH RECURSIVE months AS (
+                        SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 11 MONTH), '%Y-%m-01') as month_date
+                        UNION ALL
+                        SELECT DATE_ADD(month_date, INTERVAL 1 MONTH)
+                        FROM months
+                        WHERE month_date < DATE_FORMAT(CURDATE(), '%Y-%m-01')
+                    )
+                    SELECT
+                        COALESCE(SUM(t.amount), 0) as monthly_income
+                    FROM months m
+                    LEFT JOIN transactions t ON DATE_FORMAT(t.created_date, '%Y-%m') = DATE_FORMAT(m.month_date, '%Y-%m')
+                        AND t.status = 'COMPLETED'
+                        AND EXISTS (
+                            SELECT 1 FROM enrollments e
+                            JOIN course_mentor cm ON e.course_mentor_id = cm.id
+                            WHERE e.transaction_id = t.id
+                            AND cm.mentor_user_id = :mentorId
+                            AND e.status = 'APPROVED'
+                        )
+                    GROUP BY m.month_date
+                    ORDER BY m.month_date
+                    """, nativeQuery = true)
+    List<Long> getMonthlyIncomeList(@Param("mentorId") UUID mentorId);
+
+    /**
+     * Tính thu nhập trung bình mỗi slot
+     */
+    @Query("""
+                    SELECT
+                        CASE
+                            WHEN COALESCE(SUM(e.totalSlots), 0) = 0 THEN 0
+                            ELSE COALESCE(SUM(t.amount), 0) / COALESCE(SUM(e.totalSlots), 1)
+                        END
+                    FROM Transaction t
+                    JOIN Enrollment e ON e.transaction.id = t.id
+                    JOIN CourseMentor cm ON e.courseMentor.id = cm.id
+                    WHERE cm.mentor.id = :mentorId
+                    AND t.status = 'COMPLETED'
+                    AND e.status = 'APPROVED'
+                    """)
+    Long getIncomePerSlot(@Param("mentorId") UUID mentorId);
+
+    /**
+     * Lấy thống kê tổng hợp cho mentor
+     */
+    @Query("""
+                    SELECT new map(
+                        COALESCE(SUM(t.amount), 0) as totalIncome,
+                        COALESCE(SUM(e.totalSlots), 0) as totalSlots,
+                        CASE
+                            WHEN COALESCE(SUM(e.totalSlots), 0) = 0 THEN 0
+                            ELSE COALESCE(SUM(t.amount), 0) / COALESCE(SUM(e.totalSlots), 1)
+                        END as incomePerSlot
+                    )
+                    FROM Transaction t
+                    JOIN Enrollment e ON e.transaction.id = t.id
+                    JOIN CourseMentor cm ON e.courseMentor.id = cm.id
+                    WHERE cm.mentor.id = :mentorId
+                    AND t.status = 'COMPLETED'
+                    AND e.status = 'APPROVED'
+                    """)
+    java.util.Map<String, Long> getIncomeStatsSummary(@Param("mentorId") UUID mentorId);
+
+    //Lấy income tháng này
+        @Query("""
+                        SELECT COALESCE(SUM(t.amount), 0)
+                        FROM Transaction t
+                        JOIN Enrollment e ON e.transaction.id = t.id
+                        JOIN CourseMentor cm ON e.courseMentor.id = cm.id
+                        WHERE cm.mentor.id = :mentorId
+                        AND t.status = 'COMPLETED'
+                        AND e.status = 'APPROVED'
+                        AND DATE_FORMAT(t.createdDate, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+                        """)
+        Long getCurrentMonthIncome(@Param("mentorId") UUID mentorId);
+
+        // Lấy thu nhập tháng trước
+        @Query("""
+                        SELECT COALESCE(SUM(t.amount), 0)
+                        FROM Transaction t
+                        JOIN Enrollment e ON e.transaction.id = t.id
+                        JOIN CourseMentor cm ON e.courseMentor.id = cm.id
+                        WHERE cm.mentor.id = :mentorId
+                        AND t.status = 'COMPLETED'
+                        AND e.status = 'APPROVED'
+                        AND FUNCTION('YEAR', t.createdDate) = :lastMonthYear
+                        AND FUNCTION('MONTH', t.createdDate) = :lastMonth
+                        """)
+        Long getLastMonthIncome(@Param("mentorId") UUID mentorId,
+                                @Param("lastMonthYear") int lastMonthYear,
+                                @Param("lastMonth") int lastMonth);
 }
