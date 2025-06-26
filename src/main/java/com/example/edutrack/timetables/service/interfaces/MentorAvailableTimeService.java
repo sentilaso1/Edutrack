@@ -16,7 +16,7 @@ public interface MentorAvailableTimeService {
 
     String alertValidStartEndTime(LocalDate start, LocalDate end, Mentor mentor);
 
-    List<MentorAvailableTimeDTO> findAllDistinctStartEndDates(Mentor mentor);
+    List<MentorAvailableTimeDTO> findAllDistinctStartEndDates(Mentor mentor, MentorAvailableTime.Status status);
 
     List<MentorAvailableSlotDTO> findAllSlotByEndDate(Mentor mentor, LocalDate endDate);
 
@@ -24,5 +24,11 @@ public interface MentorAvailableTimeService {
 
     LocalDate findMinStartDate(Mentor mentor);
 
-    List<MentorAvailableTimeDTO> findAllDistinctStartEndDates();
+    List<MentorAvailableTimeDTO> findAllDistinctStartEndDates(MentorAvailableTime.Status status);
+
+    boolean[][] slotDayMatrix(List<MentorAvailableSlotDTO> setSlots);
+
+    List<MentorAvailableTime> findAllMentorAvailableTimeByEndDate(Mentor mentor, LocalDate endDate);
+
+    LocalDate findMaxEndDateByStatus(Mentor mentor, MentorAvailableTime.Status enumValue);
 }
