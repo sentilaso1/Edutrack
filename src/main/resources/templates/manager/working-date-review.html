@@ -23,6 +23,27 @@
 <!-- Main Content -->
 <div class="ml-64 min-h-screen p-10">
     <div class="bg-white shadow-md rounded-lg p-6">
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-4 border-b border-blue-200 mb-6">
+            <a th:href="@{/manager/mentor-working-date(status='PENDING')}"
+               th:classappend="${activeStatus} == 'PENDING' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'"
+               class="pb-2 border-b-2 text-sm font-medium transition">
+                Pending
+            </a>
+
+            <a th:href="@{/manager/mentor-working-date(status='APPROVED')}"
+               th:classappend="${activeStatus} == 'APPROVED' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'"
+               class="pb-2 border-b-2 text-sm font-medium transition">
+                Approved
+            </a>
+
+            <a th:href="@{/manager/mentor-working-date(status='REJECTED')}"
+               th:classappend="${activeStatus} == 'REJECTED' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'"
+               class="pb-2 border-b-2 text-sm font-medium transition">
+                Rejected
+            </a>
+        </div>
+
         <h2 class="text-2xl font-semibold text-blue-800 mb-6">Pending Mentor Requests</h2>
 
         <div class="overflow-x-auto">
@@ -41,7 +62,8 @@
                     <td class="px-6 py-4" th:text="${item.startDate}"></td>
                     <td class="px-6 py-4" th:text="${item.endDate}"></td>
                     <td class="px-6 py-4 text-center space-x-2">
-                        <a href="#" class="bg-yellow-500 text-white text-sm px-4 py-1 rounded hover:bg-yellow-600 transition">>>View</a>
+                        <a th:href="@{/manager/mentor-working-date/{mid}(mid=${item.mentor.id}, endLocal=${item.endDate})}"
+                           class="bg-yellow-500 text-white text-sm px-4 py-1 rounded hover:bg-yellow-600 transition">>>View </a>
                     </td>
                 </tr>
                 </tbody>

@@ -5,12 +5,15 @@ import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class MentorAvailableTimeDTO implements Serializable {
     @NotNull
     LocalDate startDate;
     @NotNull
     LocalDate endDate;
+    @NotNull
+    LocalDate createdDate;
 
     public Mentor getMentor() {
         return mentor;

@@ -3,10 +3,12 @@ package com.example.edutrack.accounts.controller;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
+import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.model.MentorAvailableTime;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.service.implementation.EnrollmentScheduleServiceImpl;
 import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
@@ -23,14 +25,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.edutrack.accounts.dto.RevenueChartDTO;
 import com.example.edutrack.accounts.dto.TopMentorDTO;
 import java.time.LocalDateTime;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.example.edutrack.accounts.dto.ManagerStatsDTO;
+import java.util.UUID;
 
 @Controller
 public class ManagerController {
@@ -46,7 +53,7 @@ public class ManagerController {
                              MenteeService menteeService,
                              MentorAvailableTimeService mentorAvailableTimeService,
                              EnrollmentService enrollmentServiceImpl,
-                             EnrollmentScheduleService enrollmentScheduleService, 
+                             EnrollmentScheduleService enrollmentScheduleService,
                              ManagerStatsService managerStatsService) {
         this.mentorService = mentorService;
         this.menteeService = menteeService;
@@ -92,7 +99,7 @@ public class ManagerController {
         List<RevenueChartDTO> chartData = managerStatsService.getRevenueChartData(period, startDate);
         return ResponseEntity.ok(chartData);
     }
-    
+
     @GetMapping("/manager/api/top-mentors")
     @ResponseBody
     public ResponseEntity<List<TopMentorDTO>> getTopMentors(
@@ -101,7 +108,7 @@ public class ManagerController {
         List<TopMentorDTO> topMentors = managerStatsService.getTopMentors(startDate);
         return ResponseEntity.ok(topMentors);
     }
-    
+
     @GetMapping("/manager/api/summary-stats")
     @ResponseBody
     public ResponseEntity<ManagerStatsDTO> getSummaryStats(
@@ -109,7 +116,7 @@ public class ManagerController {
         ManagerStatsDTO stats = managerStatsService.getManagerStats(period);
         return ResponseEntity.ok(stats);
     }
-    
+
     private LocalDateTime getStartDateByPeriod(String period) {
         LocalDateTime now = LocalDateTime.now();
         switch (period) {
@@ -127,11 +134,67 @@ public class ManagerController {
     }
 
     @GetMapping("/manager/mentor-working-date")
-    public String showMentorWorkingDate(Model model) {
-        List<MentorAvailableTimeDTO> mentorRequest = mentorAvailableTimeService.findAllDistinctStartEndDates();
+    public String showMentorWorkingDate(Model model,
+                                        @RequestParam(defaultValue = "PENDING") String status) {
+        MentorAvailableTime.Status enumValue = MentorAvailableTime.Status.valueOf(status);
+        List<MentorAvailableTimeDTO> mentorRequest = mentorAvailableTimeService.findAllDistinctStartEndDates(enumValue);
         model.addAttribute("mentorRequest", mentorRequest);
+        model.addAttribute("activeStatus", status.toUpperCase());
         return "manager/working-date-review";
     }
+
+    @GetMapping("/manager/mentor-working-date/{mid}")
+    public String showMentorWorkingDateView(Model model,
+                                            @PathVariable String mid,
+                                            @RequestParam LocalDate endLocal) {
+        Mentor mentor = mentorService.getMentorById(mid);
+        if (mentor == null) {
+            return "redirect:/manager/mentor-working-date";
+        }
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+
+
+        boolean[][] slotDayMatrix = mentorAvailableTimeService.slotDayMatrix(setSlots);
+        model.addAttribute("slotDayMatrix", slotDayMatrix);
+        model.addAttribute("mentor", mentor.getId());
+        model.addAttribute("endDate", endLocal);
+        model.addAttribute("slots", Slot.values());
+        model.addAttribute("days", Day.values());
+        return "manager/mentor-working-date";
+    }
+
+    @PostMapping("/manager/mentor-working-date/approve")
+    public String approveMentorWorkingDate(@RequestParam LocalDate endDate,
+                                           @RequestParam String mentor) {
+        Mentor foundMentor = mentorService.getMentorById(mentor);
+        if (mentor == null) {
+            return "redirect:/manager/mentor-working-date";
+        }
+        List<MentorAvailableTime> mentorAvailableTimes = mentorAvailableTimeService.findAllMentorAvailableTimeByEndDate(foundMentor, endDate);
+        for (MentorAvailableTime mentorAvailableTime : mentorAvailableTimes) {
+            mentorAvailableTime.setStatus(MentorAvailableTime.Status.APPROVED);
+        }
+        mentorAvailableTimeService.insertWorkingSchedule(mentorAvailableTimes);
+        return "redirect:/manager/mentor-working-date?approve=success";
+    }
+
+    @PostMapping("/manager/mentor-working-date/reject")
+    public String rejectMentorWorkingDate(@RequestParam String reason,
+                                          @RequestParam LocalDate endDate,
+                                          @RequestParam String mentor) {
+        Mentor foundMentor = mentorService.getMentorById(mentor);
+        if (mentor == null) {
+            return "redirect:/manager/mentor-working-date";
+        }
+        List<MentorAvailableTime> mentorAvailableTimes = mentorAvailableTimeService.findAllMentorAvailableTimeByEndDate(foundMentor, endDate);
+        for (MentorAvailableTime mentorAvailableTime : mentorAvailableTimes) {
+            mentorAvailableTime.setStatus(MentorAvailableTime.Status.REJECTED);
+            mentorAvailableTime.setReason(reason);
+        }
+        mentorAvailableTimeService.insertWorkingSchedule(mentorAvailableTimes);
+        return "redirect:/manager/mentor-working-date?approve=success";
+    }
+
 
     @GetMapping("/manager/create-class")
     public String showCreateClass(Model model) {
@@ -152,11 +215,12 @@ public class ManagerController {
             enrollmentService.save(enrollment);
             return "redirect:/manager/create-class?status=REJECTED&reject=" + eid;
         }
-        if(action.equals("approve")){
+        if (action.equals("approve")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.CREATED);
             enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
             return "redirect:/manager/create-class?status=APPROVED&approve=" + eid;
-        }if(action.equals("view")){
+        }
+        if (action.equals("view")) {
             return "redirect:/manager/create-class/" + eid + "/view";
         }
         return "redirect:/manager/create-class";

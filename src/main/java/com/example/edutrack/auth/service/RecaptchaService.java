@@ -22,11 +22,10 @@ public class RecaptchaService {
     public boolean verify(String responseToken, String remoteIp) {
         RestTemplate restTemplate = new RestTemplate();
 
-        Map<String, String> body = new HashMap<>();
         ResponseEntity<Map> response = restTemplate.postForEntity(VERIFY_URL + "?secret=" + recaptchaSecret + "&response=" + responseToken + "&remoteip=" + remoteIp, null, Map.class);
         Map<String, Object> responseBody = response.getBody();
 
-        System.out.println("reCAPTCHA response: " + body);
+        System.out.println("reCAPTCHA response: " + responseBody);
 
         return responseBody != null && Boolean.TRUE.equals(responseBody.get("success"));
     }

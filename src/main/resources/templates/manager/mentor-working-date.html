@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule - Blue Theme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="w-64 bg-blue-800 text-white h-screen fixed">
+    <div class="p-6 text-2xl font-bold border-b border-blue-600">EduTrack Manager</div>
+    <nav class="mt-6 space-y-1 px-4">
+        <a th:href="@{/manager/dashboard}" class="block py-2 px-3 rounded hover:bg-blue-700">Dashboard</a>
+        <a th:href="@{/manager/mentees}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentees</a>
+        <a th:href="@{/manager/mentors}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentors</a>
+        <a th:href="@{/manager/payments}" class="block py-2 px-3 rounded hover:bg-blue-700">Payments</a>
+    </nav>
+</div>
+<div class="ml-64 min-h-screen p-10">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="overflow-x-auto">
+            <div class="flex items-center justify-start mb-4">
+                <a href="javascript:history.back()"
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                    ← Return
+                </a>
+            </div>
+
+            <table class="min-w-full border border-blue-200 rounded-lg">
+                <thead>
+                <tr class="bg-blue-600 text-white text-sm">
+                    <th class="px-4 py-2 text-left">Time Slot</th>
+                    <th class="px-4 py-2 text-center capitalize"
+                        th:each="day : ${days}"
+                        th:text="${day.name().toLowerCase()}"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="slot, iStat : ${slots}" class="text-sm">
+                    <td class="border px-4 py-3 font-semibold text-gray-700"
+                        th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
+                    <td th:each="day, jStat : ${days}"
+                        class="border px-2 py-3 text-center">
+                        <div th:class="'rounded-md w-full h-10 mx-auto transition-all duration-300 ' +
+                             (${slotDayMatrix[iStat.index][jStat.index]} ? 'bg-blue-400' : 'bg-blue-50')">
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <!-- Sau </table> -->
+            <div class="flex justify-end space-x-2 mt-4">
+                <form th:action="@{/manager/mentor-working-date/approve}" method="post">
+                    <input type="hidden" name="endDate" th:value="${endDate}">
+                    <input type="hidden" name="mentor" th:value="${mentor}">
+                    <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition">
+                        Approve
+                    </button>
+                </form>
+
+                <button onclick="openRejectModal()"
+                        class="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition">
+                    Reject
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Rejection Reason</h2>
+        <form id="rejectForm" th:action="@{/manager/mentor-working-date/reject}" method="post">
+            <input type="hidden" name="endDate" th:value="${endDate}">
+            <input type="hidden" name="mentor" th:value="${mentor}">
+            <textarea name="reason" required rows="4"
+                      class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                      placeholder="Enter rejection reason..."></textarea>
+            <div class="flex justify-end space-x-2 mt-4">
+                <button type="button"
+                        onclick="closeRejectModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition">
+                    Confirm Reject
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function openRejectModal() {
+        document.getElementById('rejectModal').classList.remove('hidden');
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.add('hidden');
+    }
+</script>
+
+</body>
+</html>
