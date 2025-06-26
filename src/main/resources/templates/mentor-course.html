@@ -7,60 +7,507 @@
           href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
           rel="stylesheet"
   />
-  <link rel="stylesheet" th:href="@{/assets/css/mentor_course.css}" />
-  <title>Mentor detail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Mentor Detail</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      line-height: 1.6;
+      color: #2c3e50;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #ff7b7b 0%, #ff9999 100%);
+      color: white;
+      padding: 80px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="3" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+      animation: float 20s infinite linear;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .hero-content {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-avatar {
+      text-align: center;
+    }
+
+    .avatar-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .avatar-container img {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid rgba(255,255,255,0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .avatar-container:hover img {
+      transform: scale(1.05);
+    }
+
+    .avatar-container::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      animation: pulse 3s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.5; }
+    }
+
+    .hero-info h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .hero-summary {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      opacity: 0.95;
+      line-height: 1.8;
+    }
+
+    .expertise-list {
+      background: rgba(255,255,255,0.1);
+      padding: 25px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .expertise-list h3 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .expertise-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .expertise-tag {
+      background: rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+    }
+
+    .expertise-tag:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 80px 0;
+      background: white;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-header h2 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .section-header h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(45deg, #ff7b7b, #ff9999);
+      border-radius: 2px;
+    }
+
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: start;
+    }
+
+    .about-card {
+      background: #f8f9fa;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .about-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .about-card h3 {
+      color: #ff7b7b;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .about-card p {
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .experience-list {
+      list-style: none;
+    }
+
+    .experience-list li {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border-left: 4px solid #ff7b7b;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    /* Schedule Section */
+    .schedule-section {
+      padding: 80px 0;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .schedule-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .schedule-title {
+      font-size: 2rem;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .schedule-table th {
+      background: linear-gradient(135deg, #ff7b7b, #ff9999);
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .schedule-table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      background: white;
+    }
+
+    .schedule-table tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    .mentor-button {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ddd;
+      margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+
+    .mentor-button.active {
+      background: linear-gradient(135deg, #ff7b7b, #ff9999);
+      box-shadow: 0 3px 10px rgba(255, 123, 123, 0.3);
+      transform: scale(1.2);
+    }
+
+    /* Courses Section */
+    .courses-section {
+      padding: 80px 0;
+      background: white;
+    }
+
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .course-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .course-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(45deg, #ff7b7b, #ff9999);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .course-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .course-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .course-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #ff7b7b, #ff9999);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .course-card h4 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 15px;
+    }
+
+    .course-card p {
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 30px;
+      }
+
+      .hero-info h1 {
+        font-size: 2.5rem;
+      }
+
+      .about-content {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 0 15px;
+      }
+
+      .schedule-table {
+        font-size: 0.9rem;
+      }
+
+      .schedule-table th,
+      .schedule-table td {
+        padding: 10px 5px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        padding: 60px 0;
+      }
+
+      .hero-info h1 {
+        font-size: 2rem;
+      }
+
+      .section-header h2 {
+        font-size: 2rem;
+      }
+
+      .courses-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-<header class="section__container header__container" id="home">
-  <div class="header__image">
-    <img th:src="@{/mentors/{id}/avatar(id=${mentor.get().id})}" th:alt="${mentor.get().fullName}" />
-  </div>
-  <div class="header__content">
-    <div>
-      <h1 th:text="${mentor.get().fullName}"></h1>
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-avatar">
+        <div class="avatar-container">
+          <img th:src="@{/mentors/{id}/avatar(id=${mentor.get().id})}" th:alt="${mentor.get().fullName}" />
+        </div>
+      </div>
+      <div class="hero-info">
+        <h1 th:text="${mentor.get().fullName}">Mentor Name</h1>
+        <p class="hero-summary" th:text="${cv.get().summary}">
+          Experienced mentor with expertise in multiple domains.
+        </p>
+        <div class="expertise-list">
+          <h3>Expertise Areas</h3>
+          <div class="expertise-tags">
+            <span class="expertise-tag" th:each="subject : ${subjects}" th:text="${subject.title}">Subject</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="header__content">
-      <p class="section__description" th:text="${cv.get().summary}">
-      </p>
-      <ul class="section__description">
-        Expertise:
-        <li style="margin-left: 2em" th:each="subject : ${subjects}" th:text="${subject.title}"></li>
-      </ul>
-    </div>
-
-  </div>
-</header>
-
-<section class="section__container about__container" id="about">
-  <div class="about__image">
-    <img th:src="@{/assets/bg.png}" alt="bg" class="about__bg-1" />
-    <img th:src="@{/assets/bg.png}" alt="bg" class="about__bg-2" />
-    <img th:src="@{/assets/about.jpg}" alt="about" class="about__img" />
-  </div>
-  <div class="about__content">
-    <h2 class="section__header">Bit About Mentor</h2>
-    <p th:text="${cv.get().education}"></p>
-    <u>
-      <li th:each="cert : ${cv.get().experienceItems}"></li>
-    </u>
-    <p class="section__description" th:text="${cv.get().certifications}">
-      <u>
-        <li th:each="cert : ${cv.get().experienceItems}"></li>
-      </u>
-
-    </p>
   </div>
 </section>
 
-<section class="section__container service__container" id="service">
-  <h2 class="section__header">Courses</h2>
-  <div class="service__grid">
-    <div class="service__card" th:each="cm : ${courses}">
-      <a th:href="@{'/courses/' + ${cm.id}}">
-        <span><i class="ri-window-fill"></i></span>
+<!-- About Section -->
+<section class="about-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>About Our Mentor</h2>
+    </div>
+    <div class="about-content">
+      <div class="about-card">
+        <h3><i class="ri-graduation-cap-line"></i> Education</h3>
+        <p th:text="${cv.get().education}">
+          Educational background and qualifications of the mentor.
+        </p>
+      </div>
+      <div class="about-card">
+        <h3><i class="ri-award-line"></i> Experience & Certifications</h3>
+        <p th:text="${cv.get().certifications}">
+          Professional certifications and achievements.
+        </p>
+        <ul class="experience-list">
+          <li th:each="exp : ${cv.get().experienceItems}" th:text="${exp}">Experience item</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Schedule Section -->
+<section class="schedule-section">
+  <div class="container">
+    <div class="schedule-container">
+      <h3 class="schedule-title">Available Schedule This Month</h3>
+      <table class="schedule-table" th:if="${slotDayMatrix}">
+        <thead>
+        <tr>
+          <th style="background-color: #369F93FF">Time Slot</th>
+          <th style="background-color: #369F93FF" th:each="day : ${dayLabels}"
+              th:text="${day.name().toLowerCase()}"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="slot, iStat : ${slots}">
+          <td th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
+          <td th:each="day, jStat : ${dayLabels}">
+            <div th:class="'mentor-button' + (${slotDayMatrix[iStat.index][jStat.index]} ? ' active' : '')">
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Courses Section -->
+<section class="courses-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Available Courses</h2>
+    </div>
+    <div class="courses-grid">
+      <a class="course-card" th:each="cm : ${courses}" th:href="@{'/courses/' + ${cm.id}}">
+        <div class="course-icon">
+          <i class="ri-book-line"></i>
+        </div>
         <h4 th:text="${cm.course.name}">Course Name</h4>
         <p th:text="${cm.course.description}">
-          Course description
+          Course description and details about what students will learn.
         </p>
       </a>
     </div>
@@ -125,6 +572,37 @@
 
 
 <script src="https://unpkg.com/scrollreveal"></script>
-<script th:src="@{/main.js}"></script>
+<script>
+  // Initialize ScrollReveal animations
+  ScrollReveal().reveal('.hero-content', {
+    delay: 200,
+    distance: '50px',
+    origin: 'top',
+    duration: 1000
+  });
+
+  ScrollReveal().reveal('.about-card', {
+    delay: 300,
+    distance: '30px',
+    origin: 'bottom',
+    duration: 800,
+    interval: 200
+  });
+
+  ScrollReveal().reveal('.course-card', {
+    delay: 200,
+    distance: '30px',
+    origin: 'bottom',
+    duration: 600,
+    interval: 100
+  });
+
+  ScrollReveal().reveal('.schedule-container', {
+    delay: 400,
+    distance: '50px',
+    origin: 'top',
+    duration: 1000
+  });
+</script>
 </body>
 </html>
