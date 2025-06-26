@@ -25,7 +25,8 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
            "AND mat.id.slot = :slot " +
            "AND mat.id.startDate <= :startDate " +
            "AND mat.id.endDate >= :startDate " +
-           "AND FUNCTION('WEEKDAY', :startDate) = mat.id.day")
+           "AND FUNCTION('WEEKDAY', :startDate) = mat.id.day " +
+           "AND mat.status = 'APPROVED'")
     boolean isMentorAvailableTime(@Param("mentor") Mentor mentor,
                                   @Param("slot") Slot slot,
                                   @Param("startDate") LocalDate startDate);
