@@ -42,4 +42,6 @@ public interface CourseMentorService {
     List<CourseMentor> getRecommendedCourseMentors(UUID menteeId, int limit);
 
     List<CourseMentor> getRecommendedByHistory(UUID menteeId, int limit);
+
+    List<CourseMentor> getReviewablePairsForMentee(UUID menteeId);
 }
