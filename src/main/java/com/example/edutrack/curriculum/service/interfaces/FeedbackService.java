@@ -2,8 +2,10 @@ package com.example.edutrack.curriculum.service.interfaces;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.curriculum.dto.ReviewDTO;
+import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
+import com.example.edutrack.profiles.model.CV;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -22,4 +24,10 @@ public interface FeedbackService {
     void deleteFeedbackById(UUID id);
 
     void toggleFeedbackStatus(UUID id);
+
+    void aiVerifyFeedback(Feedback feedback);
+
+    String generatePrompt(Feedback feedback);
+
+    void processAIResponse(Feedback feedback, String aiJson);
 }

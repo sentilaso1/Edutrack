@@ -59,7 +59,7 @@ public class RoleSelectionController {
             session.setAttribute("loggedInUser", mentee);
             session.setAttribute("role", "mentee");
             session.removeAttribute("googleUserInfo");
-            return "redirect:/home";
+            return "redirect:/";
         }
         else if ("MENTOR".equalsIgnoreCase(role)) {
             Mentor mentor = new Mentor();

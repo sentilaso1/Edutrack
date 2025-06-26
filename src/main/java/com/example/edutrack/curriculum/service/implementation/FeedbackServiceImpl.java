@@ -1,12 +1,15 @@
 package com.example.edutrack.curriculum.service.implementation;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.common.service.interfaces.LLMService;
 import com.example.edutrack.curriculum.dto.ReviewDTO;
+import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
+import com.example.edutrack.profiles.model.CV;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,10 +22,13 @@ import java.util.UUID;
 public class FeedbackServiceImpl implements FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final CourseMentorRepository courseMentorRepository;
+    private final LLMService llmService;
     public FeedbackServiceImpl(FeedbackRepository feedbackRepository,
-                               CourseMentorRepository courseMentorRepository) {
+                               CourseMentorRepository courseMentorRepository,
+                               LLMService llmService) {
         this.feedbackRepository = feedbackRepository;
         this.courseMentorRepository = courseMentorRepository;
+        this.llmService = llmService;
     }
 
     @Override
@@ -98,4 +104,23 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
         feedbackRepository.save(feedback);
     }
+
+    @Override
+    public void aiVerifyFeedback(Feedback feedback) {
+        String prompt = generatePrompt(feedback);
+        String aiResponse = llmService.callModel(prompt);
+        processAIResponse(feedback, aiResponse);
+    }
+
+    @Override
+    public String generatePrompt(Feedback feedback) {
+        return "Hello";
+    }
+
+    @Override
+    public void processAIResponse(Feedback feedback, String aiResponse) {
+
+    }
+
+
 }
