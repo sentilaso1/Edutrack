@@ -33,10 +33,10 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
 
 
 
-    @Query("SELECT MAX(mat.id.endDate) FROM MentorAvailableTime mat WHERE mat.mentor = :mentor")
+    @Query("SELECT MAX(mat.date) FROM MentorAvailableTimeDetails mat WHERE mat.mentor = :mentor")
     LocalDate findMaxEndDate(Mentor mentor);
 
-    @Query("SELECT MIN(mat.id.startDate) FROM MentorAvailableTime mat WHERE mat.mentor = :mentor")
+    @Query("SELECT MIN(mat.date) FROM MentorAvailableTimeDetails mat WHERE mat.mentor = :mentor AND mat.mentee is null ")
     LocalDate findMinStartDate(Mentor mentor);
 
     @Query("SELECT COUNT(mat) > 0 " +
@@ -82,7 +82,8 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
     @Query("SELECT mat "+
            "FROM MentorAvailableTime mat " +
            "WHERE mat.mentor = :mentor " +
-           "AND mat.id.endDate = :endDate")
+           "AND mat.id.endDate = :endDate " +
+           "ORDER BY mat.id.endDate DESC ")
     List<MentorAvailableTime> findAllMentorAvailableTimeByEndDate(Mentor mentor, LocalDate endDate);
 
     @Query("SELECT MAX(mat.id.endDate) FROM MentorAvailableTime mat WHERE mat.mentor = :mentor AND mat.status = :enumValue")

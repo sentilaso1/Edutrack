@@ -1,6 +1,7 @@
 package com.example.edutrack.accounts.controller;
 
-
+import com.example.edutrack.accounts.service.MentorService;
+import com.example.edutrack.accounts.dto.IncomeStatsDTO;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -38,6 +39,7 @@ public class MentorController {
     private final MentorAvailableTimeService mentorAvailableTimeService;
     private final WalletService walletService;
     private final TransactionService transactionService;
+    private final MentorService mentorService;
 
     @Autowired
     public MentorRepository mentorRepository;
@@ -48,12 +50,14 @@ public class MentorController {
     @Autowired
     public MentorController(EnrollmentScheduleService enrollmentScheduleService,
                             EnrollmentService enrollmentService,
-                            MentorAvailableTimeService mentorAvailableTimeService, WalletService walletService, TransactionService transactionService) {
+                            MentorAvailableTimeService mentorAvailableTimeService, WalletService walletService, TransactionService transactionService,
+                                MentorService mentorService) {
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.enrollmentService = enrollmentService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.walletService = walletService;
         this.transactionService = transactionService;
+        this.mentorService = mentorService;
     }
 
     @RequestMapping("/mentor")
@@ -183,7 +187,7 @@ public class MentorController {
         }
         if (action.equals("approve")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
-            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
+            enrollmentService.save(enrollment);
             return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
         }
         if (action.equals("view")) {
@@ -202,12 +206,10 @@ public class MentorController {
         }
         Enrollment enrollment = enrollmentService.findById(eid);
         List<Slot> slots = new ArrayList<>();
-        List<Day> days = new ArrayList<>();
+        List<LocalDate> dates = new ArrayList<>();
         String summary = enrollment.getScheduleSummary();
 
-        EnrollmentScheduleServiceImpl.parseDaySlotString(summary, days, slots);
-
-        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(enrollment.getMentee(), enrollment.getCourseMentor(), slots, days, enrollment.getTotalSlots());
+        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(summary);
         model.addAttribute("startTime", startTime);
         return "mentor/skill-register-request-detail";
     }
@@ -264,6 +266,9 @@ public class MentorController {
 
     @GetMapping("/mentor/income-stats")
     public String mentorStats(Model model, HttpSession session) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        IncomeStatsDTO incomeStats = mentorService.getIncomeStats(mentor.getId());
+        model.addAttribute("incomeStats", incomeStats);
         return "accounts/html/mentor-stats";
     }
 

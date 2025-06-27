@@ -50,7 +50,6 @@ public class MentorController {
         this.courseRepository = courseRepository;
     }
 
-    // View mentors in a list, directory: localhost:port/mentors
     @GetMapping("/mentors")
     public String viewMentorList(
             @RequestParam(required = false) String name,

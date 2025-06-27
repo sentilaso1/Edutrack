@@ -84,14 +84,14 @@
                 </tr>
                 </tbody>
             </table>
-            <div class="graph">
+            <div class="graph" th:if="${reason != null}">
                 <h3>Rejection Reason:</h3>
                 <p th:text="${reason}"></p>
             </div>
         </div>
 
         <div class="todo-card" th:each="time : ${setTime}">
-            <a th:href="@{/mentor/working-date(end=${time.endDate})}">
+            <a th:href="@{/mentor/working-date(end=${time.endDate}, status=${param.status})}">
                 <span class="todo-category designer">Working Date</span>
                 <h4>From <span th:text="${time.getStartDate()}"></span> to <span th:text="${time.getEndDate()}"></span>
                 </h4>
