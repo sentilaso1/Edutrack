@@ -215,8 +215,8 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     const filterForm = document.getElementById("filter-form");
-    const pageNumber = /*[[${pageNumber}]]*/ 1;
-    const totalPages = /*[[${page.totalPages}]]*/ 1;
+    const pageNumber = [[${pageNumber}]];
+    const totalPages = [[${page.totalPages}]];
 
     document.getElementById('first-page').addEventListener('click', () => {
         filterForm.action = '/bookmark/list/1';
@@ -233,6 +233,16 @@
     document.getElementById('last-page').addEventListener('click', () => {
         filterForm.action = '/bookmark/list/' + totalPages;
         filterForm.submit();
+    });
+
+    const allTagsCheckbox = document.getElementById('tags-all');
+    const tagCheckboxes = filterForm.querySelectorAll('input[name="tags"]');
+
+    allTagsCheckbox.addEventListener('change', () => {
+        const isChecked = allTagsCheckbox.checked;
+        tagCheckboxes.forEach(cb => {
+            cb.checked = isChecked;
+        });
     });
     /*]]>*/
 </script>
