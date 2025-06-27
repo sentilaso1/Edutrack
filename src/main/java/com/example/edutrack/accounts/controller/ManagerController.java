@@ -175,6 +175,7 @@ public class ManagerController {
             mentorAvailableTime.setStatus(MentorAvailableTime.Status.APPROVED);
         }
         mentorAvailableTimeService.insertWorkingSchedule(mentorAvailableTimes);
+        mentorAvailableTimeService.insertMentorAvailableTime(mentorAvailableTimes.get(0).getId().getStartDate(), mentorAvailableTimes.get(0).getId().getEndDate(), foundMentor);
         return "redirect:/manager/mentor-working-date?approve=success";
     }
 
@@ -230,13 +231,10 @@ public class ManagerController {
     public String viewSensorClass(@PathVariable Long eid,
                                   Model model) {
         Enrollment enrollment = enrollmentService.findById(eid);
-        List<Slot> slots = new ArrayList<>();
-        List<Day> days = new ArrayList<>();
         String summary = enrollment.getScheduleSummary();
 
-        EnrollmentScheduleServiceImpl.parseDaySlotString(summary, days, slots);
 
-        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(enrollment.getMentee(), enrollment.getCourseMentor(), slots, days, enrollment.getTotalSlots());
+        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(summary);
         model.addAttribute("startTime", startTime);
         return "manager/skill-register-request-detail";
     }

@@ -5,9 +5,7 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
-import com.example.edutrack.timetables.dto.EnrollmentRequestDTO;
-import com.example.edutrack.timetables.dto.RequestedSchedule;
-import com.example.edutrack.timetables.model.Day;
+
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
@@ -22,7 +20,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,8 +50,10 @@ public class MenteeScheduleController {
     @PostMapping("/courses/checkout/{cmid}")
     public String handleCheckout(
             @PathVariable(value = "cmid") UUID courseMentorId,
-            @ModelAttribute EnrollmentRequestDTO params,
             HttpSession session,
+            @RequestParam List<Slot> slot,
+            @RequestParam List<String> date,
+            @RequestParam String totalPrice,
             Model model
     ) {
         User user = (User) session.getAttribute("loggedInUser");
@@ -73,7 +75,7 @@ public class MenteeScheduleController {
         model.addAttribute("course", courseMentor.getCourse());
         model.addAttribute("mentor", courseMentor.getMentor());
 
-        if (params.getTotalSlot() == null || params.getSlot() == null || params.getDay() == null) {
+        if (slot == null || date == null || totalPrice == null) {
             model.addAttribute("error", "Invalid enrollment parameters");
             return "/checkout/checkout-info";
         }
@@ -85,21 +87,9 @@ public class MenteeScheduleController {
         Wallet wallet = walletOptional.get();
         model.addAttribute("wallet", wallet);
 
-        Double totalCost = courseMentor.getPrice() * params.getTotalSlot();
+        Double totalCost = Double.parseDouble(totalPrice);
         if (wallet.getBalance() <= 0 || wallet.getBalance() < totalCost) {
             model.addAttribute("error", "Insufficient balance in wallet");
-            return "/checkout/checkout-info";
-        }
-
-        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(
-                menteeOpt.get(),
-                courseMentor,
-                params.getSlot(),
-                params.getDay(),
-                params.getTotalSlot()
-        );
-        if (startTime == null || startTime.isEmpty()) {
-            model.addAttribute("error", "Cannot find start time for the selected schedule");
             return "/checkout/checkout-info";
         }
 
@@ -114,57 +104,22 @@ public class MenteeScheduleController {
         );
         transactionService.save(transaction);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        List<LocalDate> localDates = date.stream().map(LocalDate::parse).toList();
+
         Enrollment enrollment = new Enrollment(
                 menteeOpt.get(),
                 courseMentor,
-                params.getTotalSlot(),
-                params.getSlot(),
-                params.getDay(),
-                startTime.get(0).getRequestedDate().format(formatter) + "-" + startTime.get(0).getSlot()
+                slot.size(),
+                slot,
+                localDates,
+                ""
         );
         enrollment.setTransaction(transaction);
+
         enrollmentService.save(enrollment);
 
         model.addAttribute("success", "Checkout Successful");
         return "/checkout/checkout-info";
     }
 
-    @PostMapping("/courses/register/{cmid}")
-    public String registerSkill(@RequestParam List<Slot> slot,
-                                @RequestParam List<Day> day,
-                                @PathVariable(value = "cmid") UUID courseMentorId,
-                                @RequestParam Integer totalSlot,
-                                HttpSession session,
-                                Model model,
-                                @RequestParam String action) {
-        User user = (User) session.getAttribute("loggedInUser");
-        if (user == null) {
-            return "redirect:/login";
-        }
-
-        Optional<Mentee> menteeOpt = menteeService.findById(user.getId());
-        if (menteeOpt.isEmpty()) {
-            model.addAttribute("error", "Mentee not found");
-            return "register-section";
-        }
-        Mentee mentee = menteeOpt.get();
-
-        Optional<Wallet> walletOptional = walletService.findById(user.getId());
-        if (walletOptional.isEmpty()) {
-            walletOptional = Optional.of(walletService.save(user));
-        }
-        model.addAttribute("wallet", walletOptional.get());
-
-        CourseMentor courseMentor = courseMentorService.findById(courseMentorId);
-        if ("checkStartDate".equals(action)) {
-            List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(mentee, courseMentor, slot, day, totalSlot);
-            System.out.println(startTime);
-            model.addAttribute("startTime", startTime);
-            session.setAttribute("startTime", startTime);
-            return "redirect:/courses/register/{cmid}";
-        }
-
-        return "register-section";
-    }
 }

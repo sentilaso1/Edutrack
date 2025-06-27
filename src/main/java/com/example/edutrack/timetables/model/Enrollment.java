@@ -59,26 +59,25 @@ public class Enrollment {
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
 
-    private String formatScheduleList(List<Slot> slots, List<Day> days) {
+    private String formatScheduleList(List<Slot> slots, List<LocalDate> days) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < days.size(); i++) {
-            sb.append(days.get(i)).append("-").append(slots.get(i).toString());
+            sb.append(days.get(i)).append(",").append(slots.get(i));
             if (i < days.size() - 1) {
-                sb.append(", ");
+                sb.append("; ");
             }
         }
         return sb.toString();
     }
 
     public Enrollment() {
-
     }
 
-    public Enrollment(Mentee mentee, CourseMentor courseMentor, Integer totalSlots, List<Slot> slots, List<Day> days, String startTime) {
+    public Enrollment(Mentee mentee, CourseMentor courseMentor, Integer totalSlots, List<Slot> slots, List<LocalDate> dates, String startTime) {
         this.mentee = mentee;
         this.courseMentor = courseMentor;
         this.totalSlots = totalSlots;
-        this.scheduleSummary = formatScheduleList(slots, days);
+        this.scheduleSummary = formatScheduleList(slots, dates);
         this.startTime = startTime;
     }
 

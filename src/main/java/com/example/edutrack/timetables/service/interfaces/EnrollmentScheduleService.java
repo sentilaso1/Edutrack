@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Service
 public interface EnrollmentScheduleService {
-    List<RequestedSchedule> findStartLearningTime(Mentee user, CourseMentor courseMentor, List<Slot> slot, List<Day> day, Integer totalSlot);
+    List<RequestedSchedule> findStartLearningTime(String summary);
 
     List<EnrollmentSchedule> findAll();
 
