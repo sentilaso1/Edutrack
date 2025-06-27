@@ -366,6 +366,41 @@
       line-height: 1.6;
     }
 
+    .back-button-container {
+      background: white;
+      padding: 20px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #ff7b7b, #ff9999);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 123, 123, 0.3);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 123, 123, 0.4);
+    }
+
+    .back-button:active {
+      transform: translateY(0);
+    }
+
+    .back-button i {
+      font-size: 1.1rem;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .hero-content {
@@ -416,6 +451,14 @@
   </style>
 </head>
 <body>
+<div class="back-button-container">
+  <div class="container">
+    <button class="back-button" onclick="history.back()">
+      <i class="ri-arrow-left-line"></i>
+      <span>Back</span>
+    </button>
+  </div>
+</div>
 <!-- Hero Section -->
 <section class="hero">
   <div class="container">

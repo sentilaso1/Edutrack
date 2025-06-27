@@ -1,7 +1,9 @@
 package com.example.edutrack.curriculum.controller;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.service.implementations.MenteeServiceImpl;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -14,7 +16,9 @@ import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
+import com.example.edutrack.timetables.model.MentorAvailableTimeDetails;
 import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.transactions.model.Wallet;
@@ -35,6 +39,8 @@ import com.example.edutrack.curriculum.model.Course;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +60,8 @@ public class CourseController {
     private final WalletService walletService;
     private final CourseRepository courseRepository;
     private final CourseMentorRepository courseMentorRepository;
+    private final MenteeServiceImpl menteeService;
+    private final MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository;
 
     @Autowired
     public CourseController(CourseServiceImpl courseServiceImpl,
@@ -67,7 +75,7 @@ public class CourseController {
                             EnrollmentService enrollmentService,
                             WalletService walletService,
                             CourseRepository courseRepository,
-                            CourseMentorRepository courseMentorRepository) {
+                            CourseMentorRepository courseMentorRepository, MenteeServiceImpl menteeService, MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository) {
         this.courseServiceImpl = courseServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
@@ -80,6 +88,8 @@ public class CourseController {
         this.walletService = walletService;
         this.courseRepository = courseRepository;
         this.courseMentorRepository = courseMentorRepository;
+        this.menteeService = menteeService;
+        this.mentorAvailableTimeDetailsRepository = mentorAvailableTimeDetailsRepository;
     }
 
     @GetMapping("/courses")
@@ -219,33 +229,33 @@ public class CourseController {
     @GetMapping("courses/register/{cmid}")
     public String registerCourse(@PathVariable UUID cmid, HttpSession session,
                                  Model model) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        Optional<Mentee> menteeOpt = menteeService.findById(user.getId());
+
         CourseMentor courseMentor = courseMentorService.findById(cmid);
         List <MentorAvailableTime> mentorAvailableTime = mentorAvailableTimeService.findByMentorId(courseMentor.getMentor());
         model.addAttribute("courseMentor", courseMentor);
         model.addAttribute("mentorAvailableTime", mentorAvailableTime);
 
         LocalDate minDate = mentorAvailableTimeService.findMinStartDate(courseMentor.getMentor());
+        if(minDate.isBefore(LocalDate.now())){
+            minDate = LocalDate.now();
+        }
         LocalDate maxDate = mentorAvailableTimeService.findMaxEndDate(courseMentor.getMentor());
         model.addAttribute("minDate", minDate);
         model.addAttribute("maxDate", maxDate);
         model.addAttribute("slots", Slot.values());
         model.addAttribute("dayLabels", Day.values());
-
-        LocalDate endLocal = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
-        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(courseMentor.getMentor(), endLocal);
-        boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
-
-        for (MentorAvailableSlotDTO dto : setSlots) {
-            int slotIndex = dto.getSlot().ordinal();
-            int dayIndex = dto.getDay().ordinal();
-            slotDayMatrix[slotIndex][dayIndex] = true;
-        }
+        boolean[][] slotDayMatrix = availableSlotMatrix(courseMentor.getMentor(), menteeOpt.get(), minDate, maxDate);
 
         model.addAttribute("slotDayMatrix", slotDayMatrix);
 
         model.addAttribute("startTime", session.getAttribute("startTime"));
 
-        User user = (User) session.getAttribute("loggedInUser");
         if (user != null) {
             Optional<Wallet> walletOptional = walletService.findById(user.getId());
             if (walletOptional.isEmpty()) {
@@ -272,4 +282,33 @@ public class CourseController {
 
         return "course-related-mentor";
     }
+
+    boolean[][] availableSlotMatrix(Mentor mentor,
+                                    Mentee mentee,
+                                    LocalDate minDate,
+                                    LocalDate maxDate) {
+        List<LocalDate> dateList = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+        if (minDate.isAfter(currentDate)){
+            currentDate = minDate;
+        }
+
+        while (!currentDate.isAfter(maxDate)) {
+            dateList.add(currentDate);
+            currentDate = currentDate.plusDays(1);
+        }
+        int dayCount = dateList.size();
+        boolean[][] availableSlotMatrix = new boolean[Slot.values().length][dayCount];
+        for (int i = 0; i < Slot.values().length; i++) {
+            for (int j = 0; j < dayCount; j++) {
+                Slot slot = Slot.values()[i];
+                LocalDate slotDate = dateList.get(j);
+                if(mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, slotDate) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, slotDate, mentee)){
+                    availableSlotMatrix[i][j] = true;
+                }
+            }
+        }
+        return availableSlotMatrix;
+    }
+
 }
