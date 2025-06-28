@@ -23,18 +23,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,6 +40,8 @@ import java.util.stream.Stream;
 
 @Service
 public class CvServiceImpl implements CvService {
+    private static final Logger logger = LoggerFactory.getLogger(CvServiceImpl.class);
+
     private final EntityManager entityManager;
     private final CvRepository cvRepository;
     private final UserRepository userRepository;
@@ -430,26 +429,26 @@ public class CvServiceImpl implements CvService {
         try {
             ObjectMapper mapper = new ObjectMapper();
             if (aiJson == null || aiJson.trim().isEmpty()) {
-                System.err.println("AI response is null or empty");
+                logger.warn("AI response is null or empty");
                 return;
             }
 
             JsonNode root = mapper.readTree(aiJson);
             JsonNode choices = root.path("choices");
             if (!choices.isArray() || choices.isEmpty()) {
-                System.err.println("Invalid or empty choices array: " + aiJson);
+                logger.error("Invalid or empty choices array: {}", aiJson);
                 return;
             }
 
             JsonNode message = choices.get(0).path("message");
             if (message.isMissingNode()) {
-                System.err.println("Missing message field: " + aiJson);
+                logger.error("Missing message field: {}", aiJson);
                 return;
             }
 
             JsonNode contentNode = message.path("content");
             if (contentNode.isMissingNode() || !contentNode.isTextual()) {
-                System.err.println("Missing or invalid content field: " + aiJson);
+                logger.error("Missing or invalid content field: {}", aiJson);
                 return;
             }
 
@@ -462,7 +461,7 @@ public class CvServiceImpl implements CvService {
             JsonNode approveNode = decision.get("is-approve");
             JsonNode reasonNode = decision.get("reason");
             if (approveNode == null || reasonNode == null || !approveNode.isTextual() || !reasonNode.isTextual()) {
-                System.err.println("Missing or invalid is-approve/reason fields: " + contentJson);
+                logger.error("Missing or invalid is-approve/reason fields: {}", contentJson);
                 return;
             }
 
@@ -478,16 +477,19 @@ public class CvServiceImpl implements CvService {
                     cm.setStatus(ApplicationStatus.REJECTED);
                     courseMentorRepository.save(cm);
                 }
+                logger.info("CV rejected for mentorId {}: {}", cv.getId(), reason);
+            } else {
+                logger.info("CV approved for mentorId {}: {}", cv.getId(), reason);
             }
 
-            System.out.println("Result: " + aiJson);
+            logger.debug("AI response result: {}", aiJson);
 
             cv.setStatus(approved ? "aiapproved" : "rejected");
             cvRepository.save(cv);
         } catch (JsonProcessingException e) {
-            System.err.println("JSON parsing error for AI response: " + aiJson);
+            logger.error("JSON parsing error for AI response: {}", aiJson, e);
         } catch (Exception e) {
-            System.err.println("Unexpected error processing AI response: " + aiJson);
+            logger.error("Unexpected error processing AI response: {}", aiJson, e);
         }
     }
 

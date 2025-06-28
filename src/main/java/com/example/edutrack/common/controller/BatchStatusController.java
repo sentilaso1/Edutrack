@@ -1,5 +1,6 @@
 package com.example.edutrack.common.controller;
 
+import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import com.example.edutrack.profiles.service.interfaces.CvService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,9 @@ public class BatchStatusController {
     @Autowired
     private CvService cvService;
 
+    @Autowired
+    private FeedbackService feedbackService;
+
     @GetMapping("/status")
     public Map<String, Object> getBatchStatus() {
         Map<String, Object> status = new HashMap<>();
@@ -23,4 +27,5 @@ public class BatchStatusController {
         status.put("lastEnd", cvService.getLastBatchEnd());
         return status;
     }
+
 }
