@@ -401,6 +401,133 @@
       font-size: 1.1rem;
     }
 
+    /* Review Section */
+    .review__grid {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .review__card.course-card {
+      background: #fff;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      padding: 2rem 2rem 1.2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .review-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .review-avatar {
+      flex: 0 0 auto;
+    }
+    .mentee-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2.5px solid #fa6262;
+      background: #f6f8fb;
+    }
+    .review-info-main {
+      flex: 1 1 auto;
+    }
+    .mentee-course-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 0.13rem;
+    }
+    .mentee-name {
+      font-weight: 600;
+      color: #121633;
+      font-size: 1.08rem;
+    }
+    .review-course-name {
+      font-size: 1rem;
+      color: #fa6262;
+      background: #fbe4e4;
+      border-radius: 0.75rem;
+      padding: 0.18em 0.85em;
+      font-weight: 500;
+    }
+    .review-rating-stars {
+      margin-bottom: 0.1rem;
+      font-size: 1.33rem;
+      color: #fa6262;
+      display: flex;
+      align-items: center;
+      gap: 0.1em;
+    }
+    .review-rating-stars i.ri-star-fill,
+    .review-rating-stars i.ri-star-half-fill {
+      color: #fa6262;
+    }
+    .review-rating-stars i.ri-star-line {
+      color: #e2e2e2;
+    }
+    .review-rating-number {
+      font-size: 1rem;
+      color: #444;
+      margin-left: 0.7em;
+    }
+    .review-date {
+      margin-left: auto;
+      font-size: 0.97rem;
+      color: #999;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      gap: 0.4em;
+      white-space: nowrap;
+    }
+    .review-card-content {
+      margin-top: 0.5rem;
+      font-size: 1.08rem;
+      color: #444;
+      line-height: 1.6;
+      padding: 0.3rem;
+      word-break: break-word;
+      background: #f7f7f9;
+      border-radius: 0.5rem;
+    }
+
+    .flag-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .flag-icon .flag-stroke {
+      stroke: #a3a3a3;
+      transition:
+              stroke 0.2s,
+              filter 0.2s,
+              transform 0.15s;
+    }
+
+    .flag-link:hover .flag-stroke,
+    .flag-link:focus .flag-stroke {
+      stroke: #e63946;
+      filter: drop-shadow(0 0 4px #ffb3b3);
+      transform: scale(1.1);
+    }
+
+    .flag-link {
+      cursor: pointer;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .hero-content {
@@ -556,63 +683,71 @@
     </div>
   </div>
 </section>
-
-<section class="section__container review__container" id="reviews">
-  <h2 class="section__header">Mentee Reviews</h2>
-  <div class="review__grid">
-    <div style="text-align: center" th:if="${feedbacks == null or #lists.isEmpty(feedbacks)}">
-      <p>No reviews yet.</p>
-    </div>
-    <div class="review__card course-card" th:each="feedback : ${feedbacks}" th:if="${feedbacks != null and !#lists.isEmpty(feedbacks)}">
-      <div class="review-card-header">
-        <div class="review-avatar">
-          <img th:src="@{'/mentees/' + ${feedback.mentee.id} + '/avatar'}"
-               th:alt="${feedback.mentee.fullName}"
-               class="mentee-avatar"/>
-        </div>
-        <div class="review-info-main">
-          <div class="mentee-course-row">
-            <span class="mentee-name" th:text="${feedback.mentee.fullName}">Mentee Name</span>
-            <div style="display: flex; gap: 0.5rem">
-              <span class="review-date" style="margin-left: 0.3rem">for</span>
-              <span class="review-course-name" th:text="${feedback.courseMentor.course.name}">Course Name</span>
+<section class="schedule-section" style="padding: 80px 0;" id="reviews">
+  <div class="section__header">
+    <div class="schedule-container">
+      <h3 class="schedule-title">Mentee Reviews</h3>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <div class="review__card course-card" style="width: 70%;" th:each="feedback : ${feedbacks}" th:if="${feedbacks != null and !#lists.isEmpty(feedbacks)}">
+          <div class="review-card-header">
+            <div class="review-avatar">
+              <img th:src="@{'/avatar/' + ${feedback.mentee.id}}"
+                   th:alt="${feedback.mentee.fullName}"
+                   style="width: 60px; height: 60px;"
+                   onerror="this.onerror=null;this.src='/assets/images/default-avatar.svg';"
+                   class="mentee-avatar"/>
             </div>
-          </div>
-          <!----->
-          <div th:with="
-      rating=${feedback.rating != null ? feedback.rating : 0},
-      fullStars=${T(java.lang.Math).floor(rating)},
-      hasHalfStar=${(rating - fullStars) >= 0.5},
-      emptyStars=${5 - fullStars - (hasHalfStar ? 1 : 0)}">
-            <div class="review-rating-stars">
-                <span th:if="${fullStars > 0}">
-                  <span th:each="star : ${#numbers.sequence(1, fullStars)}">
-                    <i class="ri-star-fill"></i>
+            <div class="review-info-main">
+              <div class="mentee-course-row">
+                <span class="mentee-name" th:text="${feedback.mentee.fullName}">Mentee Name</span>
+                <div style="display: flex; gap: 0.5rem">
+                  <span class="review-date" style="margin-left: 0.3rem">for</span>
+                  <span class="review-course-name" th:text="${feedback.courseMentor.course.name}">Course Name</span>
+                </div>
+              </div>
+              <!----->
+              <div th:with="
+        rating=${feedback.rating != null ? feedback.rating : 0},
+        fullStars=${T(java.lang.Math).floor(rating)},
+        hasHalfStar=${(rating - fullStars) >= 0.5},
+        emptyStars=${5 - fullStars - (hasHalfStar ? 1 : 0)}">
+                <div class="review-rating-stars">
+                  <span th:if="${fullStars > 0}">
+                    <span th:each="star : ${#numbers.sequence(1, fullStars)}">
+                      <i class="ri-star-fill"></i>
+                    </span>
+                  </span>
+                  <span th:if="${hasHalfStar}">
+                    <i class="ri-star-half-fill"></i>
+                  </span>
+                  <span th:if="${emptyStars > 0}">
+                  <span th:each="star : ${#numbers.sequence(0, emptyStars - 1)}">
+                    <i class="ri-star-line"></i>
                   </span>
                 </span>
-                <span th:if="${hasHalfStar}">
-                  <i class="ri-star-half-fill"></i>
+                </div>
+              </div>
+            </div>
+            <div class="review-date" style="gap: 0.1rem;">
+              <a href="/report" class="flag-link" title="Report this">
+                <span class="flag-icon">
+                  <svg width="26" height="26" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path class="flag-stroke" d="M4 3V17" stroke-width="1.3" stroke-linecap="round"/>
+                    <path class="flag-stroke" d="M4 4.5H12C12.56 4.5 12.8 5.19 12.4 5.55L10.4 7.2C10.14 7.42 10.14 7.83 10.4 8.06L12.4 9.7C12.8 10.06 12.56 10.75 12 10.75H4" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                  </svg>
                 </span>
-              <span th:if="${emptyStars > 0}">
-                <span th:each="star : ${#numbers.sequence(0, emptyStars - 1)}">
-                  <i class="ri-star-line"></i>
-                </span>
-              </span>
+              </a>
+              <span th:text="${#temporals.format(feedback.createdDate, 'dd/MM/yyyy')}">Date</span>
             </div>
           </div>
+          <div class="review-card-content" th:text="${feedback.content}">
+            Review content...
+          </div>
         </div>
-        <div class="review-date">
-          <span th:text="${#temporals.format(feedback.createdDate, 'dd/MM/yyyy')}">Date</span>
-          <i class="ri-star-half-fill" style="font-size: 2rem; color: orange;"></i>
-        </div>
-      </div>
-      <div class="review-card-content" th:text="${feedback.content}">
-        Review content...
       </div>
     </div>
   </div>
 </section>
-
 
 <script src="https://unpkg.com/scrollreveal"></script>
 <script>
