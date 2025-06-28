@@ -22,10 +22,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -151,6 +148,47 @@ public class MentorController {
         return "mentor/mentee-review";
     }
 
+    @GetMapping("/mentor/schedule/mark-as-test-day")
+    public String markAsTestDay(@RequestParam Integer esid, HttpSession session) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+        EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(esid);
+        if (enrollmentSchedule == null) {
+            return "redirect:/mentor/schedule?error=enrollmentNotFound";
+        }
+        enrollmentSchedule.setTest(!enrollmentSchedule.getTest());
+        enrollmentScheduleService.save(enrollmentSchedule);
+        return "redirect:/mentor/schedule/" + enrollmentSchedule.getId();
+    }
+
+    @GetMapping("/mentor/schedule/save")
+    public String submitAttendance(@RequestParam("esid") Integer esid,
+                                   @ModelAttribute EnrollmentSchedule enrollmentScheduleFromForm) {
+
+        EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(esid);
+        if (enrollmentSchedule == null) {
+            return "redirect:/mentor/schedule?error=enrollmentNotFound";
+        }
+
+        LocalDate currentDate = LocalDate.now();
+        if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isBefore(currentDate)) {
+            return "redirect:/mentor/schedule/" + esid +"?error=toolatetochange";
+        }
+
+        // Update relevant fields only
+        enrollmentSchedule.setAttendance(enrollmentScheduleFromForm.getAttendance());
+        enrollmentSchedule.setScore(enrollmentScheduleFromForm.getScore());
+        enrollmentSchedule.setTitleSection(enrollmentScheduleFromForm.getTitleSection());
+        enrollmentSchedule.setDescription(enrollmentScheduleFromForm.getDescription());
+        enrollmentSchedule.setReport(enrollmentScheduleFromForm.getReport());
+
+        enrollmentScheduleService.save(enrollmentSchedule);
+        return "redirect:/mentor/schedule/" + enrollmentSchedule.getId();
+    }
+
+
     @GetMapping("/mentor/sensor-class/{eid}")
     public String rejectRegistration(@PathVariable Long eid,
                                      @RequestParam String action,
@@ -273,14 +311,19 @@ public class MentorController {
     }
 
     @GetMapping("mentor/classes")
-    public String mentorClasses(Model model, HttpSession session) {
+    public String mentorClasses(Model model,
+                                HttpSession session,
+                                @RequestParam(defaultValue = "ONGOING") String status) {
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
         }
 
-        List<Enrollment> ongoingEnrollments = enrollmentService.findOngoingEnrollments(mentor.getId());
-        model.addAttribute("ongoingEnrollments", ongoingEnrollments);
+        if("ONGOING".equals(status)){
+            List<Enrollment> ongoingEnrollments = enrollmentService.findOngoingEnrollments(mentor.getId());
+            model.addAttribute("ongoingEnrollments", ongoingEnrollments);
+        }
+
         return "mentor/mentor-class";
     }
 

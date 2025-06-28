@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
@@ -44,24 +44,36 @@
                 background: #f0f4f8;
             }
 
+            /* Cơ bản */
             .participate-button {
-                margin-right: 0.5rem;
-                padding: 0.3rem 0.75rem;
-                border: none;
-                border-radius: 0.5rem;
+                padding: 6px 12px;
+                margin: 4px;
+                border: 1px solid #ccc;
+                background-color: #f3f3f3;
                 cursor: pointer;
-                font-weight: 600;
+                border-radius: 4px;
+                display: inline-block;
             }
 
-            .present {
-                background: #34d399;
+            /* Present được chọn -> xanh */
+            input[value="PRESENT"]:checked + .present {
+                background-color: #4CAF50;
                 color: white;
+                border-color: #4CAF50;
             }
 
-            .absent {
-                background: #ef4444;
+            /* Absent được chọn -> đỏ */
+            input[value="ABSENT"]:checked + .absent {
+                background-color: #f44336;
                 color: white;
+                border-color: #f44336;
             }
+
+            /* Ẩn radio */
+            input[type="radio"] {
+                display: none;
+            }
+
 
             .submit-review {
                 margin-top: 1rem;
@@ -73,13 +85,15 @@
                 font-weight: 600;
                 cursor: pointer;
             }
-            .field{
+
+            .field {
                 margin: 1em 0;
                 display: grid;
                 grid-template-columns: 1fr 6fr;
                 gap: 0.5em;
             }
-            .field .name{
+
+            .field .name {
                 width: 100%;
                 height: 50px;
                 border: 1px solid #ddd;
@@ -87,9 +101,11 @@
                 border-radius: 0.5rem;
                 resize: none;
             }
+
             .input-score {
-                width: 60px;
-                padding: 4px;
+                width: 80px;
+                padding: 5px;
+                font-size: medium;
                 border-radius: 6px;
                 border: 1px solid #ccc;
                 text-align: center;
@@ -101,54 +117,75 @@
 <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
 <div class="main">
     <div class="dashboard-header">
-        <h1 th:text=" 'Class: ' + ${enrollmentSchedule.enrollment.courseMentor.course.name}">Class: Programming Fundamental with C</h1>
+        <h1 th:text=" 'Class: ' + ${enrollmentSchedule.enrollment.courseMentor.course.name}">Class: Programming
+            Fundamental with C</h1>
         <div>
             <strong>Date: </strong><span th:text="${enrollmentSchedule.date}"> 06/05/2025</span>
-            <button class="submit-review" style="margin-left: 1rem">☆ Mark as Test Day</button>
+            <form th:action="@{/mentor/schedule/mark-as-test-day}">
+                <input type="hidden" name="esid" th:value="${enrollmentSchedule.id}">
+                <button class="submit-review" style="margin-left: 1rem"
+                        th:text="${!enrollmentSchedule.test ? '☆ Mark as Test Day' : '⭐ Remove Test Day' }">☆ Mark as
+                    Test Day
+                </button>
+            </form>
         </div>
     </div>
-    <h3 th:text=" 'Mentee: ' + ${enrollmentSchedule.enrollment.mentee.fullName}" style="margin-top: -1em; margin-bottom: 2em"></h3>
+    <h3 th:text=" 'Mentee: ' + ${enrollmentSchedule.enrollment.mentee.fullName}"
+        style="margin-top: -1em; margin-bottom: 2em"></h3>
     <div class="graph">
         <button class="upload-file-button">⬆ Upload File</button>
         <p style="margin-top: 1rem; color: #666">File upload here</p>
     </div>
-
-    <div class="graph">
-        <h3>Lesson Summary</h3>
-        <div class="field">
-            <h5>Name of Lesson: </h5>
-            <textarea class="name"></textarea>
+    <form th:action="@{/mentor/schedule/save}" th:object="${enrollmentSchedule}">
+        <input type="hidden" name="esid" th:value="${enrollmentSchedule.id}">
+        <div class="graph">
+            <h3>Lesson Summary</h3>
+            <div class="field">
+                <h5>Name of Lesson: </h5>
+                <textarea class="name" name="titleSection" th:field="*{titleSection}" th:value="${enrollmentSchedule.titleSection}"></textarea>
+            </div>
+            <div class="field">
+                <h5>Brief Description: </h5>
+                <textarea class="description" name="description" th:field="*{description}" th:value="${enrollmentSchedule.description}"></textarea>
+            </div>
         </div>
-        <div class="field">
-            <h5>Brief Description: </h5>
-            <textarea class="description"></textarea>
-        </div>
-    </div>
 
-    <div class="graph">
-        <h3>Progress</h3>
-        <table>
-            <tr><th>Mentee</th>
-                <th>Participation</th>
-                <th>Score</th>
-            </tr>
-            <tr>
-                <td th:text="${enrollmentSchedule.enrollment.mentee.fullName}">Le Phuong Linh Nga</td>
-                <td>
-                    <button class="participate-button present">Present</button>
-                    <button class="participate-button absent">Absent</button>
-                </td>
-                <td>
-                    <input type="number" class="input-score" placeholder="0-10" min="0" max="10">
-                </td>
-            </tr>
-        </table>
-        <textarea placeholder="Write your review here..." style="width: 100%; height: 100px; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ccc;"></textarea>
-        <button class="submit-review">Submit Review</button>
-    </div>
-    <div class="footer">
-        Designed | AC 2022
-    </div>
+        <div class="graph">
+            <h3>Progress</h3>
+            <table>
+                <tr>
+                    <th>Mentee</th>
+                    <th>Participation</th>
+                    <th>Score</th>
+                </tr>
+                <tr>
+                    <td th:text="${enrollmentSchedule.enrollment.mentee.fullName}">Le Phuong Linh Nga</td>
+                    <td>
+                        <label class="participate-option">
+                            <input type="radio" name="attendance" th:field="*{attendance}" value="PRESENT" th:checked="${enrollmentSchedule.attendance.name().equals('NOT_YET') || enrollmentSchedule.attendance.name().equals('PRESENT') ? 'checked' : ''}">
+                            <span class="participate-button present">Present</span>
+                        </label>
+
+                        <label class="participate-option">
+                            <input type="radio" name="attendance" th:field="*{attendance}" value="ABSENT" th:checked="${enrollmentSchedule.attendance.name().equals('REJECTED')}">
+                            <span class="participate-button absent">Absent</span>
+                        </label>
+                    </td>
+
+                    <td>
+                        <input type="number" class="input-score" th:field="*{score}" th:value="${enrollmentSchedule.score}" placeholder="0-10" min="0" max="10">
+                    </td>
+                </tr>
+            </table>
+            <textarea name="report" placeholder="Write your review here..."
+                      style="width: 100%; height: 100px; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ccc;" th:field="*{report}" th:value="${enrollmentSchedule.report}"></textarea>
+            <button class="submit-review">Submit Review</button>
+        </div>
+    </form>
+
+<div class="footer">
+    Designed | AC 2022
+</div>
 </div>
 </body>
 </html>

@@ -195,10 +195,10 @@ public class CvController {
             }
             cvService.createCV(cvForm, user.getId());
             redirectAttributes.addFlashAttribute("success", "CV updated successfully.");
-            return "redirect:mentor/cv/edit/" + id;
+            return "redirect:/mentor/cv/edit/" + id;
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", "Error updating CV: " + e.getMessage());
-            return "redirect:mentor/cv/edit/" + id;
+            return "redirect:/mentor/cv/edit/" + id;
         }
     }
 

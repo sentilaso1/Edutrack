@@ -46,6 +46,28 @@ public class EnrollmentSchedule {
     @Column(name = "report", columnDefinition = "TEXT")
     private String report;
 
+    @Column(name = "title_section")
+    private String titleSection;
+
+    public String getTitleSection() {
+        return titleSection;
+    }
+
+    public void setTitleSection(String titleSection) {
+        this.titleSection = titleSection;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Column(name = "description",  columnDefinition = "TEXT")
+    private String description;
+
     public EnrollmentSchedule() {
     }
 
