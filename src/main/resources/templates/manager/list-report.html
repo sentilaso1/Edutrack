@@ -22,7 +22,7 @@
             <b th:text="'[' + r.feedback.status.name() + ']'"></b>
             <span th:text="${r.feedback.mentee.fullName}"></span>
             <span th:text="${#strings.abbreviate(r.feedback.content, 50)}"></span>
-            <span th:text="'(' + r.feedback.createdDate?.toLocalDate() + ')'"></span>
+            <span th:text="'(' + ${r.feedback.createdDate?.toLocalDate()} + ')'"></span>
         </td>
         <td>
             <a th:href="@{|/admin/reports/toggle-status/${r.id}|}">
