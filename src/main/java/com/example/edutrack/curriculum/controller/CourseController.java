@@ -235,6 +235,9 @@ public class CourseController {
         }
 
         Optional<Mentee> menteeOpt = menteeService.findById(user.getId());
+        if(menteeOpt.isEmpty()) {
+            return "redirect:/login";
+        }
 
         CourseMentor courseMentor = courseMentorService.findById(cmid);
         List <MentorAvailableTime> mentorAvailableTime = mentorAvailableTimeService.findByMentorId(courseMentor.getMentor());
@@ -251,6 +254,9 @@ public class CourseController {
         model.addAttribute("slots", Slot.values());
         model.addAttribute("dayLabels", Day.values());
         boolean[][] slotDayMatrix = availableSlotMatrix(courseMentor.getMentor(), menteeOpt.get(), minDate, maxDate);
+        if(slotDayMatrix == null){
+            slotDayMatrix = new boolean[5][10];
+        }
 
         model.addAttribute("slotDayMatrix", slotDayMatrix);
 
