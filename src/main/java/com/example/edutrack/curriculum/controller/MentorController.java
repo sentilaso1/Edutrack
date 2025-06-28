@@ -57,6 +57,7 @@ public class MentorController {
             @RequestParam(required = false) Double rating,
             @RequestParam(required = false) Integer totalSessions,
             @RequestParam(required = false) Boolean isAvailable,
+            @RequestParam(value="skill", required=false) List<String> selectedSkills,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "6") int size_page,
             @RequestParam(required = false) String order_by,
@@ -88,11 +89,14 @@ public class MentorController {
                 name, expertise, rating, totalSessions, isAvailable, pageable
         );
 
+
+
         model.addAttribute("mentorPage", mentorPage);
         model.addAttribute("page", page);
         model.addAttribute("name", name);
         model.addAttribute("expertise", expertise);
         model.addAttribute("rating", rating);
+        model.addAttribute("selectedSkills", selectedSkills);
         model.addAttribute("totalSessions", totalSessions);
         model.addAttribute("expertiseInput", String.join(", ", expertise));
         model.addAttribute("isAvailable", isAvailable);

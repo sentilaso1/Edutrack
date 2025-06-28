@@ -1,0 +1,39 @@
+<table class="feedback-table">
+    <thead class="feedback-table-header">
+    <tr>
+        <th>Status</th>
+        <th>Category</th>
+        <th>Created Date</th>
+        <th>Reporter</th>
+        <th>Reason</th>
+        <th>Feedback</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="r : ${page.content}">
+        <td th:text="${r.status.name()}"
+            th:classappend="${r.status.name() == 'PENDING' ? 'bg-hidden' : 'bg-active'}"></td>
+        <td th:text="${r.category.name()}"></td>
+        <td th:text="${#temporals.format(r.createdDate, 'yyyy-MM-dd')}"></td>
+        <td th:text="${r.reporter.fullName}"></td>
+        <td th:text="${r.reason}" style="max-width: 250px; word-break: break-word;"></td>
+        <td>
+            <b th:text="'[' + r.feedback.status.name() + ']'"></b>
+            <span th:text="${r.feedback.mentee.fullName}"></span>
+            <span th:text="${#strings.abbreviate(r.feedback.content, 50)}"></span>
+            <span th:text="'(' + r.feedback.createdDate?.toLocalDate() + ')'"></span>
+        </td>
+        <td>
+            <a th:href="@{|/admin/reports/toggle-status/${r.id}|}">
+                <span th:text="${r.status.name() == 'PENDING' ? 'Mark Reviewed' : 'Mark Pending'}"></span>
+            </a>
+            <br/>
+            <a th:href="@{|/admin/reports/delete/${r.id}|}"
+               th:onclick="'return confirm(\'Are you sure you want to delete this report?\');'">
+                Delete
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>

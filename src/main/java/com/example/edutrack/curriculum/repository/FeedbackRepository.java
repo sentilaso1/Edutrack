@@ -34,6 +34,8 @@ public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
     Optional<Feedback> findByMenteeIdAndCourseMentorId(UUID menteeId, UUID courseMentorId);
     Page<Feedback> findByStatus(Feedback.Status status, Pageable pageable);
 
+    List<Feedback> findByStatus(Feedback.Status status);
+
     Page<Feedback> findByContentContainingIgnoreCaseOrMentee_FullNameContainingIgnoreCase(
             String content, String fullName, Pageable pageable);
 

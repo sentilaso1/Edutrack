@@ -9,6 +9,7 @@ import com.example.edutrack.profiles.model.CV;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,15 +20,5 @@ public interface FeedbackService {
 
     List<Feedback> getAllFeedbacksByMentorId(UUID mentorId);
 
-    Page<Feedback> queryFeedbacks(String filter, String sort, String status, Pageable pageable);
 
-    void deleteFeedbackById(UUID id);
-
-    void toggleFeedbackStatus(UUID id);
-
-    void aiVerifyFeedback(Feedback feedback);
-
-    String generatePrompt(Feedback feedback);
-
-    void processAIResponse(Feedback feedback, String aiJson);
 }
