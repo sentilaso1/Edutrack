@@ -43,7 +43,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             JOIN EnrollmentSchedule s ON s.enrollment.mentee = e.mentee AND s.enrollment.courseMentor.course = e.courseMentor.course
             WHERE e.mentee.id = :menteeId
               AND e.status = :enrollmentStatus
-              AND s.date >= CURRENT_DATE
            """)
     List<CourseMentor> findInProgressCourses(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
 

@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.dto.*;
 import com.example.edutrack.curriculum.model.*;
+import com.example.edutrack.curriculum.service.implementation.SuggestionServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.*;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
@@ -27,6 +28,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Controller
 public class MenteeController {
@@ -39,8 +41,9 @@ public class MenteeController {
     private final HomeControlller homeControlller;
     private final CourseTagService courseTagService;
     private final FeedbackService feedbackService;
+    private final SuggestionService suggestionService;
 
-    public MenteeController(FeedbackService feedbackService, DashboardService dashboardService, GoalService goalService, CourseMentorService courseMentorService, EnrollmentService enrollmentService, MenteeRepository menteeRepository, EnrollmentScheduleService enrollmentScheduleService, HomeControlller homeControlller, CourseTagService courseTagService) {
+    public MenteeController(FeedbackService feedbackService, DashboardService dashboardService, GoalService goalService, CourseMentorService courseMentorService, EnrollmentService enrollmentService, MenteeRepository menteeRepository, EnrollmentScheduleService enrollmentScheduleService, HomeControlller homeControlller, CourseTagService courseTagService, SuggestionService suggestionService) {
         this.dashboardService = dashboardService;
         this.courseMentorService = courseMentorService;
         this.enrollmentService = enrollmentService;
@@ -50,6 +53,7 @@ public class MenteeController {
         this.homeControlller = homeControlller;
         this.courseTagService = courseTagService;
         this.feedbackService = feedbackService;
+        this.suggestionService = suggestionService;
     }
 
     private UUID getSessionMentee(HttpSession session) {
@@ -77,7 +81,7 @@ public class MenteeController {
         if (menteeId == null) {
             return "redirect:/404";
         }
-        homeControlller.addTopTagsToModel(model, 5);
+        suggestionService.getSuggestedTags(SuggestionType.POPULAR, 5);
         List<Tag> allCourseTags = courseTagService.getAllTags();
         List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
         model.addAttribute("allCourseTagIds", allCourseTagIds);
@@ -372,16 +376,23 @@ public class MenteeController {
             schedules = enrollmentScheduleService.getEnrollmentSchedulesByMentee(menteeId);
         }
 
+
         // Lọc schedule theo tuần
         LocalDate start = mondayOfWeek;
         LocalDate end = mondayOfWeek.plusDays(6);
         schedules = schedules.stream()
                 .filter(s -> !s.getDate().isBefore(start) && !s.getDate().isAfter(end))
                 .toList();
-        DayOfWeek today = LocalDate.now().getDayOfWeek();
         List<ScheduleDTO> scheduleDTOs = enrollmentScheduleService.getScheduleDTOs(schedules, menteeId);
         List<CourseMentor> courses = enrollmentService.getCourseMentorsByMentee(menteeId);
         int testCount = enrollmentScheduleService.countTestSlot(menteeId);
+        LocalDate today = LocalDate.now();
+        List<LocalDate> daysInWeek = IntStream.range(0, 7)
+                .mapToObj(mondayOfWeek::plusDays)
+                .toList();
+
+        model.addAttribute("todayDate", today);
+        model.addAttribute("daysInWeek", daysInWeek);
         model.addAttribute("courses", courses);
         model.addAttribute("selectedCourseId", courseId);
         model.addAttribute("slots", Slot.values());
@@ -392,7 +403,6 @@ public class MenteeController {
         model.addAttribute("weekOffset", weekOffset);
         model.addAttribute("mondayOfWeek", mondayOfWeek);
         model.addAttribute("testCount", testCount);
-        model.addAttribute("todayDay", today.name());
         return "mentee/mentee-calendar";
     }
 

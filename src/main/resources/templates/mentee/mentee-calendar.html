@@ -72,11 +72,10 @@
                         <!-- Header row -->
                         <div class="time-header">Time</div>
                         <div class="day-header"
-                             th:each="day : ${days}"
-                             th:classappend="${day == todayDay} ? ' today-border' : ''"
-                             th:text="${day}">
+                             th:each="day : ${daysInWeek}"
+                             th:classappend="${day.equals(todayDate)} ? ' today-border' : ''"
+                             th:text="${#temporals.format(day, 'EEEE')}">
                         </div>
-                        <!-- Thay vì hard-code từng slot, lặp từ backend -->
                         <th:block th:each="slot : ${slots}">
                             <div class="time-cell" th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></div>
 
