@@ -81,7 +81,10 @@ public class MentorScheduleController {
         }
 
         mentorAvailableTimeService.insertWorkingSchedule(availableTimes);
-        return "redirect:/mentor/working-date";
+        if(btn.equals("draft")){
+            return "redirect:/mentor/working-date?status=DRAFT";
+        }
+        return "redirect:/mentor/working-date?status=PENDING";
     }
 
 

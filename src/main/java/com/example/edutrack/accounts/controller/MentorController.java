@@ -187,7 +187,7 @@ public class MentorController {
         }
         if (action.equals("approve")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
-            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
+            enrollmentService.save(enrollment);
             return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
         }
         if (action.equals("view")) {
@@ -206,12 +206,10 @@ public class MentorController {
         }
         Enrollment enrollment = enrollmentService.findById(eid);
         List<Slot> slots = new ArrayList<>();
-        List<Day> days = new ArrayList<>();
+        List<LocalDate> dates = new ArrayList<>();
         String summary = enrollment.getScheduleSummary();
 
-        EnrollmentScheduleServiceImpl.parseDaySlotString(summary, days, slots);
-
-        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(enrollment.getMentee(), enrollment.getCourseMentor(), slots, days, enrollment.getTotalSlots());
+        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(summary);
         model.addAttribute("startTime", startTime);
         return "mentor/skill-register-request-detail";
     }

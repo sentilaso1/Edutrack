@@ -27,6 +27,6 @@ public enum Slot {
 
     @Override
     public String toString() {
-        return name().toLowerCase().replace("_", " ");
+        return name().toLowerCase();
     }
 }

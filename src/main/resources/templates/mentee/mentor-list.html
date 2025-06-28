@@ -1,57 +1,106 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
+<head xmlns:th="http://www.thymeleaf.org">
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Youdemi - Mentor List</title>
+
+    <!--
+    - primary meta tags
+    -->
+    <title>Youdemi</title>
     <meta name="title" content="Youdemi"/>
-    <meta name="description" content="Mentor listing for Youdemi"/>
+    <meta name="description" content="This is an education HTML template made by codewithsadee"/>
+
+    <!--
+    - favicon
+    -->
     <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <!--
+    - custom font link
+    -->
+
+    <!--
+    - custom css link
+    -->
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+
+    <!--
+    - preload images
+    -->
+    <!--  <link rel="preload" as="image" th:href="@{/assets/images/hero-banner.png}" />-->
+    <!--  <link rel="preload" as="image" th:href="@{/assets/images/hero-bg.png}" />-->
 </head>
+
+
 <body>
+
+
+<!--
+- #HEADER
+-->
+
 <th:block th:insert="~{fragments/header :: header}"></th:block>
 
 <main>
     <article>
-        <section class="section course has-bg-image"
-                 aria-labelledby="mentor-label"
-                 th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
-
+        <section
+                class="section course has-bg-image"
+                aria-labelledby="course-label"
+                th:style="|background-image: url('@{/assets/images/course-bg.png}')|"
+        >
             <!-- Search Bar -->
             <div class="search-wrapper">
                 <form class="search-form" th:action="@{/mentors}" method="get">
-                    <input id="searchInput"
-                           type="text"
-                           name="name"
-                           class="search-input"
-                           placeholder="Search for mentors..."
-                           th:value="${name}"/>
+                    <input
+                            id="searchInput"
+                            type="text"
+                            name="name"
+                            class="search-input"
+                            placeholder="Search for mentors..."
+                    />
                     <button type="submit" class="search-btn" aria-label="Search">
                         <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
                     </button>
                 </form>
             </div>
 
-            <div class="container">
-                <div class="course-section-layout">
 
-                    <!-- Left: Filter (simple, for demo) -->
+            <div class="container">
+                <!--          sort and filter-->
+
+                <!-- Bắt đầu bố cục 2 cột -->
+                <div class="course-section-layout">
+                    <!-- Cột trái: bộ lọc -->
                     <aside class="course-filter">
                         <form th:action="@{/mentors}" method="get" id="filterForm">
                             <input type="hidden" name="size_page" th:value="${param.size_page}"/>
                             <h3>Filter</h3>
-                            <div>
+
+                            <div class="filter-price">
                                 <h4 class="filter-subtitle">Min Rating</h4>
                                 <input type="number" name="rating" step="0.1" min="0" max="5"
                                        th:value="${rating}" onchange="submitForm()"/>
                             </div>
-                            <div>
+
+                            <div class="filter-price">
                                 <h4 class="filter-subtitle">Expertise</h4>
-                                <input type="text" name="expertise" th:value="${expertiseInput}" placeholder="e.g. Java, Python" onchange="submitForm()"/>
+                                <ul class="price-filter" th:each="e : ${expertise}">
+                                    <li>
+                                        <label style="display: flex;">
+                                            <input class="custom-checkbox" type="checkbox"
+                                                   name="skill"
+                                                   th:value="${e}"
+                                                   th:checked="${selectedSkills != null and selectedSkills.contains(e)}"
+                                                   onchange="submitForm()"/>
+                                            <span style="margin-left: 0.5em; " th:text="${e}"></span>
+                                        </label>
+                                    </li>
+                                </ul>
                             </div>
                             <div>
                                 <h4 class="filter-subtitle">Total Sessions (Min)</h4>
@@ -64,128 +113,254 @@
                         </form>
                         <script>
                             function submitForm() {
-                                document.getElementById('filterForm').submit();
+                                document.getElementById('filterForm').submit()
                             }
                         </script>
                     </aside>
 
-                    <!-- Right: Mentor List -->
+                    <script src="https://unpkg.com/lucide@latest"></script>
+                    <!-- Cột phải: danh sách khóa học -->
                     <div class="course-listing">
-                        <!-- Sorting and paging menus (simplified) -->
                         <div class="filter-bar">
+                            <div class="course-topbar">
+                                <div class="view-toggle">
+                                    <button class="view-btn active" id="gridView" aria-label="Grid view"><i
+                                            class="fa fa-list" aria-hidden="true"></i></button>
+                                    <button class="view-btn" id="listView" aria-label="List view"><i class="fa fa-th"
+                                                                                                     aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
                             <div style="display: flex">
                                 <div class="dropdown">
                                     <button class="dropdown-toggle">▾Show</button>
                                     <ul class="dropdown-menu">
-                                        <li><a th:href="@{/mentors(size_page=6)}"><button type="button">6</button></a></li>
-                                        <li><a th:href="@{/mentors(size_page=9)}"><button type="button">9</button></a></li>
+                                        <li>
+                                            <a th:href="@{/mentors(
+                                                    size_page=6,
+                                                    expertise=${param.expertise},
+                                                    order_by=${param.order_by}
+                                            )}">
+                                                <button type="button">6</button>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a th:href="@{/mentors(
+                                                    size_page=9,
+                                                    expertise=${param.expertise},
+                                                    order_by=${param.order_by}
+                                            )}">
+                                                <button type="button">9</button>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a th:href="@{/mentors(
+                                                    size_page=12,
+                                                    expertise=${param.expertise},
+                                                    order_by=${param.order_by}
+                                            )}">
+                                                <button type="button">12</button>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a th:href="@{/mentors(
+                                                    size_page=18,
+                                                    expertise=${param.expertise},
+                                                    order_by=${param.order_by}
+                                            )}">
+                                                <button type="button">18</button>
+                                            </a>
+                                        </li>
                                     </ul>
+
                                 </div>
+
                                 <div class="dropdown">
                                     <button class="dropdown-toggle">▾Sort by</button>
                                     <ul class="dropdown-menu">
-                                        <li><a th:href="@{/mentors(order_by='newest')}"><button type="button">Newest</button></a></li>
-                                        <li><a th:href="@{/mentors(order_by='name_asc')}"><button type="button">Name: A-Z</button></a></li>
-                                        <li><a th:href="@{/mentors(order_by='rating_desc')}"><button type="button">Rating: High-Low</button></a></li>
+                                        <li>
+                                            <a th:href="@{/mentors(
+                                                    size_page=${param.size_page},
+                                                    expertise=${param.expertise},
+                                                    order_by='newest'
+                                            )}">
+                                                <button type="button">Newest</button>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a th:href="@{/mentors(
+                                                    size_page=${param.size_page},
+                                                    expertise=${param.expertise},
+                                                    order_by='oldest'
+                                            )}">
+                                                <button type="button">Oldest</button>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a th:href="@{/mentors(
+                                                    size_page=${param.size_page},
+                                                    expertise=${param.expertise},
+                                                    order_by='name_asc'
+                                            )}">
+                                                <button type="button">Alphabet: A to Z</button>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a th:href="@{/mentors(
+                                                    size_page=${param.size_page},
+                                                    expertise=${param.expertise},
+                                                    order_by='name_desc'
+                                            )}">
+                                                <button type="button">Alphabet: Z to A</button>
+                                            </a>
+                                        </li>
                                     </ul>
+
                                 </div>
                             </div>
+
                         </div>
-                        <!-- MENTOR LIST -->
-                        <ul class="grid-list" th:with="mentors=${mentorPage.content}">
+                        <ul class="grid-list" th:with="mentors = ${mentorPage.content}">
                             <li class="card-container" th:each="mentor : ${mentors}">
-                                <div class="card mentor-card">
+                                <div class="card course-card">
                                     <figure class="card-banner">
-                                        <img th:src="@{/mentor/{id}/avatar(id=${mentor.id})}" width="180" height="180" loading="lazy" alt="Mentor Avatar" class="img-cover"/>
+                                        <img
+                                                th:if="${mentor != null}"
+                                                th:src="@{/mentors/{id}/avatar(id=${mentor.id})}"
+                                                width="370"
+                                                height="248"
+                                                loading="lazy"
+                                                alt="Mentor Avatar"
+                                                class="img-cover"
+                                        />
+
+                                        <img
+                                                th:unless="${mentor != null}"
+                                                th:src="@{/assets/images/default-avatar.jpg}"
+                                                width="370"
+                                                height="248"
+                                                loading="lazy"
+                                                alt="Default Avatar"
+                                                class="img-cover"
+                                        />
+
                                     </figure>
+
                                     <div class="card-content">
                                         <div class="wrapper">
-                                            <h6 class="title-lg card-title" th:text="${mentor.fullName}">Mentor Name</h6>
+                                            <p class="title-lg card-price" th:text="${mentor.fullName}">Mentor Name</p>
+                                            <div class="rating-wrapper">
+                                                <span th:each="i : ${#numbers.sequence(1,5)}">
+                                                    <img
+                                                            th:if="${i <= T(java.lang.Math).floor(mentor.rating)}"
+                                                            th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt="" />
+                                                    <img
+                                                            th:if="${i > T(java.lang.Math).floor(mentor.rating)} and ${i - 1 < mentor.rating}"
+                                                            th:src="@{/assets/images/star-half.svg}" width="16" height="16" loading="lazy" alt="" />
+                                                    <img
+                                                            th:if="${i - 1 >= mentor.rating}"
+                                                            th:src="@{/assets/images/star-empty.svg}" width="16" height="16" loading="lazy" alt="" />
+                                                </span>
+                                            </div>
                                         </div>
+
+                                        <h6 class="title-lg card-title" th:text="${mentor.expertise}">Expertises</h6>
+
                                         <div class="card-meta wrapper card-meta-inlayout">
-                                            <h6 class="title-lg card-title">Expertise</h6>
                                             <p class="title-sm">
-                                                <span class="span" th:text="${mentor.expertise}"></span>
+                                                <img th:src="@{/assets/images/file-outline.svg}" width="16" height="16"
+                                                     loading="lazy" alt=""/>
+                                                <span class="span"
+                                                      th:text="${mentor.totalSessions} + ' Sessions Completed'">0 Total Session</span>
                                             </p>
-                                            <h6 class="title-lg card-title">Total Sessions</h6>
                                             <p class="title-sm">
-                                                <span class="span" th:text="${mentor.totalSessions != null ? mentor.totalSessions + ' Sessions' : 'No Sessions'}"></span>
-                                            </p>
-                                            <h6 class="title-lg card-title">Availability</h6>
-                                            <p class="title-sm">
-                                                <span class="span" th:text="${mentor.isAvailable ? 'Available' : 'Unavailable'}"></span>
-                                            </p>
-                                            <h6 class="title-lg card-title">Profile</h6>
-                                            <p class="title-sm">
-                                                <a th:href="@{/mentors/{id}(id=${mentor.id})}">View Mentor Profile</a>
-                                            </p>
-                                            <h6 class="title-lg card-title">Profile</h6>
-                                            <p class="title-sm">
-                                                <a th:href="@{/mentors/{id}/courses(id=${mentor.id})}">View Mentor Related Courses</a>
+                                                <img th:if="${mentor != null and mentor.isAvailable}"
+                                                     th:src="@{/assets/images/dot-green.svg}" width="16" height="16" alt="Online" />
+                                                <img th:if="${mentor != null and !mentor.isAvailable}"
+                                                     th:src="@{/assets/images/dot-red.svg}" width="16" height="16" alt="Offline" />
+                                                <span class="span">
+                                                    <span th:text="${mentor != null ? (mentor.isAvailable ? 'Available' : 'Not Available') : 'No Mentor'}">
+                                                        Mentor Availability
+                                                    </span>
+
+                                                </span>
                                             </p>
                                         </div>
                                     </div>
+
+                                    <a
+                                            th:href="@{/mentors/{mentorId}(mentorId=${mentor.id})}"
+                                            class="layer-link"
+                                            th:aria-label="'Mentor Details, ' + ${mentor.id}"
+                                    ></a>
                                 </div>
                             </li>
+
                         </ul>
+
                     </div>
                 </div>
-                <!-- Pagination -->
                 <nav class="pagination">
                     <!-- Previous Page -->
                     <button th:disabled="${mentorPage.first}">
                         <a th:if="${!mentorPage.first}" class="page-btn"
                            th:href="@{/mentors(
-                                page=${mentorPage.number},
-                                size_page=${param.size_page},
-                                name=${name},
-                                expertise=${expertiseInput},
-                                rating=${rating},
-                                totalSessions=${totalSessions},
-                                isAvailable=${isAvailable},
-                                order_by=${order_by}
-                            )}">&laquo;</a>
+                           page=${mentorPage.number},
+                           size_page=${param.size_page},
+                           expertise=${param.expertise},
+                           order_by=${param.order_by}
+                       )}">&laquo;</a>
                     </button>
+
                     <!-- Page Numbers -->
                     <th:block th:each="i : ${#numbers.sequence(1, mentorPage.totalPages)}">
-                        <a th:href="@{/mentors(
-                                page=${i},
-                                size_page=${param.size_page},
-                                name=${name},
-                                expertise=${expertiseInput},
-                                rating=${rating},
-                                totalSessions=${totalSessions},
-                                isAvailable=${isAvailable},
-                                order_by=${order_by}
-                            )}"
+                        <a th:href="@{/courses(
+                            page=${i},
+                            size_page=${param.size_page},
+                            expertise=${param.expertise},
+                            order_by=${param.order_by}
+                        )}"
                            th:classappend="${i == mentorPage.number + 1} ? 'page-btn active' : 'page-btn'"
                            th:text="${i}">1</a>
                     </th:block>
+
                     <!-- Next Page -->
                     <button th:disabled="${mentorPage.last}">
                         <a th:if="${!mentorPage.last}" class="page-btn"
                            th:href="@{/mentors(
-                                page=${mentorPage.number + 2},
-                                size_page=${param.size_page},
-                                name=${name},
-                                expertise=${expertiseInput},
-                                rating=${rating},
-                                totalSessions=${totalSessions},
-                                isAvailable=${isAvailable},
-                                order_by=${order_by}
-                            )}">&raquo;</a>
+                           page=${mentorPage.number + 2},
+                           size_page=${param.size_page},
+                           expertise=${param.expertise},
+                           order_by=${param.order_by}
+                       )}">&raquo;</a>
                     </button>
                 </nav>
+
             </div>
         </section>
     </article>
 </main>
 
+
+<!--
+- #FOOTER
+-->
+
 <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
-<script th:src="@{/assets/js/courlist.js}"></script>
-<script>
 
+<!--
+- custom js link
+-->
+<!-- Custom JS -->
+<script th:src="@{/assets/js/courlist.js}"></script>
+
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+
+<script>
     // Toggle dropdown visibility
     document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', function () {
@@ -217,8 +392,34 @@
     });
 </script>
 
-<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-</body>
+<script>
+    // lấy phần tử input tìm kiếm
+    const searchInput = document.getElementById('searchInput')
 
+    // lấy danh sách tất cả các thẻ li chứa course
+    const courseItems = document.querySelectorAll('.grid-list .card-container')
+
+    searchInput.addEventListener('input', function () {
+        const filterText = this.value.toLowerCase() // chữ thường để dễ so sánh
+
+        courseItems.forEach(item => {
+            // tìm thẻ chứa tên course (theo HTML bạn cho là h6.card-title)
+            const courseNameElement = item.querySelector('p.card-price')
+
+            if (!courseNameElement) return
+
+            const courseName = courseNameElement.textContent.toLowerCase()
+
+            // so sánh tên khóa học với từ khóa tìm kiếm
+            if (courseName.includes(filterText)) {
+                item.style.display = ''  // hiển thị
+            } else {
+                item.style.display = 'none'  // ẩn
+            }
+        })
+    })
+</script>
+
+
+</body>
 </html>

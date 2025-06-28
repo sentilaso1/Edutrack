@@ -6,474 +6,14 @@
     <title>Đăng Ký Khóa Học - Lập Trình Web Cơ Bản</title>
     <script th:src="@{/js/master.js}"></script>
 
-    <style>
-        :root {
-            --keppei: #47c8ba;
-            --light-coral: hsl(357, 92%, 79%);
-            --keppei-light: hsl(173, 60%, 67%);
-            --keppei-lighter: hsl(173, 60%, 87%);
-            --keppei-lightest: hsl(173, 60%, 97%);
-            --coral-light: hsl(357, 100%, 78%);
-            --coral-lighter: hsl(356, 89%, 93%);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            color: #333;
-            margin: 1em 5em;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 25px;
-            text-decoration: none;
-            margin-bottom: 30px;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .back-button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .back-button svg {
-            margin-right: 8px;
-        }
-
-        .registration-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            backdrop-filter: blur(20px);
-        }
-
-        .card-header {
-            background-color: #ffffff;
-            color: hsl(240, 6%, 51%);;
-            padding: 30px;
-            text-align: center;
-            position: relative;
-        }
-
-        .card-header h1 {
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .card-header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .progress-indicator {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-            gap: 10px;
-        }
-
-        .progress-step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(200, 200, 200, 0.86);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            position: relative;
-        }
-
-        .progress-step.active {
-            background-color: var(--coral-light);
-            color: white;
-        }
-
-        .progress-step.completed {
-            background-color: var(--keppei);
-            color: white;
-        }
-
-        .progress-line {
-            width: 50px;
-            height: 2px;
-            background-color: #bababa;
-        }
-
-        .progress-line.completed {
-            background-color: var(--coral-lighter);
-        }
-
-        .card-body {
-            padding: 40px;
-        }
-
-        .section {
-            background-color: white;
-            border-radius: 15px;
-            padding: 25px !important;
-            margin-bottom: 30px;
-            border-left: 5px solid var(--light-coral);
-            box-shadow: 5px 10px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .section h3 {
-            color: var(--light-coral);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            font-size: 1.3em;
-        }
-
-        .section h3 svg {
-            margin-right: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
-            background-color: white;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--keppei);
-            box-shadow: 0 0 0 3px rgba(56, 178, 160, 0.1);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .course-summary {
-            background-color: rgba(250, 187, 27, 0.62);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .course-summary h3 {
-            margin-bottom: 20px;
-            color: white;
-        }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .summary-item:last-child {
-            border-bottom: none;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .mentor-info {
-            background-color: var(--coral-lighter);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .mentor-profile {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .mentor-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            margin-right: 15px;
-            object-fit: cover;
-        }
-
-        .mentor-details h4 {
-            margin: 0;
-            color: #333;
-        }
-
-        .mentor-rating {
-            display: flex;
-            align-items: center;
-            margin: 5px 0;
-            color: #666;
-        }
-
-        .mentor-rating svg {
-            color: #ffc107;
-            margin-right: 3px;
-        }
-
-
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-            margin-right: 10px;
-            transform: scale(1.2);
-        }
-
-        .submit-section {
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            color: white;
-        }
-
-        .submit-btn {
-            background-color: var(--keppei);
-            color: white;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 15px;
-            width: 100%;
-            height: 60px;
-        }
-
-        .submit-btn:hover {
-            background-color: var(--keppei-light);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .submit-btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .alert.success {
-            background-color: var(--keppei-lightest);
-            border: 1px solid var(--keppei-lighter);
-            color: var(--keppei);
-        }
-
-        .alert.error {
-            background-color: var(--coral-lighter);
-            border: 1px solid var(--coral-light);
-            color: #b91c1c;
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-
-            .card-header h1 {
-                font-size: 1.8em;
-            }
-
-            .card-body {
-                padding: 20px;
-            }
-        }
-
-
-        .modal {
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            padding: 2rem;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 90vw;
-            position: relative;
-        }
-
-        .modal-body {
-            padding: 20px;
-            background-color: #fefefe;
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        table {
-            width: 100%;
-            margin-bottom: 20px;
-            table-layout: fixed;
-        }
-
-        thead th {
-            background-color: var(--coral-light);
-            color: white;
-            padding: 12px;
-            font-size: 0.8em;
-            text-transform: capitalize;
-            border-radius: 10px;
-        }
-
-        tbody td {
-            padding: 8px;
-        }
-
-        .slot-button {
-            width: 100%;
-            height: 50px;
-            background-color: #f0f0f0;
-            border: 2px solid transparent;
-            border-radius: 8px;
-            transition: all 0.2s ease-in-out;
-            font-size: 1rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .mentor-button {
-            width: 100%;
-            height: 50px;
-            background-color: #f0f0f0;
-            border: 2px solid transparent;
-            border-radius: 8px;
-            transition: all 0.2s ease-in-out;
-            font-size: 1rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .mentor-button:hover {
-            background-color: var(--keppei-light);
-            border-color: var(--keppei);
-        }
-
-        .slot-button:hover {
-            background-color: var(--coral-lighter);
-            border-color: var(--coral-light);
-        }
-
-        .mentor-button.active {
-            background-color: rgba(71, 200, 186, 0.69);
-            color: white;
-            border-color: var(--keppei);
-        }
-
-        .slot-button.active {
-            background-color: #FF8F94A6;
-            color: white;
-            border-color: var(--coral-light);
-        }
-
-        .time-cell {
-            font-weight: bold;
-            background-color: #fafafa;
-            border-right: 1px solid #ddd;
-        }
-
-        .submit-button {
-            margin-left: 1em;
-            padding: 5px 10px;
-            font-size: 1rem;
-            font-weight: bold;
-            color: white;
-            background-color: var(--keppei);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .submit-button:hover {
-            background-color: #f2994a;
-        }
-
-        /* Scrollbar gọn */
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background-color: #ccc;
-            border-radius: 4px;
-        }
-
-        .modal-content input[type="date"] {
-            padding: 10px 14px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fefefe;
-            font-size: 0.95rem;
-            font-family: inherit;
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.05);
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            margin-bottom: 1em;
-            color: #ff4d30;;
-        }
-
-        .modal-content input[type="date"]:focus {
-            border-color: #f7b267;
-            box-shadow: 0 0 6px rgba(242, 153, 74, 0.3);
-            outline: none;
-        }
-
-
-    </style>
+    <link rel="stylesheet" th:href="@{/assets/css/register-section.css}">
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <style>
+        .schedule-table td.selected {
+            background: linear-gradient(135deg, #ffc107, #ffca2c);
+            color: #000;
+        }
+    </style>
 </head>
 <body>
 <th:block th:insert="~{fragments/header :: header}"></th:block>
@@ -516,173 +56,115 @@
                             Error happened. Try again!
                         </div>
 
-                        <div class="section">
-                            <h3>Skill Summary</h3>
-                            <div class="summary-item">
-                                <span>Skill name</span>
-                                <span>Machine Learning</span>
-                            </div>
-                            <div class="summary-item">
-                                <span>Subject</span>
-                                <span>Artificial Intelligence</span>
-                            </div>
-                            <div class="summary-item">
-                                <span>Mentor</span>
-                                <span>John Doe</span>
-                            </div>
-                            <div class="summary-item">
-                                <span>Price per Slot</span>
-                                <span th:text="${courseMentor.priceFormatted} + ' VND'" id="price-per-slot"
-                                      th:data-price="${courseMentor.price}"></span>
-                            </div>
-                        </div>
-
-                        <!-- Mentor Information -->
-                        <div class="section">
-                            <h3>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.5-12h-3c0 1.66-1.34 3-3 3s-3-1.34-3-3H7.5L5 16h2.5v6h3v-6h2v6h4z"/>
-                                </svg>
-                                Mentor Information
-                            </h3>
-
-                            <div class="mentor-info">
-                                <div class="mentor-profile">
-                                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+"
-                                         alt="Mentor Avatar" class="mentor-avatar">
-                                    <div class="mentor-details">
-                                        <h4>John Doe</h4>
-                                        <div class="mentor-rating">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                            </svg>
-                                            <span>4.9/5 (25 đánh giá)</span>
-                                        </div>
-                                        <p><strong>Expertises: </strong> Web Development, JavaScript, React</p>
-                                    </div>
+                        <!-- Registration Form -->
+                        <form id="registrationForm" th:action="@{/courses/checkout/{cmid}(cmid=${courseMentor.id})}" method="POST">
+                            <div class="section">
+                                <h3>Skill Summary</h3>
+                                <div class="summary-item">
+                                    <span>Skill name</span>
+                                    <span>Machine Learning</span>
                                 </div>
-                                <p><strong>Experience:</strong>None</p>
+                                <div class="summary-item">
+                                    <span>Subject</span>
+                                    <span>Artificial Intelligence</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Mentor</span>
+                                    <span>John Doe</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Price per Slot</span>
+                                    <span th:text="${courseMentor.priceFormatted} + ' VND'" id="price-per-slot"
+                                          th:data-price="${courseMentor.price}">100,000 VND</span>
+                                </div>
                             </div>
-                            <h3>Available Schedule This Month:</h3>
-                            <table class="schedule-table" th:if="${slotDayMatrix}">
-                                <thead>
-                                <tr>
-                                    <th style="background-color: #369F93FF">Time Slot</th>
-                                    <th style="background-color: #369F93FF" th:each="day : ${dayLabels}"
-                                        th:text="${day.name().toLowerCase()}"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="slot, iStat : ${slots}">
-                                    <td th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
-                                    <td th:each="day, jStat : ${dayLabels}">
-                                        <div th:class="'mentor-button' + (${slotDayMatrix[iStat.index][jStat.index]} ? ' active' : '')">
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <form id="slotForm" method="post"
-                              th:action="@{/courses/register/{cid}(cid=${courseMentor.id})}">
-                            <!-- Schedule Selection -->
+
+                            <!-- Mentor Information -->
                             <div class="section">
                                 <h3>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.5-12h-3c0 1.66-1.34 3-3 3s-3-1.34-3-3H7.5L5 16h2.5v6h3v-6h2v6h4z"/>
                                     </svg>
-                                    Choose Slot per Week
+                                    Mentor Information
                                 </h3>
-                                <div class="modal">
-                                    <div class="modal-content">
-                                        <div>
-                                            <div class="modal-body">
-                                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em;">
-                                                    <div style="display: flex; flex-direction: column;align-items: start; padding: 0 2em;">
-                                                        <p>
-                                                            Warning: Teaching Date is Available in
-                                                        </p>
-                                                        <p>
-                                                            <strong th:text="${minDate} + ' to ' + ${maxDate}"></strong>
-                                                        </p>
-                                                    </div>
-                                                    <div class="form-group" style="margin-top: 1em;">
-                                                        <input type="number" id="totalSlot" name="totalSlot"
-                                                               placeholder="Enter number of Slots">
-                                                    </div>
 
-                                                    <div style="display: flex; justify-content: end; align-items: center">
-                                                        <button
-                                                                type="submit"
-                                                                class="submit-button" name="action"
-                                                                value="checkStartDate">
-                                                            Check Start Date
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <table class="table table-bordered text-center align-middle"
-                                                       style="width: 100%;">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Time</th>
-                                                        <th th:each="day : ${dayLabels}"
-                                                            th:text="${#strings.capitalize(day.name().toLowerCase())}"></th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr th:each="slot : ${slots}">
-                                                        <!-- Cột thời gian bắt đầu - kết thúc -->
-                                                        <td class="time-cell"
-                                                            th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
-
-                                                        <!-- Cột các ngày -->
-                                                        <td th:each="day : ${dayLabels}">
-                                                            <button
-                                                                    type="button"
-                                                                    class="slot-button"
-                                                                    th:attr="data-day=${day.name()}, data-slot=${slot.name()}">
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <div class="text-center mt-3"
-                                                     style="display: flex; justify-content: center">
-                                                </div>
+                                <div class="mentor-info">
+                                    <div class="mentor-profile">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+"
+                                             alt="Mentor Avatar" class="mentor-avatar">
+                                        <div class="mentor-details">
+                                            <h4>John Doe</h4>
+                                            <div class="mentor-rating">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                </svg>
+                                                <span>4.9/5 (25 đánh giá)</span>
                                             </div>
+                                            <p><strong>Expertises: </strong> Web Development, JavaScript, React</p>
+                                        </div>
+                                    </div>
+                                    <p><strong>Experience:</strong>None</p>
+                                </div>
+
+                                <div class="schedule-section">
+                                    <div class="schedule-container">
+                                        <h3 class="schedule-title">Available Schedule This Month</h3>
+                                        <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                                            Click on an available slot (✔) to select it for booking. You can only select one slot.
+                                        </p>
+
+                                        <div class="schedule-wrapper">
+                                            <table class="schedule-table">
+                                                <thead>
+                                                <tr>
+                                                    <th>Slot / Date</th>
+                                                    <th th:each="i : ${#numbers.sequence(0, #lists.size(slotDayMatrix[0]) - 1)}"
+                                                        th:text="${minDate.plusDays(i)}"
+                                                        th:attr="data-date=${minDate.plusDays(i)}">
+                                                        Date
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr th:each="slot, rowStat : ${slots}">
+                                                    <td th:text="${slot}">Time Slot</td>
+                                                    <td th:each="colStat : ${#numbers.sequence(0, #lists.size(slotDayMatrix[0]) - 1)}"
+                                                        th:classappend="${slotDayMatrix[rowStat.index][colStat]} ? 'available' : 'inactive'"
+                                                        th:data-date="${minDate.plusDays(colStat)}"
+                                                        th:data-slot="${'SLOT_' + (rowStat.index + 1)}"
+                                                        th:onclick="${slotDayMatrix[rowStat.index][colStat]} ? 'selectSlot(this)' : ''"
+                                                        th:style="${slotDayMatrix[rowStat.index][colStat]} ? 'cursor: pointer;' : ''">
+                                                        <span th:text="${slotDayMatrix[rowStat.index][colStat] ? '✔' : ''}"></span>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="section" th:if="${startTime}">
-                                <table class="schedule-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="background-color: #fac337">Session</th>
-                                            <th style="background-color: #fac337">Date</th>
-                                            <th style="background-color: #fac337">Day of Week</th>
-                                            <th style="background-color: #fac337">Slot</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="item, iStat : ${startTime}">
-                                        <td th:text="${iStat.index + 1}" style="text-align: center"></td>
-                                        <td th:text="${item.requestedDate}" style="text-align: center"></td>
-                                        <td th:text="${item.day}" style="text-align: center"></td>
-                                        <td th:text="${item.slot}" style="text-align: center"></td>
-                                    </tr>
-                                    </tbody>
 
-                                </table>
-                            </div>
-                            <!-- Submit Section -->
-                            <div class="submit-section">
-                                <button th:formaction="@{/courses/checkout/{cid}(cid=${courseMentor.id})}" type="submit"
-                                        class="submit-btn" id="submitBtn" name="action" value="submitForm">
-                                    Register Now
-                                </button>
+                                <!-- Selection Info -->
+                                <div class="selection-info" id="selectionInfo">
+                                    <h4>Selected Slot</h4>
+                                    <div class="selected-slot-info" id="selectedSlotInfo">
+                                        No slot selected
+                                    </div>
+                                    <div class="total-price">
+                                        Total: <span id="totalPrice">0 VND</span>
+                                        <input type="hidden" name="totalPrice" id="priceInput" value="0">
+                                    </div>
+                                </div>
+
+                                <!-- Submit Section -->
+                                <div class="submit-section">
+                                    <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                                        Register for Selected Slot
+                                    </button>
+                                </div>
+
+                                <!-- Hidden form fields for selected slot -->
+                                <!-- Container để thêm các input ẩn khi chọn slot -->
+                                <div id="hiddenInputsContainer"></div>
                             </div>
                         </form>
                     </div>
@@ -693,56 +175,117 @@
 </main>
 
 <script>
-    const form = document.getElementById("slotForm");
-    const buttons = form.querySelectorAll(".slot-button");
+    document.addEventListener('DOMContentLoaded', function () {
+        const scheduleWrapper = document.querySelector('.schedule-wrapper');
 
-    buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-            button.classList.toggle("active");
-            button.textContent = button.classList.contains("active") ? "✔" : "";
-
-            updateHiddenInputs();
+        let isDown = false, startX, scrollLeft;
+        scheduleWrapper.addEventListener('mousedown', (e) => {
+            isDown = true;
+            scheduleWrapper.classList.add('active');
+            startX = e.pageX - scheduleWrapper.offsetLeft;
+            scrollLeft = scheduleWrapper.scrollLeft;
         });
-    });
+        scheduleWrapper.addEventListener('mouseleave', () => {
+            isDown = false;
+            scheduleWrapper.classList.remove('active');
+        });
+        scheduleWrapper.addEventListener('mouseup', () => {
+            isDown = false;
+            scheduleWrapper.classList.remove('active');
+        });
+        scheduleWrapper.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - scheduleWrapper.offsetLeft;
+            const walk = (x - startX) * 2;
+            scheduleWrapper.scrollLeft = scrollLeft - walk;
+        });
 
-    function updateHiddenInputs() {
-        // Remove old hidden inputs
-        const oldInputs = form.querySelectorAll(
-            'input[type=hidden][data-generated="true"]'
-        );
-        oldInputs.forEach((i) => i.remove());
-
-        // Add new hidden inputs for each selected slot
-        buttons.forEach((btn) => {
-            if (btn.classList.contains("active")) {
-                // Create slot input
-                const slotInput = document.createElement("input");
-                slotInput.type = "hidden";
-                slotInput.name = "slot";
-                slotInput.value = btn.dataset.slot;
-                slotInput.dataset.generated = "true";
-                form.appendChild(slotInput);
-
-                // Create day input
-                const dayInput = document.createElement("input");
-                dayInput.type = "hidden";
-                dayInput.name = "day";
-                dayInput.value = btn.dataset.day;
-                dayInput.dataset.generated = "true";
-                form.appendChild(dayInput);
+        // Highlight current date column
+        const today = new Date().toISOString().split('T')[0];
+        const headers = document.querySelectorAll('.schedule-table th');
+        headers.forEach((header, index) => {
+            if (index === 0) return;
+            const headerDate = header.getAttribute('data-date');
+            if (headerDate === today) {
+                header.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                const rows = document.querySelectorAll('.schedule-table tbody tr');
+                rows.forEach(row => {
+                    const cell = row.children[index];
+                    if (cell && cell.classList.contains('available')) {
+                        cell.style.background = 'linear-gradient(135deg, #c3e6cb, #b8dcc0)';
+                    }
+                });
             }
         });
+    });
+
+    let selectedSlots = new Set();
+
+    function selectSlot(element) {
+        const date = element.getAttribute('data-date');
+        const slot = element.getAttribute('data-slot');
+        const key = `${date}__${slot}`;
+        const container = document.getElementById('hiddenInputsContainer');
+
+        if (selectedSlots.has(key)) {
+            selectedSlots.delete(key);
+            element.classList.remove('selected');
+            element.classList.add('available');
+
+            // Xóa input tương ứng
+            const dateInput = container.querySelector(`input[name="date"][value="${date}"][data-slot="${slot}"]`);
+            const slotInput = container.querySelector(`input[name="slot"][value="${slot}"][data-date="${date}"]`);
+            if (dateInput) dateInput.remove();
+            if (slotInput) slotInput.remove();
+        } else {
+            selectedSlots.add(key);
+            element.classList.remove('available');
+            element.classList.add('selected');
+
+            const dateInput = document.createElement('input');
+            dateInput.type = 'hidden';
+            dateInput.name = 'date';
+            dateInput.value = date;
+            dateInput.setAttribute('data-slot', slot);
+
+            const slotInput = document.createElement('input');
+            slotInput.type = 'hidden';
+            slotInput.name = 'slot';
+            slotInput.value = slot;
+            slotInput.setAttribute('data-date', date);
+
+            container.appendChild(dateInput);
+            container.appendChild(slotInput);
+        }
+
+        updateSelectionSummary();
     }
 
-    form.addEventListener("submit", function (e) {
-        const hasSelected = [...buttons].some((btn) =>
-            btn.classList.contains("active")
-        );
-        if (!hasSelected) {
-            e.preventDefault();
-            alert("Please choose at least one slot before submitting");
+    function updateSelectionSummary() {
+        const infoDiv = document.getElementById('selectedSlotInfo');
+        const totalPriceSpan = document.getElementById('totalPrice');
+        const submitBtn = document.getElementById('submitBtn');
+        const price = parseInt(document.getElementById('price-per-slot').getAttribute('data-price')) || 0;
+
+
+        if (selectedSlots.size === 0) {
+            infoDiv.textContent = "No slot selected";
+            totalPriceSpan.textContent = "0 VND";
+            submitBtn.disabled = true;
+        } else {
+            const slotInfoHTML = [...selectedSlots].map(k => {
+                const [date, slot] = k.split('__');
+                return `${slot} on ${date}`;
+            }).join('<br>');
+            infoDiv.innerHTML = slotInfoHTML;
+            totalPriceSpan.textContent = `${(price * selectedSlots.size).toLocaleString()} VND`;
+            const priceInput = document.getElementById('priceInput');
+            priceInput.value = price * selectedSlots.size;
+            submitBtn.disabled = false;
         }
-    });
+    }
 </script>
+
 </body>
 </html>

@@ -10,16 +10,27 @@ import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import com.example.edutrack.profiles.model.CV;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
+    private static final Logger logger = LoggerFactory.getLogger(FeedbackServiceImpl.class);
+
     private final FeedbackRepository feedbackRepository;
     private final CourseMentorRepository courseMentorRepository;
     private final LLMService llmService;
@@ -62,65 +73,5 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
         return feedbacks;
     }
-
-    @Override
-    public Page<Feedback> queryFeedbacks(String filter, String sort, String status, Pageable pageable) {
-        Feedback.Status statusEnum = null;
-        if (status != null && !status.isEmpty()) {
-            try {
-                statusEnum = Feedback.Status.valueOf(status);
-            } catch (IllegalArgumentException ex) {
-                statusEnum = null;
-            }
-        }
-
-        if (statusEnum != null && filter != null && !filter.isEmpty()) {
-            return feedbackRepository.findByStatusAndContentContainingIgnoreCaseOrStatusAndMentee_FullNameContainingIgnoreCase(
-                    statusEnum, filter, statusEnum, filter, pageable
-            );
-        } else if (statusEnum != null) {
-            return feedbackRepository.findByStatus(statusEnum, pageable);
-        } else if (filter != null && !filter.isEmpty()) {
-            return feedbackRepository.findByContentContainingIgnoreCaseOrMentee_FullNameContainingIgnoreCase(
-                    filter, filter, pageable
-            );
-        } else {
-            return feedbackRepository.findAll(pageable);
-        }
-    }
-    @Override
-    public void deleteFeedbackById(UUID id) {
-        feedbackRepository.deleteById(id);
-    }
-
-    @Override
-    public void toggleFeedbackStatus(UUID id) {
-        Feedback feedback = feedbackRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Feedback not found"));
-        if (feedback.getStatus() == Feedback.Status.ACTIVE) {
-            feedback.setStatus(Feedback.Status.HIDDEN);
-        } else {
-            feedback.setStatus(Feedback.Status.ACTIVE);
-        }
-        feedbackRepository.save(feedback);
-    }
-
-    @Override
-    public void aiVerifyFeedback(Feedback feedback) {
-        String prompt = generatePrompt(feedback);
-        String aiResponse = llmService.callModel(prompt);
-        processAIResponse(feedback, aiResponse);
-    }
-
-    @Override
-    public String generatePrompt(Feedback feedback) {
-        return "Hello";
-    }
-
-    @Override
-    public void processAIResponse(Feedback feedback, String aiResponse) {
-
-    }
-
 
 }

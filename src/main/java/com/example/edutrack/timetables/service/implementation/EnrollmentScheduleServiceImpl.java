@@ -5,11 +5,9 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.ScheduleDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
-import com.example.edutrack.timetables.model.Day;
-import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.EnrollmentSchedule;
-import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
+import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import org.springframework.stereotype.Service;
@@ -25,13 +23,15 @@ import java.util.*;
 public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService {
     private final EnrollmentScheduleRepository enrollmentScheduleRepository;
     private final MentorAvailableTimeRepository mentorAvailableTimeRepository;
+    private final MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository;
 
-    public EnrollmentScheduleServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository, MentorAvailableTimeRepository mentorAvailableTimeRepository) {
+    public EnrollmentScheduleServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository, MentorAvailableTimeRepository mentorAvailableTimeRepository, MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository) {
         this.enrollmentScheduleRepository = enrollmentScheduleRepository;
         this.mentorAvailableTimeRepository = mentorAvailableTimeRepository;
+        this.mentorAvailableTimeDetailsRepository = mentorAvailableTimeDetailsRepository;
     }
 
-    private void sortDayByWeek(List<Day> days, List<Slot> slots) {
+    public void sortDayByWeek(List<Day> days, List<Slot> slots) {
         List<String> weekDays = new ArrayList<>();
         weekDays.add("MONDAY");
         weekDays.add("TUESDAY");
@@ -57,91 +57,43 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     }
 
     @Override
-    public List<RequestedSchedule> findStartLearningTime(Mentee user,
-                                                         CourseMentor courseMentor,
-                                                         List<Slot> slot,
-                                                         List<Day> day,
-                                                         Integer totalSlot) {
+    public List<RequestedSchedule> findStartLearningTime(String summary) {
+        List<Slot> slot = new ArrayList<>();
+        List<LocalDate> date = new ArrayList<>();
 
-        LocalDate startDate = LocalDate.now();
-        sortDayByWeek(day, slot);
-
-        while (!day.contains(Day.valueOf(startDate.getDayOfWeek().name()))) {
-            startDate = startDate.plusDays(1);
-        }
-        System.out.println("INITIAL: " + startDate);
-
-        int found = 0;
-        int i = day.indexOf(Day.valueOf(startDate.getDayOfWeek().name()));
+        parseDaySlotString(summary, date, slot);
         List<RequestedSchedule> requestedSchedules = new ArrayList<>();
+        for (int i = 0; i < date.size(); i++) {
+            for (int j = date.size() - 1; j > i; j--) {
+                if (date.get(j).isBefore(date.get(j - 1))) {
+                    LocalDate tempDate = date.get(j);
+                    date.set(j, date.get(j - 1));
+                    date.set(j - 1, tempDate);
 
-        while (found < totalSlot) {
-            Slot currentSlot = slot.get(i);
-            Day currentDay = day.get(i);
-            System.out.println("=============================================================");
-            System.out.println(startDate);
-            System.out.println(currentDay.name() + "-" + currentSlot.name());
-
-            boolean isMentorAvailableTime = mentorAvailableTimeRepository.isMentorAvailableTime(courseMentor.getMentor(), currentSlot, startDate);
-            if (isMentorAvailableTime) {
-                return null;
-            }
-            LocalDate minDate = mentorAvailableTimeRepository.findMinStartDate(courseMentor.getMentor());
-            LocalDate maxDate = mentorAvailableTimeRepository.findMaxEndDate(courseMentor.getMentor());
-            if (minDate == null && maxDate == null) {
-                return null;
-            } else {
-                if (startDate.isBefore(minDate) || startDate.isAfter(maxDate)) {
-                    return null;
+                    Slot tempSlot = slot.get(j);
+                    slot.set(j, slot.get(j - 1));
+                    slot.set(j - 1, tempSlot);
                 }
             }
-
-            boolean clashMentor = enrollmentScheduleRepository
-                    .isTakenSlot(courseMentor.getMentor(), currentSlot, currentDay, startDate);
-            boolean clashMentee = enrollmentScheduleRepository
-                    .isLearningSlot(user, currentSlot, currentDay, startDate);
-
-            if (!clashMentor && !clashMentee) {
-                if (found == 0) {
-                    requestedSchedules.add(new RequestedSchedule(currentSlot, currentDay, startDate));
-                    System.out.println("FOUND: " + startDate);
-                }
-                found++;
-            } else {
-                found = 0;
-                requestedSchedules = new ArrayList<>();
-            }
-
-            i++;
-            if (i == day.size()) {
-                i = 0;
-                startDate = startDate.plusDays(1);
-                while (!day.contains(Day.valueOf(startDate.getDayOfWeek().name()))) {
-                    startDate = startDate.plusDays(1);
-                }
-            } else if (!day.get(i).equals(day.get(i - 1))) {
-                startDate = startDate.plusDays(1);
-                while (!day.contains(Day.valueOf(startDate.getDayOfWeek().name()))) {
-                    startDate = startDate.plusDays(1);
-                }
-            }
+            requestedSchedules.add(new RequestedSchedule(slot.get(i), Day.valueOf(date.get(i).getDayOfWeek().name()), date.get(i)));
         }
+
         return requestedSchedules;
     }
 
     public static void parseDaySlotString(String input,
-                                          List<Day> days,
+                                          List<LocalDate> dates,
                                           List<Slot> slots) {
-        String[] pairs = input.split(",");
+        String[] pairs = input.split(";");
 
         for (String pair : pairs) {
-            String[] parts = pair.trim().split("-");
+            String[] parts = pair.trim().split(",");
 
             if (parts.length == 2) {
-                Day day = Day.valueOf(parts[0].trim().toUpperCase());
+                LocalDate date = LocalDate.parse(parts[0].trim());
                 Slot slot = Slot.valueOf(parts[1].trim().toUpperCase());
 
-                days.add(day);
+                dates.add(date);
                 slots.add(slot);
             } else {
                 throw new IllegalArgumentException("Invalid format: " + pair);
@@ -151,60 +103,21 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
     @Override
     public void saveEnrollmentSchedule(Enrollment enrollment) {
-        String startTime = enrollment.getStartTime();
-        String[] strings = startTime.split("-");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate startDate = LocalDate.parse(strings[0], formatter);
-        Slot startingSlot = Slot.valueOf(strings[1]);
+        String summary = enrollment.getScheduleSummary();
+        List<RequestedSchedule> requestedSchedules = findStartLearningTime(summary);
 
-        List<Slot> slot = new ArrayList<>();
-        List<Day> day = new ArrayList<>();
-        String scheduleSummary = enrollment.getScheduleSummary();
-
-        parseDaySlotString(scheduleSummary, day, slot);
-        sortDayByWeek(day, slot);
-
-        System.out.println("INITIAL: " + startDate);
-
-        int found = 0;
-        int i = day.indexOf(Day.valueOf(startDate.getDayOfWeek().name()));
-
-        for (int t = 0; t < day.size(); t++) {
-            Day targetDay = Day.valueOf(startDate.getDayOfWeek().name());
-            if (day.get(t) == targetDay && slot.get(t) == startingSlot) {
-                i = t;
-                break;
-            }
+        for(RequestedSchedule requestedSchedule : requestedSchedules) {
+            enrollmentScheduleRepository.save(new EnrollmentSchedule(enrollment, requestedSchedule.getSlot(), requestedSchedule.getRequestedDate()));
         }
 
-        int totalSlot = enrollment.getTotalSlots();
-        while (found < totalSlot) {
-            Slot currentSlot = slot.get(i);
-            Day currentDay = day.get(i);
-            System.out.println("=============================================================");
-            System.out.println(startDate);
-            System.out.println(currentDay.name() + "-" + currentSlot.name());
-
-            EnrollmentSchedule schedule = new EnrollmentSchedule();
-            schedule.setEnrollment(enrollment);
-            schedule.setSlot(currentSlot);
-            schedule.setDate(startDate);
-            enrollmentScheduleRepository.save(schedule);
-
-            i++;
-            if (i == day.size()) {
-                i = 0;
-                startDate = startDate.plusDays(1);
-                while (!day.contains(Day.valueOf(startDate.getDayOfWeek().name()))) {
-                    startDate = startDate.plusDays(1);
-                }
-            } else if (!day.get(i).equals(day.get(i - 1))) {
-                startDate = startDate.plusDays(1);
-                while (!day.contains(Day.valueOf(startDate.getDayOfWeek().name()))) {
-                    startDate = startDate.plusDays(1);
+        List<MentorAvailableTimeDetails> mentorAvailableTimeDetails = mentorAvailableTimeDetailsRepository.findByMentor(enrollment.getCourseMentor().getMentor());
+        for(MentorAvailableTimeDetails mentorAvailableTimeDetail : mentorAvailableTimeDetails) {
+            for (RequestedSchedule requestedSchedule : requestedSchedules){
+                if(mentorAvailableTimeDetail.getDate().equals(requestedSchedule.getRequestedDate()) && requestedSchedule.getSlot().equals(mentorAvailableTimeDetail.getSlot())) {
+                    mentorAvailableTimeDetail.setMentee(enrollment.getMentee());
+                    mentorAvailableTimeDetailsRepository.save(mentorAvailableTimeDetail);
                 }
             }
-            found++;
         }
     }
 
