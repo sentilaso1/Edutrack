@@ -8,10 +8,10 @@ import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.TagEnrollmentCountDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.model.LandingPageConfig;
+import com.example.edutrack.curriculum.model.MenteeLandingRole;
 import com.example.edutrack.curriculum.model.Tag;
-import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
-import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
-import com.example.edutrack.curriculum.service.interfaces.DashboardService;
+import com.example.edutrack.curriculum.service.interfaces.*;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -26,6 +26,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Controller
 public class HomeControlller {
+
+    private final LandingPageConfigService landingPageConfigService;
+    private final SuggestionService suggestionService;
     private final CourseTagService courseTagService;
     private final EnrollmentService enrollmentService;
     private final CourseMentorService courseMentorService;
@@ -33,200 +36,160 @@ public class HomeControlller {
     private final DashboardService dashboardService;
     private final MenteeRepository menteeRepository;
 
-    public HomeControlller(CourseTagService courseTagService, EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService, DashboardService dashboardService, MenteeRepository menteeRepository) {
+    public HomeControlller(LandingPageConfigService landingPageConfigService,
+                           SuggestionService suggestionService,
+                           CourseTagService courseTagService,
+                           EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService,
+                           MenteeRepository menteeRepository,
+                           DashboardService dashboardService) {
+        this.landingPageConfigService = landingPageConfigService;
+        this.suggestionService = suggestionService;
         this.courseTagService = courseTagService;
         this.enrollmentService = enrollmentService;
         this.courseMentorService = courseMentorService;
         this.mentorService = mentorService;
-        this.dashboardService = dashboardService;
         this.menteeRepository = menteeRepository;
+        this.dashboardService = dashboardService;
     }
 
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        User user = (User) session.getAttribute("loggedInUser");
 
-        if (loggedInUser == null) {
-            return handleGuestUser(model);
-        }
+        if (user == null) return handleGuestUser(model);
+        if (user instanceof Mentor) return "redirect:/mentor/dashboard";
+        if ("Manager".equals(user.getClass().getSimpleName())) return "redirect:/manager/dashboard";
 
-        if (loggedInUser instanceof Mentor) {
-            return "redirect:/mentor";
-        }
-
-        if (loggedInUser.getClass().getSimpleName().equals("Manager")) {
-            return "redirect:/manager/dashboard";
-        }
-
-        Mentee mentee = (Mentee) loggedInUser;
+        Mentee mentee = (Mentee) user;
         if (enrollmentService.getEnrollmentsByMenteeId(mentee.getId()).isEmpty()) {
-            return handleNewLoggedInUser(mentee, model);
+            return handleNewMenteeUser(mentee, model);
         } else {
-            return handleExperiencedLoggedInUser(mentee, model);
+            return handleExperiencedMenteeUser(mentee, model);
         }
-    }
-
-
-    private String handleMentorUser(Mentor mentor, Model model) {
-        model.addAttribute("mentor", mentor);
-        return "mentor/dashboard";
-    }
-
-    private String handleManagerUser(User manager, Model model) {
-        model.addAttribute("manager", manager);
-        return "manager/dashboard";
-    }
-
-
-
-    public void addTopTagsToModel(Model model, int limit) {
-        List<TagEnrollmentCountDTO> topTags = courseTagService.getTopTags(limit);
-        model.addAttribute("topTags", topTags);
     }
 
     private String handleGuestUser(Model model) {
+        LandingPageConfig config = landingPageConfigService.getConfigByRole(MenteeLandingRole.GUEST);
+        populateCommonModel(model, config);
+
         model.addAttribute("headerCTA", "Sign Up");
         model.addAttribute("headerCTALink", "/signup");
-
-        model.addAttribute("heroHeadline", "Better <span class=\"span\">Learning Future</span> Starts With Youdemi");
-        model.addAttribute("heroSubHeadline", "It is long established fact that reader distracted by the readable content.");
-        model.addAttribute("heroCTA", "Explore Courses");
-        model.addAttribute("heroCTALink", "/courses");
-
-        model.addAttribute("sectionOneTitle", "Featured Courses");
-        model.addAttribute("sectionOneSubtitle", "Choose Unlimited Courses");
-
-        model.addAttribute("sectionTwoTitle", "Latest Courses");
-        model.addAttribute("sectionTwoSubtitle", "Newest Courses");
-
-        addTopTagsToModel(model, 9);
-
-        List<Tag> allCourseTags = courseTagService.getAllTags();
-        List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
-        model.addAttribute("allCourseTagIds", allCourseTagIds);
-
-        List<CourseMentor> popularCourses = enrollmentService.getPopularCoursesForGuest(8);
-        List<CourseCardDTO> courseSectionOne = enrollmentService.mapToCourseCardDTOList(popularCourses);
-        model.addAttribute("courseSectionOne", courseSectionOne);
-
-        List<CourseMentor> latestCourses = courseMentorService.findLatestCourse(8);
-        List<CourseCardDTO> courseSectionTwo = enrollmentService.mapToCourseCardDTOList(latestCourses);
-        model.addAttribute("courseSectionTwo", courseSectionTwo);
-
-        List<Mentor> topMentors = mentorService.getTopMentorsByRatingOrSessions(7);
-        model.addAttribute("recommendedMentors", topMentors);
-
         model.addAttribute("userType", "guest");
         model.addAttribute("showSchedulesLink", false);
         model.addAttribute("showTracker", false);
+
+        model.addAttribute("courseSectionOne", enrollmentService.mapToCourseCardDTOList(
+                suggestionService.getSuggestedCourses(config.getCourseSectionOneSuggestion(), null, 8)));
+        model.addAttribute("courseSectionTwo", enrollmentService.mapToCourseCardDTOList(
+                suggestionService.getSuggestedCourses(config.getCourseSectionTwoSuggestion(), null, 8)));
+        model.addAttribute("recommendedMentors",
+                suggestionService.getSuggestedMentors(config.getMentorSuggestion(), null, 7));
+
         return "mentee/mentee-landing-page";
     }
 
-
-    private String handleNewLoggedInUser(User user, Model model) {
-        model.addAttribute("headerCTA", "Logout");
-        model.addAttribute("headerCTALink", "/logout");
+    private String handleNewMenteeUser(Mentee user, Model model) {
+        LandingPageConfig config = landingPageConfigService.getConfigByRole(MenteeLandingRole.MENTEE_NEW);
+        populateCommonModel(model, config);
 
         model.addAttribute("heroHeadline", "Welcome, <span class=\"span\">" + user.getFullName() + "!</span>");
-        model.addAttribute("heroSubHeadline", "Start your learning journey with personalized recommendations.");
-        model.addAttribute("heroCTA", "Find Your First Course");
-        model.addAttribute("heroCTALink", "/courses");
-
-        model.addAttribute("sectionOneTitle", "Recommended For You");
-        model.addAttribute("sectionOneSubtitle", "Based on your interests");
-
-        List<CourseMentor> recommended = courseMentorService.getRecommendedCoursesByInterests(user.getId(), 8);
-        List<CourseCardDTO> courseSectionOne = enrollmentService.mapToCourseCardDTOList(recommended);
-        model.addAttribute("courseSectionOne", courseSectionOne);
-
-        model.addAttribute("sectionTwoTitle", "Popular Now");
-        model.addAttribute("sectionTwoSubtitle", "What other learners are exploring");
-
-        addTopTagsToModel(model, 9);
-
-        List<Tag> allCourseTags = courseTagService.getAllTags();
-        List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
-        model.addAttribute("allCourseTagIds", allCourseTagIds);
-
-        List<CourseMentor> popularCourses = enrollmentService.getPopularCoursesForGuest(8);
-        List<CourseCardDTO> courseSectionTwo = enrollmentService.mapToCourseCardDTOList(popularCourses);
-        model.addAttribute("courseSectionTwo", courseSectionTwo);
-
-        List<Mentor> mentorsByInterest = mentorService.findMentorsByMenteeInterest(user.getId(), 5);
-        model.addAttribute("recommendedMentors", mentorsByInterest);
-
         model.addAttribute("userType", "newUser");
         model.addAttribute("showSchedulesLink", false);
         model.addAttribute("showDashboard", true);
 
+        model.addAttribute("headerCTA", "Logout");
+        model.addAttribute("headerCTALink", "/logout");
+
         UUID userId = user.getId();
+
+        model.addAttribute("courseSectionOne", enrollmentService.mapToCourseCardDTOList(
+                suggestionService.getSuggestedCourses(config.getCourseSectionOneSuggestion(), userId, 8)));
+        model.addAttribute("courseSectionTwo", enrollmentService.mapToCourseCardDTOList(
+                suggestionService.getSuggestedCourses(config.getCourseSectionTwoSuggestion(), userId, 8)));
+        model.addAttribute("recommendedMentors",
+                suggestionService.getSuggestedMentors(config.getMentorSuggestion(), userId, 5));
+
         Mentee mentee = menteeRepository.findById(userId).orElse(null);
         boolean showInterestModal = mentee != null && (mentee.getInterests() == null || mentee.getInterests().isEmpty());
         model.addAttribute("userId", userId.toString());
         model.addAttribute("showInterestModal", showInterestModal);
+
         return "mentee/mentee-landing-page";
     }
 
-    private String handleExperiencedLoggedInUser(User user, Model model) {
+    private String handleExperiencedMenteeUser(Mentee user, Model model) {
+        LandingPageConfig config = landingPageConfigService.getConfigByRole(MenteeLandingRole.MENTEE_EXPERIENCED);
+        UUID userId = user.getId();
+
+        if (config.isUseScheduleReminder()) {
+            if (dashboardService.isAllCoursesCompleted(userId)) {
+                config.setHeroHeadline("Well Done!");
+                config.setHeroSubHeadline("You've completed all your sessions. Explore more advanced topics.");
+                config.setHeroCTA("Find New Courses");
+                config.setHeroCTALink("/courses");
+            } else {
+                config.setHeroHeadline("Upcoming Sessions");
+                config.setHeroSubHeadline("Next session: " + dashboardService.getNextSessionTime(userId));
+                config.setHeroCTA("View schedule →");
+                config.setHeroCTALink("/schedules");
+            }
+        }
+
+        populateCommonModel(model, config);
+        model.addAttribute("landingConfig", config);
+
         model.addAttribute("headerCTA", "Logout");
         model.addAttribute("headerCTALink", "/logout");
+        model.addAttribute("userType", "experiencedUser");
+        model.addAttribute("showSchedulesLink", true);
+        model.addAttribute("showDashboard", true);
+        model.addAttribute("showTracker", true);
 
-        if (dashboardService.isAllCoursesCompleted(user.getId())) {
-            model.addAttribute("heroHeadline", "<span class='span'>Well Done!</span>");
-            model.addAttribute("heroSubHeadline", "You've completed all your sessions. Explore more advanced topics.");
-            model.addAttribute("heroCTA", "Find New Courses");
-            model.addAttribute("heroCTALink", "/courses");
-        } else {
-            model.addAttribute("heroHeadline", "<span class='span'>Upcoming Sessions</span>");
-            model.addAttribute("heroSubHeadline", "Next session: " + dashboardService.getNextSessionTime(user.getId()));
-            model.addAttribute("heroCTA", "View schedule →");
-            model.addAttribute("heroCTALink", "/schedules");
-        }
-        List<CourseMentor> inProgress = enrollmentService.getCourseInProgressMentee(user.getId());
-        CourseMentor baseCourse = null;
+        model.addAttribute("courseSectionOne", enrollmentService.mapToCourseCardDTOList(
+                suggestionService.getSuggestedCourses(config.getCourseSectionOneSuggestion(), userId, 8)));
+        model.addAttribute("courseSectionTwo", enrollmentService.mapToCourseCardDTOList(
+                suggestionService.getSuggestedCourses(config.getCourseSectionTwoSuggestion(), userId, 8)));
+        model.addAttribute("recommendedMentors",
+                suggestionService.getSuggestedMentors(config.getMentorSuggestion(), userId, 7));
 
-        if (!inProgress.isEmpty()) {
-            int randomIndex = ThreadLocalRandom.current().nextInt(inProgress.size()); //Get Random Course That Mentee Is Learning
-            baseCourse = inProgress.get(randomIndex);
-        }
+        return "mentee/mentee-landing-page";
+    }
 
-        if (baseCourse != null) {
-            model.addAttribute("sectionOneTitle", "Because You Learned " + baseCourse.getCourse().getName());
-            model.addAttribute("sectionOneSubtitle", "Recommended courses related to your progress");
 
-            List<CourseMentor> relatedCourses = courseMentorService.getRelatedCoursesByTags(baseCourse.getCourse().getId(), user.getId(), 8);
-            List<CourseCardDTO> courseSectionOne = enrollmentService.mapToCourseCardDTOList(relatedCourses);
-            model.addAttribute("courseSectionOne", courseSectionOne);
-        } else {
-            model.addAttribute("sectionOneTitle", "Continue Your Journey");
-            model.addAttribute("sectionOneSubtitle", "Pick up where you left off");
-            model.addAttribute("courseSectionOne", Collections.emptyList());
-        }
+    private void populateCommonModel(Model model, LandingPageConfig config) {
+        model.addAttribute("heroHeadline", config.getHeroHeadline());
+        model.addAttribute("heroSubHeadline", config.getHeroSubHeadline());
+        model.addAttribute("heroCTA", config.getHeroCTA());
+        model.addAttribute("heroCTALink", config.getHeroCTALink());
 
-        addTopTagsToModel(model, 9);
+        model.addAttribute("sectionOneTitle", config.getSectionOneTitle());
+        model.addAttribute("sectionOneSubtitle", config.getSectionOneSubtitle());
+        model.addAttribute("sectionTwoTitle", config.getSectionTwoTitle());
+        model.addAttribute("sectionTwoSubtitle", config.getSectionTwoSubtitle());
 
+        model.addAttribute("categoryTitle", config.getCategoryTitle());
+        model.addAttribute("categorySubtitle", config.getCategorySubtitle());
+        model.addAttribute("categoryButtonText", config.getCategoryButtonText());
+
+        model.addAttribute("aboutTitle", config.getAboutTitle());
+        model.addAttribute("aboutSubtitle", config.getAboutSubtitle());
+        model.addAttribute("aboutDescription", config.getAboutDescription());
+
+        model.addAttribute("mentorSectionTitle", config.getMentorSectionTitle());
+        model.addAttribute("mentorSectionSubtitle", config.getMentorSectionSubtitle());
+
+        model.addAttribute("heroImageUrl", config.getHeroImageUrl());
+        model.addAttribute("categorySectionBgUrl", config.getCategorySectionBgUrl());
+        model.addAttribute("aboutSectionImageUrl", config.getAboutSectionImageUrl());
+        model.addAttribute("courseSectionBgUrl", config.getCourseSectionBgUrl());
+        model.addAttribute("mentorSectionBgUrl", config.getMentorSectionBgUrl());
+
+        model.addAttribute("footerDescription", config.getFooterDescription());
+        model.addAttribute("copyrightText", config.getCopyrightText());
+
+        model.addAttribute("topTags", suggestionService.getSuggestedTags(config.getTagSuggestion(), 9));
         List<Tag> allCourseTags = courseTagService.getAllTags();
         List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
         model.addAttribute("allCourseTagIds", allCourseTagIds);
-
-
-        model.addAttribute("sectionTwoTitle", "Recommended Courses");
-        model.addAttribute("sectionTwoSubtitle", "Enhance your skills with these picks");
-
-        List<CourseMentor> recommendations = courseMentorService.getRecommendedByHistory(user.getId(), 8);
-        List<CourseCardDTO> courseSectionTwo = enrollmentService.mapToCourseCardDTOList(recommendations);
-        model.addAttribute("courseSectionTwo", courseSectionTwo);
-
-        List<Mentor> topMentors = mentorService.getTopMentorsByRatingOrSessions(7);
-        model.addAttribute("recommendedMentors", topMentors);
-
-        model.addAttribute("userType", "experiencedUser");
-        model.addAttribute("showSchedulesLink", true);
-        model.addAttribute("showTracker", true);
-        model.addAttribute("showDashboard", true);
-
-        return "mentee/mentee-landing-page";
     }
-
-
 }
