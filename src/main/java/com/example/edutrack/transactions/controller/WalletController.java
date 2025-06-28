@@ -190,15 +190,23 @@ public class WalletController {
             return "/wallet/withdraw";
         }
 
-        BankingQR qr = null;
         Optional<BankingQR> qrOpt = bankingQrService.findByUser(user);
 
-        if (qrOpt.isEmpty()) {
-            if (qrImage == null || qrImage.isEmpty()) {
-                model.addAttribute("error", "Banking QR image is required.");
+        if (qrOpt.isEmpty() && (qrImage == null || qrImage.isEmpty()))  {
+            model.addAttribute("error", "Banking QR image is required.");
+            return "/wallet/withdraw";
+        }
+
+        if (qrOpt.isPresent()) {
+            try {
+                qrOpt.get().setQrImage(qrImage);
+                bankingQrService.save(qrOpt.get());
+            } catch (IOException e) {
+                model.addAttribute("error", "Failed to process banking qr image.");
+                model.addAttribute("details", e.getStackTrace());
                 return "/wallet/withdraw";
             }
-
+        } else {
             try {
                 bankingQrService.save(new BankingQR(qrImage, user));
             } catch (IOException e) {
