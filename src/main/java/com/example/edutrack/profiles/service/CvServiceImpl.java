@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.UserRepository;
+import com.example.edutrack.common.service.interfaces.LLMService;
 import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.CVCourse;
 import com.example.edutrack.curriculum.model.Course;
@@ -22,18 +23,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -42,6 +40,8 @@ import java.util.stream.Stream;
 
 @Service
 public class CvServiceImpl implements CvService {
+    private static final Logger logger = LoggerFactory.getLogger(CvServiceImpl.class);
+
     private final EntityManager entityManager;
     private final CvRepository cvRepository;
     private final UserRepository userRepository;
@@ -49,7 +49,7 @@ public class CvServiceImpl implements CvService {
     private final CVCourseRepository cvCourseRepository;
     private final MentorRepository mentorRepository;
     private final CourseMentorRepository courseMentorRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final LLMService llmService;
 
     @Autowired
     public CvServiceImpl(EntityManager entityManager,
@@ -58,7 +58,8 @@ public class CvServiceImpl implements CvService {
                          CourseRepository courseRepository,
                          CVCourseRepository cvCourseRepository,
                          MentorRepository mentorRepository,
-                         CourseMentorRepository courseMentorRepository) {
+                         CourseMentorRepository courseMentorRepository,
+                         LLMService llmService) {
         this.entityManager = entityManager;
         this.cvRepository = cvRepository;
         this.userRepository = userRepository;
@@ -66,6 +67,7 @@ public class CvServiceImpl implements CvService {
         this.cvCourseRepository = cvCourseRepository;
         this.mentorRepository = mentorRepository;
         this.courseMentorRepository = courseMentorRepository;
+        this.llmService = llmService;
     }
 
     @Override
@@ -339,7 +341,7 @@ public class CvServiceImpl implements CvService {
     @Override
     public void aiVerifyCV(CV cv, List<Course> courses) {
         String prompt = generatePrompt(cv, courses);
-        String aiResponse = callMistralAPI(prompt);
+        String aiResponse = llmService.callModel(prompt);
         processAIResponse(cv, aiResponse);
     }
 
@@ -423,53 +425,30 @@ public class CvServiceImpl implements CvService {
         """.formatted(summary, experienceYears, skills, education, experience, certifications, languages, courseName);
     }
 
-    public String callMistralAPI(String prompt) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth("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");
-
-        Map<String, Object> body = Map.of(
-                "model", "mistralai/devstral-small:free",
-                "messages", List.of(
-                        Map.of("role", "user", "content", prompt)
-                )
-        );
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "https://openrouter.ai/api/v1/chat/completions",
-                entity,
-                String.class
-        );
-
-        return response.getBody();
-    }
-
     public void processAIResponse(CV cv, String aiJson) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             if (aiJson == null || aiJson.trim().isEmpty()) {
-                System.err.println("AI response is null or empty");
+                logger.warn("AI response is null or empty");
                 return;
             }
 
             JsonNode root = mapper.readTree(aiJson);
             JsonNode choices = root.path("choices");
             if (!choices.isArray() || choices.isEmpty()) {
-                System.err.println("Invalid or empty choices array: " + aiJson);
+                logger.error("Invalid or empty choices array: {}", aiJson);
                 return;
             }
 
             JsonNode message = choices.get(0).path("message");
             if (message.isMissingNode()) {
-                System.err.println("Missing message field: " + aiJson);
+                logger.error("Missing message field: {}", aiJson);
                 return;
             }
 
             JsonNode contentNode = message.path("content");
             if (contentNode.isMissingNode() || !contentNode.isTextual()) {
-                System.err.println("Missing or invalid content field: " + aiJson);
+                logger.error("Missing or invalid content field: {}", aiJson);
                 return;
             }
 
@@ -482,7 +461,7 @@ public class CvServiceImpl implements CvService {
             JsonNode approveNode = decision.get("is-approve");
             JsonNode reasonNode = decision.get("reason");
             if (approveNode == null || reasonNode == null || !approveNode.isTextual() || !reasonNode.isTextual()) {
-                System.err.println("Missing or invalid is-approve/reason fields: " + contentJson);
+                logger.error("Missing or invalid is-approve/reason fields: {}", contentJson);
                 return;
             }
 
@@ -498,16 +477,19 @@ public class CvServiceImpl implements CvService {
                     cm.setStatus(ApplicationStatus.REJECTED);
                     courseMentorRepository.save(cm);
                 }
+                logger.info("CV rejected for mentorId {}: {}", cv.getId(), reason);
+            } else {
+                logger.info("CV approved for mentorId {}: {}", cv.getId(), reason);
             }
 
-            System.out.println("Result: " + aiJson);
+            logger.debug("AI response result: {}", aiJson);
 
             cv.setStatus(approved ? "aiapproved" : "rejected");
             cvRepository.save(cv);
         } catch (JsonProcessingException e) {
-            System.err.println("JSON parsing error for AI response: " + aiJson);
+            logger.error("JSON parsing error for AI response: {}", aiJson, e);
         } catch (Exception e) {
-            System.err.println("Unexpected error processing AI response: " + aiJson);
+            logger.error("Unexpected error processing AI response: {}", aiJson, e);
         }
     }
 

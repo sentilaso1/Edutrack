@@ -57,7 +57,7 @@ public class GoogleAuthController {
             Mentee mentee = menteeRepository.findByEmail(email).get();
             session.setAttribute("loggedInUser", mentee);
             session.setAttribute("role", "mentee");
-            return "redirect:/home";
+            return "redirect:/";
         } else if (mentorRepository.findByEmail(email).isPresent()) {
             Mentor mentor = mentorRepository.findByEmail(email).get();
             session.setAttribute("loggedInUser", mentor);

@@ -1,268 +1,249 @@
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EduTrack - list-bookmark.html</title>
+    <title>EduTrack - My Bookmarks</title>
     <link rel="stylesheet" th:href="@{/css/master.css}"/>
     <link rel="stylesheet" th:href="@{/css/colors.css}"/>
-
     <style>
-        .main-grid {
-            max-width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 3fr;
-            gap: 1.5em;
-            padding: 0.5em;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #e6f7f9, #ffeef0);
+            margin: 0;
         }
 
-        .sidebar > form {
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #2C3E50;
+            margin-bottom: 30px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+
+        .filter-section {
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .filter-section h4 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #2C3E50;
+        }
+
+        .filter-section form {
             display: flex;
             flex-direction: column;
-            position: sticky;
-            top: 0.5em;
-            gap: 0.5em;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        select, input[type="checkbox"] {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .filter-section button {
+            background-color: rgba(255, 128, 134, 0.99);
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .filter-section button:hover {
+            background-color: rgba(255, 100, 110, 0.99);
         }
 
         .bookmark-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 1.5em;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .bookmark-item {
-            box-sizing: border-box;
-            width: 100%;
-            height: 100%;
-            border-radius: 0.25em;
+        .bookmark-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
         }
 
-        .bookmark-header {
-            border-radius: 0.25em 0.25em 0 0;
-            padding: 0.5em;
+        .bookmark-card-header {
             display: flex;
             justify-content: space-between;
-            font-size: 0.9em;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #555;
         }
 
-        .bookmark-image {
-            width: 100%;
-            aspect-ratio: 16/9;
-            margin-bottom: 0.5em;
+        .bookmark-card h3 {
+            margin: 10px 0;
+            font-size: 18px;
+            color: #2C3E50;
         }
 
-        .bookmark-content {
-            padding: 0.5em;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5em;
-            flex-grow: 1;
+        .bookmark-card p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 14px;
         }
 
-        .bookmark-tags {
+        .tag-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.25rem;
-            padding: 0.5rem;
+            gap: 6px;
+            margin-top: 10px;
         }
 
         .tag-item {
-            padding: 0.25rem;
-            border-radius: 0.25rem;
-            font-size: 0.8em;
+            background-color: rgba(255, 128, 134, 0.1);
+            color: rgba(255, 100, 110, 1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 128, 134, 0.3);
         }
 
-        .course-title {
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        .course-desc {
-            font-size: 0.9em;
-        }
-
-        .visible {
-            visibility: visible;
-        }
-
-        .invisible {
-            visibility: hidden;
-        }
-
-        .filter-options {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 0.5em;
-        }
-
-        .filter-button {
+        .delete-btn {
+            background-color: rgba(255, 100, 110, 0.9);
+            color: white;
             border: none;
-            border-radius: 0.25em;
-            padding: 0.5em;
-            background-color: var(--bg);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        .filter-button:hover {
-            background-color: #759976;
+        .delete-btn:hover {
+            background-color: rgba(255, 70, 80, 0.9);
         }
 
         .pagination {
-            margin: 1em;
-            max-width: 100%;
+            margin-top: 30px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 1em;
+            gap: 10px;
+        }
+
+        .pagination button {
+            background-color: rgba(255, 128, 134, 0.99);
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .pagination button.disabled {
+            display: none;
         }
     </style>
 </head>
-<body class="viewport">
-<h1 style="padding: 0.5rem 0.5rem 0 0.5rem; margin-bottom: 1rem; font-size: 3em">Bookmark List</h1>
-
-<div class="main-grid">
-    <aside class="sidebar">
-        <form class="filter-form">
-            <h3 class="small-heading">
+<body>
+<div class="container">
+    <h1>My Bookmarks</h1>
+    <div class="grid-layout">
+        <div class="filter-section">
+            <h4>Filter Bookmarks</h4>
+            <form id="filter-form">
                 <label for="sort">Sorting Order:</label>
-            </h3>
-            <select name="sort" id="sort" style="margin-bottom: 1em">
-                <option value="date-desc"
-                        th:selected="${sort == null || (sort != null && sort == 'date-desc')}">Date
-                    descending
-                </option>
-                <option value="date-asc" th:selected="${sort != null && sort == 'date-asc'}">Date
-                    ascending
-                </option>
-            </select>
-
-            <h3>Filter Options</h3>
-            <div class="filter-options">
-                <label>
-                    <input type="checkbox" id="tags-all"
-                           th:checked="${selectedTags == null || selectedTags.isEmpty() || tags.size() == selectedTags.size()}"/>
-                    <span>All</span>
-                </label>
-
+                <select name="sort" id="sort">
+                    <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Date descending</option>
+                    <option value="date-asc" th:selected="${sort == 'date-asc'}">Date ascending</option>
+                </select>
+                <label><input type="checkbox" id="tags-all" th:checked="${selectedTags == null || selectedTags.isEmpty() || tags.size() == selectedTags.size()}"/> All</label>
                 <label th:each="tag : ${tags}">
-                    <input type="checkbox" name="tags" th:value="${tag.id}"
-                           th:attr="checked=${selectedTags != null && #lists.contains(selectedTags, tag.id)}"/>
+                    <input type="checkbox" name="tags" th:value="${tag.id}" th:attr="checked=${selectedTags != null && #lists.contains(selectedTags, tag.id)}"/>
                     <span th:text="${tag.title}"></span>
                 </label>
-            </div>
-
-            <button type="submit" class="">
-                Filter
-            </button>
-        </form>
-    </aside>
-
-    <main th:with="bookmarkDTOs = ${page.content}" class="bookmark-grid">
-        <div th:each="bookmarkDTO : ${bookmarkDTOs}"
-             th:with="bookmark = ${bookmarkDTO.bookmark}, course = ${bookmarkDTO.bookmark.course}, tags = ${bookmarkDTO.tags}"
-             class="bookmark-item container-bg">
-            <div class="bookmark-header section-bg">
-                <span th:text="${bookmark.getCreatedDate().toLocaleString()}"></span>
-                <form th:action="@{/bookmark/delete/{id}(id=${bookmark.id})}" method="post">
-                    <button type="submit" class="" title="Delete Bookmark">
-                        delete
-                    </button>
-                </form>
-            </div>
-
-            <div class="bookmark-image modal-bg">
-            </div>
-
-            <div class="bookmark-content">
-                <span>
-                    <span th:text="${course.name}" class="course-title"></span>
-                    (
-                    <span th:text="${course.getOpen() ? 'Open' : 'Closed'}"></span>
-                    )
-                </span>
-                <span th:text="${course.description}" class="course-desc"></span>
-            </div>
-
-            <div class="bookmark-tags">
-                <th:block th:each="tag : ${bookmarkDTO.tags}">
-                    <span th:text="${tag.title}" class="tag-item modal-bg"></span>
-                </th:block>
+                <button type="submit">Apply Filters</button>
+            </form>
+        </div>
+        <div class="bookmark-grid">
+            <div th:each="bookmarkDTO : ${page.content}" th:with="bookmark = ${bookmarkDTO.bookmark}, course = ${bookmarkDTO.bookmark.course}, tags = ${bookmarkDTO.tags}" class="bookmark-card">
+                <div class="bookmark-card-header">
+                    <span th:text="${#dates.format(bookmark.createdDate, 'MMM dd, yyyy')}">Date</span>
+                    <form th:action="@{/bookmark/delete/{id}(id=${bookmark.id})}" method="post">
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+                </div>
+                <h3 th:text="${course.name}"></h3>
+                <p><span th:text="${course.getOpen() ? 'Open' : 'Closed'}"></span> By unknown mentor</p>
+                <p th:text="${course.description}"></p>
+                <div class="tag-list">
+                    <span th:each="tag : ${tags}" th:text="${tag.title}" class="tag-item"></span>
+                </div>
             </div>
         </div>
-    </main>
+    </div>
+    <div class="pagination">
+        <button id="first-page" th:classappend="${(pageNumber > 1) ? '' : 'disabled'}">First</button>
+        <button id="previous-page" th:classappend="${(page.hasPrevious()) ? '' : 'disabled'}">Previous</button>
+        <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+        <button id="next-page" th:classappend="${(page.hasNext()) ? '' : 'disabled'}">Next</button>
+        <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? '' : 'disabled'}">Last</button>
+    </div>
 </div>
-
-<div class="pagination">
-    <button id="first-page" th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
-        First
-    </button>
-
-    <button id="previous-page" th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
-        Previous
-    </button>
-
-    <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
-
-    <button id="next-page" th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
-        Next
-    </button>
-
-    <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? 'visible' : 'invisible'}">
-        Last
-    </button>
-</div>
-
-
 <script th:inline="javascript">
     /*<![CDATA[*/
     const filterForm = document.getElementById("filter-form");
+    const pageNumber = [[${pageNumber}]];
+    const totalPages = [[${page.totalPages}]];
 
     document.getElementById('first-page').addEventListener('click', () => {
         filterForm.action = '/bookmark/list/1';
         filterForm.submit();
     });
     document.getElementById('previous-page').addEventListener('click', () => {
-        filterForm.action = '/bookmark/list/' + [[${pageNumber - 1}]];
+        filterForm.action = '/bookmark/list/' + (pageNumber - 1);
         filterForm.submit();
     });
     document.getElementById('next-page').addEventListener('click', () => {
-        filterForm.action = '/bookmark/list/' + [[${pageNumber + 1}]];
+        filterForm.action = '/bookmark/list/' + (pageNumber + 1);
         filterForm.submit();
     });
     document.getElementById('last-page').addEventListener('click', () => {
-        filterForm.action = '/bookmark/list/' + [[${page.totalPages}]];
+        filterForm.action = '/bookmark/list/' + totalPages;
         filterForm.submit();
     });
 
     const allTagsCheckbox = document.getElementById('tags-all');
-    const tagCheckboxes = document.querySelectorAll('input[name="tags"]');
+    const tagCheckboxes = filterForm.querySelectorAll('input[name="tags"]');
 
-    checkAllBoxes = () => {
-        tagCheckboxes.forEach(checkbox => {
-            checkbox.checked = allTagsCheckbox.checked;
+    allTagsCheckbox.addEventListener('change', () => {
+        const isChecked = allTagsCheckbox.checked;
+        tagCheckboxes.forEach(cb => {
+            cb.checked = isChecked;
         });
-    }
-
-    countCheckBoxes = () => {
-        let count = 0;
-        for (const tagCheckbox of tagCheckboxes) {
-            if (tagCheckbox.checked) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    if (allTagsCheckbox.checked) {
-        checkAllBoxes();
-    }
-    allTagsCheckbox.addEventListener('change', checkAllBoxes);
-
-    for (const tagCheckbox of tagCheckboxes) {
-        tagCheckbox.addEventListener('change', () => {
-            allTagsCheckbox.checked = countCheckBoxes() === [[${tags.size()}]];
-        });
-    }
+    });
     /*]]>*/
 </script>
 </body>

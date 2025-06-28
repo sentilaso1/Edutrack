@@ -26,38 +26,37 @@ public class MentorScheduleController {
     @PostMapping("/add-new-schedule")
     public String addNewSchedule(@RequestParam List<Day> day,
                                  @RequestParam List<Slot> slot,
-                                 @RequestParam String monthOption,
+                                 @RequestParam(required = false) String monthOption,
+                                 @RequestParam(required = false) LocalDate startDate,
+                                 @RequestParam(required = false) LocalDate endDate,
+                                 @RequestParam String btn,
                                  HttpSession session) {
 
         if (day == null || slot == null || day.isEmpty() || day.size() != slot.size()) {
             return "redirect:/mentor/working-date?error=invalid-day-slot";
         }
+        if(startDate == null || endDate == null) {
+            LocalDate today = LocalDate.now();
+            if ("current".equals(monthOption)) {
+                startDate = today.withDayOfMonth(1);
+                endDate = today.withDayOfMonth(today.lengthOfMonth());
 
-        LocalDate today = LocalDate.now();
-        LocalDate startDate;
-        LocalDate endDate;
+            } else if ("next".equals(monthOption)) {
+                LocalDate firstDayNextMonth = today.plusMonths(1).withDayOfMonth(1);
+                LocalDate lastDayThisMonth = today.withDayOfMonth(today.lengthOfMonth());
 
-        if ("current".equals(monthOption)) {
-            startDate = today.withDayOfMonth(1);
-            endDate = today.withDayOfMonth(today.lengthOfMonth());
+                LocalDate startOfLastWeekThisMonth = lastDayThisMonth.minusDays(6);
 
-        } else if ("next".equals(monthOption)) {
-            LocalDate firstDayNextMonth = today.plusMonths(1).withDayOfMonth(1);
-            LocalDate lastDayThisMonth = today.withDayOfMonth(today.lengthOfMonth());
+                if (today.isBefore(startOfLastWeekThisMonth)) {
+                    return "redirect:/mentor/working-date?error=too-early-for-next-month";
+                }
 
-            // Tính tuần cuối cùng là 7 ngày cuối của tháng
-            LocalDate startOfLastWeekThisMonth = lastDayThisMonth.minusDays(6);
+                startDate = firstDayNextMonth;
+                endDate = firstDayNextMonth.withDayOfMonth(firstDayNextMonth.lengthOfMonth());
 
-            // Kiểm tra nếu hôm nay không thuộc tuần cuối cùng → từ chối đăng ký
-            if (today.isBefore(startOfLastWeekThisMonth)) {
-                return "redirect:/mentor/working-date?error=too-early-for-next-month";
+            } else {
+                return "redirect:/mentor/working-date?error=invalid-month-selection";
             }
-
-            startDate = firstDayNextMonth;
-            endDate = firstDayNextMonth.withDayOfMonth(firstDayNextMonth.lengthOfMonth());
-
-        } else {
-            return "redirect:/mentor/working-date?error=invalid-month-selection";
         }
 
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
@@ -72,11 +71,20 @@ public class MentorScheduleController {
 
         List<MentorAvailableTime> availableTimes = new ArrayList<>();
         for (int i = 0; i < day.size(); i++) {
-            availableTimes.add(new MentorAvailableTime(mentor, slot.get(i), day.get(i), startDate, endDate));
+            MentorAvailableTime newMentorAvailableTime = new MentorAvailableTime(mentor, slot.get(i), day.get(i), startDate, endDate);
+            if(btn.equals("draft")){
+                newMentorAvailableTime.setStatus(MentorAvailableTime.Status.DRAFT);
+            } else if (btn.equals("submit")) {
+                newMentorAvailableTime.setStatus(MentorAvailableTime.Status.PENDING);
+            }
+            availableTimes.add(newMentorAvailableTime);
         }
 
         mentorAvailableTimeService.insertWorkingSchedule(availableTimes);
-        return "redirect:/mentor/working-date";
+        if(btn.equals("draft")){
+            return "redirect:/mentor/working-date?status=DRAFT";
+        }
+        return "redirect:/mentor/working-date?status=PENDING";
     }
 
 

@@ -51,7 +51,7 @@ public class HomeControlller {
         }
 
         if (loggedInUser instanceof Mentor) {
-            return "redirect:/mentor/dashboard";
+            return "redirect:/mentor";
         }
 
         if (loggedInUser.getClass().getSimpleName().equals("Manager")) {

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
-
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -266,19 +266,16 @@
         <p>Theo dõi hiệu suất và thu nhập của bạn</p>
     </div>
 
-    <div class="period-selector">
-        <button class="period-btn active" onclick="updatePeriod('week')">7 ngày</button>
-        <button class="period-btn" onclick="updatePeriod('month')">30 ngày</button>
-        <button class="period-btn" onclick="updatePeriod('quarter')">3 tháng</button>
-        <button class="period-btn" onclick="updatePeriod('year')">1 năm</button>
-    </div>
-
     <div class="stats-grid">
         <div class="stat-card">
             <span class="mentor-icon">💰</span>
             <h3>Tổng Thu Nhập</h3>
-            <div class="value" id="total-income">45,250,000₫</div>
-            <div class="change positive">+12.5% so với tháng trước</div>
+            <div class="value" id="total-income" th:text="${#numbers.formatInteger(incomeStats.totalIncome, 0, 'POINT')} + '₫'">
+                0₫
+            </div>
+            <div class="change" th:text="${#numbers.formatDecimal(incomeStats.percentChange, 1, 1)} + '% so với tháng trước'">
+                0%
+            </div>
         </div>
         <div class="stat-card">
             <span class="mentor-icon">👥</span>
@@ -304,10 +301,6 @@
         <div class="chart-container">
             <div class="chart-title">📈 Thu Nhập Theo Thời Gian</div>
             <canvas id="incomeChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <div class="chart-title">🎯 Nguồn Thu Nhập</div>
-            <canvas id="sourceChart"></canvas>
         </div>
     </div>
 
@@ -336,26 +329,25 @@
             <div class="metric-value">87.2%</div>
         </div>
         <div class="metric-card">
-            <h4>Thu Nhập/Giờ</h4>
-            <div class="metric-value">485k₫</div>
+            <h4>Thu Nhập/Slot</h4>
+            <div class="metric-value" th:text="${#numbers.formatInteger(incomeStats.incomePerSlot, 0, 'POINT')} + '₫'">
+                0₫
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-    // Mentor data
+<script th:inline="javascript">
     const mentorData = {
-        income: [3200000, 3800000, 4100000, 3900000, 4500000, 4200000, 4800000],
+        income: /*[[${incomeStats.incomeOverTime}]]*/[],
         labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-        sources: {
-            labels: ['Khóa Học Cá Nhân', 'Khóa Học Nhóm', 'Tư Vấn', 'Workshop'],
-            data: [45, 30, 15, 10],
-            colors: ['#ff6127', '#ff7c4c', '#fd946d', '#c7ceea']
-        },
         students: [15, 18, 22, 20, 25, 23, 27, 30, 28, 32, 35, 38],
         studentLabels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
         hours: [25, 30, 28, 35, 32, 40, 38]
     };
+</script>
+
+<script>
 
     let charts = {};
 
@@ -365,7 +357,7 @@
         charts.income = new Chart(incomeCtx, {
             type: 'line',
             data: {
-                labels: mentorData.labels,
+                labels: mentorData.studentLabels,
                 datasets: [{
                     label: 'Thu Nhập (VNĐ)',
                     data: mentorData.income,
@@ -410,48 +402,6 @@
                     x: {
                         ticks: {color: '#666'},
                         grid: {display: false}
-                    }
-                }
-            }
-        });
-
-        // Source Chart
-        const sourceCtx = document.getElementById('sourceChart').getContext('2d');
-        charts.source = new Chart(sourceCtx, {
-            type: 'doughnut',
-            data: {
-                labels: mentorData.sources.labels,
-                datasets: [{
-                    data: mentorData.sources.data,
-                    backgroundColor: mentorData.sources.colors,
-                    borderWidth: 0,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true,
-                            color: '#666',
-                            font: {size: 12}
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(255,97,39,0.56)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        borderColor: '#ff6127',
-                        borderWidth: 2,
-                        cornerRadius: 10,
-                        callbacks: {
-                            label: function (context) {
-                                return context.label + ': ' + context.parsed + '%';
-                            }
-                        }
                     }
                 }
             }

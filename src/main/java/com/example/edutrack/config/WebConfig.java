@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
         public void addInterceptors(InterceptorRegistry registry) {
                 registry.addInterceptor(new RequestLoggingInterceptor(repository));
                 registry.addInterceptor(roleInterceptor)
-                        .addPathPatterns("/admin/**", "/mentor/**", "/staff/**");
+                        .addPathPatterns("/mentor/**", "/mentee/**");
         }
 
 

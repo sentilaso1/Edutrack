@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Write a Review</title>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(120deg, #e3ecff 0%, #ffe2ef 100%);
+        }
+        .review-main-container {
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 2.5rem 2rem;
+            background: #fff;
+            border-radius: 2rem;
+            box-shadow: 0 6px 32px rgba(0,0,0,0.09);
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #fa6262;
+        }
+        .mentor-info-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            background: #f6f8fb;
+            padding: 1.2rem 1rem;
+            border-radius: 1.5rem;
+        }
+        .mentor-avatar {
+            width: 85px;
+            height: 85px;
+            border-radius: 100%;
+            object-fit: cover;
+            border: 3px solid #fa6262;
+            background: #fff;
+        }
+        .mentor-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35em;
+        }
+        .mentor-details span {
+            font-size: 1.3rem;
+            color: #444;
+        }
+        .mentor-details .mentor-fullname {
+            font-weight: 600;
+            color: #121633;
+            font-size: 1.5rem;
+        }
+        .course-info-section {
+            background: #f6f8fb;
+            border-radius: 1.5rem;
+            padding: 1rem 1.3rem;
+            margin-bottom: 2rem;
+        }
+        .course-name {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #fa6262;
+        }
+        .course-date {
+            font-size: 1rem;
+            color: #888;
+        }
+        .course-desc {
+            margin: 0.5rem 0 0 0;
+            color: #333;
+        }
+        .review-form-section {
+            padding: 0.5rem 0;
+        }
+        .review-form-section label {
+            font-weight: 600;
+            color: #121633;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+        .review-form-section textarea {
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid #e2e2e2;
+            padding: 1rem;
+            margin-top: 0.3rem;
+            resize: vertical;
+            font-size: 1.5rem;
+            font-family: inherit;
+            margin-bottom: 1.4rem;
+        }
+        .post-review-btn {
+            background: #fa6262;
+            color: #fff;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.85rem 1.7rem;
+            font-size: 1.13rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background 0.2s;
+            float: right;
+        }
+        .post-review-btn:hover {
+            background: #121633;
+            color: #fff;
+        }
+
+        /* STAR RATING */
+        .star-rating-svg {
+            display: flex;
+            align-items: center;
+            gap: 0.1em;
+            font-size: 0;
+            user-select: none;
+            margin-bottom: 2rem;
+        }
+        .star-svg-wrapper {
+            cursor: pointer;
+            width: 3rem;
+            height: 3rem;
+            display: inline-block;
+            position: relative;
+        }
+        .star-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<main>
+    <article>
+        <section
+                class="section course has-bg-image"
+                aria-labelledby="course-label"
+                th:style="|background-image: url('@{/assets/images/course-bg.png}')|"
+        >
+<div class="review-main-container">
+    <!-- Section 1: Mentor Info -->
+    <h2 class="section-title">
+        Write a Review for <span th:text="${mentor.fullName}">Mentor Name</span>
+    </h2>
+    <div class="mentor-info-section">
+        <img class="mentor-avatar" th:src="@{/mentors/{id}/avatar(id=${mentor.id})}" alt="Mentor Avatar"/>
+        <div class="mentor-details">
+            <span class="mentor-fullname" th:text="${mentor.fullName}">Mentor Name</span>
+            <span><b>Gender:</b> <span th:text="${mentor.gender}">Male</span></span>
+            <span><b>Email:</b> <span th:text="${mentor.email}">mentor@email.com</span></span>
+            <span><b>Phone:</b> <span th:text="${mentor.phone}">0123456789</span></span>
+            <span><b>Expertise:</b> <span th:text="${mentor.expertise}">Programming, AI</span></span>
+        </div>
+    </div>
+    <!-- Section 2: Course Info -->
+    <div class="course-info-section">
+        <div>
+            <span class="course-name" th:text="${course.name}">Course Name</span>
+            <span class="course-date" style="float:right;">
+                <b>Created:</b> <span th:text="${#dates.format(course.createdDate, 'dd/MM/yyyy')}">01/01/2024</span>
+            </span>
+        </div>
+        <div class="course-desc" th:text="${course.description}">
+            This is the course description...
+        </div>
+    </div>
+    <!-- Section 3: Review Form -->
+    <form class="review-form-section" th:action="@{/api/feedback}" method="post" autocomplete="off">
+        <input type="hidden" name="menteeId" th:value="${menteeId}" />
+        <input type="hidden" name="courseId" th:value="${course.id}" />
+        <input type="hidden" name="mentorId" th:value="${mentor.id}" />
+
+        <label for="review-text">Your Thoughts:</label>
+        <textarea id="review-text" name="content" rows="4" required placeholder="Share your thoughts..."></textarea>
+
+        <label>Your Rating:</label>
+        <div class="star-rating-svg" id="starRatingSVG" aria-label="Star rating"></div>
+        <input type="hidden" name="rating" id="rating-input-svg" value="0" required />
+        <button type="submit" class="post-review-btn">Post Review</button>
+    </form>
+</div>
+        </section>
+    </article>
+</main>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+<!-- Custom JS -->
+<script th:src="@{/assets/js/courlist.js}"></script>
+
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+<script>
+    (function(){
+        const container = document.getElementById('starRatingSVG');
+        const ratingInput = document.getElementById('rating-input-svg');
+        let value = 0;
+
+        function createStar(idx) {
+            const wrap = document.createElement('span');
+            wrap.className = 'star-svg-wrapper';
+            wrap.setAttribute('data-idx', idx+1);
+            wrap.setAttribute('tabindex', '0');
+            // SVG star path (full star, mask via <defs> for half)
+            wrap.innerHTML = `
+<svg class="star-svg" viewBox="0 0 24 24">
+  <defs>
+    <linearGradient id="star-grad-${idx}">
+      <stop offset="50%" stop-color="#fde74c"/>
+      <stop offset="50%" stop-color="#fff"/>
+    </linearGradient>
+    <clipPath id="half-clip-${idx}">
+      <rect x="0" y="0" width="12" height="24"/>
+    </clipPath>
+  </defs>
+  <polygon points="12,2 15,9 22,9.5 17,14.5 18.5,21.5 12,18 5.5,21.5 7,14.5 2,9.5 9,9"
+    fill="#fff" stroke="#f9f9f7" stroke-width="1.5" class="star-bg"/>
+  <polygon class="star-fill"
+    points="12,2 15,9 22,9.5 17,14.5 18.5,21.5 12,18 5.5,21.5 7,14.5 2,9.5 9,9"
+    fill="#fde74c" fill-opacity="0.28"/>
+</svg>`;
+            wrap.addEventListener('mousemove', e => {
+                const rect = wrap.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                if (x < rect.width / 2) paint(idx + 0.5);
+                else paint(idx + 1);
+            });
+            wrap.addEventListener('mouseleave', () => paint(value));
+            wrap.addEventListener('click', e => {
+                const rect = wrap.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                value = (x < rect.width / 2) ? (idx + 0.5) : (idx + 1);
+                ratingInput.value = value;
+                paint(value);
+            });
+            // Keyboard: left/right, space/enter
+            wrap.addEventListener('keydown', e => {
+                if (e.key === 'ArrowLeft' && value > 0.5) value -= 0.5;
+                if (e.key === 'ArrowRight' && value < 5) value += 0.5;
+                if (e.key === 'Enter' || e.key === ' ') ratingInput.value = value;
+                paint(value);
+            });
+            return wrap;
+        }
+
+        for(let i=0;i<5;i++) container.appendChild(createStar(i));
+
+        function paint(val) {
+            container.querySelectorAll('.star-svg-wrapper').forEach((wrap, idx) => {
+                const svg = wrap.querySelector('.star-svg');
+                const fill = svg.querySelector('.star-fill');
+                if (val >= idx + 1) {
+                    fill.setAttribute('fill', '#fde74c');
+                    fill.setAttribute('fill-opacity', '1');
+                    fill.removeAttribute('clip-path');
+                } else if (val >= idx + 0.5) {
+                    fill.setAttribute('fill', 'url(#star-grad-' + idx + ')');
+                    fill.setAttribute('fill-opacity', '1');
+                    fill.setAttribute('clip-path', 'url(#half-clip-' + idx + ')');
+                } else {
+                    fill.setAttribute('fill', '#fde74c');
+                    fill.setAttribute('fill-opacity', '0.28');
+                    fill.removeAttribute('clip-path');
+                }
+            });
+        }
+        paint(value);
+    })();
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.example.edutrack.accounts.controller;
 
-
+import com.example.edutrack.accounts.service.MentorService;
+import com.example.edutrack.accounts.dto.IncomeStatsDTO;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -8,10 +9,7 @@ import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
-import com.example.edutrack.timetables.model.Day;
-import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.EnrollmentSchedule;
-import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.service.implementation.EnrollmentScheduleServiceImpl;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
@@ -41,6 +39,7 @@ public class MentorController {
     private final MentorAvailableTimeService mentorAvailableTimeService;
     private final WalletService walletService;
     private final TransactionService transactionService;
+    private final MentorService mentorService;
 
     @Autowired
     public MentorRepository mentorRepository;
@@ -51,12 +50,14 @@ public class MentorController {
     @Autowired
     public MentorController(EnrollmentScheduleService enrollmentScheduleService,
                             EnrollmentService enrollmentService,
-                            MentorAvailableTimeService mentorAvailableTimeService, WalletService walletService, TransactionService transactionService) {
+                            MentorAvailableTimeService mentorAvailableTimeService, WalletService walletService, TransactionService transactionService,
+                                MentorService mentorService) {
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.enrollmentService = enrollmentService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.walletService = walletService;
         this.transactionService = transactionService;
+        this.mentorService = mentorService;
     }
 
     @RequestMapping("/mentor")
@@ -184,11 +185,12 @@ public class MentorController {
 
             return "redirect:/mentor/sensor-class?status=REJECTED&reject=" + eid;
         }
-        if(action.equals("approve")){
+        if (action.equals("approve")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
-            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
+            enrollmentService.save(enrollment);
             return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
-        }if(action.equals("view")){
+        }
+        if (action.equals("view")) {
             return "redirect:/mentor/sensor-class/" + eid + "/view";
         }
         return "redirect:/mentor/sensor-class";
@@ -204,12 +206,10 @@ public class MentorController {
         }
         Enrollment enrollment = enrollmentService.findById(eid);
         List<Slot> slots = new ArrayList<>();
-        List<Day> days = new ArrayList<>();
+        List<LocalDate> dates = new ArrayList<>();
         String summary = enrollment.getScheduleSummary();
 
-        EnrollmentScheduleServiceImpl.parseDaySlotString(summary, days, slots);
-
-        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(enrollment.getMentee(), enrollment.getCourseMentor(), slots, days, enrollment.getTotalSlots());
+        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(summary);
         model.addAttribute("startTime", startTime);
         return "mentor/skill-register-request-detail";
     }
@@ -217,43 +217,58 @@ public class MentorController {
     @GetMapping("/mentor/working-date")
     public String workingDate(Model model,
                               @RequestParam(required = false) String end,
-            HttpSession session) {
+                              @RequestParam(defaultValue = "PENDING") String status,
+                              HttpSession session) {
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
         }
+        MentorAvailableTime.Status enumValue = MentorAvailableTime.Status.valueOf(status);
 
-        List<MentorAvailableTimeDTO> setTime = mentorAvailableTimeService.findAllDistinctStartEndDates(mentor);
+        List<MentorAvailableTimeDTO> setTime = mentorAvailableTimeService.findAllDistinctStartEndDates(mentor, enumValue);
         model.addAttribute("setTime", setTime);
+
+        if("REJECTED".equals(status) || "DRAFT".equals(status)){
+            if(setTime.size() == 1){
+                LocalDate startDate = setTime.get(0).getStartDate();
+                LocalDate endDate = setTime.get(0).getEndDate();
+                model.addAttribute("startDate", startDate);
+                model.addAttribute("endDate", endDate);
+            }
+        }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate endLocal;
         if (end == null || end.isEmpty()) {
-            endLocal = mentorAvailableTimeService.findMaxEndDate(mentor);
+            endLocal = mentorAvailableTimeService.findMaxEndDateByStatus(mentor, enumValue);
         } else {
             endLocal = LocalDate.parse(end, formatter);
         }
-        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
-        boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
 
-        for (MentorAvailableSlotDTO dto : setSlots) {
-            int slotIndex = dto.getSlot().ordinal();
-            int dayIndex = dto.getDay().ordinal();
-            slotDayMatrix[slotIndex][dayIndex] = true;
+        if("REJECTED".equals(status)){
+            List<MentorAvailableTime> foundMentorAvailableTime = mentorAvailableTimeService.findAllMentorAvailableTimeByEndDate(mentor, endLocal);
+            if(!foundMentorAvailableTime.isEmpty()){
+                model.addAttribute("reason", foundMentorAvailableTime.get(0).getReason());
+            }
         }
 
-        model.addAttribute("slotDayMatrix", slotDayMatrix);
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        boolean[][] slotDayMatrix = setSlots == null || setSlots.isEmpty() ? null : mentorAvailableTimeService.slotDayMatrix(setSlots);
 
-        System.out.println("SIZE: " + setSlots.size());
-        
+        model.addAttribute("slotDayMatrix", slotDayMatrix);
+        model.addAttribute("activeStatus", status.toUpperCase());
         model.addAttribute("slots", Slot.values());
         model.addAttribute("days", Day.values());
 
         return "/mentor/mentor-working-date";
     }
 
+
     @GetMapping("/mentor/income-stats")
     public String mentorStats(Model model, HttpSession session) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        IncomeStatsDTO incomeStats = mentorService.getIncomeStats(mentor.getId());
+        model.addAttribute("incomeStats", incomeStats);
         return "accounts/html/mentor-stats";
     }
 
