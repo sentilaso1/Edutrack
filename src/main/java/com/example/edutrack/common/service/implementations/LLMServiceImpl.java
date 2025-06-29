@@ -3,6 +3,7 @@ package com.example.edutrack.common.service.implementations;
 import com.example.edutrack.common.model.ModelConfig;
 import com.example.edutrack.common.model.ModelProvider;
 import com.example.edutrack.common.service.interfaces.LLMService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,34 +25,29 @@ public class LLMServiceImpl implements LLMService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final String OPENROUTER_API_KEY_1 = "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";
-    private static final String OPENROUTER_API_KEY_2 = "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";
-    private static final String OPENROUTER_API_KEY_3 = "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";
-    private static final String NOVITA_API_KEY = "sk_wDNGmRzFb-yIoJ0fsmtuYssSKB3D_5GlgQ2x3bTsZ3c";
+    private static final String OPENROUTER_API_KEY_1 = "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";
+    private static final String OPENROUTER_API_KEY_2 = "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";
+    private static final String OPENROUTER_API_KEY_3 = "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";
+    private static final String GROQ_API_KEY = "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";
+    private static final String TOGETHERAI_API_KEY = "253a683b1a6dff88b0e141d72f37ed7a80d700a4f30a545d00131fc3a591a2ca";
 
-    private static final String DEEPSEEK_MODEL = "deepseek/deepseek-chat-v3-0324:free";
-    private static final String MISTRAL_MODEL = "mistralai/devstral-small:free";
-    private static final String GEMINI_MODEL = "google/gemini-2.0-flash-exp:free";
+    private static final String TA_DEEPSEEK_MODEL = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free";
+    private static final String OR_MISTRAL_MODEL = "mistralai/devstral-small:free";
+    private static final String GR_COMPOUND = "compound-beta-mini";
     private static final String OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+    private static final String TOGETHERAI_ENDPOINT = "https://api.together.xyz/v1/chat/completions";
+    private static final String GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
 
     private final List<ModelConfig> configs = List.of(
 
-            // Deepseek
-            new ModelConfig(OPENROUTER_API_KEY_1, DEEPSEEK_MODEL, OPENROUTER_ENDPOINT , ModelProvider.DEEPSEEK),
-            new ModelConfig(OPENROUTER_API_KEY_2, DEEPSEEK_MODEL, OPENROUTER_ENDPOINT , ModelProvider.DEEPSEEK),
-            new ModelConfig(OPENROUTER_API_KEY_3, DEEPSEEK_MODEL, OPENROUTER_ENDPOINT , ModelProvider.DEEPSEEK),
+            new ModelConfig(TOGETHERAI_API_KEY, TA_DEEPSEEK_MODEL, TOGETHERAI_ENDPOINT, ModelProvider.TOGETHERAI),
 
-            // Mistral
-            new ModelConfig(OPENROUTER_API_KEY_1, MISTRAL_MODEL, OPENROUTER_ENDPOINT, ModelProvider.MISTRAL),
-            new ModelConfig(OPENROUTER_API_KEY_2, MISTRAL_MODEL, OPENROUTER_ENDPOINT, ModelProvider.MISTRAL),
-            new ModelConfig(OPENROUTER_API_KEY_3, MISTRAL_MODEL, OPENROUTER_ENDPOINT, ModelProvider.MISTRAL),
+            new ModelConfig(GROQ_API_KEY, GR_COMPOUND, GROQ_ENDPOINT, ModelProvider.GROQ),
 
-            // Gemini
-            new ModelConfig(OPENROUTER_API_KEY_1, GEMINI_MODEL, OPENROUTER_ENDPOINT, ModelProvider.GEMINI),
-            new ModelConfig(OPENROUTER_API_KEY_2, GEMINI_MODEL, OPENROUTER_ENDPOINT, ModelProvider.GEMINI),
-            new ModelConfig(OPENROUTER_API_KEY_3, GEMINI_MODEL, OPENROUTER_ENDPOINT, ModelProvider.GEMINI)
-
+            new ModelConfig(OPENROUTER_API_KEY_1, OR_MISTRAL_MODEL, OPENROUTER_ENDPOINT , ModelProvider.OPENROUTER),
+            new ModelConfig(OPENROUTER_API_KEY_2, OR_MISTRAL_MODEL, OPENROUTER_ENDPOINT , ModelProvider.OPENROUTER),
+            new ModelConfig(OPENROUTER_API_KEY_3, OR_MISTRAL_MODEL, OPENROUTER_ENDPOINT , ModelProvider.OPENROUTER)
 
     );
 
@@ -66,9 +62,9 @@ public class LLMServiceImpl implements LLMService {
 
                 Map<String, Object> body;
 
-                if (cfg.provider == ModelProvider.DEEPSEEK
-                        || cfg.provider == ModelProvider.MISTRAL
-                        || cfg.provider == ModelProvider.GEMINI) {
+                if (cfg.provider == ModelProvider.OPENROUTER
+                        || cfg.provider == ModelProvider.GROQ
+                        || cfg.provider == ModelProvider.TOGETHERAI) {
 
                     headers.setBearerAuth(cfg.apiKey);
 
@@ -78,7 +74,14 @@ public class LLMServiceImpl implements LLMService {
                             Map.of("role", "user", "content", prompt)
                     ));
 
-                    return tryRequest(cfg, headers, body);
+                    String aiResult = tryRequest(cfg, headers, body);
+                    log.info("AI Result: {}", aiResult);
+
+                    if (aiResult == null || aiResult.trim().isEmpty()) {
+                        log.warn("Provider {} returned empty result. Trying next model...", cfg.provider);
+                        continue;
+                    }
+                    return aiResult;
 
                 } else {
                     throw new IllegalStateException("Unknown model provider: " + cfg.provider);
@@ -93,7 +96,7 @@ public class LLMServiceImpl implements LLMService {
             }
         }
         log.error("All model providers and API keys failed for prompt: {}", prompt);
-        throw new RuntimeException("All model providers and API keys failed.");
+        return "";
     }
 
     private String tryRequest(ModelConfig cfg, HttpHeaders headers, Map<String, Object> body) throws Exception {
@@ -110,7 +113,7 @@ public class LLMServiceImpl implements LLMService {
         log.info("Received HTTP status {} from provider: {}", response.getStatusCode(), cfg.provider);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            log.info("Successful response from provider: {}", cfg.provider);
+            log.info("Successful response from provider: {} | Body: {}", cfg.provider, response.getBody());
             return response.getBody();
         } else {
             log.warn("Non-2xx response from provider: {} | status: {}", cfg.provider, response.getStatusCode());
