@@ -169,7 +169,7 @@ public class CvController {
         cvService.createCV(request, user.getId());
 
         model.addAttribute("message", "CV created successfully!");
-        return "redirect:/admin/cv/list/1";
+        return "redirect:/mentor";
     }
 
     @GetMapping("mentor/cv/edit/{id}")

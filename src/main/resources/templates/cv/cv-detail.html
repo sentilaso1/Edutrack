@@ -611,7 +611,7 @@
                 <a th:href="${cv.portfolioUrl}" class="portfolio-url" th:text="${cv.portfolioUrl}"></a>
             </div>
 
-            <div th:if="${cv.status == 'aiapproved'}" class="action-buttons">
+            <div th:if="${cv.status == 'aiapproved' || cv.status == 'pending'}" class="action-buttons">
                 <form th:action="@{/cv/accept/{id}(id=${cv.id})}" method="post">
                     <button type="submit" class="btn btn-primary">Accept CV</button>
                 </form>
@@ -646,12 +646,6 @@
 
             <div th:if="${registeredCourses.isEmpty()}">
                 <p>No courses registered for this CV.</p>
-            </div>
-
-            <div class="pagination">
-                <a th:href="@{/cv/detail/{id}(id=${cv.id}, page=${pageNumber - 1}, size=6)}" th:if="${coursePage.hasPrevious()}" style="margin-right: 10px;">« Prev</a>
-                <span>Page <span th:text="${pageNumber}"></span></span>
-                <a th:href="@{/cv/detail/{id}(id=${cv.id}, page=${pageNumber + 1}, size=6)}" th:if="${coursePage.hasNext()}" style="margin-left: 10px;">Next »</a>
             </div>
         </div>
     </div>

@@ -21,28 +21,28 @@ public class CV {
     @Column(name = "user_id")
     private UUID id;
 
-    @Column(name = "summary", length = 256, nullable = false)
+    @Column(name = "summary", nullable = false, columnDefinition = "LONGTEXT")
     private String summary;
 
     @Column(name = "experience_years", nullable = false)
     private Integer experienceYears = 0;
 
-    @Column(name = "skills", length = 512, nullable = false)
+    @Column(name = "skills", nullable = false, columnDefinition = "LONGTEXT")
     private String skills;
 
-    @Column(name = "education", length = 512, nullable = false)
+    @Column(name = "education", nullable = false, columnDefinition = "LONGTEXT")
     private String education;
 
-    @Column(name = "experience", length = 512)
+    @Column(name = "experience", columnDefinition = "LONGTEXT")
     private String experience;
 
-    @Column(name = "certifications", length = 512)
+    @Column(name = "certifications", columnDefinition = "LONGTEXT")
     private String certifications;
 
-    @Column(name = "languages", length = 512)
+    @Column(name = "languages", columnDefinition = "LONGTEXT")
     private String languages;
 
-    @Column(name = "portfolio_url", length = 1024)
+    @Column(name = "portfolio_url", columnDefinition = "LONGTEXT")
     private String portfolioUrl;
 
     @Column(name = "status", nullable = false)

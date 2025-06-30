@@ -339,14 +339,14 @@ public class CvServiceImpl implements CvService {
     }
 
     @Override
-    public void aiVerifyCV(CV cv, List<Course> courses) {
-        String prompt = generatePrompt(cv, courses);
+    public void aiVerifyCV(CV cv) {
+        String prompt = generatePrompt(cv);
         String aiResponse = llmService.callModel(prompt);
         processAIResponse(cv, aiResponse);
     }
 
     @Override
-    public String generatePrompt(CV cv, List<Course> courses) {
+    public String generatePrompt(CV cv) {
         // Handle null or empty fields to prevent malformed JSON or prompt issues
         String summary = cv.getSummary() != null ? cv.getSummary() : "";
         String experienceYears = cv.getExperienceYears() != null ? cv.getExperienceYears().toString() : "0";
@@ -355,12 +355,6 @@ public class CvServiceImpl implements CvService {
         String experience = cv.getExperience() != null ? cv.getExperience() : "";
         String certifications = cv.getCertifications() != null ? cv.getCertifications() : "";
         String languages = cv.getLanguages() != null ? cv.getLanguages() : "";
-        String courseName = "";
-        StringBuilder sb = new StringBuilder();
-        for (Course course : courses) {
-            sb.append(course.getName()).append(", ");
-        }
-        courseName = sb.toString();
 
         // Escape double quotes to prevent JSON injection or malformed strings
         summary = summary.replace("\"", "\\\"");
@@ -369,7 +363,6 @@ public class CvServiceImpl implements CvService {
         experience = experience.replace("\"", "\\\"");
         certifications = certifications.replace("\"", "\\\"");
         languages = languages.replace("\"", "\\\"");
-        courseName = courseName.replace("\"", "\\\"");
 
 
         return """
@@ -381,9 +374,6 @@ public class CvServiceImpl implements CvService {
             - Check for logical coherence across the summary, experience, education, certifications, and languages (e.g., the experience aligns with age and skills).
             - Flag inconsistencies such as improbable experience durations, unrealistic skills compared to stated experience, or incomplete/vague information.
             - Languages should be plausible and pertinent to mentoring.
-        3. Course Relevance:
-            - Verify that the candidate's skills, certifications, and experience align specifically with the course they have registered for.
-            - Reject candidates whose expertise significantly mismatches the registered course, even if the CV is otherwise valid (e.g., candidate with Java expertise registering for a Python course)
 
         Validation Guidelines:
         - Treat empty or excessively vague fields as potential red flags unless clearly supported elsewhere in the CV.
@@ -411,7 +401,6 @@ public class CvServiceImpl implements CvService {
           "experience": "%s",
           "certifications": "%s",
           "languages": "%s",
-          "course_registered": "%s"
         }
 
         Example valid responses:
@@ -424,7 +413,7 @@ public class CvServiceImpl implements CvService {
           "reason": "Skills are vague ('expert') and certification ('Supreme Certificate') is not recognized."
         }
         Respond ONLY with raw JSON, no markdown, no explanation, no code block.
-        """.formatted(summary, experienceYears, skills, education, experience, certifications, languages, courseName);
+        """.formatted(summary, experienceYears, skills, education, experience, certifications, languages);
     }
 
     @Override
@@ -512,8 +501,7 @@ public class CvServiceImpl implements CvService {
                 return;
             }
             for (CV cv : pendingCVs) {
-                List<Course> courses = getCoursesForCV(cv);
-                aiVerifyCV(cv, courses);
+                aiVerifyCV(cv);
             }
         } finally {
             lastBatchEnd = LocalDateTime.now();
