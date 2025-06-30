@@ -9,6 +9,7 @@ import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
 import com.example.edutrack.curriculum.repository.CourseRepository;
+import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import jakarta.servlet.http.HttpSession;
@@ -36,17 +37,18 @@ public class MentorController {
     private final MentorService mentorService;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
     private final MentorAvailableTimeService mentorAvailableTimeService;
-    private final FeedbackService feedbackService;
+    private final FeedbackRepository feedbackRepository;
     private final CourseRepository courseRepository;
 
     public MentorController(MentorService mentorService,
-                            CourseMentorServiceImpl courseMentorServiceImpl, MentorAvailableTimeService mentorAvailableTimeService,
-                            FeedbackService feedbackService,
+                            CourseMentorServiceImpl courseMentorServiceImpl,
+                            MentorAvailableTimeService mentorAvailableTimeService,
+                            FeedbackRepository feedbackRepository,
                             CourseRepository courseRepository) {
         this.mentorService = mentorService;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
-        this.feedbackService = feedbackService;
+        this.feedbackRepository = feedbackRepository;
         this.courseRepository = courseRepository;
     }
 
@@ -123,7 +125,7 @@ public class MentorController {
         model.addAttribute("slots", Slot.values());
         model.addAttribute("dayLabels", Day.values());
 
-        List<Feedback> feedbacks = feedbackService.getAllFeedbacksByMentorId(id);
+        List<Feedback> feedbacks = feedbackRepository.findByCourseMentor_Mentor_IdAndStatus(id, Feedback.Status.ACTIVE);
 
         model.addAttribute("feedbacks", feedbacks);
         model.addAttribute("mentor", mentorService.getMentorById(id));

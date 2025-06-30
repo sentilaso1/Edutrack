@@ -19,8 +19,8 @@
         }
         .review-list-container {
             max-width: 1200px;
-            margin: 40px auto;
-            padding: 2rem 1rem;
+            margin: 0 auto;
+            padding: 96px;
         }
         .review-list-header {
             text-align: center;
@@ -91,6 +91,7 @@
     </style>
 </head>
 <body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 <div class="review-list-container">
     <h2 class="review-list-header">Courses & Mentors You Can Review</h2>
     <div class="review-card-list">

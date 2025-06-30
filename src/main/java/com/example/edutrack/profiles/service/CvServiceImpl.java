@@ -390,6 +390,7 @@ public class CvServiceImpl implements CvService {
         - Verify credibility, realism, and clarity explicitly.
         
         Response requirements:
+        - You MUST reply ONLY with valid JSON (no markdown, no code block, no natural language, no explanation, no commentary, no  tags, no backticks). Return ONLY the following structure:
         - Provide responses strictly in valid JSON format:
           {
             "is-approve": "true" or "false",
@@ -399,6 +400,7 @@ public class CvServiceImpl implements CvService {
         - Ensure "reason" is a non-empty string.
         - Do not include any explanation, markdown, code block, or extra fields. Output must be pure JSON only.
         - Escape special characters in the reason to ensure valid JSON.
+        - Do NOT add any extra text, explanation, or formatting. Do NOT wrap in backticks or code blocks.
 
         CV data:
         {
@@ -425,6 +427,7 @@ public class CvServiceImpl implements CvService {
         """.formatted(summary, experienceYears, skills, education, experience, certifications, languages, courseName);
     }
 
+    @Override
     public void processAIResponse(CV cv, String aiJson) {
         try {
             ObjectMapper mapper = new ObjectMapper();

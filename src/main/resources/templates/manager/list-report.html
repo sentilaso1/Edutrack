@@ -1,39 +1,269 @@
-<table class="feedback-table">
-    <thead class="feedback-table-header">
-    <tr>
-        <th>Status</th>
-        <th>Category</th>
-        <th>Created Date</th>
-        <th>Reporter</th>
-        <th>Reason</th>
-        <th>Feedback</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="r : ${page.content}">
-        <td th:text="${r.status.name()}"
-            th:classappend="${r.status.name() == 'PENDING' ? 'bg-hidden' : 'bg-active'}"></td>
-        <td th:text="${r.category.name()}"></td>
-        <td th:text="${#temporals.format(r.createdDate, 'yyyy-MM-dd')}"></td>
-        <td th:text="${r.reporter.fullName}"></td>
-        <td th:text="${r.reason}" style="max-width: 250px; word-break: break-word;"></td>
-        <td>
-            <b th:text="'[' + r.feedback.status.name() + ']'"></b>
-            <span th:text="${r.feedback.mentee.fullName}"></span>
-            <span th:text="${#strings.abbreviate(r.feedback.content, 50)}"></span>
-            <span th:text="'(' + ${r.feedback.createdDate?.toLocalDate()} + ')'"></span>
-        </td>
-        <td>
-            <a th:href="@{|/admin/reports/toggle-status/${r.id}|}">
-                <span th:text="${r.status.name() == 'PENDING' ? 'Mark Reviewed' : 'Mark Pending'}"></span>
-            </a>
-            <br/>
-            <a th:href="@{|/admin/reports/delete/${r.id}|}"
-               th:onclick="'return confirm(\'Are you sure you want to delete this report?\');'">
-                Delete
-            </a>
-        </td>
-    </tr>
-    </tbody>
-</table>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduTrack - Feedback List</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+
+    <style>
+        .page-header { font-size: 2.5em; padding: 0.5rem; margin-bottom: 0.5rem; }
+        .main-grid { display: grid; grid-template-columns: 1fr; gap: 1em; padding: 0.5em; }
+        .filter-form { display: grid; grid-template-columns: 1fr 1fr auto; grid-template-rows: auto auto; gap: 1em; }
+        .filter-group { display: flex; justify-content: flex-start; gap: 0.5em; }
+        .feedback-table { width: 100%; border-collapse: collapse; }
+        .feedback-table-header { background-color: var(--color-primary); }
+        .feedback-table th, .feedback-table td { padding: 0.5em; border: 1px solid var(--color-secondary); text-align: left; }
+        .feedback-table tbody > tr:nth-child(odd) { background-color: var(--bg-primary); }
+        .feedback-table tbody > tr:nth-child(even) { background-color: var(--bg-modal); }
+        .bg-pending   { background-color: #ffb3b3;  }  /* soft red/pink */
+        .bg-reviewed  { background-color: #b3e5fc;  }  /* light blue */
+        .bg-ai-reviewed { background-color: #ffe082; }  /* light yellow/gold */
+        .bg-hidden    { background-color: #cccccc;  }  /* light gray */
+        .pagination { width: 100%; display: flex; justify-content: center; gap: 0.5em; }
+        .visible { visibility: visible; }
+        .invisible { visibility: hidden; }
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5em;
+            background: #f7f9fb;
+            border-radius: 1em;
+            padding: 1em 1.3em;
+            margin-bottom: 1.5em;
+            box-shadow: 0 2px 8px rgba(220,220,220,0.07);
+        }
+
+        .filter-set {
+            display: flex;
+            align-items: center;
+            gap: 0.85em;
+            font-size: 1.07em;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            margin-right: 0.4em;
+            color: #222;
+        }
+
+        .filter-set label {
+            margin-right: 0.45em;
+            font-weight: 400;
+            font-size: 0.98em;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .filter-set select {
+            padding: 0.25em 0.6em;
+            border-radius: 0.6em;
+            border: 1.5px solid #ececec;
+            background: #fff;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body class="viewport">
+<h1 class="page-header">Feedback / Review List</h1>
+<main class="main-grid">
+    <div id="report-batch-timer">
+        <span th:if="${reportBatchRunning}">AI moderation is in progress...</span>
+        <span th:unless="${reportBatchRunning}">
+        Next AI moderation in <span id="report-timer"></span>
+    </span>
+    </div>
+    <form class="filter-form" id="filter-form" th:action="@{/admin/reports/list/1}" method="get">
+        <div class="filters-bar">
+            <div class="filter-set">
+                <label for="sort"><strong>Sort:</strong></label>
+                <select name="sort" id="sort">
+                    <option value="date-desc" th:selected="${sort != null && sort == 'date-desc'}">Date descending</option>
+                    <option value="date-asc" th:selected="${sort != null && sort == 'date-asc'}">Date ascending</option>
+                </select>
+            </div>
+            <div class="filter-set">
+                <span class="filter-label"><strong>Status:</strong></span>
+                <label><input type="radio" name="status" value="PENDING" th:checked="${status != null and status == 'PENDING'}"> Pending</label>
+                <label><input type="radio" name="status" value="REVIEWED" th:checked="${status != null and status == 'REVIEWED'}"> Reviewed</label>
+                <label><input type="radio" name="status" value="HIDDEN" th:checked="${status != null and status == 'HIDDEN'}"> Hidden</label>
+                <label><input type="radio" name="status" value="AIREVIEWED" th:checked="${status != null and status == 'AIREVIEWED'}"> AI Reviewed</label>
+                <label><input type="radio" name="status" value="" th:checked="${status == null or status == ''}"> All</label>
+            </div>
+            <div class="filter-set">
+                <span class="filter-label"><strong>Category:</strong></span>
+                <label><input type="radio" name="category" value="SPAM" th:checked="${category != null and category == 'SPAM'}"> Spam</label>
+                <label><input type="radio" name="category" value="OFFENSIVE" th:checked="${category != null and category == 'OFFENSIVE'}"> Offensive</label>
+                <label><input type="radio" name="category" value="HARASSMENT" th:checked="${category != null and category == 'HARASSMENT'}"> Harassment</label>
+                <label><input type="radio" name="category" value="MISINFORMATION" th:checked="${category != null and category == 'MISINFORMATION'}"> Misinformation</label>
+                <label><input type="radio" name="category" value="OTHER" th:checked="${category != null and category == 'OTHER'}"> Other</label>
+                <label><input type="radio" name="category" value="" th:checked="${category == null or category == ''}"> All</label>
+            </div>
+        </div>
+
+    </form>
+
+
+    <table class="feedback-table">
+        <thead class="feedback-table-header">
+        <tr>
+            <th>Status</th>
+            <th>Category</th>
+            <th>Created Date</th>
+            <th>Reporter</th>
+            <th style="width: 20%;">Reason</th>
+            <th style="width: 36%;">Feedback Content</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${page.content}">
+            <td th:text="${r.status.name()}"
+                th:classappend="|
+                    ${r.status.name() == 'PENDING'     ? 'bg-pending'
+                    : r.status.name() == 'REVIEWED'    ? 'bg-reviewed'
+                    : r.status.name() == 'AIREVIEWED'  ? 'bg-ai-reviewed'
+                    : r.status.name() == 'HIDDEN'      ? 'bg-hidden'
+                    : ''}|
+                ">
+            </td>
+            <td th:text="${r.category.name()}"></td>
+            <td th:text="${#temporals.format(r.createdDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${r.reporter.fullName}"></td>
+            <td th:text="${r.reason}" style="max-width: 250px; word-break: break-word;"></td>
+            <td style="max-width: 600px; word-break: break-word;">
+                <span style="font-weight: bold;" th:text="'Current feedback status: ' + ${r.feedback.status.name()}"></span>
+                <br>
+                <span th:text="${r.feedback.mentee.fullName} + ' says:'"></span>
+                <br>
+                <span th:text="${#strings.abbreviate(r.feedback.content, 500)}"></span>
+            </td>
+            <td>
+                <div th:if="${r.status.name() == 'PENDING' || r.status.name() == 'AIREVIEWED'}">
+                    <a th:href="@{|/admin/reports/review-action/${r.id}?action=hide|}">Hide Feedback</a>
+                    &nbsp;|&nbsp;
+                    <a th:href="@{|/admin/reports/review-action/${r.id}?action=active|}">Keep Active</a>
+                </div>
+                <div th:unless="${r.status.name() == 'PENDING' || r.status.name() == 'AIREVIEWED'}">
+                    <span style="color: green;">Reviewed</span>
+                </div>
+                <br/>
+                <a th:href="@{|/admin/reports/delete/${r.id}|}"
+                   th:onclick="'return confirm(\'Are you sure you want to delete this report?\');'">
+                    Delete
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <button id="first-page" th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">First</button>
+        <button id="previous-page" th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">Previous</button>
+        <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+        <button id="next-page" th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">Next</button>
+        <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? 'visible' : 'invisible'}">Last</button>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    const filterForm = document.getElementById("filter-form");
+    document.getElementById('sort').addEventListener('change', function () {
+        filterForm.action = '/admin/reports/list/1';
+        filterForm.submit();
+    });
+    Array.from(document.querySelectorAll('input[name="status"], input[name="category"]')).forEach(function (el) {
+        el.addEventListener('change', function () {
+            filterForm.action = '/admin/reports/list/1';
+            filterForm.submit();
+        });
+    });
+
+    document.getElementById('first-page').addEventListener('click', () => {
+        filterForm.action = '/admin/reports/list/1';
+        filterForm.submit();
+    });
+    document.getElementById('previous-page').addEventListener('click', () => {
+        filterForm.action = '/admin/reports/list/' + [[${pageNumber - 1}]];
+        filterForm.submit();
+    });
+    document.getElementById('next-page').addEventListener('click', () => {
+        filterForm.action = '/admin/reports/list/' + [[${pageNumber + 1}]];
+        filterForm.submit();
+    });
+    document.getElementById('last-page').addEventListener('click', () => {
+        filterForm.action = '/admin/reports/list/' + [[${page.totalPages}]];
+        filterForm.submit();
+    });
+
+    /*<![CDATA[*/
+    let reportWasRunning = false;
+
+    function pollReportBatchStatus() {
+        fetch('/api/report-batch/status')
+            .then(res => res.json())
+            .then(status => {
+                if (!status.running && reportWasRunning) {
+                    // Only reload when switching from running -> not running
+                    location.reload();
+                }
+                reportWasRunning = status.running;
+
+                // Optionally update UI:
+                const reportBatchTimerElem = document.getElementById('report-batch-timer');
+                if (reportBatchTimerElem) {
+                    if (status.running) {
+                        reportBatchTimerElem.innerHTML = '<span>AI moderation is in progress...</span>';
+                    } else {
+                        // Show next batch timer if available
+                        const reportTimerElem = document.getElementById('report-timer');
+                        if (reportTimerElem && status.nextBatchMillis) {
+                            const now = Date.now();
+                            let secondsToNextBatch = Math.floor((status.nextBatchMillis - now) / 1000);
+                            if (secondsToNextBatch < 0) secondsToNextBatch = 0;
+                            reportTimerElem.textContent = formatMMSS(secondsToNextBatch);
+
+                            if (secondsToNextBatch === 0) {
+                                location.reload();
+                            }
+                        }
+                    }
+                }
+            })
+            .catch(console.error);
+    }
+
+    setInterval(pollReportBatchStatus, 10000);
+    pollReportBatchStatus();
+
+    function formatMMSS(secs) {
+        let min = Math.floor(secs / 60);
+        let sec = secs % 60;
+        return min.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
+    }
+
+    // For initial countdown on page load:
+    const reportBatchRunning = [[${reportBatchRunning}]];
+    const nextReportBatchMillis = [[${nextReportBatchMillis}]];
+    const reportTimerElem = document.getElementById('report-timer');
+    if (reportTimerElem && !reportBatchRunning && nextReportBatchMillis > 0) {
+        function updateReportCountdown() {
+            const now = Date.now();
+            let secondsToNextBatch = Math.floor((nextReportBatchMillis - now) / 1000);
+            if (secondsToNextBatch < 0) secondsToNextBatch = 0;
+            reportTimerElem.textContent = formatMMSS(secondsToNextBatch);
+            if (secondsToNextBatch === 0) {
+                clearInterval(reportTimerInterval);
+                location.reload();
+            }
+        }
+        updateReportCountdown();
+        var reportTimerInterval = setInterval(updateReportCountdown, 1000);
+    }
+</script>
+
+
+
+</body>
+</html>
