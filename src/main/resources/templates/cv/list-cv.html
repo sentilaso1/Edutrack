@@ -1,234 +1,233 @@
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>EduTrack - CV Approval List</title>
     <link rel="stylesheet" th:href="@{/css/master.css}"/>
     <link rel="stylesheet" th:href="@{/css/colors.css}"/>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .page-header {
-            font-size: 2.5em;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: linear-gradient(to right, #e6f7f9, #ffeef0);
+            color: #333;
         }
 
-        .main-grid {
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #2C3E50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .grid-layout {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 1em;
-            padding: 0.5em;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
         }
 
-        .filter-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            grid-template-rows: auto auto;
-            gap: 1em;
+        .filter-section {
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
         }
 
-        .filter-group {
+        .filter-section h4 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #2C3E50;
+        }
+
+        .filter-section form {
             display: flex;
-            justify-content: flex-start;
-            gap: 0.5em;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .checkbox-group {
-            grid-column: span 3;
-            width: 100%;
-            display: flex;
-            justify-content: flex-start;
-            flex-wrap: wrap;
-            gap: 0.5em;
+        label {
+            font-weight: 600;
+        }
+
+        .filter-text {
+            font-weight: normal;
+        }
+
+        select, input[type="checkbox"] {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .filter-section button {
+            background-color: rgba(255, 128, 134, 0.99);
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .filter-section button:hover {
+            background-color: rgba(255, 100, 110, 0.99);
         }
 
         .cv-table {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 14px;
         }
 
-        .cv-table-header {
-            background-color: var(--color-primary);
-        }
-
-        .cv-table th, .cv-table td {
-            padding: 0.5em;
-            border: 1px solid var(--color-secondary);
+        th, td {
+            padding: 12px;
             text-align: left;
+            border-bottom: 1px solid #eee;
         }
 
-        .cv-table tbody > tr:nth-child(odd) {
-            background-color: var(--bg-primary);
+        th {
+            background-color: #fff7f7;
+            color: #444;
         }
 
-        .cv-table tbody > tr:nth-child(even) {
-            background-color: var(--bg-modal);
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5em;
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
         }
 
         .tag-item {
-            background-color: var(--color-info);
-            padding: 0.25em 0.5em;
-            border-radius: 0.25em;
-        }
-
-        .pagination {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 0.5em;
+            background-color: rgba(255, 128, 134, 0.1);
+            color: rgba(255, 100, 110, 1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 128, 134, 0.3);
+            display: inline-block;
+            margin-right: 5px;
+            margin-bottom: 5px;
         }
 
         .bg-approved {
-            background-color: var(--color-success);
+            color: #fff;
+            background-color: rgba(56, 203, 137, 0.8);
+            padding: 4px 10px;
+            font-weight: bold;
         }
 
         .bg-rejected {
-            background-color: var(--color-error);
+            color: #fff;
+            background-color: rgba(255, 99, 132, 0.8);
+            padding: 4px 10px;
+            font-weight: bold;
         }
 
         .bg-pending {
-            background-color: var(--color-warning);
+            color: #fff;
+            background-color: rgba(255, 205, 86, 0.8);
+            padding: 4px 10px;
+            font-weight: bold;
         }
 
-        .visible {
-            visibility: visible;
+        .pagination {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .invisible {
-            visibility: hidden;
+        .pagination button {
+            background-color: rgba(255, 128, 134, 0.99);
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .pagination button.disabled {
+            display: none;
         }
     </style>
 </head>
-<body class="viewport">
-<h1 class="page-header">CV Approval List</h1>
-<main class="main-grid">
-    <div id="batch-timer">
-        <span th:if="${batchRunning}">AI verification is in progress...</span>
-        <span th:unless="${batchRunning}">
-        Next AI verification in <span id="timer"></span>
-    </span>
-    </div>
-    <form class="filter-form" id="filter-form">
-        <div class="filter-group">
-            <h3 class="">
+<body>
+<div class="container">
+    <h1>CV Approval List</h1>
+    <div class="grid-layout">
+        <div class="filter-section">
+            <h4>Filter CVs</h4>
+            <form id="filter-form">
                 <label for="sort">Sorting Order:</label>
-            </h3>
-            <select name="sort" id="sort">
-                <option value="date-desc" th:selected="${sort != null && sort == 'date-desc' }">Date
-                    descending
-                </option>
-                <option value="date-asc" th:selected="${sort != null && sort == 'date-asc' }">Date
-                    ascending
-                </option>
-            </select>
+                <select name="sort" id="sort">
+                    <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Date descending</option>
+                    <option value="date-asc" th:selected="${sort == 'date-asc'}">Date ascending</option>
+                </select>
+                <label>Status Filter:</label>
+                <label class="filter-text"><input type="radio" name="filter" id="pending" value="pending" th:checked="${filter != null && filter == 'pending'}"> Pending</label>
+                <label class="filter-text"><input type="radio" name="filter" id="aiapproved" value="aiapproved" th:checked="${filter != null && filter == 'aiapproved'}"> AI Approved</label>
+                <label class="filter-text"><input type="radio" name="filter" id="approved" value="approved" th:checked="${filter != null && filter == 'approved'}"> Approved</label>
+                <label class="filter-text"><input type="radio" name="filter" id="rejected" value="rejected" th:checked="${filter != null && filter == 'rejected'}"> Rejected</label>
+
+                <label>Skills Filter:</label>
+                <label class="filter-text"><input id="tags-all" type="checkbox" th:checked="${tags == null || tags.isEmpty() || tags.size() == skills.size()}"/> All</label>
+                <label th:each="skill : ${skills}">
+                    <input type="checkbox" name="tags" th:value="${skill}" th:attr="checked=${tags != null && #lists.contains(tags, skill)}"/>
+                    <span th:text="${skill}" class="filter-text"></span>
+                </label>
+                <button type="submit">Apply Filters</button>
+            </form>
         </div>
-
-        <div class="filter-group">
-            <h3 class="">Filter Options:</h3>
-            <label for="pending">
-                <input type="radio" name="filter" id="pending" value="pending"
-                       th:checked="${filter != null && filter == 'pending'}">
-                Pending
-            </label>
-
-            <label for="aiapproved">
-                <input type="radio" name="filter" id="aiapproved" value="aiapproved"
-                       th:checked="${filter != null && filter == 'aiapproved'}">
-                AI Approve
-            </label>
-
-            <label for="approved">
-                <input type="radio" name="filter" id="approved" value="approved"
-                       th:checked="${filter != null && filter == 'approved'}">
-                Approved
-            </label>
-
-            <label for="rejected">
-                <input type="radio" name="filter" id="rejected" value="rejected"
-                       th:checked="${filter != null && filter == 'rejected'}">
-                Rejected
-            </label>
+        <div class="cv-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>User</th>
+                    <th>Skills</th>
+                    <th>Education</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cv : ${page.content}">
+                    <td th:text="${cv.status}" th:classappend="${cv.status.equals('approved') ? 'bg-approved' : (cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending')}"></td>
+                    <td th:text="${cv.createdDate.toLocaleString()}"></td>
+                    <td th:text="${cv.user.fullName}"></td>
+                    <td><span th:each="skill : ${cv.getSkillItems()}" th:text="${skill}" class="tag-item"></span></td>
+                    <td><span th:each="edu : ${cv.getEducationItems()}" th:text="${edu}" class="tag-item"></span></td>
+                    <td><a th:href="@{/admin/cv/detail/{id}(id = ${cv.id})}">View More</a></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="pagination">
+                <button id="first-page" th:classappend="${(pageNumber > 1) ? '' : 'disabled'}">First</button>
+                <button id="previous-page" th:classappend="${(page.hasPrevious()) ? '' : 'disabled'}">Previous</button>
+                <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+                <button id="next-page" th:classappend="${(page.hasNext()) ? '' : 'disabled'}">Next</button>
+                <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? '' : 'disabled'}">Last</button>
+            </div>
         </div>
-
-        <button type="submit" class="">Filter</button>
-
-        <div class="checkbox-group">
-            <label>
-                <input id="tags-all" type="checkbox" th:checked="${tags == null || tags.isEmpty() || tags.size() == skills.size()}"/>
-                <span>All</span>
-            </label>
-
-            <label th:each="skill : ${skills}">
-                <input type="checkbox" name="tags" th:value="${skill}"
-                       th:attr="checked=${tags != null && #lists.contains(tags, skill)}"/>
-                <span th:text="${skill}"></span>
-            </label>
-        </div>
-    </form>
-
-    <table class="cv-table">
-        <thead class="cv-table-header">
-        <tr>
-            <th>Status</th>
-            <th>Created Date</th>
-            <th>User</th>
-            <th>Skills</th>
-            <th>Education</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr th:each="cv : ${page.content}">
-            <td th:text="${cv.status}"
-                th:classappend="${cv.status.equals('approved') ? 'bg-approved' : (cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending')}"></td>
-            <td th:text="${cv.createdDate.toLocaleString()}"></td>
-            <td th:text="${cv.user.fullName}"></td>
-            <td>
-                <div class="tags">
-                    <span th:each="skill : ${cv.getSkillItems()}" th:text="${skill}" class="tag-item"></span>
-                </div>
-            </td>
-            <td>
-                <div class="tags">
-                    <span th:each="education : ${cv.getEducationItems()}" th:text="${education}"
-                          class="tag-item"></span>
-                </div>
-            </td>
-            <td>
-                <a th:href="@{/admin/cv/detail/{id}(id = ${cv.id})}">View More</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <div class="pagination">
-        <button id="first-page" th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
-            First
-        </button>
-
-        <button id="previous-page" th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
-            Previous
-        </button>
-
-        <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
-
-        <button id="next-page" th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
-            Next
-        </button>
-
-        <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? 'visible' : 'invisible'}">
-            Last
-        </button>
     </div>
-</main>
-
+</div>
 <script th:inline="javascript">
     /*<![CDATA[*/
     const filterForm = document.getElementById("filter-form");
