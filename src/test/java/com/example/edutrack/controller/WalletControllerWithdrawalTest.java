@@ -20,7 +20,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.ui.Model;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Date;
@@ -31,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class WalletControllerTest {
+public class WalletControllerWithdrawalTest {
 
     @Mock
     private WalletService walletService;
@@ -51,6 +50,7 @@ public class WalletControllerTest {
     @Mock
     private Model model;
 
+    @InjectMocks
     private WalletController controller;
 
     private User user;
