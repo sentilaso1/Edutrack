@@ -8,7 +8,7 @@
             rel="stylesheet"
     />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <title>Mentor Detail</title>
+    <title>Course related Mentors</title>
     <style>
         * {
             margin: 0;
@@ -366,6 +366,165 @@
             line-height: 1.6;
         }
 
+        .back-button-container {
+            background: white;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #ff7b7b, #ff9999);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 123, 123, 0.3);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 123, 123, 0.4);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        .back-button i {
+            font-size: 1.1rem;
+        }
+
+        /* Review Section */
+        .review__grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .review__card.course-card {
+            background: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 2rem 2rem 1.2rem 2rem;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .review-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .review-avatar {
+            flex: 0 0 auto;
+        }
+        .mentee-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2.5px solid #fa6262;
+            background: #f6f8fb;
+        }
+        .review-info-main {
+            flex: 1 1 auto;
+        }
+        .mentee-course-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 0.13rem;
+        }
+        .mentee-name {
+            font-weight: 600;
+            color: #121633;
+            font-size: 1.08rem;
+        }
+        .review-course-name {
+            font-size: 1rem;
+            color: #24704A;
+            background: #ADEBB3;
+            border-radius: 0.75rem;
+            padding: 0.18em 0.85em;
+            font-weight: 500;
+        }
+        .review-rating-stars {
+            margin-bottom: 0.1rem;
+            font-size: 1.33rem;
+            color: #ffe234;
+            display: flex;
+            align-items: center;
+            gap: 0.1em;
+        }
+        .review-rating-stars i.ri-star-fill,
+        .review-rating-stars i.ri-star-half-fill {
+            color: #ffe234;
+        }
+        .review-rating-stars i.ri-star-line {
+            color: #e2e2e2;
+        }
+        .review-rating-number {
+            font-size: 1rem;
+            color: #444;
+            margin-left: 0.7em;
+        }
+        .review-date {
+            margin-left: auto;
+            font-size: 0.97rem;
+            color: #999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-end;
+            gap: 0.4em;
+            white-space: nowrap;
+        }
+        .review-card-content {
+            margin-top: 0.5rem;
+            font-size: 1.08rem;
+            color: #444;
+            line-height: 1.6;
+            padding: 0.3rem;
+            word-break: break-word;
+            background: #f7f7f9;
+            border-radius: 0.5rem;
+        }
+
+        .flag-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .flag-icon .flag-stroke {
+            stroke: #a3a3a3;
+            transition:
+                    stroke 0.2s,
+                    filter 0.2s,
+                    transform 0.15s;
+        }
+
+        .flag-link:hover .flag-stroke,
+        .flag-link:focus .flag-stroke {
+            stroke: #e63946;
+            filter: drop-shadow(0 0 4px #ffb3b3);
+            transform: scale(1.1);
+        }
+
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .hero-content {
@@ -416,6 +575,14 @@
     </style>
 </head>
 <body>
+<div class="back-button-container">
+    <div class="container">
+        <button class="back-button" onclick="history.back()">
+            <i class="ri-arrow-left-line"></i>
+            <span>Back</span>
+        </button>
+    </div>
+</div>
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
@@ -425,69 +592,10 @@
                 <p class="hero-summary" th:text="${course.description}">
                     Basic Java
                 </p>
-<!--                <div class="expertise-list">
-                    <h3>Expertise Areas</h3>
-                    <div class="expertise-tags">
-                        <span class="expertise-tag" th:each="subject : ${subjects}" th:text="${subject.title}">Subject</span>
-                    </div>
-                </div>-->
             </div>
         </div>
     </div>
 </section>
-
-<!-- About Section -->
-<!--<section class="about-section">
-    <div class="container">
-        <div class="section-header">
-            <h2>About Our Mentor</h2>
-        </div>
-        <div class="about-content">
-            <div class="about-card">
-                <h3><i class="ri-graduation-cap-line"></i> Education</h3>
-                <p th:text="${cv.get().education}">
-                    Educational background and qualifications of the mentor.
-                </p>
-            </div>
-            <div class="about-card">
-                <h3><i class="ri-award-line"></i> Experience & Certifications</h3>
-                <p th:text="${cv.get().certifications}">
-                    Professional certifications and achievements.
-                </p>
-                <ul class="experience-list">
-                    <li th:each="exp : ${cv.get().experienceItems}" th:text="${exp}">Experience item</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</section>
-
-&lt;!&ndash; Schedule Section &ndash;&gt;
-<section class="schedule-section">
-    <div class="container">
-        <div class="schedule-container">
-            <h3 class="schedule-title">Available Schedule This Month</h3>
-            <table class="schedule-table" th:if="${slotDayMatrix}">
-                <thead>
-                <tr>
-                    <th style="background-color: #369F93FF">Time Slot</th>
-                    <th style="background-color: #369F93FF" th:each="day : ${dayLabels}"
-                        th:text="${day.name().toLowerCase()}"></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="slot, iStat : ${slots}">
-                    <td th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
-                    <td th:each="day, jStat : ${dayLabels}">
-                        <div th:class="'mentor-button' + (${slotDayMatrix[iStat.index][jStat.index]} ? ' active' : '')">
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</section>-->
 
 <!-- Mentors Section -->
 <section class="courses-section">
@@ -495,22 +603,77 @@
         <div class="section-header">
             <h2>Available Mentors</h2>
         </div>
-        <div class="courses-grid">
-            <a class="course-card" th:each="mentor : ${relatedMentors}" th:href="@{'/mentors/' + ${mentor.id}}">
-                <div class="course-icon">
-                    <i class="ri-book-line"></i>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 2rem">
+            <a th:href="@{'/mentors/' + ${mentor.id}}"
+               style="text-decoration: none; color: inherit;"
+               th:each="mentor : ${relatedMentors}"
+               th:if="${relatedMentors != null and !#lists.isEmpty(relatedMentors)}">
+            <div class="review__card course-card" style="width: 70%;">
+                <div class="review-card-header">
+                    <div class="review-avatar">
+                        <img th:src="@{'/avatar/' + ${mentor.id}}"
+                             th:alt="${mentor.fullName}"
+                             style="width: 60px; height: 60px;"
+                             onerror="this.onerror=null;this.src='/assets/images/default-avatar.svg';"
+                             class="mentee-avatar"/>
+                    </div>
+                    <div class="review-info-main">
+                        <div class="mentee-course-row">
+                            <span class="mentee-name" th:text="${mentor.fullName}">Mentee Name</span>
+                            <div style="display: flex; gap: 0.5rem">
+                                <span class="review-date" style="margin-left: 0.3rem">expert in</span>
+                                <span class="review-course-name" th:text="${mentor.expertise}">Course Name</span>
+                            </div>
+                        </div>
+                        <!----->
+                        <div th:with="
+                            rating=${mentor.rating != null ? mentor.rating : 0},
+                            fullStars=${T(java.lang.Math).floor(rating)},
+                            hasHalfStar=${(rating - fullStars) >= 0.5},
+                            emptyStars=${5 - fullStars - (hasHalfStar ? 1 : 0)}">
+                                            <div class="review-rating-stars">
+                                  <span th:if="${fullStars > 0}">
+                                    <span th:each="star : ${#numbers.sequence(1, fullStars)}">
+                                      <i class="ri-star-fill"></i>
+                                    </span>
+                                  </span>
+                                                <span th:if="${hasHalfStar}">
+                                    <i class="ri-star-half-fill"></i>
+                                  </span>
+                                                <span th:if="${emptyStars > 0}">
+                                  <span th:each="star : ${#numbers.sequence(0, emptyStars - 1)}">
+                                    <i class="ri-star-line"></i>
+                                  </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-date" style="gap: 0.1rem;">
+                        <a class="flag-link">
+                <span class="flag-icon">
+                  <img th:if="${mentor != null and mentor.isAvailable}"
+                       th:src="@{/assets/images/dot-green.svg}" width="16" height="16" alt="Online" />
+                                                <img th:if="${mentor != null and !mentor.isAvailable}"
+                                                     th:src="@{/assets/images/dot-red.svg}" width="16" height="16" alt="Offline" />
+                                                <span class="span">
+                                                    <span th:text="${mentor != null ? (mentor.isAvailable ? 'Available' : 'Not Available') : 'No Mentor'}">
+                                                        Mentor Availability
+                                                    </span>
+
+                                                </span>
+                </span>
+                        </a>
+                        <span th:text="${mentor.totalSessions} + ' sessions Completed'">Total Sessions</span>
+                    </div>
                 </div>
-                <h4 th:text="${mentor.fullName}">Mentor Name</h4>
-                <div th:each="expertise: ${mentor.expertiseItem}" style="display: flex; flex-direction: row">
-                    <p th:text="${expertise}">
-                        Mentor description and details about what students will learn.
-                    </p>
+                <div class="review-card-content" th:text="${mentor.bio}">
+                    Bio
                 </div>
+            </div>
             </a>
         </div>
     </div>
 </section>
-
 
 
 <script src="https://unpkg.com/scrollreveal"></script>

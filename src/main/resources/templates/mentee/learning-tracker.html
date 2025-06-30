@@ -486,12 +486,24 @@
 
                                 <form method="post" th:action="@{/report}" class="report-form">
                                     <input type="hidden" name="scheduleId" th:value="${schedule.id}"/>
+
                                     <input type="text" name="report"
                                            th:value="${schedule.report}"
                                            placeholder="Report an issue (e.g., mentor didn't teach)"
-                                           required/>
-                                    <button type="submit">Report</button>
+                                           required
+                                           th:disabled="${schedule.attendance.name() == 'NOT_YET'}"/>
+
+                                    <button type="submit"
+                                            th:disabled="${schedule.attendance.name() == 'NOT_YET'}">
+                                        Report
+                                    </button>
+
+                                    <p th:if="${schedule.attendance.name() == 'NOT_YET'}"
+                                       style="font-size: 12px; color: gray; margin-top: 5px;">
+                                        ⚠️ You can only report after this session is marked as attended or absent.
+                                    </p>
                                 </form>
+
 
                                 <div id="toast" class="toast" th:if="${success}" th:text="${success}"></div>
                                 <div id="toast-error" class="toast error" th:if="${error}" th:text="${error}"></div>
@@ -592,7 +604,7 @@
 
 
                     <!-- Pagination -->
-                    <div class="pagination" th:if="${reviewPage.totalPages > 0}">
+                    <div th:if="${reviewPage != null and reviewPage.totalPages > 0}">
                         <ul class="pagination-list">
                             <li th:if="${reviewPage.number > 0}">
                                 <a th:href="@{/learning-tracker(

@@ -23,18 +23,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,6 +40,8 @@ import java.util.stream.Stream;
 
 @Service
 public class CvServiceImpl implements CvService {
+    private static final Logger logger = LoggerFactory.getLogger(CvServiceImpl.class);
+
     private final EntityManager entityManager;
     private final CvRepository cvRepository;
     private final UserRepository userRepository;
@@ -340,14 +339,14 @@ public class CvServiceImpl implements CvService {
     }
 
     @Override
-    public void aiVerifyCV(CV cv, List<Course> courses) {
-        String prompt = generatePrompt(cv, courses);
+    public void aiVerifyCV(CV cv) {
+        String prompt = generatePrompt(cv);
         String aiResponse = llmService.callModel(prompt);
         processAIResponse(cv, aiResponse);
     }
 
     @Override
-    public String generatePrompt(CV cv, List<Course> courses) {
+    public String generatePrompt(CV cv) {
         // Handle null or empty fields to prevent malformed JSON or prompt issues
         String summary = cv.getSummary() != null ? cv.getSummary() : "";
         String experienceYears = cv.getExperienceYears() != null ? cv.getExperienceYears().toString() : "0";
@@ -356,12 +355,6 @@ public class CvServiceImpl implements CvService {
         String experience = cv.getExperience() != null ? cv.getExperience() : "";
         String certifications = cv.getCertifications() != null ? cv.getCertifications() : "";
         String languages = cv.getLanguages() != null ? cv.getLanguages() : "";
-        String courseName = "";
-        StringBuilder sb = new StringBuilder();
-        for (Course course : courses) {
-            sb.append(course.getName()).append(", ");
-        }
-        courseName = sb.toString();
 
         // Escape double quotes to prevent JSON injection or malformed strings
         summary = summary.replace("\"", "\\\"");
@@ -370,7 +363,6 @@ public class CvServiceImpl implements CvService {
         experience = experience.replace("\"", "\\\"");
         certifications = certifications.replace("\"", "\\\"");
         languages = languages.replace("\"", "\\\"");
-        courseName = courseName.replace("\"", "\\\"");
 
 
         return """
@@ -382,15 +374,13 @@ public class CvServiceImpl implements CvService {
             - Check for logical coherence across the summary, experience, education, certifications, and languages (e.g., the experience aligns with age and skills).
             - Flag inconsistencies such as improbable experience durations, unrealistic skills compared to stated experience, or incomplete/vague information.
             - Languages should be plausible and pertinent to mentoring.
-        3. Course Relevance:
-            - Verify that the candidate's skills, certifications, and experience align specifically with the course they have registered for.
-            - Reject candidates whose expertise significantly mismatches the registered course, even if the CV is otherwise valid (e.g., candidate with Java expertise registering for a Python course)
 
         Validation Guidelines:
         - Treat empty or excessively vague fields as potential red flags unless clearly supported elsewhere in the CV.
         - Verify credibility, realism, and clarity explicitly.
         
         Response requirements:
+        - You MUST reply ONLY with valid JSON (no markdown, no code block, no natural language, no explanation, no commentary, no  tags, no backticks). Return ONLY the following structure:
         - Provide responses strictly in valid JSON format:
           {
             "is-approve": "true" or "false",
@@ -400,6 +390,7 @@ public class CvServiceImpl implements CvService {
         - Ensure "reason" is a non-empty string.
         - Do not include any explanation, markdown, code block, or extra fields. Output must be pure JSON only.
         - Escape special characters in the reason to ensure valid JSON.
+        - Do NOT add any extra text, explanation, or formatting. Do NOT wrap in backticks or code blocks.
 
         CV data:
         {
@@ -410,7 +401,6 @@ public class CvServiceImpl implements CvService {
           "experience": "%s",
           "certifications": "%s",
           "languages": "%s",
-          "course_registered": "%s"
         }
 
         Example valid responses:
@@ -423,33 +413,34 @@ public class CvServiceImpl implements CvService {
           "reason": "Skills are vague ('expert') and certification ('Supreme Certificate') is not recognized."
         }
         Respond ONLY with raw JSON, no markdown, no explanation, no code block.
-        """.formatted(summary, experienceYears, skills, education, experience, certifications, languages, courseName);
+        """.formatted(summary, experienceYears, skills, education, experience, certifications, languages);
     }
 
+    @Override
     public void processAIResponse(CV cv, String aiJson) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             if (aiJson == null || aiJson.trim().isEmpty()) {
-                System.err.println("AI response is null or empty");
+                logger.warn("AI response is null or empty");
                 return;
             }
 
             JsonNode root = mapper.readTree(aiJson);
             JsonNode choices = root.path("choices");
             if (!choices.isArray() || choices.isEmpty()) {
-                System.err.println("Invalid or empty choices array: " + aiJson);
+                logger.error("Invalid or empty choices array: {}", aiJson);
                 return;
             }
 
             JsonNode message = choices.get(0).path("message");
             if (message.isMissingNode()) {
-                System.err.println("Missing message field: " + aiJson);
+                logger.error("Missing message field: {}", aiJson);
                 return;
             }
 
             JsonNode contentNode = message.path("content");
             if (contentNode.isMissingNode() || !contentNode.isTextual()) {
-                System.err.println("Missing or invalid content field: " + aiJson);
+                logger.error("Missing or invalid content field: {}", aiJson);
                 return;
             }
 
@@ -462,7 +453,7 @@ public class CvServiceImpl implements CvService {
             JsonNode approveNode = decision.get("is-approve");
             JsonNode reasonNode = decision.get("reason");
             if (approveNode == null || reasonNode == null || !approveNode.isTextual() || !reasonNode.isTextual()) {
-                System.err.println("Missing or invalid is-approve/reason fields: " + contentJson);
+                logger.error("Missing or invalid is-approve/reason fields: {}", contentJson);
                 return;
             }
 
@@ -478,16 +469,19 @@ public class CvServiceImpl implements CvService {
                     cm.setStatus(ApplicationStatus.REJECTED);
                     courseMentorRepository.save(cm);
                 }
+                logger.info("CV rejected for mentorId {}: {}", cv.getId(), reason);
+            } else {
+                logger.info("CV approved for mentorId {}: {}", cv.getId(), reason);
             }
 
-            System.out.println("Result: " + aiJson);
+            logger.debug("AI response result: {}", aiJson);
 
             cv.setStatus(approved ? "aiapproved" : "rejected");
             cvRepository.save(cv);
         } catch (JsonProcessingException e) {
-            System.err.println("JSON parsing error for AI response: " + aiJson);
+            logger.error("JSON parsing error for AI response: {}", aiJson, e);
         } catch (Exception e) {
-            System.err.println("Unexpected error processing AI response: " + aiJson);
+            logger.error("Unexpected error processing AI response: {}", aiJson, e);
         }
     }
 
@@ -507,8 +501,7 @@ public class CvServiceImpl implements CvService {
                 return;
             }
             for (CV cv : pendingCVs) {
-                List<Course> courses = getCoursesForCV(cv);
-                aiVerifyCV(cv, courses);
+                aiVerifyCV(cv);
             }
         } finally {
             lastBatchEnd = LocalDateTime.now();

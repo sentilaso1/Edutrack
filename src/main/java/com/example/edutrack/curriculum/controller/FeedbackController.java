@@ -3,11 +3,11 @@ package com.example.edutrack.curriculum.controller;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.dto.FeedbackDTO;
-import com.example.edutrack.curriculum.dto.FeedbackFilterForm;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.CourseMentorId;
 import com.example.edutrack.curriculum.model.Feedback;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import jakarta.servlet.http.HttpSession;
@@ -32,15 +32,17 @@ public class FeedbackController {
     private final MenteeRepository menteeRepository;
     private final CourseMentorRepository courseMentorRepository;
     private final CourseMentorService courseMentorService;
+    private final FeedbackRepository feedbackRepository;
 
     public FeedbackController(FeedbackService feedbackService,
                               MenteeRepository menteeRepository,
                               CourseMentorRepository courseMentorRepository,
-                              CourseMentorService courseMentorService) {
+                              CourseMentorService courseMentorService, FeedbackRepository feedbackRepository) {
         this.feedbackService = feedbackService;
         this.menteeRepository = menteeRepository;
         this.courseMentorRepository = courseMentorRepository;
         this.courseMentorService = courseMentorService;
+        this.feedbackRepository = feedbackRepository;
     }
 
     @GetMapping("/reviews")
@@ -79,59 +81,4 @@ public class FeedbackController {
         return "redirect:/mentors/" + request.getMentorId();
     }
 
-    @GetMapping("/admin/reviews/list/{page}")
-    public String listFeedbacks(@ModelAttribute FeedbackFilterForm params, Model model, @PathVariable int page) {
-        if (page - 1 < 0) {
-            return "redirect:/404";
-        }
-
-        String filter = params.getFilter();
-        String sort = params.getSort();
-        String status = params.getStatus();
-
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-
-        Page<Feedback> feedbackPage = feedbackService.queryFeedbacks(filter, sort, status, pageable);
-
-        model.addAttribute("pageNumber", page);
-        model.addAttribute("page", feedbackPage);
-
-        if (sort != null) model.addAttribute("sort", sort);
-        if (filter != null) model.addAttribute("filter", filter);
-        if (status != null) model.addAttribute("status", status);
-
-        if (feedbackPage.getTotalPages() > 0 && page > feedbackPage.getTotalPages()) {
-            return "redirect:/404";
-        }
-
-        return "manager/list-feedback";
-    }
-
-    @GetMapping("/admin/reviews/list")
-    public String redirectToListFeedbacks() {
-        return "redirect:/admin/reviews/list/1";
-    }
-
-    @GetMapping("/admin/reviews/delete/{id}")
-    public String deleteFeedback(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
-        try {
-            feedbackService.deleteFeedbackById(id);
-            redirectAttributes.addFlashAttribute("success", "Feedback deleted successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to delete feedback: " + e.getMessage());
-        }
-        return "redirect:/admin/reviews/list/1";
-    }
-
-    // TOGGLE STATUS
-    @GetMapping("/admin/reviews/toggle-status/{id}")
-    public String toggleFeedbackStatus(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
-        try {
-                feedbackService.toggleFeedbackStatus(id);
-            redirectAttributes.addFlashAttribute("success", "Feedback status toggled!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to toggle status: " + e.getMessage());
-        }
-        return "redirect:/admin/reviews/list/1";
-    }
 }

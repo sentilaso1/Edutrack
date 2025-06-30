@@ -82,25 +82,25 @@ public class AccountsController {
         }
 
         public boolean verifyBirthDate(String birthDateStr) {
-        if (birthDateStr == null || birthDateStr.trim().isEmpty()) {
-            return false;
-        }
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            sdf.setLenient(false); // Strict parsing
-            Date birthDate = sdf.parse(birthDateStr);
-            Date today = new Date();
+                if (birthDateStr == null || birthDateStr.trim().isEmpty()) {
+                        return false;
+                }
+                try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        sdf.setLenient(false); // Strict parsing
+                        Date birthDate = sdf.parse(birthDateStr);
+                        Date today = new Date();
 
-            // Check if birth date is in the future
-            if (!birthDate.before(today)) {
-                return false;
-            }
+                        // Check if birth date is in the future
+                        if (!birthDate.before(today)) {
+                                return false;
+                        }
 
-            return true;
-        } catch (Exception e) {
-            return false; // Invalid date format
+                        return true;
+                } catch (Exception e) {
+                        return false; // Invalid date format
+                }
         }
-    }
 
         @PostMapping("/profile/{id}/edit")
         public String editProfile(@PathVariable String id,
@@ -113,47 +113,75 @@ public class AccountsController {
                         @RequestParam(required = false) String interests,
                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes)
                         throws IOException {
+                // Validate fullName
                 if (fullName == null || fullName.trim().isEmpty()) {
                         redirectAttributes.addFlashAttribute("error", "Full name is required");
                         return "redirect:/profile/" + id + "#edit";
                 }
-                if (email == null || email.trim().isEmpty() || !verifyEmail(email)) {
+
+                // Validate email
+                if (!verifyEmail(email)) {
                         redirectAttributes.addFlashAttribute("error", "Email không hợp lệ");
                         return "redirect:/profile/" + id + "#edit";
                 }
-                if (phone == null || phone.trim().isEmpty() || !verifyPhone(phone)) {
+
+                // Validate phone
+                if (!verifyPhone(phone)) {
                         redirectAttributes.addFlashAttribute("error", "Phone number không hợp lệ");
                         return "redirect:/profile/" + id + "#edit";
                 }
-                if (birthDate == null || birthDate.trim().isEmpty() || !verifyBirthDate(birthDate)) {
+
+                // Validate birthDate
+                if (!verifyBirthDate(birthDate)) {
                         redirectAttributes.addFlashAttribute("error",
                                         "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng yyyy-MM-dd)");
                         return "redirect:/profile/" + id + "#edit";
                 }
 
+                // Validate expertise for mentors
+                Mentor mentor = mentorService.getMentorById(id);
+                if (mentor != null) {
+                        if (expertise == null || expertise.trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("error", "Expertise is required");
+                                return "redirect:/profile/" + id + "#edit";
+                        }
+                        if (expertise.trim().length() < 3 || expertise.trim().length() > 100) {
+                                redirectAttributes.addFlashAttribute("error", "Expertise phải từ 3 đến 100 ký tự");
+                                return "redirect:/profile/" + id + "#edit";
+                        }
+                }
+
+                // Validate interests for mentees
+                Mentee mentee = menteeService.getMenteeById(id);
+                if (mentor == null && mentee != null) {
+                        if (interests != null && (interests.trim().length() < 3 || interests.trim().length() > 100)) {
+                                redirectAttributes.addFlashAttribute("error", "Interests phải từ 3 đến 100 ký tự");
+                                return "redirect:/profile/" + id + "#edit";
+                        }
+                }
+
+                // Load user
                 User user = userService.getUserById(id);
                 if (user == null) {
                         throw new IllegalArgumentException("User not found with id: " + id);
                 }
-                Mentor mentor = mentorService.getMentorById(id);
-                if ((expertise == null || expertise.trim().isEmpty()) && mentor != null) {
-                        redirectAttributes.addFlashAttribute("error", "Expertise is required");
-                        return "redirect:/profile/" + id + "#edit";
-                }
+
+                // Update user
                 user.setFullName(fullName.trim());
                 user.setEmail(email.trim());
                 user.setPhone(phone);
                 user.setBio(bio != null ? bio.trim() : null);
                 userRepository.save(user);
 
+                // Update mentor or mentee
                 if (mentor != null) {
-                        mentor.setExpertise(expertise);
+                        mentor.setExpertise(expertise.trim());
                         mentorRepository.save(mentor);
-                } else {
-                        Mentee mentee = menteeService.getMenteeById(id);
-                        mentee.setInterests(interests);
+                } else if (mentee != null) {
+                        mentee.setInterests(interests != null ? interests.trim() : null);
                         menteeRepository.save(mentee);
                 }
+
                 return "redirect:/profile/" + id;
         }
 

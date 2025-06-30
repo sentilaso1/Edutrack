@@ -1,0 +1,529 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Landing Page Manager - Youdemi</title>
+    <link rel="stylesheet" th:href="@{/assets/css/manage-landing-page.css}"/>
+</head>
+
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎨 Landing Page Manager</h1>
+        <p>Customize your landing page content with ease</p>
+        <div class="status-indicator" style="margin-top: 15px;">
+            <div class="status-dot"></div>
+            System Online
+        </div>
+
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" style="margin-top: 15px;">
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-error" style="margin-top: 15px;">
+            <span th:text="${errorMessage}"></span>
+        </div>
+        <div th:if="${resetSuccess}" class="alert alert-success" style="margin-top: 15px;">
+            Reset to current configuration!
+        </div>
+
+        <!-- Personalization Toggle Option -->
+        <input type="hidden" name="isPersonalized" th:value="${isPersonalized}"/>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox"
+                       th:checked="${isPersonalized}"
+                       onchange="document.getElementById('togglePersonalization').submit()"/>
+                Personalize per Role
+            </label>
+            <form id="togglePersonalization"
+                  th:action="@{/manager/landing-page/toggle-personalization}"
+                  method="post" style="display: none;">
+                <input type="hidden" name="personalize" th:value="${isPersonalized != null and !isPersonalized}"/>
+                <input type="hidden" name="activeTab" th:value="${activeTab}"/>
+            </form>
+        </div>
+
+        <!-- Role Selector - only visible if personalized -->
+        <form method="get" th:action="@{/manager/landing-page}" style="margin-top: 20px;" th:if="${isPersonalized}">
+            <div class="role-switcher">
+                <label class="form-label">Switch Role:</label>
+                <select name="role" class="form-input" onchange="this.form.submit()"
+                        style="width: 200px; display: inline-block;">
+                    <option value="GUEST" th:selected="${role == 'GUEST'}">Guest</option>
+                    <option value="MENTEE_NEW" th:selected="${role == 'MENTEE_NEW'}">New User</option>
+                    <option value="MENTEE_EXPERIENCED" th:selected="${role == 'MENTEE_EXPERIENCED'}">Experienced User
+                    </option>
+                </select>
+                <input type="hidden" name="activeTab" th:value="${activeTab}"/>
+            </div>
+        </form>
+
+    </div>
+
+    <div class="content">
+        <form th:action="@{/manager/landing-page/save}" th:object="${landingConfig}" method="post"
+              enctype="multipart/form-data">
+            <input type="hidden" name="role" th:value="${role}"/>
+            <input type="hidden" name="activeTab" th:value="${activeTab}"/>
+            <input type="hidden" name="usePersonalization" th:value="${landingConfig.usePersonalization}"/>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button type="button" class="tab" th:classappend="${activeTab == 'hero'} ? 'active' : ''" onclick="switchTab('hero')">Hero Section</button>
+                <button type="button" class="tab" th:classappend="${activeTab == 'categories'} ? 'active' : ''" onclick="switchTab('categories')">Categories</button>
+                <button type="button" class="tab" th:classappend="${activeTab == 'about'} ? 'active' : ''" onclick="switchTab('about')">About Section</button>
+                <button type="button" class="tab" th:classappend="${activeTab == 'courses'} ? 'active' : ''" onclick="switchTab('courses')">Course Sections</button>
+                <button type="button" class="tab" th:classappend="${activeTab == 'mentor'} ? 'active' : ''" onclick="switchTab('mentor')">Mentor Section</button>
+                <button type="button" class="tab" th:classappend="${activeTab == 'footer'} ? 'active' : ''" onclick="switchTab('footer')">Footer</button>
+            </div>
+
+            <!-- Hero Section -->
+            <div class="tab-content" th:classappend="${activeTab == 'hero'} ? 'active' : ''" id="hero-content">
+                <div class="section">
+                    <h2>🎯 Hero Section</h2>
+                    <div class="form-row">
+                        <div class="form-group" th:if="${role == 'MENTEE_EXPERIENCED'}">
+                            <label>
+                                <input type="checkbox" th:field="*{useScheduleReminder}" id="useScheduleReminder" value="true"/>
+                                Use schedule-based hero message?
+                            </label>
+                            <p style="font-size: 13px; color: gray; margin-top: 5px;">
+                                If enabled, headline/subheadline/CTA will be filled automatically based on user's
+                                session progress.
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label>Main Headline</label>
+                            <input type="text" th:field="*{heroHeadline}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('heroHeadline')}" th:errors="*{heroHeadline}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Sub Headline</label>
+                            <input type="text" th:field="*{heroSubHeadline}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('heroSubHeadline')}" th:errors="*{heroSubHeadline}"></p>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>CTA Button Text</label>
+                            <input type="text" th:field="*{heroCTA}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('heroCTA')}" th:errors="*{heroCTA}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>CTA Button Link</label>
+                            <select th:field="*{heroCTALink}" class="form-input">
+                                <option value="">-- Select a route --</option>
+                                <option th:each="ep : ${availableEndpoints}"
+                                        th:value="${ep}"
+                                        th:text="${ep}"
+                                        th:selected="${ep == landingConfig.heroCTALink}">
+                                </option>
+                            </select>
+                            <p class="error" th:if="${#fields.hasErrors('heroCTALink')}" th:errors="*{heroCTALink}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Hero Background Image</label>
+                            <div class="image-upload" onclick="document.getElementById('heroImage').click()">
+                                <input type="file" id="heroImage" name="heroImage"
+                                       accept=".png,.jpg,.jpeg,.svg,image/svg+xml">
+                                <p>📷 Click to upload hero background image</p>
+                                <small>Recommended size: 1920x1080px</small>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px;" th:if="${landingConfig.heroImageUrl}">
+                            <label>Current Image Preview:</label><br/>
+                            <img th:src="${landingConfig.heroImageUrl}" alt="Hero Background"
+                                 style="max-width: 300px; border: 1px solid #ccc; padding: 5px;">
+                            <p style="font-size: 12px; color: gray;" th:text="${landingConfig.heroImageUrl}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="tab-content" th:classappend="${activeTab == 'categories'} ? 'active' : ''" id="categories-content">
+                <div class="section">
+                    <h2>📚 Categories</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Subtitle</label>
+                            <input type="text" th:field="*{categorySubtitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('categorySubtitle')}" th:errors="*{categorySubtitle}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Category Title</label>
+                            <input type="text" th:field="*{categoryTitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('categoryTitle')}" th:errors="*{categoryTitle}"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Button Text</label>
+                        <input type="text" th:field="*{categoryButtonText}" class="form-input"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Tag Suggestion Logic</label>
+                        <select th:field="*{tagSuggestion}" class="form-input">
+                            <option value="POPULAR">Popular</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Categories Background Image</label>
+                        <div class="image-upload" onclick="document.getElementById('categoryImage').click()">
+                            <input type="file" id="categoryImage" name="categoryImage"
+                                   accept=".png,.jpg,.jpeg,.svg,image/svg+xml">
+                            <p>📷 Click to upload categories background image</p>
+                            <small>Recommended size: 1920x1080px</small>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;" th:if="${landingConfig.categorySectionBgUrl}">
+                        <label>Current Image Preview:</label><br/>
+                        <img th:src="${landingConfig.categorySectionBgUrl}" alt="Category Background"
+                             style="max-width: 300px; border: 1px solid #ccc; padding: 5px;">
+                        <p style="font-size: 12px; color: gray;" th:text="${landingConfig.categorySectionBgUrl}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About -->
+            <div class="tab-content" th:classappend="${activeTab == 'about'} ? 'active' : ''" id="about-content">
+                <div class="section">
+                    <h2>ℹ️ About</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Subtitle</label>
+                            <input type="text" th:field="*{aboutSubtitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('aboutSubtitle')}" th:errors="*{aboutSubtitle}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" th:field="*{aboutTitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('aboutTitle')}" th:errors="*{aboutTitle}"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea th:field="*{aboutDescription}" class="form-input form-textarea"></textarea>
+                        <p class="error" th:if="${#fields.hasErrors('aboutDescription')}" th:errors="*{aboutDescription}"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">About Section Image</label>
+                        <div class="image-upload" onclick="document.getElementById('aboutImage').click()">
+                            <input type="file" id="aboutImage" name="aboutImage"
+                                   accept=".png,.jpg,.jpeg,.svg,image/svg+xml">
+                            <p>📷 Click to upload about section image</p>
+                            <small>Recommended size: 775x685px</small>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;" th:if="${landingConfig.aboutSectionImageUrl}">
+                        <label>Current Image Preview:</label><br/>
+                        <img th:src="${landingConfig.aboutSectionImageUrl}" alt="About Section Image"
+                             style="max-width: 300px; border: 1px solid #ccc; padding: 5px;">
+                        <p style="font-size: 12px; color: gray;" th:text="${landingConfig.aboutSectionImageUrl}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses -->
+            <div class="tab-content" th:classappend="${activeTab == 'courses'} ? 'active' : ''" id="courses-content">
+                <div class="section">
+                    <h2>📖 Course Section One</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Subtitle</label>
+                            <input type="text" th:field="*{sectionOneSubtitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('sectionOneSubtitle')}" th:errors="*{sectionOneSubtitle}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" th:field="*{sectionOneTitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('sectionOneTitle')}" th:errors="*{sectionOneTitle}"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Course Suggestion Logic</label>
+                        <select th:field="*{courseSectionOneSuggestion}" class="form-input">
+                            <option value="POPULAR">Popular</option>
+                            <option value="LATEST">Latest</option>
+                            <option value="INTEREST_BASED" th:if="${role != 'GUEST'}">Interest Based</option>
+                            <option value="HISTORY_BASED" th:if="${role == 'MENTEE_EXPERIENCED'}">History Based</option>
+                            <option value="BECAUSE_YOU_LEARNED" th:if="${role == 'MENTEE_EXPERIENCED'}">Because You Learned</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="section">
+                    <h2>📚 Course Section Two</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Subtitle</label>
+                            <input type="text" th:field="*{sectionTwoSubtitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('sectionTwoSubtitle')}" th:errors="*{sectionTwoSubtitle}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" th:field="*{sectionTwoTitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('sectionTwoTitle')}" th:errors="*{sectionTwoTitle}"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Course Section Two Suggestion Logic</label>
+                        <select th:field="*{courseSectionTwoSuggestion}" class="form-input">
+                            <option value="POPULAR">Popular</option>
+                            <option value="LATEST">Latest</option>
+                            <option value="INTEREST_BASED" th:if="${role != 'GUEST'}">Interest Based</option>
+                            <option value="HISTORY_BASED" th:if="${role == 'MENTEE_EXPERIENCED'}">History Based</option>
+                            <option value="BECAUSE_YOU_LEARNED" th:if="${role == 'MENTEE_EXPERIENCED'}">Because You Learned</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Course Section Background Image</label>
+                        <div class="image-upload" onclick="document.getElementById('courseImage').click()">
+                            <input type="file" id="courseImage" name="courseImage"
+                                   accept=".png,.jpg,.jpeg,.svg,image/svg+xml">
+                            <p>📷 Click to upload course section background image</p>
+                            <small>Recommended size: 1920x1080px</small>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;" th:if="${landingConfig.courseSectionBgUrl}">
+                        <label>Current Image Preview:</label><br/>
+                        <img th:src="${landingConfig.courseSectionBgUrl}" alt="Course Background"
+                             style="max-width: 300px; border: 1px solid #ccc; padding: 5px;">
+                        <p style="font-size: 12px; color: gray;" th:text="${landingConfig.courseSectionBgUrl}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mentor -->
+            <div class="tab-content" th:classappend="${activeTab == 'mentor'} ? 'active' : ''" id="mentor-content">
+                <div class="section">
+                    <h2>👤 Mentor Section</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mentor Section Title</label>
+                            <input type="text" th:field="*{mentorSectionTitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('mentorSectionTitle')}" th:errors="*{mentorSectionTitle}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Mentor Section Subtitle</label>
+                            <input type="text" th:field="*{mentorSectionSubtitle}" class="form-input"/>
+                            <p class="error" th:if="${#fields.hasErrors('mentorSectionSubtitle')}" th:errors="*{mentorSectionSubtitle}"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mentor Suggestion Logic</label>
+                        <select th:field="*{mentorSuggestion}" class="form-input">
+                            <option value="POPULAR">Popular</option>
+                            <option value="TOP_RATED">TOP RATED</option>
+                            <option value="INTEREST_BASED" th:if="${role != 'GUEST'}">Interest Based</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mentor Section Background Image</label>
+                        <div class="image-upload" onclick="document.getElementById('mentorImage').click()">
+                            <input type="file" id="mentorImage" name="mentorImage"
+                                   accept=".png,.jpg,.jpeg,.svg,image/svg+xml">
+                            <p>📷 Click to upload mentor section background image</p>
+                            <small>Recommended size: 1920x1080px</small>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;" th:if="${landingConfig.mentorSectionBgUrl}">
+                        <label>Current Image Preview:</label><br/>
+                        <img th:src="${landingConfig.mentorSectionBgUrl}" alt="Mentor Background"
+                             style="max-width: 300px; border: 1px solid #ccc; padding: 5px;">
+                        <p style="font-size: 12px; color: gray;" th:text="${landingConfig.mentorSectionBgUrl}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="tab-content" th:classappend="${activeTab == 'footer'} ? 'active' : ''" id="footer-content">
+                <div class="section">
+                    <h2>🦞️ Footer</h2>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea th:field="*{footerDescription}" class="form-input form-textarea"></textarea>
+                        <p class="error" th:if="${#fields.hasErrors('footerDescription')}" th:errors="*{footerDescription}"></p>
+                    </div>
+                    <div class="form-group">
+                        <label>Copyright</label>
+                        <input type="text" th:field="*{copyrightText}" class="form-input"/>
+                        <p class="error" th:if="${#fields.hasErrors('copyrightText')}" th:errors="*{copyrightText}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-success">📀 Save Changes</button>
+            </div>
+        </form>
+
+        <!-- Reset and Preview -->
+        <div class="action-buttons">
+            <form th:action="@{/manager/landing-page/reset}" method="get" style="display: inline-block;">
+                <input type="hidden" name="role" th:value="${role}"/>
+                <button type="submit" class="btn btn-secondary"
+                        onclick="return confirm('Reset to default for this role?')">
+                    🔄 Reset to Defaults
+                </button>
+            </form>
+
+            <form th:action="@{/manager/landing-page/preview}" method="post" target="_blank"
+                  th:object="${landingConfig}"
+                  style="display: inline-block;">
+                <input type="hidden" name="role" th:value="${role}"/>
+
+                <input type="hidden" th:field="*{heroHeadline}"/>
+                <input type="hidden" th:field="*{heroSubHeadline}"/>
+                <input type="hidden" th:field="*{heroCTA}"/>
+                <input type="hidden" th:field="*{heroCTALink}"/>
+                <input type="hidden" th:field="*{heroImageUrl}"/>
+
+                <input type="hidden" th:field="*{categorySubtitle}"/>
+                <input type="hidden" th:field="*{categoryTitle}"/>
+                <input type="hidden" th:field="*{categoryButtonText}"/>
+                <input type="hidden" th:field="*{categorySectionBgUrl}"/>
+                <input type="hidden" th:field="*{tagSuggestion}"/>
+
+                <input type="hidden" th:field="*{aboutSubtitle}"/>
+                <input type="hidden" th:field="*{aboutTitle}"/>
+                <input type="hidden" th:field="*{aboutDescription}"/>
+                <input type="hidden" th:field="*{aboutSectionImageUrl}"/>
+
+                <input type="hidden" th:field="*{sectionOneSubtitle}"/>
+                <input type="hidden" th:field="*{sectionOneTitle}"/>
+                <input type="hidden" th:field="*{sectionTwoSubtitle}"/>
+                <input type="hidden" th:field="*{sectionTwoTitle}"/>
+                <input type="hidden" th:field="*{courseSectionOneSuggestion}"/>
+                <input type="hidden" th:field="*{courseSectionTwoSuggestion}"/>
+                <input type="hidden" th:field="*{courseSectionBgUrl}"/>
+
+                <input type="hidden" th:field="*{mentorSectionTitle}"/>
+                <input type="hidden" th:field="*{mentorSectionSubtitle}"/>
+                <input type="hidden" th:field="*{mentorSuggestion}"/>
+                <input type="hidden" th:field="*{mentorSectionBgUrl}"/>
+
+                <input type="hidden" th:field="*{footerDescription}"/>
+                <input type="hidden" th:field="*{copyrightText}"/>
+
+                <button type="submit" class="btn btn-primary">👁️ Preview Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        const targetContent = document.getElementById(tabName + '-content');
+        if (targetContent) {
+            targetContent.classList.add('active');
+        }
+        event.target.classList.add('active');
+
+        document.querySelectorAll('input[name="activeTab"]').forEach(input => {
+            input.value = tabName;
+        });
+
+        const url = new URL(window.location);
+        url.searchParams.set('activeTab', tabName);
+        window.history.replaceState({}, '', url);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const scheduleCheckbox = document.getElementById("useScheduleReminder");
+        if (scheduleCheckbox) {
+            scheduleCheckbox.addEventListener("change", function () {
+                if (this.checked) {
+                    const headlineInput = document.querySelector("input[name='heroHeadline']");
+                    const subHeadlineInput = document.querySelector("input[name='heroSubHeadline']");
+                    const ctaInput = document.querySelector("input[name='heroCTA']");
+                    const ctaLinkInput = document.querySelector("select[name='heroCTALink']");
+
+                    if (headlineInput) headlineInput.value = "Upcoming Sessions";
+                    if (subHeadlineInput) subHeadlineInput.value = "Next session: [auto-filled by system]";
+                    if (ctaInput) ctaInput.value = "View schedule →";
+                    if (ctaLinkInput) ctaLinkInput.value = "/schedules";
+
+                    // Mark as dirty
+                    isDirty = true;
+                }
+            });
+        }
+
+        // Track form changes
+        let isDirty = false;
+        const form = document.querySelector("form[action*='/save']");
+        if (form) {
+            form.querySelectorAll("input, textarea, select").forEach(el => {
+                el.addEventListener("change", () => isDirty = true);
+                el.addEventListener("input", () => isDirty = true);
+            });
+
+            // Add submit handler to update activeTab before submit
+            form.addEventListener("submit", function(e) {
+                const activeTabFromUrl = new URLSearchParams(window.location.search).get('activeTab') || 'hero';
+                const activeTabInput = form.querySelector('input[name="activeTab"]');
+                if (activeTabInput) {
+                    activeTabInput.value = activeTabFromUrl;
+                }
+            });
+        }
+
+        // Handle role switching with confirmation
+        const roleSelect = document.querySelector("select[name='role']");
+        if (roleSelect) {
+            let originalValue = roleSelect.value;
+
+            roleSelect.addEventListener("change", function (e) {
+                if (isDirty) {
+                    const confirmLeave = confirm("⚠️ You have unsaved changes. Are you sure you want to switch roles?");
+                    if (!confirmLeave) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.value = originalValue;
+                        return false;
+                    }
+                }
+                // Update original value after successful change
+                originalValue = this.value;
+            });
+        }
+
+        // Auto-hide alerts after 5 seconds
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    alert.remove();
+                }, 500);
+            }, 5000);
+        });
+
+        // Set active tab from URL parameter on page load
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTabFromUrl = urlParams.get('activeTab');
+        if (activeTabFromUrl) {
+            // Find and click the correct tab
+            const targetTab = document.querySelector(`.tab[onclick*="${activeTabFromUrl}"]`);
+            if (targetTab) {
+                // Remove active from all
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // Set active
+                targetTab.classList.add('active');
+                const targetContent = document.getElementById(activeTabFromUrl + '-content');
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

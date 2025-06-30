@@ -15,9 +15,8 @@
                     />
                 </a>
 
-                <p class="title-sm footer-text">
-                    Lorem ipsum amet, consectetur adipiscing elit. Suspendis varius
-                    enim eros elementum tristique. Duis cursus.
+                <p class="title-sm footer-text" th:text="${footerDescription}">
+                    [Footer description will load here...]
                 </p>
 
                 <ul class="social-list">
@@ -91,8 +90,8 @@
 
     <div class="footer-bottom">
         <div class="container">
-            <p class="copyright">
-                &copy; 2022 Youdemi. All Rights Reserved by codewithsadee.
+            <p class="copyright" th:text="${copyrightText}">
+                &copy; Youdemi. All rights reserved.
             </p>
         </div>
     </div>

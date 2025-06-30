@@ -31,8 +31,8 @@ public interface CvService {
     boolean acceptCV(UUID id);
     boolean rejectCV(UUID id);
 
-    void aiVerifyCV(CV cv, List<Course> courses);
-    String generatePrompt(CV cv, List<Course> courses);
+    void aiVerifyCV(CV cv);
+    String generatePrompt(CV cv);
     void processAIResponse(CV cv, String aiJson);
     void scheduleAIVerification();
     boolean isBatchRunning();
