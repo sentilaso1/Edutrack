@@ -1,4 +1,4 @@
-package com.example.edutrack;
+package com.example.edutrack.controller;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.repository.MenteeRepository;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 

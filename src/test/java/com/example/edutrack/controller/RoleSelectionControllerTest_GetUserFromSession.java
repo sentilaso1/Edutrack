@@ -1,4 +1,4 @@
-package com.example.edutrack;
+package com.example.edutrack.controller;
 
 import com.example.edutrack.auth.controller.RoleSelectionController;
 import jakarta.servlet.http.HttpSession;
