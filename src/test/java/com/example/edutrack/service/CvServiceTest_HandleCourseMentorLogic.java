@@ -1,4 +1,4 @@
-package com.example.edutrack;
+package com.example.edutrack.service;
 
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.ApplicationStatus;

@@ -1,4 +1,4 @@
-package com.example.edutrack;
+package com.example.edutrack.service;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,13 +10,11 @@ import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.profiles.repository.CvRepository;
-import com.example.edutrack.profiles.service.interfaces.CvService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 import java.util.UUID;

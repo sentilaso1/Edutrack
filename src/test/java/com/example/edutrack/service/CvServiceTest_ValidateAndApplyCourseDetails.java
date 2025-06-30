@@ -1,4 +1,4 @@
-package com.example.edutrack;
+package com.example.edutrack.service;
 
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
@@ -8,13 +8,11 @@ import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.dto.CourseApplicationDetail;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.service.CvServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
