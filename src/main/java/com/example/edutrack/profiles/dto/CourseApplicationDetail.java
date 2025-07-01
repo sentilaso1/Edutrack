@@ -1,7 +1,7 @@
 package com.example.edutrack.profiles.dto;
 
 public class CourseApplicationDetail {
-    private double price;
+    private Double price;
     private String description;
 
     public Double getPrice() {

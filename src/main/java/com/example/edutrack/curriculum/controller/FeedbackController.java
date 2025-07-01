@@ -67,6 +67,22 @@ public class FeedbackController {
                     .findByCourse_IdAndMentor_Id(request.getCourseId(), request.getMentorId())
                     .orElseThrow(() -> new IllegalArgumentException("CourseMentor not found"));
 
+            Double rating = request.getRating();
+            if (rating == null || rating < 0 || rating > 5) {
+                redirectAttributes.addFlashAttribute("error", "Rating must be between 0 and 5");
+                return "redirect:/mentors/" + request.getMentorId();
+            }
+
+            String content = request.getContent();
+            if (content == null || content.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Content must not be empty");
+                return "redirect:/mentors/" + request.getMentorId();
+            }
+            if (content.length() > 3000) {
+                redirectAttributes.addFlashAttribute("error", "Content is too long");
+                return "redirect:/mentors/" + request.getMentorId();
+            }
+
             feedbackService.submitFeedback(
                     request.getContent(),
                     request.getRating(),
