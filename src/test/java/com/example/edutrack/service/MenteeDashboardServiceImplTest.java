@@ -21,6 +21,8 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+// Hàm F5: public String getNextSessionTime(UUID menteeId)
+// trong DashboardServiceImpl
 class MenteeDashboardServiceImplTest {
 
     private EnrollmentScheduleRepository enrollmentScheduleRepository;
@@ -52,6 +54,14 @@ class MenteeDashboardServiceImplTest {
         menteeId = UUID.randomUUID();
     }
 
+    /**
+     * TC 5.1: Kiểm tra trường hợp danh sách lịch học rỗng
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP1: Không có lịch học (danh sách rỗng)
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh schedules.isEmpty() trả về "No upcoming session"
+     * Mục đích: Đảm bảo hàm trả về "No upcoming session" trong Youdemi khi học viên không có lịch học nào.
+     */
     @Test
     @DisplayName("Should return 'No upcoming session' when list is empty")
     void testEmptyScheduleList() {
@@ -61,6 +71,15 @@ class MenteeDashboardServiceImplTest {
         assertThat(result).isEqualTo("No upcoming session");
     }
 
+    /**
+     * TC 5.2: Kiểm tra trường hợp tất cả lịch học đều trong quá khứ
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có lịch học hợp lệ
+     *   - IP2: Tất cả lịch học có ngày giờ nhỏ hơn thời điểm hiện tại
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh kiểm tra schedule.getDateTime() < currentDateTime (trả về "No upcoming session")
+     * Mục đích: Đảm bảo hàm trả về "No upcoming session" trong Youdemi khi tất cả lịch học đều đã qua.
+     */
     @Test
     @DisplayName("Should return 'No upcoming session' when all schedules are in the past")
     void testAllSchedulesInPast() {
@@ -71,6 +90,17 @@ class MenteeDashboardServiceImplTest {
         assertThat(result).isEqualTo("No upcoming session");
     }
 
+    /**
+     * TC 5.3: Kiểm tra trường hợp có một lịch học sắp tới
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có lịch học hợp lệ
+     *   - VP2: Có lịch học trong tương lai
+     *   - VP3: Chỉ có một lịch học
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh tìm lịch học sớm nhất (chỉ có một lịch)
+     *   - Nhánh định dạng chuỗi đầu ra với tên khóa học
+     * Mục đích: Đảm bảo hàm trả về thông tin lịch học sắp tới trong Youdemi khi chỉ có một lịch học trong tương lai.
+     */
     @Test
     @DisplayName("Should return one upcoming session correctly")
     void testOneUpcomingSchedule() {
@@ -81,6 +111,16 @@ class MenteeDashboardServiceImplTest {
         assertThat(result).contains("Python");
     }
 
+    /**
+     * TC 5.4: Kiểm tra chọn lịch học sớm nhất khi có nhiều lịch học sắp tới
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có lịch học hợp lệ
+     *   - VP2: Có nhiều lịch học trong tương lai
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh so sánh và chọn schedule.getDateTime() sớm nhất
+     *   - Nhánh định dạng chuỗi đầu ra với tên khóa học
+     * Mục đích: Đảm bảo hàm trả về thông tin lịch học sớm nhất trong Youdemi khi có nhiều lịch học trong tương lai.
+     */
     @Test
     @DisplayName("Should return earliest upcoming session when multiple exist")
     void testMultipleUpcomingSchedules() {
@@ -92,6 +132,17 @@ class MenteeDashboardServiceImplTest {
         assertThat(result).contains("Python");
     }
 
+    /**
+     * TC 5.5: Kiểm tra trường hợp có cả lịch học trong quá khứ và tương lai
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có lịch học hợp lệ
+     *   - VP2: Có lịch học trong tương lai
+     *   - VP4: Có lịch học trong quá khứ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh lọc bỏ lịch học trong quá khứ
+     *   - Nhánh chọn lịch học sớm nhất trong tương lai
+     * Mục đích: Đảm bảo hàm chỉ trả về lịch học sớm nhất trong tương lai trong Youdemi khi có cả lịch học trong quá khứ và tương lai.
+     */
     @Test
     @DisplayName("Should handle mix of past and future schedules")
     void testMixedSchedules() {
@@ -103,6 +154,16 @@ class MenteeDashboardServiceImplTest {
         assertThat(result).contains("Java");
     }
 
+    /**
+     * TC 5.6: Kiểm tra lịch học tại thời điểm hiện tại (giá trị biên)
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có lịch học hợp lệ
+     *   - IP2: Lịch học có ngày giờ nhỏ hơn hoặc bằng thời điểm hiện tại
+     *   - VB1: Thời điểm lịch học ngay trước thời điểm hiện tại (giới hạn biên)
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh schedule.getDateTime() <= currentDateTime (trả về "No upcoming session")
+     * Mục đích: Đảm bảo hàm coi lịch học ngay trước thời điểm hiện tại là quá khứ và trả về "No upcoming session" trong Youdemi.
+     */
     @Test
     @DisplayName("Should handle exact current datetime as past")
     void testScheduleAtCurrentTime() {
@@ -115,6 +176,16 @@ class MenteeDashboardServiceImplTest {
         assertThat(result).isEqualTo("No upcoming session");
     }
 
+    /**
+     * TC 5.7: Kiểm tra định dạng chuỗi đầu ra
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có lịch học hợp lệ
+     *   - VP2: Có lịch học trong tương lai
+     *   - VP3: Chỉ có một lịch học
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh định dạng chuỗi đầu ra với tên khóa học và thời gian
+     * Mục đích: Đảm bảo hàm trả về chuỗi định dạng đúng (bao gồm tên khóa học và thời gian) trong Youdemi.
+     */
     @Test
     @DisplayName("Should return correct format of date")
     void testFormattedOutput() {
@@ -125,6 +196,14 @@ class MenteeDashboardServiceImplTest {
         assertThat(result).contains("Rust - ");
     }
 
+    /**
+     * TC 5.8: Kiểm tra xử lý an toàn khi danh sách lịch học là null
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP3: Danh sách lịch học là null
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh xử lý schedules == null (trả về "No upcoming session")
+     * Mục đích: Đảm bảo hàm xử lý an toàn và trả về "No upcoming session" trong Youdemi khi repository trả về null.
+     */
     @Test
     @DisplayName("Should ignore null values safely")
     void testNullHandling() {

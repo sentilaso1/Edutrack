@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+// Hàm F3: public void save(LandingPageConfig config, MenteeLandingRole role)
+// trong LandingPageConfigServiceImpl
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LandingPageConfigServiceImpl - save() Method Tests")
 class LandingPageConfigServiceImplSaveTest {
@@ -104,7 +106,19 @@ class LandingPageConfigServiceImplSaveTest {
         otherRoleConfig2.setCopyrightText("Other Copyright 2");
     }
 
-
+    /**
+     * TC 3.1: Kiểm tra lưu cấu hình MENTEE_EXPERIENCED với useScheduleReminder=true
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Role là MENTEE_EXPERIENCED
+     *   - VP2: Cấu hình hiện có tồn tại (findByRole trả về Optional có giá trị)
+     *   - VP3: useScheduleReminder = true
+     *   - VP4: Các trường cấu hình hợp lệ (hero, category, about, course, mentor, footer)
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh role == MENTEE_EXPERIENCED
+     *   - Nhánh giữ nguyên useScheduleReminder từ config đầu vào
+     *   - Nhánh đồng bộ footer cho các role khác
+     * Mục đích: Đảm bảo hàm lưu đúng cấu hình trang đích cho vai trò MENTEE_EXPERIENCED trong Youdemi, giữ useScheduleReminder=true và đồng bộ footer.
+     */
     @Test
     @DisplayName("Should save MENTEE_EXPERIENCED config with useScheduleReminder=true")
     void testSave_MenteeExperienced_WithScheduleReminderTrue() {
@@ -168,6 +182,18 @@ class LandingPageConfigServiceImplSaveTest {
         verify(configRepository).findByRole(MenteeLandingRole.GUEST);
     }
 
+    /**
+     * TC 3.2: Kiểm tra lưu cấu hình MENTEE_EXPERIENCED với useScheduleReminder=false
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Role là MENTEE_EXPERIENCED
+     *   - VP2: Cấu hình hiện có tồn tại
+     *   - VP5: useScheduleReminder = false
+     *   - VP4: Các trường cấu hình hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh role == MENTEE_EXPERIENCED
+     *   - Nhánh giữ nguyên useScheduleReminder từ config đầu vào
+     * Mục đích: Đảm bảo hàm lưu đúng cấu hình trang đích cho vai trò MENTEE_EXPERIENCED trong Youdemi với useScheduleReminder=false.
+     */
     @Test
     @DisplayName("Should save MENTEE_EXPERIENCED config with useScheduleReminder=false when form value is false")
     void testSave_MenteeExperienced_WithScheduleReminderFalse() {
@@ -187,7 +213,18 @@ class LandingPageConfigServiceImplSaveTest {
         assertThat(savedConfig.isUseScheduleReminder()).isFalse();
     }
 
-
+    /**
+     * TC 3.3: Kiểm tra lưu cấu hình cho role không phải MENTEE_EXPERIENCED, ép useScheduleReminder=false
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP6: Role là MENTEE_NEW
+     *   - VP2: Cấu hình hiện có tồn tại
+     *   - VP3: useScheduleReminder = true (nhưng sẽ bị ép thành false)
+     *   - VP4: Các trường cấu hình hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh role != MENTEE_EXPERIENCED
+     *   - Nhánh ép useScheduleReminder = false
+     * Mục đích: Đảm bảo hàm ép useScheduleReminder=false cho các vai trò không phải MENTEE_EXPERIENCED trong Youdemi.
+     */
     @Test
     @DisplayName("Should save non-MENTEE_EXPERIENCED role with useScheduleReminder=false regardless of input")
     void testSave_NonMenteeExperienced_ShouldForceScheduleReminderFalse() {
@@ -201,8 +238,6 @@ class LandingPageConfigServiceImplSaveTest {
         when(configRepository.findByRole(MenteeLandingRole.MENTEE_NEW))
                 .thenReturn(Optional.of(newConfig));
 
-
-
         // When
         landingPageConfigService.save(updatedConfig, MenteeLandingRole.MENTEE_NEW);
 
@@ -215,6 +250,18 @@ class LandingPageConfigServiceImplSaveTest {
         assertThat(savedConfig.isUseScheduleReminder()).isFalse();
     }
 
+    /**
+     * TC 3.4: Kiểm tra lưu cấu hình cho role GUEST, ép useScheduleReminder=false
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP7: Role là GUEST
+     *   - VP2: Cấu hình hiện có tồn tại
+     *   - VP3: useScheduleReminder = true (nhưng sẽ bị ép thành false)
+     *   - VP4: Các trường cấu hình hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh role != MENTEE_EXPERIENCED
+     *   - Nhánh ép useScheduleReminder = false
+     * Mục đích: Đảm bảo hàm ép useScheduleReminder=false cho vai trò GUEST trong Youdemi.
+     */
     @Test
     @DisplayName("Should save GUEST role with useScheduleReminder=false")
     void testSave_GuestRole_ShouldForceScheduleReminderFalse() {
@@ -239,6 +286,18 @@ class LandingPageConfigServiceImplSaveTest {
         assertThat(savedConfig.isUseScheduleReminder()).isFalse();
     }
 
+    /**
+     * TC 3.5: Kiểm tra đồng bộ footer cho tất cả các role khác trừ role hiện tại
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Role là MENTEE_EXPERIENCED
+     *   - VP2: Cấu hình hiện có tồn tại
+     *   - VP8: Các role khác (MENTEE_NEW, GUEST) tồn tại
+     *   - VP4: Các trường cấu hình hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh đồng bộ footer cho các role khác
+     *   - Nhánh kiểm tra tất cả giá trị enum MenteeLandingRole
+     * Mục đích: Đảm bảo hàm đồng bộ footerDescription và copyrightText cho các vai trò khác trong Youdemi.
+     */
     @Test
     @DisplayName("Should sync footer to all other roles except the current role")
     void testSave_ShouldSyncFooterAcrossRoles() {
@@ -283,7 +342,17 @@ class LandingPageConfigServiceImplSaveTest {
         verifyNoMoreInteractions(configRepository);
     }
 
-
+    /**
+     * TC 3.6: Kiểm tra không đồng bộ footer cho role đang được cập nhật
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP7: Role là GUEST
+     *   - VP2: Cấu hình hiện có tồn tại
+     *   - VP8: Các role khác (MENTEE_NEW, MENTEE_EXPERIENCED) tồn tại
+     *   - VP4: Các trường cấu hình hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh loại trừ role hiện tại khỏi danh sách đồng bộ footer
+     * Mục đích: Đảm bảo hàm không đồng bộ footer cho vai trò GUEST đang được cập nhật trong Youdemi.
+     */
     @Test
     @DisplayName("Should not sync footer to the same role being updated")
     void testSave_ShouldExcludeCurrentRoleFromFooterSync() {
@@ -308,6 +377,14 @@ class LandingPageConfigServiceImplSaveTest {
         verify(configRepository).findByRole(MenteeLandingRole.MENTEE_EXPERIENCED);
     }
 
+    /**
+     * TC 3.7: Kiểm tra trường hợp không tìm thấy cấu hình cho role
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP1: Cấu hình không tồn tại (findByRole trả về Optional rỗng)
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh ném IllegalArgumentException khi findByRole trả về Optional rỗng
+     * Mục đích: Đảm bảo hàm ném ngoại lệ khi không tìm thấy cấu hình cho vai trò MENTEE_EXPERIENCED trong Youdemi.
+     */
     @Test
     @DisplayName("Should throw IllegalArgumentException when config not found for role")
     void testSave_ConfigNotFound_ShouldThrowException() {
@@ -326,6 +403,18 @@ class LandingPageConfigServiceImplSaveTest {
         verify(configRepository, never()).save(any());
     }
 
+    /**
+     * TC 3.8: Kiểm tra xử lý tất cả giá trị enum MenteeLandingRole trong đồng bộ footer
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Role là MENTEE_EXPERIENCED
+     *   - VP2: Cấu hình hiện có tồn tại
+     *   - IP2: Các role khác không có cấu hình (Optional rỗng)
+     *   - VP4: Các trường cấu hình hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh lặp qua tất cả giá trị enum MenteeLandingRole
+     *   - Nhánh bỏ qua role hiện tại trong đồng bộ footer
+     * Mục đích: Đảm bảo hàm kiểm tra tất cả giá trị enum MenteeLandingRole khi đồng bộ footer trong Youdemi.
+     */
     @Test
     @DisplayName("Should handle all MenteeLandingRole enum values in footer sync")
     void testSave_ShouldHandleAllEnumValues() {
@@ -352,6 +441,17 @@ class LandingPageConfigServiceImplSaveTest {
         }
     }
 
+    /**
+     * TC 3.9: Kiểm tra giữ nguyên ID hiện có khi cập nhật cấu hình
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Role là MENTEE_EXPERIENCED
+     *   - VP2: Cấu hình hiện có tồn tại
+     *   - VP4: Các trường cấu hình hợp lệ
+     *   - VP9: ID hiện có hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh giữ nguyên ID của cấu hình hiện có
+     * Mục đích: Đảm bảo hàm giữ nguyên ID của cấu hình hiện có khi cập nhật trong Youdemi.
+     */
     @Test
     @DisplayName("Should preserve existing ID when updating")
     void testSave_ShouldPreserveExistingId() {
@@ -371,6 +471,17 @@ class LandingPageConfigServiceImplSaveTest {
         assertThat(savedConfig.getId()).isEqualTo(999L); // Should preserve existing ID
     }
 
+    /**
+     * TC 3.10: Kiểm tra xử lý an toàn với các giá trị null trong config đầu vào
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Role là MENTEE_EXPERIENCED
+     *   - VP2: Cấu hình hiện có tồn tại
+     *   - IP3: Một số trường trong config đầu vào là null
+     *   - VP5: useScheduleReminder = false
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh xử lý các trường null trong config đầu vào
+     * Mục đích: Đảm bảo hàm xử lý an toàn các giá trị null trong cấu hình đầu vào khi lưu trong Youdemi.
+     */
     @Test
     @DisplayName("Should handle null values in updatedConfig gracefully")
     void testSave_WithNullValues_ShouldHandleGracefully() {
@@ -383,8 +494,6 @@ class LandingPageConfigServiceImplSaveTest {
 
         when(configRepository.findByRole(MenteeLandingRole.MENTEE_EXPERIENCED))
                 .thenReturn(Optional.of(existingConfig));
-
-
 
         // When
         landingPageConfigService.save(configWithNulls, MenteeLandingRole.MENTEE_EXPERIENCED);

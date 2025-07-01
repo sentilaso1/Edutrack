@@ -188,6 +188,7 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         return getRecommendationsByTags(tagTitles, menteeId, limit);
     }
 
+    // Hàm F1
     @Override
     public List<CourseMentor> getRecommendedByHistory(UUID menteeId, int limit) {
         if (limit <= 0) {
