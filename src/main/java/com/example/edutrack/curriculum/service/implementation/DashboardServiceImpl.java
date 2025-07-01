@@ -1,5 +1,6 @@
 package com.example.edutrack.curriculum.service.implementation;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.dto.SkillProgressDTO;
@@ -25,10 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,10 +47,13 @@ public class DashboardServiceImpl implements DashboardService {
         this.goalRepository = goalRepository;
     }
 
+    // Hàm F5
     @Override
     public String getNextSessionTime(UUID menteeId) {
         List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findAllByMenteeId(menteeId);
-
+        if (schedules == null || schedules.isEmpty()) {
+            return "No upcoming session";
+        }
         EnrollmentSchedule next = null;
         LocalDateTime nearest = null;
 
@@ -84,16 +85,40 @@ public class DashboardServiceImpl implements DashboardService {
         return mentorRepository.countMentorsByMenteeId(menteeId);
     }
 
+    // Hàm F4
     @Override
     public int getLearningProgress(UUID menteeId) {
-        List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
-        int total = 0;
-        for (Enrollment e : enrollments) {
-            total += e.getTotalSlots();
-        }
-        int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT);
+        List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(
+                menteeId, Enrollment.EnrollmentStatus.APPROVED);
+
+        int total = enrollments.stream()
+                .mapToInt(Enrollment::getTotalSlots)
+                .sum();
+
         if (total == 0) return 0;
+
+        int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(
+                menteeId, EnrollmentSchedule.Attendance.PRESENT);
+
+
+        completed = Math.min(completed, total);
+
         return (int) Math.round((completed * 100.0) / total);
+    }
+
+    public Optional<Boolean> hasCompletedCourse(CourseMentor courseMentor, Mentee mentee) {
+        List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findEnrollmentScheduleByMenteeAndCourseMentor(
+                mentee.getId(), courseMentor.getId()
+        );
+
+        if (schedules.isEmpty()) {
+            return Optional.empty();
+        }
+
+        boolean allPresent = schedules.stream()
+                .allMatch(s -> s.getAttendance() == EnrollmentSchedule.Attendance.PRESENT);
+
+        return Optional.of(allPresent);
     }
 
     @Override
@@ -128,6 +153,7 @@ public class DashboardServiceImpl implements DashboardService {
         return new PageImpl<>(pageContent, pageable, fullList.size());
     }
 
+    // Hàm F2
     @Override
     public List<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId) {
         List<Enrollment> menteeEnrollment = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);

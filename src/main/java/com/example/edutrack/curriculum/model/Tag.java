@@ -30,6 +30,7 @@ public class Tag {
         this.description = description;
     }
 
+
     // Getters and setters
     public Integer getId() {
         return id;

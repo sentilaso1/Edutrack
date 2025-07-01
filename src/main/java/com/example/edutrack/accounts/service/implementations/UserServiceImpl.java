@@ -84,32 +84,103 @@ public class UserServiceImpl implements UserService{
         @Override
         @Transactional
         public void grantStaffRole(String userId, Staff.Role role) {
-                UUID staffId = UUID.fromString(userId);
-                User user = getUserById(userId);
+                if (userId == null || userId.trim().isEmpty()) {
+                        throw new IllegalArgumentException("User ID cannot be null or empty");
+                }
+                if (role == null) {
+                        throw new IllegalArgumentException("Role cannot be null");
+                }
+                String trimmedUserId = userId.trim();
+                UUID staffId;
+
+                try {
+                        staffId = UUID.fromString(trimmedUserId);
+                } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid UUID format for user ID: " + trimmedUserId);
+                }
+
+                User user;
+                try {
+                        user = getUserById(trimmedUserId);
+                } catch (RuntimeException e) {
+                        throw new RuntimeException("User not found with ID: " + trimmedUserId);
+                }
+
+                if (!user.getIsActive()) {
+                        throw new IllegalStateException("Cannot grant staff role to inactive user");
+                }
+                if (user.getIsLocked()) {
+                        throw new IllegalStateException("Cannot grant staff role to locked user");
+                }
+
                 if (staffRepository.existsById(staffId)) {
-                        Staff staff = staffRepository.findById(staffId)
+                        Staff existingStaff = staffRepository.findById(staffId)
                                         .orElseThrow(() -> new IllegalStateException(
-                                                        "Staff record not found for existing ID: " + userId));
-                        staff.setRole(role);
-                        staff.setCreatedDate(new Date());
-                        staffRepository.save(staff);
+                                                        "Staff record not found for existing ID: " + trimmedUserId));
+                        if (existingStaff.getRole() == role) {
+                                throw new IllegalStateException("User already has the role: " + role.name());
+                        }
+                        existingStaff.setRole(role);
+                        existingStaff.setCreatedDate(new Date());
+                        staffRepository.save(existingStaff);
                         return;
                 }
+
                 try {
-                        if (mentorRepository.existsById(staffId) || menteeRepository.existsById(staffId)) {
+                        if (mentorRepository.existsById(staffId)) {
                                 throw new IllegalStateException(
-                                                "Không thể gán vai trò nhân viên cho người dùng đã là Mentor hoặc Mentee");
-                                
+                                                "Cannot grant staff role to user who is already a Mentor");
+                        }
+                        if (menteeRepository.existsById(staffId)) {
+                                throw new IllegalStateException(
+                                                "Cannot grant staff role to user who is already a Mentee");
                         }
                         staffRepository.insertStaff(staffId, role.name());
+
+                } catch (IllegalStateException e) {
+                        throw e;
                 } catch (Exception e) {
-                        throw new RuntimeException(e.getMessage(), e);
+                        throw new RuntimeException("Failed to grant staff role: " + e.getMessage(), e);
                 }
         }
 
         @Override
         public void revokeStaffRole(String id) {
-                staffRepository.deleteById(UUID.fromString(id));
+                if (id == null || id.trim().isEmpty()) {
+                        throw new IllegalArgumentException("User ID cannot be empty!");
+                }
+
+                UUID userId;
+                try {
+                        userId = UUID.fromString(id);
+                } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid user ID format!");
+                }
+
+                User user = userRepository.findById(userId).orElse(null);
+                if (user == null) {
+                        throw new RuntimeException("User not found!");
+                }
+
+                if (!user.getIsActive()) {
+                        throw new IllegalStateException("Cannot revoke staff role from inactive user account!");
+                }
+
+                Staff staff = staffRepository.findById(userId).orElse(null);
+                if (staff == null) {
+                        throw new IllegalStateException("User does not have staff role to revoke!");
+                }
+
+                if (staff.getRole() == Staff.Role.Admin) {
+                        throw new IllegalStateException(
+                                        "Cannot revoke admin role! Admin privileges cannot be removed.");
+                }
+
+                if (user.getIsLocked()) {
+                        throw new IllegalStateException("Cannot revoke staff role from locked user account!");
+                }
+
+                staffRepository.deleteById(userId);
         }
 
         @Override

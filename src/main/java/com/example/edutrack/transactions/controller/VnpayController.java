@@ -130,7 +130,7 @@ public class VnpayController {
         vnpayTransactionService.save(transaction);
         JsonObject json = vnpayTransactionService.prepareRefundJson(transaction);
 
-        URL url = new URL(vnpayConfig.vnpRefundUrl);
+        URL url = createRefundUrl(vnpayConfig.vnpRefundUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
 
@@ -165,6 +165,10 @@ public class VnpayController {
         vnpayTransactionService.save(refundTransaction);
 
         response.sendRedirect("/wallet/refund?success=true");
+    }
+
+    public URL createRefundUrl(String url) throws IOException {
+        return new URL(url);
     }
 
     @GetMapping("/api/vnpay/return")
