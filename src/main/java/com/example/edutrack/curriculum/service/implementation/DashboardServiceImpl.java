@@ -52,7 +52,9 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public String getNextSessionTime(UUID menteeId) {
         List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findAllByMenteeId(menteeId);
-
+        if (schedules == null || schedules.isEmpty()) {
+            return "No upcoming session";
+        }
         EnrollmentSchedule next = null;
         LocalDateTime nearest = null;
 
@@ -86,15 +88,24 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public int getLearningProgress(UUID menteeId) {
-        List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
-        int total = 0;
-        for (Enrollment e : enrollments) {
-            total += e.getTotalSlots();
-        }
-        int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT);
+        List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(
+                menteeId, Enrollment.EnrollmentStatus.APPROVED);
+
+        int total = enrollments.stream()
+                .mapToInt(Enrollment::getTotalSlots)
+                .sum();
+
         if (total == 0) return 0;
+
+        int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(
+                menteeId, EnrollmentSchedule.Attendance.PRESENT);
+
+
+        completed = Math.min(completed, total);
+
         return (int) Math.round((completed * 100.0) / total);
     }
+
 
     @Override
     public boolean isAllCoursesCompleted(UUID menteeId) {
