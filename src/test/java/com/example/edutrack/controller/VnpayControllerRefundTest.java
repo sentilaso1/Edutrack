@@ -35,6 +35,17 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the VnpayController's refund functionality (VnpayController.java - refund method).
+ * Test cases include: TC-3.1 to TC-3.5 (All passed)
+ * <p>
+ * Test case TC-3.1: Redirect to login if user is null.
+ * Test case TC-3.2: Redirect to 404 if transaction not found.
+ * Test case TC-3.3: Redirect to 404 if amount is invalid.
+ * Test case TC-3.4: Redirect to 404 if wallet balance is insufficient.
+ * Test case TC-3.5: Process refund successfully.
+ */
+
 @ExtendWith(MockitoExtension.class)
 public class VnpayControllerRefundTest {
 
@@ -116,6 +127,10 @@ public class VnpayControllerRefundTest {
         refundTransaction.setOrderInfo("Hoan tien giao dich " + payTransaction.getTxnRef());
     }
 
+    /**
+     * Helper method to create a test user.
+     * This user will be used in the tests to simulate a logged-in user.
+     */
     private User createTestUser() {
         User user = new User();
         user.setId(UUID.randomUUID());
@@ -130,6 +145,9 @@ public class VnpayControllerRefundTest {
         return user;
     }
 
+    /**
+     * Test case TC-3.1: Redirect to login if user is null. (Invalid partition)
+     */
     @Test
     void shouldRedirectToLoginIfUserNull() throws IOException {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(null);
@@ -139,6 +157,9 @@ public class VnpayControllerRefundTest {
         verify(response).sendRedirect("/login");
     }
 
+    /**
+     * Test case TC-3.2: Redirect to 404 if transaction not found. (Invalid partition)
+     */
     @Test
     void shouldRedirectIfTransactionNotFound() throws IOException {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -149,6 +170,9 @@ public class VnpayControllerRefundTest {
         verify(response).sendRedirect("/wallet/refund?error=No matching payment");
     }
 
+    /**
+     * Test case TC-3.3: Redirect to 404 if amount is invalid. (Invalid boundary)
+     */
     @Test
     void shouldRedirectIfAmountInvalid() throws IOException {
         payTransaction = spy(new VnpayPayTransaction());
@@ -162,6 +186,9 @@ public class VnpayControllerRefundTest {
         verify(response).sendRedirect("/wallet/refund?error=Invalid amount");
     }
 
+    /**
+     * Test case TC-3.4: Redirect to 404 if wallet balance is insufficient. (Invalid partition)
+     */
     @Test
     void shouldRedirectIfInsufficientBalance() throws IOException {
         wallet.setBalance(10.0);
@@ -178,6 +205,9 @@ public class VnpayControllerRefundTest {
         verify(response).sendRedirect("/wallet/refund?error=Insufficient balance for refund");
     }
 
+    /**
+     * Test case TC-3.5: Process refund successfully. (Valid partition)
+     */
     @Test
     void shouldProcessRefundSuccessfully() throws Exception {
         controller = spy(new VnpayController(vnpayConfig, vnpayTransactionService, walletService));

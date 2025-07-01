@@ -26,6 +26,16 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the VnpayController's payment functionality (VnpayController.java - pay method).
+ * Test cases include: TC-4.1 to TC-4.4 (All passed)
+ * <p></p>
+ * Test case TC-4.1: Redirect to login if user is null.
+ * Test case TC-4.2: Redirect to recharge page if amount is invalid.
+ * Test case TC-4.3: Create wallet if it does not exist and redirect to payment URL.
+ * Test case TC-4.4: Process payment if wallet exists and redirect to payment URL.
+ */
+
 @ExtendWith(MockitoExtension.class)
 public class VnpayControllerPayTest {
 
@@ -63,6 +73,9 @@ public class VnpayControllerPayTest {
         wallet.setBalance(500000.0);
     }
 
+    /**
+     * Test case TC-4.1: Redirect to login if user is null. (Invalid partition)
+     */
     @Test
     void shouldRedirectToLoginIfUserNull() throws IOException {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(null);
@@ -72,6 +85,9 @@ public class VnpayControllerPayTest {
         verify(response).sendRedirect("/login");
     }
 
+    /**
+     * Test case TC-4.2: Redirect to recharge page if amount is invalid. (Invalid boundary)
+     */
     @Test
     void shouldRedirectIfAmountInvalid() throws IOException {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -81,6 +97,9 @@ public class VnpayControllerPayTest {
         verify(response).sendRedirect("/wallet/recharge?error=Invalid amount");
     }
 
+    /**
+     * Test case TC-4.3: Create wallet if it does not exist and redirect to payment URL. (Valid partition)
+     */
     @Test
     void shouldCreateWalletIfNotExist() throws IOException {
         VnpayPayTransaction transaction = new VnpayPayTransaction();
@@ -97,6 +116,9 @@ public class VnpayControllerPayTest {
         verify(response).sendRedirect("https://redirect.url");
     }
 
+    /**
+     * Test case TC-4.4: Process payment if wallet exists and redirect to payment URL. (Valid partition)
+     */
     @Test
     void shouldProcessPaymentIfWalletExists() throws IOException {
         VnpayPayTransaction transaction = new VnpayPayTransaction();

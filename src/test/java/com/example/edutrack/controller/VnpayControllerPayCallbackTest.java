@@ -22,6 +22,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the VnpayController's payment return functionality (VnpayController.java - paymentReturn method).
+ * Test cases include: TC-5.1 to TC-5.4 (All passed)
+ * <p>
+ * Test case TC-5.1: Redirect to 404 if transaction not found.
+ * Test case TC-5.2: Redirect with success message if valid response.
+ * Test case TC-5.3: Redirect with failure message if invalid secure hash.
+ * Test case TC-5.4: Redirect with failure message if response code is not "00".
+ */
+
 class VnpayControllerPayCallbackTest {
 
     @Mock
@@ -78,6 +88,10 @@ class VnpayControllerPayCallbackTest {
         payTransaction.setOrderInfo("Nap tien EduTrack tai khoan test@example.com. So tien 20000 VND");
     }
 
+    /**
+     * Helper method to create a test user.
+     * This user will be used in the tests to simulate a logged-in user.
+     */
     private User createTestUser() {
         User user = new User();
         user.setId(UUID.randomUUID());
@@ -92,6 +106,9 @@ class VnpayControllerPayCallbackTest {
         return user;
     }
 
+    /**
+     * Test case TC-5.1: Redirect to 404 if transaction not found. (Invalid partition)
+     */
     @Test
     void shouldRedirectTo404IfTransactionNotFound() {
         Map<String, String> params = new HashMap<>();
@@ -108,6 +125,9 @@ class VnpayControllerPayCallbackTest {
         assertEquals("redirect:/404", result);
     }
 
+    /**
+     * Test case TC-5.2: Redirect with success message if valid response. (Valid partition)
+     */
     @Test
     void shouldRedirectWithSuccessMessageIfValidResponse() {
         Map<String, String> params = new HashMap<>();
@@ -128,6 +148,9 @@ class VnpayControllerPayCallbackTest {
         assertEquals("redirect:/wallet/recharge", result);
     }
 
+    /**
+     * Test case TC-5.3: Redirect with failure message if invalid secure hash. (Invalid partition)
+     */
     @Test
     void shouldRedirectWithFailureMessageIfInvalidHash() {
         Map<String, String> params = new HashMap<>();
@@ -146,6 +169,9 @@ class VnpayControllerPayCallbackTest {
         assertEquals("redirect:/wallet/recharge", result);
     }
 
+    /**
+     * Test case TC-5.4: Redirect with failure message if response code is not "00". (Valid partition)
+     */
     @Test
     void shouldRedirectWithFailureMessageIfResponseCodeNot00() {
         Map<String, String> params = new HashMap<>();

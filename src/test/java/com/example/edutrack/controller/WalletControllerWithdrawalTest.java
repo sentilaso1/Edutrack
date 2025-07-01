@@ -29,6 +29,19 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the WalletController's withdrawal functionality (WalletController.java - requestWithdrawal method).
+ * Test cases include: TC-1.1 to TC-1.8 (All passed)
+ * <p>
+ * Test case TC-1.1: Redirect to login if user is null.
+ * Test case TC-1.2: Return error for invalid amount.
+ * Test case TC-1.3: Return error for amount below minimum.
+ * Test case TC-1.4: Return error if balance is insufficient.
+ * Test case TC-1.5: Return error if QR is missing and not saved.
+ * Test case TC-1.6: Process withdrawal successfully.
+ * Test case TC-1.7: Return error on IOException when creating QR.
+ * Test case TC-1.8: Return error on IOException when updating QR.
+ */
 @ExtendWith(MockitoExtension.class)
 public class WalletControllerWithdrawalTest {
 
@@ -75,6 +88,10 @@ public class WalletControllerWithdrawalTest {
         qrImage = new MockMultipartFile("qrImage", "qr.png", "image/png", "dummy".getBytes());
     }
 
+    /**
+     * Helper method to create a test user.
+     * This user will be used in the tests to simulate a logged-in user.
+     */
     private User createTestUser() {
         User user = new User();
         user.setId(UUID.randomUUID());
@@ -89,6 +106,9 @@ public class WalletControllerWithdrawalTest {
         return user;
     }
 
+    /**
+     * Test case TC-1.1: Redirect to login if user is null (Invalid partition)
+     */
     @Test
     void shouldRedirectToLoginWhenUserIsNull() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(null);
@@ -98,6 +118,9 @@ public class WalletControllerWithdrawalTest {
         assertEquals("redirect:/login", result);
     }
 
+    /**
+     * Test case TC-1.2: Return error for invalid amount (Invalid partition)
+     */
     @Test
     void shouldReturnErrorForInvalidAmount() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -108,6 +131,9 @@ public class WalletControllerWithdrawalTest {
         verify(model).addAttribute(eq("error"), contains("Invalid withdrawal amount"));
     }
 
+    /**
+     * Test case TC-1.3: Return error for amount below minimum (Invalid partition)
+     */
     @Test
     void shouldReturnErrorForAmountBelowMinimum() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -118,6 +144,9 @@ public class WalletControllerWithdrawalTest {
         verify(model).addAttribute(eq("error"), contains("Withdrawal amount must be larger"));
     }
 
+    /**
+     * Test case TC-1.4: Return error if balance is insufficient (Invalid partition)
+     */
     @Test
     public void shouldReturnErrorIfBalanceIsInsufficient() {
         wallet.setBalance(100000.0);
@@ -130,6 +159,9 @@ public class WalletControllerWithdrawalTest {
         assertEquals("/wallet/withdraw", view);
     }
 
+    /**
+     * Test case TC-1.5: Return error if QR is missing and not saved (Invalid partition)
+     */
     @Test
     void shouldReturnErrorIfQrMissingAndNotSaved() {
         wallet.setBalance(100000.0);
@@ -144,6 +176,9 @@ public class WalletControllerWithdrawalTest {
         verify(model).addAttribute(eq("error"), eq("Banking QR image is required."));
     }
 
+    /**
+     * Test case TC-1.6: Process withdrawal successfully. (Valid partition)
+     */
     @Test
     void shouldProcessWithdrawalSuccessfully() throws IOException {
         wallet.setBalance(100000.0);
@@ -162,6 +197,9 @@ public class WalletControllerWithdrawalTest {
         verify(walletService).save(any(Wallet.class));
     }
 
+    /**
+     * Test case TC-1.7: Return error on IOException when creating QR. (Valid Partition)
+     */
     @Test
     public void shouldReturnErrorOnIOExceptionWhenCreatingQr() throws IOException {
         wallet.setBalance(100000.0);
@@ -178,6 +216,9 @@ public class WalletControllerWithdrawalTest {
         assertEquals("/wallet/withdraw", view);
     }
 
+    /**
+     * Test case TC-1.8: Return error on IOException when updating QR. (Valid Partition)
+     */
     @Test
     public void shouldReturnErrorOnIOExceptionWhenUpdatingQr() throws IOException {
         wallet.setBalance(100000.0);
