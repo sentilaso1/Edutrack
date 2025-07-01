@@ -1,3 +1,4 @@
+
 package com.example.edutrack.service;
 
 import com.example.edutrack.accounts.repository.MentorRepository;
@@ -5,7 +6,6 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
-import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+// Hàm F1: public List<CourseMentor> getRecommendedByHistory(UUID menteeId, int limit)
+// trong CourseMentorServiceImpl
 @ExtendWith(MockitoExtension.class)
 class CourseMentorServiceTest {
 
@@ -69,9 +71,18 @@ class CourseMentorServiceTest {
     // ============== EQUIVALENCE PARTITIONING TEST CASES ==============
 
     /**
-     * Test Case 1: Normal case with sufficient recommendations
-     * Branch Coverage: recommendations.size() >= limit (false branch)
-     * Equivalence Partition: Sufficient recommendations available
+     * TC 1.1: Kiểm tra trường hợp bình thường với đủ số lượng gợi ý khóa học
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có tagTitles hợp lệ từ mentee
+     *   - VP2: Có mentorExpertise hợp lệ từ mentee
+     *   - VP3: Số lượng gợi ý (recommendations.size()) >= limit
+     *   - VP4: Limit > 0
+     *   - VB1: Limit hợp lệ (limit = 3)
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh recommendations.size() >= limit (false branch)
+     *   - Nhánh không gọi getPopularCoursesForGuest khi đủ gợi ý
+     *   - Nhánh xây dựng danh sách keywords từ tagTitles và mentorExpertise
+     * Mục đích: Đảm bảo hàm trả về đúng số lượng khóa học gợi ý (limit=3) dựa trên lịch sử học tập của mentee trong Youdemi, không cần fallback.
      */
     @Test
     void testGetRecommendedByHistory_SufficientRecommendations() {
@@ -105,9 +116,17 @@ class CourseMentorServiceTest {
     }
 
     /**
-     * Test Case 2: Insufficient recommendations - requires fallback
-     * Branch Coverage: recommendations.size() < limit (true branch)
-     * Equivalence Partition: Insufficient recommendations, needs fallback
+     * TC 1.2: Kiểm tra trường hợp số lượng gợi ý không đủ, cần fallback
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có tagTitles hợp lệ từ mentee
+     *   - VP2: Có mentorExpertise hợp lệ từ mentee
+     *   - IP1: Số lượng gợi ý (recommendations.size()) < limit
+     *   - VP4: Limit > 0
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh recommendations.size() < limit (true branch)
+     *   - Nhánh gọi getPopularCoursesForGuest để bổ sung khóa học phổ biến
+     *   - Nhánh kết hợp recommendations và fallbackCourses
+     * Mục đích: Đảm bảo hàm bổ sung các khóa học phổ biến từ Youdemi khi số lượng gợi ý dựa trên lịch sử học tập không đủ limit.
      */
     @Test
     void testGetRecommendedByHistory_InsufficientRecommendations_RequiresFallback() {
@@ -139,9 +158,17 @@ class CourseMentorServiceTest {
     }
 
     /**
-     * Test Case 3: Empty recommendations - full fallback
-     * Branch Coverage: recommendations.size() < limit (true branch), recommendations.size() = 0
-     * Equivalence Partition: No recommendations found
+     * TC 1.3: Kiểm tra trường hợp không có gợi ý, sử dụng toàn bộ fallback
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP2: Không có tagTitles (rỗng)
+     *   - IP3: Không có mentorExpertise (rỗng)
+     *   - IP1: Số lượng gợi ý (recommendations.size()) = 0
+     *   - VP4: Limit > 0
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh recommendations.size() < limit (true branch)
+     *   - Nhánh recommendations.size() = 0
+     *   - Nhánh gọi getPopularCoursesForGuest với limit đầy đủ
+     * Mục đích: Đảm bảo hàm trả về danh sách khóa học phổ biến từ Youdemi khi không có gợi ý dựa trên lịch sử học tập.
      */
     @Test
     void testGetRecommendedByHistory_EmptyRecommendations_FullFallback() {
@@ -174,8 +201,16 @@ class CourseMentorServiceTest {
     // ============== BOUNDARY VALUE ANALYSIS TEST CASES ==============
 
     /**
-     * Test Case 4: Boundary - limit = 1 (minimum meaningful limit)
-     * Boundary Value: Minimum limit value
+     * TC 1.4: Kiểm tra giá trị biên với limit = 1 (giá trị tối thiểu có nghĩa)
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có tagTitles hợp lệ từ mentee
+     *   - VP2: Có mentorExpertise hợp lệ từ mentee
+     *   - VP3: Số lượng gợi ý (recommendations.size()) >= limit
+     *   - VB2: Limit = 1 (giá trị biên tối thiểu)
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh recommendations.size() >= limit (false branch)
+     *   - Nhánh tạo Pageable với pageSize = 1
+     * Mục đích: Đảm bảo hàm trả về đúng 1 khóa học gợi ý trong Youdemi khi limit được đặt ở giá trị biên tối thiểu.
      */
     @Test
     void testGetRecommendedByHistory_BoundaryLimit1() {
@@ -205,12 +240,15 @@ class CourseMentorServiceTest {
     }
 
     /**
-     * Test Case 5: Boundary - limit = 0 (edge case)
-     * Boundary Value: Zero limit
+     * TC 1.5: Kiểm tra giá trị biên với limit = 0 (trường hợp biên không hợp lệ)
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IB1: Limit = 0
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh kiểm tra limit <= 0 (trả về danh sách rỗng)
+     * Mục đích: Đảm bảo hàm trả về danh sách rỗng và không gọi bất kỳ repository nào trong Youdemi khi limit bằng 0.
      */
     @Test
     void testGetRecommendedByHistory_BoundaryLimit0() {
-
         int limit = 0;
 
         List<CourseMentor> result = courseMentorService.getRecommendedByHistory(testMenteeId, limit);
@@ -223,13 +261,20 @@ class CourseMentorServiceTest {
         verifyNoInteractions(enrollmentServiceImpl);
     }
 
-
-
     // ============== COMPLEX SCENARIOS & EDGE CASES ==============
 
     /**
-     * Test Case 7: Mixed case expertise handling
-     * Tests lowercase conversion logic for mentor expertise
+     * TC 1.7: Kiểm tra xử lý mentor expertise với chữ hoa/thường lẫn lộn
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có tagTitles hợp lệ từ mentee
+     *   - VP2: Có mentorExpertise hợp lệ từ mentee
+     *   - VP3: Số lượng gợi ý (recommendations.size()) >= limit
+     *   - VP4: Limit > 0
+     *   - VP5: Mentor expertise chứa chữ hoa/thường lẫn lộn
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh chuyển đổi mentorExpertise sang chữ thường
+     *   - Nhánh xây dựng danh sách keywords từ tagTitles và mentorExpertise
+     * Mục đích: Đảm bảo hàm xử lý đúng các expertise của mentor (chữ hoa/thường) trong Youdemi để tạo danh sách keyword chính xác.
      */
     @Test
     void testGetRecommendedByHistory_MixedCaseExpertise() {
@@ -260,8 +305,18 @@ class CourseMentorServiceTest {
     }
 
     /**
-     * Test Case 8: Duplicate elimination with LinkedHashSet
-     * Tests that combined results maintain order and eliminate duplicates
+     * TC 1.8: Kiểm tra loại bỏ trùng lặp khi kết hợp gợi ý và fallback
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có tagTitles hợp lệ từ mentee
+     *   - VP2: Có mentorExpertise hợp lệ từ mentee
+     *   - IP1: Số lượng gợi ý (recommendations.size()) < limit
+     *   - VP4: Limit > 0
+     *   - VP6: Có khóa học trùng lặp giữa recommendations và fallbackCourses
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh recommendations.size() < limit (true branch)
+     *   - Nhánh sử dụng LinkedHashSet để loại bỏ trùng lặp
+     *   - Nhánh duy trì thứ tự khi kết hợp recommendations và fallbackCourses
+     * Mục đích: Đảm bảo hàm loại bỏ các khóa học trùng lặp trong Youdemi và giữ đúng thứ tự ưu tiên (recommendations trước, fallback sau).
      */
     @Test
     void testGetRecommendedByHistory_DuplicateElimination() {
@@ -296,8 +351,17 @@ class CourseMentorServiceTest {
     }
 
     /**
-     * Test Case 9: SubList boundary when combined size exceeds limit
-     * Tests Math.min logic in subList operation
+     * TC 1.9: Kiểm tra giá trị biên khi tổng số khóa học vượt quá limit
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có tagTitles hợp lệ từ mentee
+     *   - VP2: Có mentorExpertise hợp lệ từ mentee
+     *   - IP1: Số lượng gợi ý (recommendations.size()) < limit
+     *   - VP4: Limit > 0
+     *   - VP7: Tổng số khóa học (recommendations + fallback) > limit
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh recommendations.size() < limit (true branch)
+     *   - Nhánh sử dụng Math.min để giới hạn số lượng khóa học trả về
+     * Mục đích: Đảm bảo hàm chỉ trả về đúng số lượng khóa học theo limit trong Youdemi khi tổng số khóa học vượt quá giới hạn.
      */
     @Test
     void testGetRecommendedByHistory_SubListBoundary() {
@@ -324,8 +388,18 @@ class CourseMentorServiceTest {
     }
 
     /**
-     * Test Case 10: Null safety and empty collections handling
-     * Tests edge cases with null/empty inputs
+     * TC 1.10: Kiểm tra xử lý an toàn với danh sách đầu vào rỗng
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP2: Không có tagTitles (rỗng)
+     *   - IP3: Không có mentorExpertise (rỗng)
+     *   - IP1: Số lượng gợi ý (recommendations.size()) = 0
+     *   - VP4: Limit > 0
+     *   - IP7: FallbackCourses nhỏ hơn limit
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh recommendations.size() < limit (true branch)
+     *   - Nhánh xử lý danh sách keywords rỗng
+     *   - Nhánh gọi getPopularCoursesForGuest khi không có gợi ý
+     * Mục đích: Đảm bảo hàm xử lý an toàn khi không có tagTitles hoặc mentorExpertise, trả về fallbackCourses trong Youdemi.
      */
     @Test
     void testGetRecommendedByHistory_EmptyInputs() {
@@ -359,13 +433,19 @@ class CourseMentorServiceTest {
     // ============== ADDITIONAL BRANCH COVERAGE TESTS ==============
 
     /**
-     * Test Case 11: Math.max edge case - negative remaining
-     * Tests Math.max(limit - recommendations.size(), 0) when difference could be negative
+     * TC 1.11: Kiểm tra logic Math.max với số lượng khóa học còn lại âm
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có tagTitles hợp lệ từ mentee
+     *   - VP2: Có mentorExpertise hợp lệ từ mentee
+     *   - IP1: Số lượng gợi ý (recommendations.size()) < limit
+     *   - VP4: Limit > 0
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh recommendations.size() < limit (true branch)
+     *   - Nhánh Math.max(limit - recommendations.size(), 0)
+     * Mục đích: Đảm bảo hàm tính đúng số lượng khóa học cần lấy từ fallback trong Youdemi khi số lượng còn lại không âm.
      */
     @Test
     void testGetRecommendedByHistory_MathMaxLogic() {
-        // This is actually impossible with current logic since recommendations.size() < limit
-        // is the condition to enter the branch, but we test the Math.max safety
         int limit = 3;
         List<String> tagTitles = Arrays.asList("Angular");
         List<String> mentorExpertise = Arrays.asList("FRONTEND");

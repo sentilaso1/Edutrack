@@ -32,6 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+
+// Hàm F2: public List<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId)
+// trong DashboardServiceImpl
 @ExtendWith(MockitoExtension.class)
 @DisplayName("DashboardServiceImpl - getSkillProgressList Tests")
 class DashboardServiceImplTest {
@@ -130,6 +133,23 @@ class DashboardServiceImplTest {
         enrollment3.setStartTime("invalid-date-format");
     }
 
+    /**
+     * TC 2.1: Kiểm tra trường hợp không áp dụng bộ lọc, trả về tất cả các khóa học
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có nhiều enrollment hợp lệ
+     *   - VP2: Total slots > 0
+     *   - VP3: Có sessions được tham gia
+     *   - VP4: Total slots hợp lệ
+     *   - VP5: Có mentor hợp lệ
+     *   - VP6: Mentor không null
+     *   - VB2: Null mentorId filter
+     *   - VB3: Null month filter
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh không áp dụng bộ lọc keyword, mentorId, month (keyword == null, mentorId == null, month == null)
+     *   - Nhánh tính toán tiến độ (progress = sessionsCompleted / totalSlots * 100)
+     *   - Nhánh xử lý danh sách tags từ TagRepository
+     * Mục đích: Đảm bảo hàm trả về danh sách tất cả các khóa học với thông tin đúng (tiêu đề, tiến độ, mentor, tags) khi không có bộ lọc.
+     */
     @Test
     @DisplayName("Should return all skills when no filters applied")
     void testGetSkillProgressList_NoFilters_ReturnsAllSkills() {
@@ -173,6 +193,21 @@ class DashboardServiceImplTest {
         assertThat(skill2.getMentorName()).isEqualTo("Jane Smith");
     }
 
+    /**
+     * TC 2.2: Kiểm tra lọc theo keyword với tìm kiếm không phân biệt hoa thường
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có enrollment hợp lệ
+     *   - VP2: Total slots > 0
+     *   - VP3: Có sessions được tham gia
+     *   - VP4: Total slots hợp lệ
+     *   - VP5: Có mentor hợp lệ
+     *   - VP6: Mentor không null
+     *   - VB1: Keyword tìm kiếm không phân biệt hoa thường
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh áp dụng bộ lọc keyword (keyword != null && !keyword.trim().isEmpty())
+     *   - Nhánh kiểm tra courseName.contains(keyword, ignoreCase)
+     * Mục đích: Đảm bảo hàm lọc đúng khóa học dựa trên keyword không phân biệt hoa thường (VD: "JAVA" khớp với "Java Programming").
+     */
     @Test
     @DisplayName("Should filter by keyword - case insensitive")
     void testGetSkillProgressList_KeywordFilter_CaseInsensitive() {
@@ -194,6 +229,15 @@ class DashboardServiceImplTest {
         assertThat(result.get(0).getCourseTitle()).isEqualTo("Java Programming");
     }
 
+    /**
+     * TC 2.3: Kiểm tra lọc theo keyword không có kết quả khớp
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP1: Keyword không khớp với bất kỳ khóa học nào
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh áp dụng bộ lọc keyword (keyword != null && !keyword.trim().isEmpty())
+     *   - Nhánh không tìm thấy khóa học khớp với keyword
+     * Mục đích: Đảm bảo hàm trả về danh sách rỗng khi keyword không khớp với bất kỳ khóa học nào.
+     */
     @Test
     @DisplayName("Should filter by keyword - no matches")
     void testGetSkillProgressList_KeywordFilter_NoMatches() {
@@ -207,6 +251,14 @@ class DashboardServiceImplTest {
         assertThat(result).isEmpty();
     }
 
+    /**
+     * TC 2.4: Kiểm tra bỏ qua bộ lọc khi keyword rỗng hoặc chỉ chứa khoảng trắng
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IB1: Keyword rỗng hoặc chỉ chứa khoảng trắng
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh bỏ qua bộ lọc keyword (keyword == null || keyword.trim().isEmpty())
+     * Mục đích: Đảm bảo hàm bỏ qua bộ lọc keyword và trả về tất cả các khóa học khi keyword là rỗng hoặc chỉ chứa khoảng trắng.
+     */
     @Test
     @DisplayName("Should filter by keyword - blank keyword should be ignored")
     void testGetSkillProgressList_BlankKeyword_ShouldIgnoreFilter() {
@@ -227,6 +279,20 @@ class DashboardServiceImplTest {
         assertThat(result).hasSize(2);
     }
 
+    /**
+     * TC 2.5: Kiểm tra lọc theo mentor ID
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP2: Mentor ID khớp với enrollment
+     *   - VP1: Có enrollment hợp lệ
+     *   - VP3: Có sessions được tham gia
+     *   - VP4: Total slots hợp lệ
+     *   - VP5: Có mentor hợp lệ
+     *   - VP6: Mentor không null
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh áp dụng bộ lọc mentorId (mentorId != null)
+     *   - Nhánh kiểm tra mentor.getId().equals(mentorId)
+     * Mục đích: Đảm bảo hàm chỉ trả về các khóa học của mentor được chỉ định.
+     */
     @Test
     @DisplayName("Should filter by mentor ID")
     void testGetSkillProgressList_MentorFilter() {
@@ -249,6 +315,20 @@ class DashboardServiceImplTest {
         assertThat(result.get(0).getMentorName()).isEqualTo("John Doe");
     }
 
+    /**
+     * TC 2.6: Kiểm tra lọc theo tháng bắt đầu khóa học
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP3: Tháng bắt đầu khớp với enrollment
+     *   - VP1: Có enrollment hợp lệ
+     *   - VP2: Total slots > 0
+     *   - VP4: Total slots hợp lệ
+     *   - VP5: Có mentor hợp lệ
+     *   - VP6: Mentor không null
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh áp dụng bộ lọc month (month != null)
+     *   - Nhánh kiểm tra startTime khớp với YearMonth
+     * Mục đích: Đảm bảo hàm chỉ trả về các khóa học có tháng bắt đầu khớp với bộ lọc.
+     */
     @Test
     @DisplayName("Should filter by month from startTime")
     void testGetSkillProgressList_MonthFilter() {
@@ -271,6 +351,15 @@ class DashboardServiceImplTest {
         assertThat(result.get(0).getCourseTitle()).isEqualTo("Python Basics");
     }
 
+    /**
+     * TC 2.7: Kiểm tra xử lý định dạng ngày không hợp lệ
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IB2: Định dạng ngày không hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh xử lý ngoại lệ khi parse startTime thất bại
+     *   - Nhánh bỏ qua enrollment với startTime không hợp lệ
+     * Mục đích: Đảm bảo hàm bỏ qua các enrollment có định dạng ngày không hợp lệ và trả về danh sách rỗng.
+     */
     @Test
     @DisplayName("Should handle invalid date format gracefully")
     void testGetSkillProgressList_InvalidDateFormat_ShouldSkip() {
@@ -284,6 +373,19 @@ class DashboardServiceImplTest {
         assertThat(result).isEmpty();
     }
 
+    /**
+     * TC 2.8: Kiểm tra xử lý mentor null
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP6: Mentor null
+     *   - VP1: Có enrollment hợp lệ
+     *   - VP2: Total slots > 0
+     *   - VP3: Có sessions được tham gia
+     *   - VP4: Total slots hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh xử lý mentor null (courseMentor.getMentor() == null)
+     *   - Nhánh gán mentorName = "Unknown" khi mentor null
+     * Mục đích: Đảm bảo hàm hiển thị "Unknown" cho mentorName khi mentor là null.
+     */
     @Test
     @DisplayName("Should handle null mentor gracefully")
     void testGetSkillProgressList_NullMentor_ShouldUseUnknown() {
@@ -318,6 +420,17 @@ class DashboardServiceImplTest {
         assertThat(result.get(0).getMentorId()).isNull();
     }
 
+    /**
+     * TC 2.9: Kiểm tra xử lý totalSlots null
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP4: Total slots null
+     *   - VP1: Có enrollment hợp lệ
+     *   - VP3: Có sessions được tham gia
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh xử lý totalSlots == null (gán default totalSlots = 1)
+     *   - Nhánh tính toán tiến độ khi totalSlots được gán mặc định
+     * Mục đích: Đảm bảo hàm gán totalSlots = 1 khi null và tính tiến độ đúng (100% nếu có sessions được tham gia).
+     */
     @Test
     @DisplayName("Should handle zero total slots correctly")
     void testGetSkillProgressList_ZeroTotalSlots_ShouldUseDefaultOne() {
@@ -352,6 +465,17 @@ class DashboardServiceImplTest {
         assertThat(result.get(0).getProgressPercentage()).isEqualTo(100);
     }
 
+    /**
+     * TC 2.10: Kiểm tra kết hợp nhiều bộ lọc (keyword, month, mentorId) không có kết quả khớp
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có enrollment hợp lệ
+     *   - VP3: Tháng bắt đầu khớp
+     *   - IP2: Mentor ID không khớp
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh áp dụng đồng thời nhiều bộ lọc (keyword != null, month != null, mentorId != null)
+     *   - Nhánh không tìm thấy kết quả khi tất cả bộ lọc không khớp
+     * Mục đích: Đảm bảo hàm trả về danh sách rỗng khi các bộ lọc kết hợp không tìm thấy enrollment phù hợp.
+     */
     @Test
     @DisplayName("Should combine multiple filters correctly")
     void testGetSkillProgressList_MultipleFilters_ShouldApplyAll() {
@@ -366,6 +490,14 @@ class DashboardServiceImplTest {
         assertThat(result).isEmpty();
     }
 
+    /**
+     * TC 2.11: Kiểm tra trường hợp không có enrollment nào
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP3: Không có enrollment
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh trả về danh sách rỗng khi không có enrollment (enrollments.isEmpty())
+     * Mục đích: Đảm bảo hàm trả về danh sách rỗng khi không tìm thấy enrollment nào.
+     */
     @Test
     @DisplayName("Should return empty list when no enrollments found")
     void testGetSkillProgressList_NoEnrollments_ShouldReturnEmpty() {
@@ -377,6 +509,15 @@ class DashboardServiceImplTest {
         assertThat(result).isEmpty();
     }
 
+    /**
+     * TC 2.12: Kiểm tra trường hợp totalSlots = 0
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VB4: Total slots = 0
+     *   - VP1: Có enrollment hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh xử lý totalSlots == 0 (trả về progressPercentage = 0)
+     * Mục đích: Đảm bảo hàm trả về tiến độ 0% khi totalSlots bằng 0, bất kể số sessions được tham gia.
+     */
     @Test
     @DisplayName("Should handle totalSlots = 0 by returning 0% progress")
     void testGetSkillProgressList_TotalSlotsZero() {
@@ -404,6 +545,16 @@ class DashboardServiceImplTest {
         assertThat(result.get(0).getProgressPercentage()).isEqualTo(0);
     }
 
+    /**
+     * TC 2.13: Kiểm tra trường hợp không có sessions nào được tham gia
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - IP5: Không có sessions được tham gia
+     *   - VP2: Total slots > 0
+     *   - VP1: Có enrollment hợp lệ
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh xử lý sessionsCompleted == 0 (trả về progressPercentage = 0)
+     * Mục đích: Đảm bảo hàm trả về tiến độ 0% khi không có sessions nào được tham gia, với totalSlots > 0.
+     */
     @Test
     @DisplayName("Should handle no sessions attended with total slots > 0")
     void testGetSkillProgressList_NoSessionsAttended() {
@@ -439,6 +590,20 @@ class DashboardServiceImplTest {
         assertThat(result.get(0).getProgressPercentage()).isEqualTo(0);
     }
 
+    /**
+     * TC 2.14: Kiểm tra trường hợp bộ lọc month là null
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VB3: Month filter null
+     *   - VP1: Có enrollment hợp lệ
+     *   - VP2: Total slots > 0
+     *   - VP3: Có sessions được tham gia
+     *   - VP4: Total slots hợp lệ
+     *   - VP5: Có mentor hợp lệ
+     *   - VP6: Mentor không null
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh bỏ qua bộ lọc month (month == null)
+     * Mục đích: Đảm bảo hàm trả về tất cả các khóa học khi không áp dụng bộ lọc tháng.
+     */
     @Test
     @DisplayName("Should return all enrollments with null month filter")
     void testGetSkillProgressList_NullMonthFilter() {
@@ -469,6 +634,17 @@ class DashboardServiceImplTest {
         assertThat(result.get(1).getCourseTitle()).isEqualTo("Python Basics");
     }
 
+    /**
+     * TC 2.15: Kiểm tra kết hợp nhiều bộ lọc với kết quả không khớp
+     * Phân vùng tương đương (Equivalence Partition):
+     *   - VP1: Có enrollment hợp lệ
+     *   - VP3: Tháng bắt đầu khớp
+     *   - IP2: Mentor ID không khớp
+     * Độ phủ nhánh (Branch Coverage):
+     *   - Nhánh áp dụng đồng thời nhiều bộ lọc (keyword != null, month != null, mentorId != null)
+     *   - Nhánh không tìm thấy kết quả khi tất cả bộ lọc không khớp
+     * Mục đích: Đảm bảo hàm trả về danh sách rỗng khi các bộ lọc kết hợp không tìm thấy enrollment phù hợp.
+     */
     @Test
     @DisplayName("Should handle multiple filters with mismatch")
     void testGetSkillProgressList_MultipleFilters_Mismatch() {

@@ -1,5 +1,6 @@
 package com.example.edutrack.curriculum.service.implementation;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.dto.SkillProgressDTO;
@@ -25,10 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +47,7 @@ public class DashboardServiceImpl implements DashboardService {
         this.goalRepository = goalRepository;
     }
 
+    // Hàm F5
     @Override
     public String getNextSessionTime(UUID menteeId) {
         List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findAllByMenteeId(menteeId);
@@ -86,6 +85,7 @@ public class DashboardServiceImpl implements DashboardService {
         return mentorRepository.countMentorsByMenteeId(menteeId);
     }
 
+    // Hàm F4
     @Override
     public int getLearningProgress(UUID menteeId) {
         List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(
@@ -106,6 +106,20 @@ public class DashboardServiceImpl implements DashboardService {
         return (int) Math.round((completed * 100.0) / total);
     }
 
+    public Optional<Boolean> hasCompletedCourse(CourseMentor courseMentor, Mentee mentee) {
+        List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findEnrollmentScheduleByMenteeAndCourseMentor(
+                mentee.getId(), courseMentor.getId()
+        );
+
+        if (schedules.isEmpty()) {
+            return Optional.empty();
+        }
+
+        boolean allPresent = schedules.stream()
+                .allMatch(s -> s.getAttendance() == EnrollmentSchedule.Attendance.PRESENT);
+
+        return Optional.of(allPresent);
+    }
 
     @Override
     public boolean isAllCoursesCompleted(UUID menteeId) {
@@ -139,6 +153,7 @@ public class DashboardServiceImpl implements DashboardService {
         return new PageImpl<>(pageContent, pageable, fullList.size());
     }
 
+    // Hàm F2
     @Override
     public List<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId) {
         List<Enrollment> menteeEnrollment = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
