@@ -11,10 +11,12 @@ import com.example.edutrack.transactions.service.WalletService;
 import com.example.edutrack.transactions.service.WithdrawalService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import jakarta.servlet.http.HttpSession;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,19 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the WalletController's transaction history functionality (WalletController.java - showTransactionHistory method).
+ * Test cases include: TC-2.1 to TC-2.7 (All passed)
+ * <p>
+ * Test case TC-2.1: Redirect to login if user is null.
+ * Test case TC-2.2: Redirect to 404 if page is less than one.
+ * Test case TC-2.3: Return error if wallet is not found.
+ * Test case TC-2.4: List transactions in descending order without search.
+ * Test case TC-2.5: List transactions in ascending order without search.
+ * Test case TC-2.6: List transactions with search query.
+ * Test case TC-2.7: List transactions if sort and search are null.
+ */
+@ExtendWith(MockitoExtension.class)
 public class WalletControllerHistoryTest {
     @Mock
     private WalletService walletService;
@@ -63,6 +78,10 @@ public class WalletControllerHistoryTest {
         wallet.setOnHold(0.0);
     }
 
+    /**
+     * Helper method to create a test user.
+     * This user will be used in the tests to simulate a logged-in user.
+     */
     private User createTestUser() {
         User user = new User();
         user.setId(UUID.randomUUID());
@@ -77,6 +96,9 @@ public class WalletControllerHistoryTest {
         return user;
     }
 
+    /**
+     * Test case TC-2.1: Redirect to login if user is null. (Invalid partition)
+     */
     @Test
     void shouldRedirectToLoginIfUserIsNull() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(null);
@@ -86,6 +108,9 @@ public class WalletControllerHistoryTest {
         assertEquals("redirect:/login", view); // Unauthenticated
     }
 
+    /**
+     * Test case TC-2.2: Redirect to 404 if page is less than one. (Invalid boundary)
+     */
     @Test
     void shouldRedirectTo404IfPageIsLessThanOne() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -95,6 +120,9 @@ public class WalletControllerHistoryTest {
         assertEquals("redirect:/404", view); // Boundary failure
     }
 
+    /**
+     * Test case TC-2.3: Return error if wallet is not found. (Invalid partition)
+     */
     @Test
     void shouldReturnErrorIfWalletNotFound() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -106,6 +134,9 @@ public class WalletControllerHistoryTest {
         verify(model).addAttribute(eq("error"), eq("Missing wallet information"));
     }
 
+    /**
+     * Test case TC-2.4: List transactions in descending order without search. (Valid partition)
+     */
     @Test
     void shouldListTransactionsDescendingWithoutSearch() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -125,6 +156,9 @@ public class WalletControllerHistoryTest {
         verify(model).addAttribute("sort", "desc");
     }
 
+    /**
+     * Test case TC-2.5: List transactions in ascending order without search. (Valid partition)
+     */
     @Test
     void shouldListTransactionsAscendingWithoutSearch() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -141,6 +175,9 @@ public class WalletControllerHistoryTest {
         verify(model).addAttribute("sort", "asc");
     }
 
+    /**
+     * Test case TC-2.6: List transactions with search query. (Valid partition)
+     */
     @Test
     void shouldListTransactionsWithSearchQuery() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
@@ -156,6 +193,9 @@ public class WalletControllerHistoryTest {
         verify(model).addAttribute("search", "vnpay");
     }
 
+    /**
+     * Test case TC-2.7: List transactions if sort and search are null. (Valid boundary)
+     */
     @Test
     void shouldListTransactionsIfSortAndSearchAreNull() {
         when(session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString())).thenReturn(user);
