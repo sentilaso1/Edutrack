@@ -174,6 +174,9 @@ public class CourseMentorServiceImpl implements CourseMentorService {
 
     @Override
     public List<CourseMentor> getRecommendedCourseMentors(UUID menteeId, int limit) {
+        if (limit <= 0) {
+            return Collections.emptyList();
+        }
         List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
         Set<String> tagTitles = new HashSet<>();
         for (Enrollment e : enrollments) {
@@ -187,6 +190,9 @@ public class CourseMentorServiceImpl implements CourseMentorService {
 
     @Override
     public List<CourseMentor> getRecommendedByHistory(UUID menteeId, int limit) {
+        if (limit <= 0) {
+            return Collections.emptyList();
+        }
         List<String> tagTitlesByMenteeId = tagRepository.findDistinctTagTitlesFromMenteeId(menteeId);
         List<String> mentorExpertiseByMenteeId = mentorRepository.findExpertiseOfMentorsByMentee(menteeId);
 
