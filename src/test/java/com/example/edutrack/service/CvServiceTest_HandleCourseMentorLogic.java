@@ -46,7 +46,6 @@ public class CvServiceTest_HandleCourseMentorLogic {
         mentor = new Mentor();
         course = new Course();
         detail = new CourseApplicationDetail();
-        detail.setPrice(100.0);
         detail.setDescription("desc");
     }
 

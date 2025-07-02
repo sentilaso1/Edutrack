@@ -201,7 +201,7 @@
     let reportWasRunning = false;
 
     function pollReportBatchStatus() {
-        fetch('/api/report-batch/status')
+        fetch('/api/batch/status')
             .then(res => res.json())
             .then(status => {
                 if (!status.running && reportWasRunning) {

@@ -42,23 +42,26 @@ public class CvController {
 
     private final CvService cvService;
     private final CourseService courseService;
+    private final CourseMentorRepository courseMentorRepository;
+    private final CvRepository cvRepository;
+    private final MentorRepository mentorRepository;
+    private final MentorController mentorController;
 
-    @Autowired
-    public CourseMentorRepository courseMentorRepository;
 
-    @Autowired
-    public CvRepository cvRepository;
-
-    @Autowired
-    public MentorRepository mentorRepository;
-    @Autowired
-    private MentorController mentor;
 
     @Autowired
     public CvController(CvService cvService,
-                        CourseService courseService) {
+                        CourseService courseService,
+                        CourseMentorRepository courseMentorRepository,
+                        CvRepository cvRepository,
+                        MentorRepository mentorRepository,
+                        MentorController mentorController) {
         this.cvService = cvService;
         this.courseService = courseService;
+        this.courseMentorRepository = courseMentorRepository;
+        this.cvRepository = cvRepository;
+        this.mentorRepository = mentorRepository;
+        this.mentorController = mentorController;
     }
 
     @GetMapping("/admin/cv/list/{page}")

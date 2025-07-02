@@ -344,20 +344,7 @@ public class MenteeController {
         return "/mentee/learning-tracker";
     }
 
-    @PostMapping("/report")
-    public String submitAttendanceReport(@RequestParam("scheduleId") int scheduleId,
-                                         @RequestParam("report") String reportContent,
-                                         RedirectAttributes redirectAttributes) {
-        EnrollmentSchedule schedule = enrollmentScheduleService.findById(scheduleId);
-        if (schedule != null) {
-            schedule.setReport(reportContent);
-            enrollmentScheduleService.save(schedule);
-            redirectAttributes.addFlashAttribute("success", "Report submitted successfully.");
-        } else {
-            redirectAttributes.addFlashAttribute("error", "Session not found.");
-        }
-        return "redirect:/learning-tracker?activeTab=sessions";
-    }
+
 
     @GetMapping("/schedules")
     public String showSchedulesPage(

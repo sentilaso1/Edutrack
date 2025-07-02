@@ -394,10 +394,6 @@
                 inputDiv.className = 'dynamic-inputs';
                 inputDiv.innerHTML = `
                     <div class="form-group">
-                        <label>Price (VND)</label>
-                        <input type="number" class="course-price" min="0" placeholder="Enter price" required />
-                    </div>
-                    <div class="form-group">
                         <label>Teaching Description</label>
                         <textarea class="course-desc" placeholder="Describe how you will teach this course" required></textarea>
                     </div>
@@ -416,7 +412,6 @@
         if (selectedCourses.size === 0) {
             event.preventDefault();
             warning.style.display = 'block';
-
             warning.scrollIntoView({ behavior: "smooth", block: "center" });
             return;
         }
@@ -425,28 +420,25 @@
 
         selectedCourses.forEach((_, courseId) => {
             const courseCard = document.querySelector(`.add-btn[data-course-id="${courseId}"]`).closest('.course-card');
-            const priceInput = courseCard.querySelector('.course-price');
             const descInput = courseCard.querySelector('.course-desc');
-
-            const price = parseFloat(priceInput.value);
             const description = descInput.value.trim();
 
-            if (isNaN(price) || price <= 0 || description === '') {
+            if (description === '') {
                 isValid = false;
-                priceInput.style.borderColor = 'red';
                 descInput.style.borderColor = 'red';
                 return;
+            } else {
+                descInput.style.borderColor = '';
             }
 
             courseData[courseId] = {
-                price: price,
                 description: description
             };
         });
 
         if (!isValid) {
             event.preventDefault();
-            alert('Please fill in valid price and teaching description for all selected courses.');
+            alert('Please fill in a teaching description for all selected courses.');
             return;
         }
 
