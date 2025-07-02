@@ -126,6 +126,24 @@ public class BookmarkServiceImpl implements BookmarkService {
     }
 
     @Override
+    public Page<BookmarkDTO> queryAll(BookmarkFilterForm params, Pageable pageable, User user) {
+        String sort = params.getSort();
+        List<Integer> tagIds = params.getTags();
+
+        if (sort == null || sort.equals(BookmarkFilterForm.SORT_DATE_DESC)) {
+            if (tagIds == null || tagIds.isEmpty()) {
+                return this.findAllBookmarkWithCourseTagsDateDesc(pageable, user);
+            }
+            return this.findAllBookmarkContainingTagsDateDesc(pageable, user, tagIds);
+        }
+
+        if (tagIds == null || tagIds.isEmpty()) {
+            return this.findAllBookmarkWithCourseTagsDateAsc(pageable, user);
+        }
+        return this.findAllBookmarkContainingTagsDateAsc(pageable, user, tagIds);
+    }
+
+    @Override
     public List<Tag> findAllUniqueTags(List<BookmarkDTO> bookmarkDTOs) {
         return bookmarkDTOs.stream()
                 .flatMap(bookmarkDTO -> bookmarkDTO.getTags().stream())

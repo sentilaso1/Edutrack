@@ -1,94 +1,48 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>EduTrack - My Bookmarks</title>
-    <link rel="stylesheet" th:href="@{/css/master.css}"/>
-    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <meta charset="UTF-8"/>
+    <title>My Bookmarks</title>
+
+    <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to right, #e6f7f9, #ffeef0);
-            margin: 0;
+        h2.headline-md {
+            margin-bottom: 2rem;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        .filter-price select {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            margin-top: 6px;
         }
 
-        h1 {
-            font-size: 32px;
-            color: #2C3E50;
-            margin-bottom: 30px;
-        }
-
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 30px;
-        }
-
-        .filter-section {
-            background-color: #fafafa;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-        }
-
-        .filter-section h4 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #2C3E50;
-        }
-
-        .filter-section form {
+        .price-filter li label {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-bottom: 6px;
         }
 
-        label {
-            font-weight: 600;
-        }
-
-        select, input[type="checkbox"] {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-
-        .filter-section button {
-            background-color: rgba(255, 128, 134, 0.99);
-            color: white;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .filter-section button:hover {
-            background-color: rgba(255, 100, 110, 0.99);
-        }
-
-        .bookmark-grid {
+        .grid-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
         }
 
         .bookmark-card {
-            background-color: white;
+            background-color: #fff;
             border-radius: 12px;
-            padding: 15px;
+            padding: 20px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
         .bookmark-card-header {
@@ -112,23 +66,6 @@
             font-size: 14px;
         }
 
-        .tag-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
-        .tag-item {
-            background-color: rgba(255, 128, 134, 0.1);
-            color: rgba(255, 100, 110, 1);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            border: 1px solid rgba(255, 128, 134, 0.3);
-        }
-
         .delete-btn {
             background-color: rgba(255, 100, 110, 0.9);
             color: white;
@@ -145,92 +82,158 @@
             background-color: rgba(255, 70, 80, 0.9);
         }
 
-        .pagination {
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .tag-item {
+            background-color: rgba(255, 128, 134, 0.1);
+            color: rgba(255, 100, 110, 1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 128, 134, 0.3);
+            white-space: nowrap;
+            max-width: fit-content;
+        }
+
+        nav.pagination {
             margin-top: 30px;
             display: flex;
             justify-content: center;
             gap: 10px;
         }
 
-        .pagination button {
-            background-color: rgba(255, 128, 134, 0.99);
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .pagination button.disabled {
+        nav.pagination.hidden {
             display: none;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>My Bookmarks</h1>
-    <div class="grid-layout">
-        <div class="filter-section">
-            <h4>Filter Bookmarks</h4>
-            <form id="filter-form">
-                <label for="sort">Sorting Order:</label>
-                <select name="sort" id="sort">
-                    <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Date descending</option>
-                    <option value="date-asc" th:selected="${sort == 'date-asc'}">Date ascending</option>
-                </select>
-                <label><input type="checkbox" id="tags-all" th:checked="${selectedTags == null || selectedTags.isEmpty() || tags.size() == selectedTags.size()}"/> All</label>
-                <label th:each="tag : ${tags}">
-                    <input type="checkbox" name="tags" th:value="${tag.id}" th:attr="checked=${selectedTags != null && #lists.contains(selectedTags, tag.id)}"/>
-                    <span th:text="${tag.title}"></span>
-                </label>
-                <button type="submit">Apply Filters</button>
-            </form>
-        </div>
-        <div class="bookmark-grid">
-            <div th:each="bookmarkDTO : ${page.content}" th:with="bookmark = ${bookmarkDTO.bookmark}, course = ${bookmarkDTO.bookmark.course}, tags = ${bookmarkDTO.tags}" class="bookmark-card">
-                <div class="bookmark-card-header">
-                    <span th:text="${#dates.format(bookmark.createdDate, 'MMM dd, yyyy')}">Date</span>
-                    <form th:action="@{/bookmark/delete/{id}(id=${bookmark.id})}" method="post">
-                        <button type="submit" class="delete-btn">Delete</button>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+
+<main>
+    <section class="section course has-bg-image"
+             th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="container">
+            <h2 class="headline-md">My Bookmarks</h2>
+
+            <div class="course-section-layout">
+                <!-- Filter Sidebar -->
+                <aside class="course-filter">
+                    <form id="filter-form">
+                        <h3>Filter Bookmarks</h3>
+
+                        <div class="filter-price">
+                            <h4 class="filter-subtitle">Sort by</h4>
+                            <select class="custom-checkbox" name="sort" id="sort">
+                                <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Newest</option>
+                                <option value="date-asc" th:selected="${sort == 'date-asc'}">Oldest</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-price">
+                            <h4 class="filter-subtitle">Tags</h4>
+                            <ul class="price-filter">
+                                <li>
+                                    <label>
+                                        <input class="custom-checkbox" type="checkbox" id="tags-all"
+                                               th:checked="${selectedTags == null || selectedTags.isEmpty() || tags.size() == selectedTags.size()}"/>
+                                        All
+                                    </label>
+                                </li>
+                                <li th:each="tag : ${tags}">
+                                    <label>
+                                        <input class="custom-checkbox" type="checkbox" name="tags"
+                                               th:value="${tag.id}"
+                                               th:attr="checked=${selectedTags != null && #lists.contains(selectedTags, tag.id)}"/>
+                                        <span th:text="${tag.title}"></span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <button class="btn btn-secondary" type="submit">Apply</button>
                     </form>
-                </div>
-                <h3 th:text="${course.name}"></h3>
-                <p><span th:text="${course.getOpen() ? 'Open' : 'Closed'}"></span> By unknown mentor</p>
-                <p th:text="${course.description}"></p>
-                <div class="tag-list">
-                    <span th:each="tag : ${tags}" th:text="${tag.title}" class="tag-item"></span>
+                </aside>
+
+                <!-- Bookmark Listing -->
+                <div class="course-listing">
+                    <ul class="grid-list">
+                        <li th:each="bookmarkDTO : ${page.content}"
+                            th:with="bookmark = ${bookmarkDTO.bookmark}, course = ${bookmarkDTO.bookmark.course}, tags = ${bookmarkDTO.tags}"
+                            class="card-container">
+
+                            <div class="bookmark-card">
+                                <div class="bookmark-card-header">
+                                    <span th:text="${#dates.format(bookmark.createdDate, 'MMM dd, yyyy')}">Date</span>
+                                    <form th:action="@{/bookmark/delete/{id}(id=${bookmark.id})}" method="post">
+                                        <button type="submit" class="delete-btn">Delete</button>
+                                    </form>
+                                </div>
+                                <h3 th:text="${course.name}">Course Title</h3>
+                                <p th:text="${course.getOpen() ? 'Open' : 'Closed'}"></p>
+                                <p th:text="${course.description}">Course description</p>
+                                <div class="tag-list">
+                                    <span th:each="tag : ${tags}" th:text="${tag.title}" class="tag-item"></span>
+                                </div>
+                            </div>
+
+                        </li>
+                    </ul>
+
+                    <!-- Pagination -->
+                    <nav class="pagination" th:classappend="${page.totalPages <= 1} ? 'hidden'">
+                        <button th:disabled="${pageNumber == 1}">
+                            <a th:href="@{/bookmark/list/1}" class="page-btn">&laquo;</a>
+                        </button>
+                        <button th:disabled="${!page.hasPrevious()}">
+                            <a th:href="@{/bookmark/list/{page}(page=${pageNumber - 1})}" class="page-btn">Prev</a>
+                        </button>
+
+                        <th:block th:each="i : ${#numbers.sequence(1, page.totalPages)}">
+                            <a th:href="@{/bookmark/list/{page}(page=${i})}"
+                               th:classappend="${i == pageNumber} ? 'page-btn active' : 'page-btn'"
+                               th:text="${i}"></a>
+                        </th:block>
+
+                        <button th:disabled="${!page.hasNext()}">
+                            <a th:href="@{/bookmark/list/{page}(page=${pageNumber + 1})}" class="page-btn">Next</a>
+                        </button>
+                        <button th:disabled="${pageNumber == page.totalPages}">
+                            <a th:href="@{/bookmark/list/{page}(page=${page.totalPages})}" class="page-btn">&raquo;</a>
+                        </button>
+                    </nav>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="pagination">
-        <button id="first-page" th:classappend="${(pageNumber > 1) ? '' : 'disabled'}">First</button>
-        <button id="previous-page" th:classappend="${(page.hasPrevious()) ? '' : 'disabled'}">Previous</button>
-        <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
-        <button id="next-page" th:classappend="${(page.hasNext()) ? '' : 'disabled'}">Next</button>
-        <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? '' : 'disabled'}">Last</button>
-    </div>
-</div>
+    </section>
+</main>
+
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
 <script th:inline="javascript">
-    /*<![CDATA[*/
     const filterForm = document.getElementById("filter-form");
     const pageNumber = [[${pageNumber}]];
     const totalPages = [[${page.totalPages}]];
 
-    document.getElementById('first-page').addEventListener('click', () => {
+    document.getElementById('first-page')?.addEventListener('click', () => {
         filterForm.action = '/bookmark/list/1';
         filterForm.submit();
     });
-    document.getElementById('previous-page').addEventListener('click', () => {
+    document.getElementById('previous-page')?.addEventListener('click', () => {
         filterForm.action = '/bookmark/list/' + (pageNumber - 1);
         filterForm.submit();
     });
-    document.getElementById('next-page').addEventListener('click', () => {
+    document.getElementById('next-page')?.addEventListener('click', () => {
         filterForm.action = '/bookmark/list/' + (pageNumber + 1);
         filterForm.submit();
     });
-    document.getElementById('last-page').addEventListener('click', () => {
+    document.getElementById('last-page')?.addEventListener('click', () => {
         filterForm.action = '/bookmark/list/' + totalPages;
         filterForm.submit();
     });
@@ -244,7 +247,11 @@
             cb.checked = isChecked;
         });
     });
-    /*]]>*/
 </script>
+
+<script th:src="@{/assets/js/courlist.js}"></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
 </body>
 </html>

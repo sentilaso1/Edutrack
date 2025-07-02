@@ -36,6 +36,7 @@ public interface BookmarkService {
     Page<BookmarkDTO> findAllBookmarkContainingTagsDateAsc(Pageable pageable, User user, List<Integer> tagIds);
 
     Page<BookmarkDTO> queryAll(BookmarkFilterForm params, Pageable pageable);
+    Page<BookmarkDTO> queryAll(BookmarkFilterForm params, Pageable pageable, User user);
 
     List<Tag> findAllUniqueTags(List<BookmarkDTO> bookmarkDTOs);
     List<Tag> findAllSelectedTags(List<Integer> tagIds);

@@ -2,8 +2,11 @@ package com.example.edutrack.accounts.controller;
 
 import com.example.edutrack.accounts.dto.BookmarkDTO;
 import com.example.edutrack.accounts.dto.BookmarkFilterForm;
+import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.interfaces.BookmarkService;
+import com.example.edutrack.common.model.CommonModelAttribute;
 import com.example.edutrack.curriculum.model.Tag;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,21 +32,30 @@ public class BookmarkController {
     }
 
     @GetMapping("/bookmark/list/{page}")
-    public String bookmarkList(Model model, @PathVariable int page, @ModelAttribute BookmarkFilterForm params) {
+    public String bookmarkList(
+            Model model, @PathVariable int page,
+            @ModelAttribute BookmarkFilterForm params,
+            HttpSession session
+    ) {
         if (page - 1 < 0) {
             return "redirect:/404";
         }
 
+        User user = (User) session.getAttribute(CommonModelAttribute.LOGGED_IN_USER.toString());
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         List<Integer> selectedTags = params.getTags();
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        Page<BookmarkDTO> bookmarkPage = bookmarkService.queryAll(params, pageable);
+        Page<BookmarkDTO> bookmarkPage = bookmarkService.queryAll(params, pageable, user);
         List<BookmarkDTO> bookmarks;
 
         // TODO: Optimize this logic to avoid redundant queries
         if (params.getSort() == null || params.getSort().equals(BookmarkFilterForm.SORT_DATE_DESC)) {
-            bookmarks = bookmarkService.findAllBookmarkWithCourseTagsDateDesc(Pageable.unpaged()).getContent();
+            bookmarks = bookmarkService.findAllBookmarkWithCourseTagsDateDesc(Pageable.unpaged(), user).getContent();
         } else {
-            bookmarks = bookmarkService.findAllBookmarkWithCourseTagsDateAsc(Pageable.unpaged()).getContent();
+            bookmarks = bookmarkService.findAllBookmarkWithCourseTagsDateAsc(Pageable.unpaged(), user).getContent();
         }
         List<Tag> tags = bookmarkService.findAllUniqueTags(bookmarks);
 
