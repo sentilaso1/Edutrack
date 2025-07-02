@@ -834,10 +834,17 @@
         <div class="review__card course-card" style="width: 70%;" th:each="feedback : ${feedbacks}" th:if="${feedbacks != null and !#lists.isEmpty(feedbacks)}">
           <div class="review-card-header">
             <div class="review-avatar">
-              <img th:src="${feedback.isAnonymous} ? '/assets/images/default-avatar.svg' : @{'/avatar/' + ${feedback.mentee.id}}"
-                   th:alt="${feedback.isAnonymous} ? 'Anonymous Mentee' : ${feedback.mentee.fullName}"
+              <img th:if="${feedback.isAnonymous}"
+                   th:src="@{/assets/images/default-avatar.svg}"
+                   alt="Anonymous Mentee"
                    style="width: 60px; height: 60px;"
-                   class="mentee-avatar"/>
+                   class="mentee-avatar" />
+
+              <img th:unless="${feedback.isAnonymous}"
+                   th:src="@{/avatar/{id}(id=${feedback.mentee.id})}"
+                   th:alt="${feedback.mentee.fullName}"
+                   style="width: 60px; height: 60px;"
+                   class="mentee-avatar" />
             </div>
             <div class="review-info-main">
               <div class="mentee-course-row">
