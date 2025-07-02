@@ -266,9 +266,6 @@ public class CvServiceImpl implements CvService {
             UUID courseId = entry.getKey();
             CourseApplicationDetail detail = entry.getValue();
 
-            if (detail.getPrice() == null || detail.getPrice() <= 0) {
-                throw new IllegalArgumentException("Invalid price for course: " + courseId);
-            }
             if (detail.getDescription() == null || detail.getDescription().trim().isEmpty()) {
                 throw new IllegalArgumentException("Missing description for course: " + courseId);
             }
@@ -290,7 +287,6 @@ public class CvServiceImpl implements CvService {
             if (cm.getStatus() != ApplicationStatus.REJECTED) {
                 return;
             }
-            cm.setPrice(detail.getPrice());
             cm.setDescription(detail.getDescription());
             cm.setStatus(ApplicationStatus.PENDING);
             cm.setAppliedDate(LocalDateTime.now());
@@ -298,7 +294,6 @@ public class CvServiceImpl implements CvService {
             cm = new CourseMentor();
             cm.setMentor(mentor);
             cm.setCourse(course);
-            cm.setPrice(detail.getPrice());
             cm.setDescription(detail.getDescription());
             cm.setStatus(ApplicationStatus.PENDING);
             cm.setAppliedDate(LocalDateTime.now());

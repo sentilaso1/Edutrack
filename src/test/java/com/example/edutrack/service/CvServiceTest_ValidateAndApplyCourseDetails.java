@@ -59,7 +59,6 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
     void invalidPrice_null_throws() {
         UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
-        detail.setPrice(null);
         detail.setDescription("valid description");
 
         Map<UUID, CourseApplicationDetail> details = new HashMap<>();
@@ -80,7 +79,6 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
     void invalidPrice_zeroOrNegative_throws() {
         UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
-        detail.setPrice(0.0);
         detail.setDescription("valid description");
 
         Map<UUID, CourseApplicationDetail> details = new HashMap<>();
@@ -101,7 +99,6 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
     void invalidDescription_null_throws() {
         UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
-        detail.setPrice(10.0);
         detail.setDescription(null);
 
         Map<UUID, CourseApplicationDetail> details = new HashMap<>();
@@ -122,7 +119,6 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
     void invalidDescription_blank_throws() {
         UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
-        detail.setPrice(10.0);
         detail.setDescription("   ");
 
         Map<UUID, CourseApplicationDetail> details = new HashMap<>();
@@ -143,7 +139,6 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
     void courseNotFound_throws() {
         UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
-        detail.setPrice(10.0);
         detail.setDescription("valid");
 
         Map<UUID, CourseApplicationDetail> details = new HashMap<>();
@@ -165,7 +160,6 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
     void allValid_callsHandleCourseMentorLogic() {
         UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
-        detail.setPrice(99.99);
         detail.setDescription("OK");
 
         Map<UUID, CourseApplicationDetail> details = new HashMap<>();

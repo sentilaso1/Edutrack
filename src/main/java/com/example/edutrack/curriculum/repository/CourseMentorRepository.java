@@ -276,4 +276,7 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
         Long getLastMonthIncome(@Param("mentorId") UUID mentorId,
                         @Param("lastMonthYear") int lastMonthYear,
                         @Param("lastMonth") int lastMonth);
+
+        List<CourseMentor> findByMentor_Id(UUID mentorId);
 }
+
