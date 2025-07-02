@@ -54,4 +54,6 @@ public interface CourseService {
 
     @Transactional
     void deleteCourseWithRelatedData(UUID courseId);
+
+    Page<Course> findAllExcludingIds(List<UUID> excludeIds, Pageable pageable);
 }

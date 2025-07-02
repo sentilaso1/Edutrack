@@ -53,7 +53,7 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
     int countMentorsByMenteeId(@Param("menteeId") UUID menteeId);
     Optional<Mentor> findByEmail(String email);
 
-    @Query("SELECT m FROM Mentor m WHERE " +
+/*    @Query("SELECT m FROM Mentor m WHERE " +
             "(:name IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
             "(:rating IS NULL OR m.rating >= :rating) AND " +
             "(:totalSessions IS NULL OR m.totalSessions >= :totalSessions) AND " +
@@ -62,11 +62,30 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
                                     @Param("rating") Double rating,
                                     @Param("totalSessions") Integer totalSessions,
                                     @Param("isAvailable") Boolean isAvailable,
-                    Pageable pageable);
+                    Pageable pageable);*/
 
         @Query("SELECT COUNT(m) FROM Mentor m WHERE m.createdDate >= :startDate")
         Long getNewMentorCountFromDate(@Param("startDate") LocalDateTime startDate);
 
         @Query("SELECT AVG(m.rating) FROM Mentor m WHERE m.rating IS NOT NULL")
         Double getAverageRating();
+
+
+    @Query("""
+    SELECT m FROM Mentor m
+    JOIN CV cv ON m.id = cv.id
+    WHERE cv.status = :status
+    AND (:name IS NULL OR LOWER(m.fullName) LIKE LOWER(CONCAT('%', :name, '%')))
+    AND (:rating IS NULL OR m.rating >= :rating)
+    AND (:totalSessions IS NULL OR m.totalSessions >= :totalSessions)
+    AND (:isAvailable IS NULL OR m.isAvailable = :isAvailable)
+""")
+    Page<Mentor> searchMentorsWithApprovedCV(
+            @Param("name") String name,
+            @Param("rating") Double rating,
+            @Param("totalSessions") Integer totalSessions,
+            @Param("isAvailable") Boolean isAvailable,
+            @Param("status") String status,
+            Pageable pageable
+    );
 }

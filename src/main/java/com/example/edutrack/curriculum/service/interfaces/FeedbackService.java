@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface FeedbackService {
     Page<ReviewDTO> getFilteredReviewsByMentee(UUID menteeId, String keyword, Integer rating, Pageable pageable);
 
-    Feedback submitFeedback(String content, Double rating, Mentee mentee, CourseMentor courseMentor);
+    Feedback submitFeedback(String content, Double rating, boolean isAnonymous, Mentee mentee, CourseMentor courseMentor);
 
     List<Feedback> getAllFeedbacksByMentorId(UUID mentorId);
 

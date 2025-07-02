@@ -55,11 +55,11 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public Feedback submitFeedback(String content, Double rating, Mentee mentee, CourseMentor courseMentor) {
+    public Feedback submitFeedback(String content, Double rating, boolean isAnonymous, Mentee mentee, CourseMentor courseMentor) {
         if (feedbackRepository.findByMenteeAndCourseMentor(mentee, courseMentor).isPresent()) {
             throw new IllegalStateException("Feedback already submitted for this course and mentor.");
         }
-        Feedback feedback = new Feedback(content, rating, mentee, courseMentor);
+        Feedback feedback = new Feedback(content, rating, isAnonymous, mentee, courseMentor);
         return feedbackRepository.save(feedback);
     }
 

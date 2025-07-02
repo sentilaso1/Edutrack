@@ -49,4 +49,7 @@ public interface CourseMentorService {
 
     void updatePrices(UUID mentorId, List<UUID> courseIds, List<Double> prices);
 
+    List<CourseMentor> findByMentorId(UUID mentorId);
+    Page<CourseMentor> findByMentorIdPaged(UUID mentorId, Pageable pageable);
+
 }
