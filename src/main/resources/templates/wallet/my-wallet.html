@@ -4,44 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>EduTrack - My Wallet</title>
-    <link rel="stylesheet" th:href="@{/css/master.css}"/>
-    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background: linear-gradient(to right, #e6f7f9, #ffeef0);
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
+        h2.headline-md {
+            margin-bottom: 2rem;
             text-align: center;
             color: #2C3E50;
         }
 
-        .header-description {
-            text-align: center;
-            color: #777;
-            margin-bottom: 30px;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .main-layout {
+        .wallet-section-layout {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 30px;
@@ -53,13 +27,18 @@
             gap: 20px;
         }
 
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
         .balance-card {
             background: linear-gradient(to right, #e6f7f9, #ffeef0);
             color: #2C3E50;
-            padding: 20px;
-            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
         }
 
         .balance-amount {
@@ -67,18 +46,10 @@
             font-weight: bold;
         }
 
-        .chart-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .history-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #2C3E50;
         }
 
         table {
@@ -98,14 +69,6 @@
             color: #444;
         }
 
-        .quick-links {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
         .quick-links a {
             display: block;
             color: rgba(255, 128, 134, 0.99);
@@ -119,67 +82,78 @@
         }
 
         @media (max-width: 992px) {
-            .main-layout {
+            .wallet-section-layout {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>My Wallet</h1>
-    <p class="header-description">Manage your funds, track your wallet balance and view your recent transactions.</p>
-    <div class="main-layout">
-        <div class="wallet-content">
-            <div class="balance-card">
-                <h3>Wallet Balance</h3>
-                <div class="balance-amount" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">0
-                    VND
-                </div>
-                <div th:if="${wallet != null && wallet.onHold > 0}" style="margin-top: 10px;">
-                    <small th:text="${wallet.onHoldFormatted + ' VND on hold'}"></small>
-                </div>
-            </div>
-            <div class="chart-card">
-                <h3>Wallet Change</h3>
-                <canvas id="wallet-chart"></canvas>
-            </div>
-            <div class="history-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>Recent History</h3>
-                    <a th:href="@{/wallet/history}" style="color: rgba(255, 128, 134, 0.99); font-weight: bold;">View
-                        More</a>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+
+<main>
+    <section class="section course has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="container">
+            <h2 class="headline-md">My Wallet</h2>
+            <p class="header-description" style="text-align: center; color: #777; margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto;">
+                Manage your funds, track your wallet balance and view your recent transactions.
+            </p>
+            <div class="wallet-section-layout">
+                <div class="wallet-content">
+                    <div class="card balance-card">
+                        <h3>Wallet Balance</h3>
+                        <div class="balance-amount" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">0 VND</div>
+                        <div th:if="${wallet != null && wallet.onHold > 0}" style="margin-top: 10px;">
+                            <small th:text="${wallet.onHoldFormatted + ' VND on hold'}"></small>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Wallet Change</h3>
+                        <canvas id="wallet-chart"></canvas>
+                    </div>
+
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3>Recent History</h3>
+                            <a th:href="@{/wallet/history}" style="color: rgba(255, 128, 134, 0.99); font-weight: bold;">View More</a>
+                        </div>
+
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Item</th>
+                                <th>Change</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="transaction : ${transactions}">
+                                <td th:text="${transaction.transactionDate}"></td>
+                                <td th:text="${transaction.transactionInfo}"></td>
+                                <td th:text="${transaction.transactionAmountFormatted}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Item</th>
-                        <th>Change</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="transaction : ${transactions}">
-                        <td th:text="${transaction.transactionDate}"></td>
-                        <td th:text="${transaction.transactionInfo}"></td>
-                        <td th:text="${transaction.transactionAmountFormatted}"></td>
-                    </tr>
-                    </tbody>
-                </table>
+                <aside>
+                    <div class="card quick-links">
+                        <h3>Quick Actions</h3>
+                        <a th:href="@{/wallet}"><i class="fas fa-wallet"></i> Account Details</a>
+                        <a th:href="@{/wallet/recharge}"><i class="fas fa-plus-circle"></i> Add Funds</a>
+                        <a th:href="@{/wallet/withdraw}"><i class="fas fa-minus-circle"></i> Withdraw Funds</a>
+                        <a th:href="@{/wallet/history}"><i class="fas fa-history"></i> Full Transaction History</a>
+                    </div>
+                </aside>
             </div>
         </div>
-        <div>
-            <div class="quick-links">
-                <h4>Quick Actions</h4>
-                <a th:href="@{/wallet}"><i class="fas fa-wallet"></i> Account Details</a>
-                <a th:href="@{/wallet/recharge}"><i class="fas fa-plus-circle"></i> Add Funds</a>
-                <a th:href="@{/wallet/withdraw}"><i class="fas fa-minus-circle"></i> Withdraw Funds</a>
-                <a th:href="@{/wallet/history}"><i class="fas fa-history"></i> Full Transaction History</a>
-            </div>
-        </div>
-    </div>
-</div>
+    </section>
+</main>
+
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
     const recentTransactions = [[${recentTransactions}]];
@@ -206,5 +180,9 @@
     );
     /*]]>*/
 </script>
+
+<script th:src="@{/assets/js/courlist.js}"></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
 </html>
