@@ -834,15 +834,14 @@
         <div class="review__card course-card" style="width: 70%;" th:each="feedback : ${feedbacks}" th:if="${feedbacks != null and !#lists.isEmpty(feedbacks)}">
           <div class="review-card-header">
             <div class="review-avatar">
-              <img th:src="@{'/avatar/' + ${feedback.mentee.id}}"
-                   th:alt="${feedback.mentee.fullName}"
+              <img th:src="${feedback.isAnonymous} ? '/assets/images/default-avatar.svg' : @{'/avatar/' + ${feedback.mentee.id}}"
+                   th:alt="${feedback.isAnonymous} ? 'Anonymous Mentee' : ${feedback.mentee.fullName}"
                    style="width: 60px; height: 60px;"
-                   onerror="this.onerror=null;this.src='/assets/images/default-avatar.svg';"
                    class="mentee-avatar"/>
             </div>
             <div class="review-info-main">
               <div class="mentee-course-row">
-                <span class="mentee-name" th:text="${feedback.mentee.fullName}">Mentee Name</span>
+                <span th:text="${feedback.isAnonymous} ? 'Anonymous Mentee' : ${feedback.mentee.fullName}"></span>
                 <div style="display: flex; gap: 0.5rem">
                   <span class="review-date" style="margin-left: 0.3rem">for</span>
                   <span class="review-course-name" th:text="${feedback.courseMentor.course.name}">Course Name</span>
@@ -937,7 +936,9 @@
   </div>
 </div>
 
-
+<script th:inline="javascript">
+  const IS_LOGGED_IN = [[${isLoggedIn}]];
+</script>
 <script src="https://unpkg.com/scrollreveal"></script>
 <script>
   // Initialize ScrollReveal animations
@@ -975,6 +976,10 @@
 <script>
   function openReportForm(link) {
     // Get feedback info from data- attributes
+    if (!IS_LOGGED_IN) {
+      window.location.href = '/login';
+      return;
+    }
     var feedbackId = link.getAttribute('data-feedback-id');
     var content = link.getAttribute('data-feedback-content');
     // Set values in the overlay form
