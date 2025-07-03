@@ -22,6 +22,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Optional;
 
 @Controller
@@ -29,12 +32,12 @@ public class AuthController {
     private final UserService userService;
     private final StaffService staffService;
 
-    @Autowired
     private RecaptchaService recaptchaService;
 
-    public AuthController(UserService userService, StaffService staffService) {
+    public AuthController(UserService userService, StaffService staffService, RecaptchaService recaptchaService) {
         this.userService = userService;
         this.staffService = staffService;
+        this.recaptchaService = recaptchaService;
     }
 
     @GetMapping("/login")
@@ -99,6 +102,28 @@ public class AuthController {
             model.addAttribute("error", "Email already exists");
             return "auth/signup";
         }
+
+        if (user.getPassword().length() < 6) {
+            model.addAttribute("error", "Password must be at least 6 characters");
+            return "auth/signup";
+        }
+
+        if (user.getFullName().trim().split("\\s+").length < 2) {
+            model.addAttribute("error", "Full name must contain at least two words");
+            return "auth/signup";
+        }
+
+        if (!user.getPhone().matches("\\d{10}")) {
+            model.addAttribute("error", "Phone number must be 10 digits");
+            return "auth/signup";
+        }
+
+        LocalDate dob = user.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (Period.between(dob, LocalDate.now()).getYears() < 6) {
+            model.addAttribute("error", "You must be at least 6 years old");
+            return "auth/signup";
+        }
+
 
         if(!confirm_password.equals(user.getPassword())) {
             model.addAttribute("error", "Repeated password does not match original password");

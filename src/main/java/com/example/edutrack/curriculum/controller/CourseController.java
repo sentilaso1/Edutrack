@@ -290,7 +290,7 @@ CourseController {
         return "course-related-mentor";
     }
 
-    boolean[][] availableSlotMatrix(Mentor mentor,
+    public boolean[][] availableSlotMatrix(Mentor mentor,
                                     Mentee mentee,
                                     LocalDate minDate,
                                     LocalDate maxDate) {

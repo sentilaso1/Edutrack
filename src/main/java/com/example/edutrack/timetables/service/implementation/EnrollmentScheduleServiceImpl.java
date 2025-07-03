@@ -51,6 +51,12 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
                     Slot s = slots.get(i);
                     slots.set(i, slots.get(j));
                     slots.set(j, s);
+                }else if(weekDays.indexOf(days.get(i).name()) == weekDays.indexOf(days.get(j).name())){
+                    if(slots.get(i).ordinal() > slots.get(j).ordinal()){
+                        Slot s = slots.get(i);
+                        slots.set(i, slots.get(j));
+                        slots.set(j, s);
+                    }
                 }
             }
         }
@@ -58,6 +64,9 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
     @Override
     public List<RequestedSchedule> findStartLearningTime(String summary) {
+        if(summary == null || summary.isEmpty()){
+            return new ArrayList<>();
+        }
         List<Slot> slot = new ArrayList<>();
         List<LocalDate> date = new ArrayList<>();
 
