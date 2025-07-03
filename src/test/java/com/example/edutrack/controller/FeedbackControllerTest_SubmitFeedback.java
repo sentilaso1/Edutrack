@@ -143,7 +143,7 @@ public class FeedbackControllerTest_SubmitFeedback {
         when(menteeRepository.findById(menteeId)).thenReturn(Optional.of(mentee));
         when(courseMentorRepository.findByCourse_IdAndMentor_Id(courseId, mentorId)).thenReturn(Optional.of(cm));
         doThrow(new RuntimeException("DB down")).when(feedbackService)
-                .submitFeedback(anyString(), anyDouble(), any(), any());
+                .submitFeedback(anyString(), anyDouble(), anyBoolean(), any(), any());
 
         FeedbackDTO dto = new FeedbackDTO("Good feedback", 4.0, menteeId, courseId, mentorId);
         String result = feedbackController.submitFeedback(dto, redirectAttributes);
@@ -164,6 +164,6 @@ public class FeedbackControllerTest_SubmitFeedback {
 
         assertEquals("redirect:/mentors/" + mentorId, result);
         verify(redirectAttributes).addFlashAttribute(eq("success"), contains("Your review was submitted successfully!"));
-        verify(feedbackService).submitFeedback(eq("Great mentor!"), eq(5.0), eq(mentee), eq(cm));
+        verify(feedbackService).submitFeedback(eq("Great mentor!"), eq(5.0), eq(false), eq(mentee), eq(cm));
     }
 }

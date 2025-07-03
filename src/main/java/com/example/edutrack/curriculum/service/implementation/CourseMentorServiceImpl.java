@@ -245,6 +245,16 @@ public class CourseMentorServiceImpl implements CourseMentorService {
             }
         }
     }
+
+    @Override
+    public List<CourseMentor> findByMentorId(UUID mentorId) {
+        return courseMentorRepository.findByMentorId(mentorId);
+    }
+
+    @Override
+    public Page<CourseMentor> findByMentorIdPaged(UUID mentorId, Pageable pageable) {
+        return courseMentorRepository.findByMentorId(mentorId, pageable);
+    }
 }
 
 

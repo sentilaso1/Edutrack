@@ -47,10 +47,10 @@ public class FeedbackController {
 
     @GetMapping("/reviews")
     public String showReviewList(HttpSession session, Model model) {
-        if (session == null) {
+        Mentee mentee = (Mentee) session.getAttribute("loggedInUser");
+        if (mentee == null) {
             return "redirect:/login";
         }
-        Mentee mentee = (Mentee) session.getAttribute("loggedInUser");
         UUID menteeId = mentee.getId();
         List<CourseMentor> reviewPairs = courseMentorService.getReviewablePairsForMentee(menteeId);
         model.addAttribute("reviewPairs", reviewPairs);
@@ -86,6 +86,7 @@ public class FeedbackController {
             feedbackService.submitFeedback(
                     request.getContent(),
                     request.getRating(),
+                    request.isAnonymous(),
                     mentee,
                     courseMentor
             );

@@ -278,5 +278,6 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
                         @Param("lastMonth") int lastMonth);
 
         List<CourseMentor> findByMentor_Id(UUID mentorId);
+        Page<CourseMentor> findByMentorId(UUID mentorId, Pageable pageable);
 }
 

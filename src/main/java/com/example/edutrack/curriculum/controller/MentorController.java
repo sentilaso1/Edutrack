@@ -36,6 +36,7 @@ import java.util.*;
 @Controller(value = "mentee")
 public class MentorController {
     private final MentorService mentorService;
+    private final MentorRepository mentorRepository;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
     private final MentorAvailableTimeService mentorAvailableTimeService;
     private final FeedbackRepository feedbackRepository;
@@ -44,6 +45,7 @@ public class MentorController {
     private final CourseMentorRepository courseMentorRepository;
 
     public MentorController(MentorService mentorService,
+                            MentorRepository mentorRepository,
                             CourseMentorServiceImpl courseMentorServiceImpl,
                             MentorAvailableTimeService mentorAvailableTimeService,
                             FeedbackRepository feedbackRepository,
@@ -51,6 +53,7 @@ public class MentorController {
                             CourseMentorService courseMentorService,
                             CourseMentorRepository courseMentorRepository) {
         this.mentorService = mentorService;
+        this.mentorRepository = mentorRepository;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.feedbackRepository = feedbackRepository;
@@ -94,12 +97,13 @@ public class MentorController {
 
         Pageable pageable = PageRequest.of(page - 1, size_page, sort);
 
-        Page<Mentor> mentorPage = mentorService.searchMentors(
+        Page<Mentor> mentorPage = mentorService.searchMentorsWithApprovedCV(
                 name, expertise, rating, totalSessions, isAvailable, pageable
         );
 
+        List<String> allSkills = mentorService.getAllMentorExpertiseFromApprovedCVs();
 
-
+        model.addAttribute("allExpertiseSkills", allSkills);
         model.addAttribute("mentorPage", mentorPage);
         model.addAttribute("page", page);
         model.addAttribute("name", name);
@@ -115,7 +119,7 @@ public class MentorController {
     }
 
     @GetMapping("/mentors/{id}")
-    public String viewMentorDetail(@PathVariable UUID id, Model model){
+    public String viewMentorDetail(@PathVariable UUID id, Model model, HttpSession session){
         List<CourseMentor> courseMentors = courseMentorServiceImpl.getCourseMentorByMentorId(id);
         Mentor mentor = mentorService.getMentorById(id).get();
         LocalDate endLocal = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
@@ -134,6 +138,7 @@ public class MentorController {
 
         List<Feedback> feedbacks = feedbackRepository.findByCourseMentor_Mentor_IdAndStatus(id, Feedback.Status.ACTIVE);
 
+        model.addAttribute("isLoggedIn", session.getAttribute("loggedInUser") != null);
         model.addAttribute("feedbacks", feedbacks);
         model.addAttribute("mentor", mentorService.getMentorById(id));
         model.addAttribute("courses", courseMentors);

@@ -5,6 +5,7 @@ import java.util.UUID;
 public class FeedbackDTO {
     private String content;
     private Double rating;
+    private boolean isAnonymous;
     private UUID menteeId;
     private UUID courseId;
     private UUID mentorId;
@@ -35,6 +36,10 @@ public class FeedbackDTO {
     public void setRating(Double rating) {
         this.rating = rating;
     }
+
+    public boolean isAnonymous() { return isAnonymous; }
+
+    public void setIsAnonymous(boolean isAnonymous) { this.isAnonymous = isAnonymous; }
 
     public UUID getMenteeId() {
         return menteeId;

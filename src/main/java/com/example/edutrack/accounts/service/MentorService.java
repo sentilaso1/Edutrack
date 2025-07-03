@@ -1,32 +1,34 @@
 package com.example.edutrack.accounts.service;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.profiles.model.CV;
+import com.example.edutrack.profiles.repository.CvRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.example.edutrack.accounts.dto.IncomeStatsDTO;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class MentorService {
     private final MentorRepository mentorRepository;
     private final CourseMentorRepository courseMentorRepository;
+    private final CvRepository cvRepository;
 
-    public MentorService(MentorRepository mentorRepository, CourseMentorRepository courseMentorRepository) {
+    public MentorService(MentorRepository mentorRepository,
+                         CourseMentorRepository courseMentorRepository,
+                         CvRepository cvRepository) {
         this.mentorRepository = mentorRepository;
         this.courseMentorRepository = courseMentorRepository;
+        this.cvRepository = cvRepository;
     }
 
     // Receiving all mentors
@@ -34,28 +36,6 @@ public class MentorService {
         return mentorRepository.findAll();
     }
 
-    // Filter mentors
-    public Page<Mentor> searchMentors(String name, String[] expertise, Double rating, Integer totalSessions,
-            Boolean isAvailable, Pageable pageable) {
-        Page<Mentor> mentorPage = mentorRepository.searchMentorsBasic(name, rating, totalSessions, isAvailable,
-                pageable);
-
-        if (expertise != null && expertise.length > 0) {
-            List<String> expertiseList = Arrays.stream(expertise)
-                    .map(String::toLowerCase)
-                    .toList();
-
-            List<Mentor> filteredList = mentorPage.getContent().stream()
-                    .filter(m -> {
-                        String mentorExpertise = m.getExpertise().toLowerCase();
-                        return expertiseList.stream().allMatch(mentorExpertise::contains);
-                    })
-                    .collect(Collectors.toList());
-            return new PageImpl<>(filteredList, pageable, mentorPage.getTotalElements());
-        }
-
-        return mentorPage;
-    }
 
     public Optional<Mentor> getMentorById(UUID id) {
         return mentorRepository.findById(id);
@@ -105,5 +85,68 @@ public class MentorService {
             
         }
         return new IncomeStatsDTO(totalIncome, incomeOverTime, incomePerSlot, percentChange);
+    }
+
+    public List<String> getAllMentorSkills() {
+        List<Mentor> allMentors = mentorRepository.findAll();
+        Set<String> allSkillsSet = new HashSet<>();
+        for (Mentor mentor : allMentors) {
+            if (mentor.getExpertise() != null) {
+                String[] skillsArr = mentor.getExpertise().split(",");
+                for (String skill : skillsArr) {
+                    String trimmed = skill.trim();
+                    if (!trimmed.isEmpty()) allSkillsSet.add(trimmed);
+                }
+            }
+        }
+        return new ArrayList<>(allSkillsSet);
+    }
+
+    public Page<Mentor> searchMentorsWithApprovedCV(
+            String name, String[] expertise, Double rating,
+            Integer totalSessions, Boolean isAvailable, Pageable pageable
+    ) {
+        // Expertise filtering can be done after fetching, or in JPQL if needed
+        Page<Mentor> page = mentorRepository.searchMentorsWithApprovedCV(
+                name,
+                rating,
+                totalSessions,
+                isAvailable,
+                CV.STATUS_APPROVED,
+                pageable
+        );
+
+        // If you need to filter further by expertise
+        if (expertise != null && expertise.length > 0 && !expertise[0].isEmpty()) {
+            List<String> expertiseList = Arrays.stream(expertise)
+                    .map(String::trim)
+                    .filter(e -> !e.isEmpty())
+                    .map(String::toLowerCase)
+                    .toList();
+            List<Mentor> filtered = page.getContent().stream()
+                    .filter(m -> m.getExpertiseItem().stream()
+                            .map(String::toLowerCase)
+                            .anyMatch(expertiseList::contains))
+                    .toList();
+            return new PageImpl<>(filtered, pageable, filtered.size());
+        }
+        return page;
+    }
+
+    public List<String> getAllMentorExpertiseFromApprovedCVs() {
+        List<CV> approvedCVs = cvRepository.findByStatus(CV.STATUS_APPROVED);
+        Set<String> expertiseSet = new HashSet<>();
+        for (CV cv : approvedCVs) {
+            User user = cv.getUser();
+            if (user != null) {
+                Optional<Mentor> mentorOpt = mentorRepository.findById(user.getId());
+                if (mentorOpt.isPresent()) {
+                    Mentor mentor = mentorOpt.get();
+                    List<String> expertiseItems = mentor.getExpertiseItem();
+                    expertiseSet.addAll(expertiseItems);
+                }
+            }
+        }
+        return new ArrayList<>(expertiseSet);
     }
 }

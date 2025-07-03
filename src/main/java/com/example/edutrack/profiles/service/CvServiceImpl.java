@@ -262,6 +262,16 @@ public class CvServiceImpl implements CvService {
         Mentor mentor = mentorRepository.findById(mentorId)
                 .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
 
+        Set<UUID> newCourseIds = details.keySet();
+
+        // REMOVE any CourseMentor entries not in the new selection!
+        List<CourseMentor> oldMentorCourses = courseMentorRepository.findByMentorId(mentorId);
+        for (CourseMentor old : oldMentorCourses) {
+            if (!newCourseIds.contains(old.getCourse().getId())) {
+                courseMentorRepository.delete(old);
+            }
+        }
+
         for (Map.Entry<UUID, CourseApplicationDetail> entry : details.entrySet()) {
             UUID courseId = entry.getKey();
             CourseApplicationDetail detail = entry.getValue();
@@ -305,8 +315,7 @@ public class CvServiceImpl implements CvService {
 
     @Override
     public CV getCVById(UUID id) {
-        return cvRepository.findByUserId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cv not found with ID: " + id));
+        return cvRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -322,11 +331,9 @@ public class CvServiceImpl implements CvService {
         Optional<CV> optionalCv = cvRepository.findById(id);
         if (optionalCv.isPresent()) {
             CV cv = optionalCv.get();
-            if (cv.getStatus().equals("aiapproved")) {
-                cv.setStatus("approved");
-                cvRepository.save(cv);
-                return true;
-            }
+            cv.setStatus("approved");
+            cvRepository.save(cv);
+            return true;
         }
         return false;
     }
@@ -336,11 +343,9 @@ public class CvServiceImpl implements CvService {
         Optional<CV> optionalCv = cvRepository.findById(id);
         if (optionalCv.isPresent()) {
             CV cv = optionalCv.get();
-            if (cv.getStatus().equals("aiapproved")) {
-                cv.setStatus("rejected");
-                cvRepository.save(cv);
-                return true;
-            }
+            cv.setStatus("rejected");
+            cvRepository.save(cv);
+            return true;
         }
         return false;
     }
