@@ -260,5 +260,4 @@ public class CourseServiceImpl implements CourseService {
         }
         return courseRepository.findByIdNotIn(excludeIds, pageable);
     }
-
 }
