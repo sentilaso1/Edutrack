@@ -4,62 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!--=============== REMIXICONS ===============-->
-    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css}">
+    <title>Sign Up - EduTrack</title>
 
-    <!--=============== CSS ===============-->
+    <!-- Icons & Styles -->
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css}">
     <link rel="stylesheet" th:href="@{/assets/css/login.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}">
 
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
-<body style="overflow: scroll;">
-<!--=============== LOGIN IMAGE ===============-->
-<svg class="login__blob" viewBox="0 0 566 840" xmlns="http://www.w3.org/2000/svg">
-    <mask id="mask0" mask-type="alpha">
-        <path d="M342.407 73.6315C388.53 56.4007 394.378 17.3643 391.538
-            0H566V840H0C14.5385 834.991 100.266 804.436 77.2046 707.263C49.6393
-            591.11 115.306 518.927 176.468 488.873C363.385 397.026 156.98 302.824
-            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z"/>
-    </mask>
+<body style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
 
-    <g mask="url(#mask0)">
-        <path d="M342.407 73.6315C388.53 56.4007 394.378 17.3643 391.538
-            0H566V840H0C14.5385 834.991 100.266 804.436 77.2046 707.263C49.6393
-            591.11 115.306 518.927 176.468 488.873C363.385 397.026 156.98 302.824
-            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z"/>
+<!-- Header Fragment -->
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 
-        <image class="login__img" th:href="@{/assets/img/bg-img.jpg}"/>
-    </g>
-</svg>
-
-<!--=============== LOGIN ===============-->
-<div class="login container grid" id="loginAccessRegister" style="overflow: scroll;">
-    <!--===== LOGIN REGISTER =====-->
+<!-- Signup Form -->
+<div class="login container grid" style="display: flex; justify-content: center; width: 100%; margin-top: 120px; padding-bottom: 4rem;" id="loginAccessRegister">
     <div class="login__access">
         <h1 class="login__title">Create new account.</h1>
 
         <div class="login__area">
             <form th:action="@{/signup}" method="post" th:object="${user}" class="login__form">
                 <div class="login__content grid">
+
                     <div th:if="${error}" style="color: red;">[[${error}]]</div>
+
                     <div class="login__box">
                         <input type="text" th:field="*{fullName}" required placeholder=" " class="login__input">
                         <label class="login__label">Full Name</label>
-                        <i class="ri-mail-fill login__icon"></i>
+                        <i class="ri-user-fill login__icon"></i>
                     </div>
 
                     <div class="login__group grid">
                         <div class="login__box">
-                            <div class="login__box">
-                                <input type="date" th:field="*{birthDate}" required placeholder=" " class="login__input" id="birthDateInput" style="color: #9c9b9b">
-                                <label class="login__label">Birth Date</label>
-                            </div>
-
+                            <input type="date" th:field="*{birthDate}" required placeholder=" " class="login__input" id="birthDateInput" style="color: #9c9b9b">
+                            <label class="login__label">Birth Date</label>
                         </div>
 
-                        <div class="login__box" style="justify-content: space-between; ">
+                        <div class="login__box" style="justify-content: space-between;">
                             <label style="margin: 0 10px; font-weight: 600;">Gender</label>
-                            <label class="gender-option male">
+                            <label class="gender-option">
                                 <input type="radio" th:field="*{gender}" value="male" hidden checked>
                                 <span>Male</span>
                             </label>
@@ -68,13 +52,14 @@
                                 <span>Female</span>
                             </label>
                         </div>
-
                     </div>
+
                     <div class="login__box">
                         <input type="text" th:field="*{phone}" required placeholder=" " class="login__input">
                         <label class="login__label">Phone</label>
-                        <i class="ri-id-card-fill login__icon"></i>
+                        <i class="ri-phone-fill login__icon"></i>
                     </div>
+
                     <div class="login__box">
                         <input type="email" th:field="*{email}" required placeholder=" " class="login__input">
                         <label class="login__label">Email</label>
@@ -82,10 +67,11 @@
                     </div>
 
                     <div class="login__box">
-                        <select name="role" style="width: 100%; border-radius: 1rem; padding: 1em; border-color: white; background-color: inherit; color: hsl(220, 15%, 66%); font-weight: 600; font-family: inherit; font-size: inherit; height: 72px;">
+                        <select name="role" class="login__input" style="height: auto; padding: 1.25rem;">
                             <option value="mentee">Mentee</option>
                             <option value="mentor">Mentor</option>
                         </select>
+                        <label class="login__label" style="top: -1.5rem;">Role</label>
                     </div>
 
                     <div class="login__group grid">
@@ -95,33 +81,32 @@
                             <i class="ri-eye-off-fill login__icon login__password" id="loginPassword"></i>
                         </div>
                         <div class="login__box">
-                            <input type="password" name="confirm_password" id="confirm_password" required
-                                   placeholder=" " class="login__input">
+                            <input type="password" name="confirm_password" id="confirm_password" required placeholder=" " class="login__input">
                             <label class="login__label">Repeat Password</label>
                         </div>
                     </div>
+
                     <div class="g-recaptcha" data-sitekey="6Ld2SkkrAAAAAPiQ0oOFQp1QvEd07wsehI43ObCR"></div>
                 </div>
 
-                <button type="submit" class="login__button">Create account</button>
+                <button type="submit" class="login__button">Create Account</button>
             </form>
 
-            <p class="login__switch">
-                Already have an account?
-                <button id="loginButtonAccess" type="button"><a style="text-decoration: inherit" href="/login">Log In</a></button>
-            </p>
+            <div class="login__switch" style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; font-size: 1.25rem; font-weight: 500; margin-top: 2rem;">
+                <span style="color: #333;">Already have an account?</span>
+                <a href="/login" style="color: #ff6b6b; font-weight: 700; font-size: 1.25rem; text-decoration: none;">Log In</a>
+            </div>
         </div>
     </div>
 </div>
 
-<!--=============== MAIN JS ===============-->
-<script>
-    setInterval(function () {
-        grecaptcha.reset();
-    }, 120000);
-</script>
+<!-- Footer Fragment -->
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
+<!-- JavaScript Validation -->
 <script>
+    setInterval(() => grecaptcha.reset(), 120000);
+
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector(".login__form");
         const fullNameInput = form.querySelector("[name='fullName']");
@@ -138,76 +123,53 @@
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
-
             const today = new Date();
 
-            // Full name required
-            if (fullName === "") {
+            if (!fullName) {
                 alert("Full name is required");
-                e.preventDefault();
-                return;
+                e.preventDefault(); return;
             }
 
-            // Birth date cannot be in the future
             if (birthDate > today) {
                 alert("Birth date cannot be in the future");
-                e.preventDefault();
-                return;
+                e.preventDefault(); return;
             }
 
-            // Age must be 6 or older
             let age = today.getFullYear() - birthDate.getFullYear();
             const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
             if (age < 6) {
                 alert("You must be at least 6 years old to register");
-                e.preventDefault();
-                return;
+                e.preventDefault(); return;
             }
 
-            // Phone number format (basic pattern for digits only, 10-15 characters)
             if (!/^\d{10,15}$/.test(phone)) {
                 alert("Phone number must be between 10 and 15 digits");
-                e.preventDefault();
-                return;
+                e.preventDefault(); return;
             }
 
-            // Email format
             if (!/^\S+@\S+\.\S+$/.test(email)) {
                 alert("Email format is invalid");
-                e.preventDefault();
-                return;
+                e.preventDefault(); return;
             }
 
-            // Password length
             if (password.length < 6) {
                 alert("Password must be at least 6 characters");
-                e.preventDefault();
-                return;
+                e.preventDefault(); return;
             }
 
-            // Confirm password
             if (password !== confirmPassword) {
                 alert("Passwords do not match");
-                e.preventDefault();
-                return;
+                e.preventDefault(); return;
             }
 
-            // Check reCAPTCHA
-            const recaptchaResponse = grecaptcha.getResponse();
-            if (recaptchaResponse.length === 0) {
+            if (grecaptcha.getResponse().length === 0) {
                 alert("Please verify reCAPTCHA");
-                e.preventDefault();
-                return;
+                e.preventDefault(); return;
             }
-
-            // All good, allow submit
         });
     });
 </script>
 
-<script th:src="@{/assets/js/login.js}"></script>
 </body>
 </html>
