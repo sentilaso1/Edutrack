@@ -344,8 +344,6 @@ public class MenteeController {
         return "/mentee/learning-tracker";
     }
 
-
-
     @GetMapping("/schedules")
     public String showSchedulesPage(
             HttpSession session,
