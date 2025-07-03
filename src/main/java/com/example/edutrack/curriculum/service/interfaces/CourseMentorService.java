@@ -1,7 +1,9 @@
 package com.example.edutrack.curriculum.service.interfaces;
 
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.model.CourseMentorId;
 import com.example.edutrack.curriculum.model.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,4 +46,10 @@ public interface CourseMentorService {
     List<CourseMentor> getRecommendedByHistory(UUID menteeId, int limit);
 
     List<CourseMentor> getReviewablePairsForMentee(UUID menteeId);
+
+    void updatePrices(UUID mentorId, List<UUID> courseIds, List<Double> prices);
+
+    List<CourseMentor> findByMentorId(UUID mentorId);
+    Page<CourseMentor> findByMentorIdPaged(UUID mentorId, Pageable pageable);
+
 }

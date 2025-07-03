@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Manage Course Prices</title>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}" />
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Arial, sans-serif;
+        }
+        .mentor-section-bg {
+            background-image: url('/assets/images/course-bg.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            min-height: 100vh;
+            padding: 120px 0 64px 0;
+        }
+        .mentor-price-card-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 32px 16px;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .mentor-price-card-list {
+                grid-template-columns: 1fr;
+                max-width: 700px;
+            }
+        }
+        .mentor-price-card {
+            background: var(--white);
+            border-radius: var(--radius-8);
+            box-shadow: var(--shadow-1);
+            transition: box-shadow 0.22s, transform 0.22s;
+            padding: 34px 38px 32px 26px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            border-left: 8px solid var(--selective-yellow);
+            position: relative;
+            min-height: 190px;
+            margin: 0 auto;
+        }
+        .mentor-price-card:hover, .mentor-price-card:focus-within {
+            box-shadow: 0 8px 44px 0 var(--roman-silver_10);
+            transform: translateY(-2px) scale(1.01);
+            border-left: 8px solid var(--light-coral);
+        }
+        .mentor-price-card.active {
+            border-left: 8px solid var(--light-coral);
+            box-shadow: 0 12px 48px 0 var(--light-coral);
+        }
+        /* Header Row: Name left, price/date right */
+        .mentor-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+        }
+        .mentor-card-title {
+            font-size: 2.6rem;
+            color: var(--oxford-blue);
+            font-weight: 700;
+            margin-bottom: 6px;
+            max-width: 65%;
+            word-break: break-word;
+        }
+        .mentor-card-desc-header {
+            font-size: 1.6rem;
+            color: var(--oxford-blue);
+            font-weight: 300;
+            margin-bottom: 6px;
+            max-width: 65%;
+            word-break: break-word;
+        }
+        .mentor-card-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 120px;
+        }
+        .current-price {
+            color: var(--light-coral);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .created-date {
+            font-size: 1.3rem;
+            color: var(--roman-silver);
+        }
+        .mentor-card-desc {
+            color: var(--keppei);
+            font-size: 1.35rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            line-height: 1.7;
+        }
+        .mentor-card-edit-area {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transform: scaleY(0.96);
+            transition: all 0.35s var(--cubic-out);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mentor-price-card.active .mentor-card-edit-area {
+            max-height: 80px;
+            opacity: 1;
+            transform: scaleY(1);
+            margin-top: 10px;
+        }
+        .mentor-card-edit-input {
+            padding: 9px 20px;
+            font-size: 1.5rem;
+            border-radius: var(--radius-6);
+            border: 2px solid var(--light-gray);
+            outline: none;
+            width: 160px;
+            background: #fffdfa;
+            box-shadow: 0 2px 8px var(--roman-silver_10);
+            transition: border 0.18s, background 0.18s;
+        }
+        .mentor-card-edit-input:focus {
+            border-color: var(--light-coral);
+            background: #fff5ef;
+        }
+        .save-all-btn {
+            margin: 52px auto 0 auto;
+            display: block;
+            padding: 16px 64px;
+            font-size: 2.0rem;
+            border-radius: var(--radius-6);
+            background: var(--light-coral);
+            color: var(--white);
+            font-weight: 800;
+            box-shadow: 0 6px 30px var(--roman-silver_10);
+            border: none;
+            cursor: pointer;
+            transition: background 0.22s, box-shadow 0.22s;
+            letter-spacing: 0.03em;
+        }
+        .save-all-btn:hover, .save-all-btn:focus {
+            background: var(--keppei);
+            box-shadow: 0 8px 36px var(--keppei);
+        }
+        .msg-container {
+            margin: 22px auto 0 auto;
+            max-width: 900px;
+            text-align: center;
+        }
+        .msg-success {
+            background: #e5faee;
+            color: #27ae60;
+            border: 1px solid #b9f4cd;
+            padding: 16px 38px;
+            border-radius: var(--radius-6);
+            font-size: 2.0rem;
+            margin-bottom: 14px;
+            display: inline-block;
+            font-family: inherit;
+        }
+        .msg-error {
+            background: #fae5e5;
+            color: #c0392b;
+            border: 1px solid #f4b9b9;
+            padding: 16px 38px;
+            border-radius: var(--radius-6);
+            font-size: 2.0rem;
+            margin-bottom: 14px;
+            display: inline-block;
+            font-family: inherit;
+        }
+        .mentor-price-card.active::after {
+            content: "✏️";
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            font-size: 2.0rem;
+            opacity: 0.90;
+        }
+        @media (max-width: 650px) {
+            .mentor-price-card-list { padding: 16px 2px; }
+            .mentor-price-card { padding: 14px 4px; min-height: 150px;}
+            .save-all-btn { font-size: 1.4rem; padding: 10px 18px; }
+            .mentor-card-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .mentor-card-title { max-width: 100%; }
+            .mentor-card-right { align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<th:block th:insert="~{fragments/mentor-header :: header}"></th:block>
+
+<main>
+    <section class="mentor-section-bg">
+        <h2 style="
+                text-align: center;
+                font-size: 2.8rem;
+                color: var(--oxford-blue);
+                font-weight: 800;
+                letter-spacing: 0.02em;
+                margin-bottom: 6px;
+                margin-top: 12px;
+                font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Arial, sans-serif;
+            ">
+            Change your course price
+        </h2>
+        <!-- MESSAGE DIV (success or error from RedirectAttributes) -->
+        <div class="msg-container">
+            <div th:if="${success}" class="msg-success" th:text="${success}"></div>
+            <div th:if="${error}" class="msg-error" th:text="${error}"></div>
+        </div>
+
+        <form th:action="@{/mentor/price/save}" method="post" autocomplete="off">
+            <div class="mentor-price-card-list">
+                <div th:each="cm : ${courseMentors}" class="mentor-price-card" tabindex="0">
+                    <input type="hidden" name="courseId" th:value="${cm.course.id}" />
+                    <div class="mentor-card-header">
+                        <div class="mentor-card-title" th:text="${cm.course.name}">Course Name</div>
+                        <div class="mentor-card-right">
+                            <span class="current-price" th:text="${cm.price} + ' VND'">0.00</span>
+                            <span class="created-date" th:text="${#dates.format(cm.course.createdDate, 'yyyy-MM-dd')}">2023-11-05</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="mentor-card-desc-header">Course Description:</div>
+                        <div class="mentor-card-desc" th:text="${cm.description}">Course Description</div>
+                    </div>
+                    <!-- Price edit area (hidden by default, shown when card is active) -->
+                    <div class="mentor-card-edit-area">
+                        <input class="mentor-card-edit-input" type="number" name="price"
+                               step="0.01" min="0" placeholder="Enter new price"/>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="save-all-btn">Save All</button>
+        </form>
+    </section>
+</main>
+
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+<script th:src="@{/assets/js/courlist.js}"></script>
+
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+<script>
+    // Enable toggling, multi-active cards
+    document.querySelectorAll('.mentor-price-card').forEach(card => {
+        card.addEventListener('click', function (e) {
+            if (e.target.tagName === 'INPUT') return;
+            card.classList.toggle('active');
+            if (card.classList.contains('active')) {
+                let input = card.querySelector('.mentor-card-edit-input');
+                if (input) setTimeout(() => input.focus(), 170);
+            }
+        });
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                card.click();
+            }
+        });
+    });
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.mentor-price-card')) {
+            document.querySelectorAll('.mentor-price-card.active').forEach(c => c.classList.remove('active'));
+        }
+    });
+</script>
+
+</body>
+</html>

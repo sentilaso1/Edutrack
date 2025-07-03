@@ -10,6 +10,7 @@ import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CVCourseRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
@@ -17,6 +18,8 @@ import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.repository.CvRepository;
 import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.profiles.service.interfaces.CvService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,10 +33,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -42,23 +42,26 @@ public class CvController {
 
     private final CvService cvService;
     private final CourseService courseService;
+    private final CourseMentorRepository courseMentorRepository;
+    private final CvRepository cvRepository;
+    private final MentorRepository mentorRepository;
+    private final CourseMentorService courseMentorService;
 
-    @Autowired
-    public CourseMentorRepository courseMentorRepository;
 
-    @Autowired
-    public CvRepository cvRepository;
-
-    @Autowired
-    public MentorRepository mentorRepository;
-    @Autowired
-    private MentorController mentor;
 
     @Autowired
     public CvController(CvService cvService,
-                        CourseService courseService) {
+                        CourseService courseService,
+                        CourseMentorRepository courseMentorRepository,
+                        CvRepository cvRepository,
+                        MentorRepository mentorRepository,
+                        CourseMentorService courseMentorService) {
         this.cvService = cvService;
         this.courseService = courseService;
+        this.courseMentorRepository = courseMentorRepository;
+        this.cvRepository = cvRepository;
+        this.mentorRepository = mentorRepository;
+        this.courseMentorService = courseMentorService;
     }
 
     @GetMapping("/admin/cv/list/{page}")
@@ -118,8 +121,9 @@ public class CvController {
     // Show the CV form
     public String showCVForm(Model model,
                              @RequestParam(defaultValue = "1") int page,
-                             @RequestParam(defaultValue = "6") int size,
-                             HttpSession session) {
+                             @RequestParam(defaultValue = "1") int registeredPage,
+                             @RequestParam(defaultValue = "3") int size,
+                             HttpSession session) throws JsonProcessingException {
         if (page - 1 < 0) {
             return "redirect:/404";
         }
@@ -131,22 +135,32 @@ public class CvController {
         UUID userId = user.getId();
 
         Optional<CV> existingCv = cvRepository.findByUserId(userId);
+
+        List<CourseMentor> registered = courseMentorService.findByMentorId(userId);
+        List<UUID> registeredCourseIds = registered.stream().map(cm -> cm.getCourse().getId()).toList();
+
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Course> coursePage = courseService.findAll(pageable);
+        Pageable registeredPageable = PageRequest.of(registeredPage - 1, size);
+
+        Page<Course> availableCoursePage = courseService.findAllExcludingIds(registeredCourseIds, pageable);
+        Page<CourseMentor> registeredCoursePage = courseMentorService.findByMentorIdPaged(userId, registeredPageable);
 
         model.addAttribute("cv", new CVForm());
-        model.addAttribute("coursePage", coursePage);
+        model.addAttribute("availableCoursePage", availableCoursePage);
+        model.addAttribute("registeredCoursePage", registeredCoursePage);
         model.addAttribute("pageNumber", page);
+        model.addAttribute("registeredPageNumber", registeredPage);
         model.addAttribute("userId", userId);
 
         if (existingCv.isPresent()) {
             CV cv = existingCv.get();
-            if (!cv.getStatus().equalsIgnoreCase("rejected")) {
-                return "redirect:/mentor/cv/edit/" + userId;
-            } else {
-                return "cv/create-cv";
-            }
+            model.addAttribute("cv", cv);
+            model.addAttribute("cvStatus", cv.getStatus());
+            return "cv/create-cv";
+
         } else {
+            model.addAttribute("cv", new CVForm());
+            model.addAttribute("cvStatus", "new");
             return "cv/create-cv";
         }
     }
@@ -205,12 +219,19 @@ public class CvController {
     @GetMapping("/admin/cv/detail/{id}")
     public String detailCV(@PathVariable("id") UUID id, Model model) {
         CV cv = cvService.getCVById(id);
+        if (cv == null) {
+            model.addAttribute("cv", null);
+            model.addAttribute("registeredCourses", null);
+            return "cv/cv-detail";
+        }
         Optional<Mentor> mentorOpt = mentorRepository.findById(cv.getId());
         if (mentorOpt.isPresent()) {
             List<CourseMentor> registeredCourses = courseMentorRepository.findAllByMentor(mentorOpt.get());
-            System.out.println("Courses found: " + registeredCourses.size());
             model.addAttribute("cv", cv);
             model.addAttribute("registeredCourses", registeredCourses);
+        } else {
+            model.addAttribute("cv", cv);
+            model.addAttribute("registeredCourses", null);
         }
         return "cv/cv-detail";
     }

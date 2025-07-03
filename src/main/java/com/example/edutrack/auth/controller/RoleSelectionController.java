@@ -35,7 +35,7 @@ public class RoleSelectionController {
 
     @PostMapping("/choose-role")
     public String setRole(@RequestParam String role, HttpSession session) {
-        Map<String, Object> userInfo = (Map<String, Object>) session.getAttribute("googleUserInfo");
+        Map<String, Object> userInfo = getUserInfoFromSession(session);
         if (userInfo == null) {
             return "redirect:/login?error";
         }
@@ -82,6 +82,20 @@ public class RoleSelectionController {
         }
 
         session.removeAttribute("googleUserInfo");
-        return "redirect:/home";
+        return "redirect:/login?error";
+    }
+
+    public Map<String, Object> getUserInfoFromSession(HttpSession session) {
+        Map<String, Object> userInfo = (Map<String, Object>) session.getAttribute("googleUserInfo");
+        if (userInfo == null) {
+            return null;
+        }
+        if (!userInfo.containsKey("email") || !userInfo.containsKey("name")) {
+            return null;
+        }
+        if (userInfo.get("email") == null || userInfo.get("name") == null) {
+            return null;
+        }
+        return userInfo;
     }
 }

@@ -29,11 +29,178 @@
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
 
+    <!-- Tagify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
+    <!-- Tagify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+
     <!--
     - preload images
     -->
     <!--  <link rel="preload" as="image" th:href="@{/assets/images/hero-banner.png}" />-->
     <!--  <link rel="preload" as="image" th:href="@{/assets/images/hero-bg.png}" />-->
+    <style>
+        .course-section-layout {
+            gap: 40px !important;
+
+        }
+
+        .course-filter {
+            background: #fff;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px 0 rgba(70,31,80,0.07), 0 1.5px 4px 0 rgba(70,31,80,0.04);
+            padding: 18px 14px 15px 14px;
+            max-width: 200px;
+            min-width: 150px;
+            margin-top: 16px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.22s;
+        }
+
+        .course-filter h3 {
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 8px;
+            letter-spacing: 0.01em;
+            text-align: center;
+        }
+
+        .filter-price,
+        .course-filter > div:not(:last-child) {
+            margin-bottom: 20px !important;
+        }
+
+        .filter-subtitle {
+            font-weight: 700;
+            font-size: 0.97em;
+            color: #666;
+            margin-bottom: 6px;
+            letter-spacing: 0.01em;
+        }
+
+        .price-filter li label {
+            font-size: 0.98em;
+            color: #777;
+            padding-left: 2px;
+            letter-spacing: 0.01em;
+        }
+
+        input[type="number"]::placeholder {
+            opacity: 0.7;
+        }
+
+        input[type="number"] {
+            font-family: var(--ff-gilroy);
+            border: 1.2px solid #eee;
+            border-radius: 7px;
+            padding: 8px 0px 8px 12px;
+            font-size: 0.97em;
+            background: #fff;
+            color: #444;
+            margin-top: 3px;
+            width: 100%;
+            transition: border-color 0.22s;
+            box-sizing: border-box;
+        }
+
+        input[type="number"]:focus {
+            border-color: #ff8ab8;
+            outline: none;
+            background: #fff;
+        }
+
+        input[type="checkbox"].custom-checkbox {
+            accent-color: #ff70a6;
+            width: 1em;
+            height: 1em;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+
+        .course-filter label {
+            font-size: 14px;
+            color: #666;
+            letter-spacing: 0.01em;
+        }
+
+        .filter-apply-btn {
+            background: linear-gradient(90deg, #ff70a6 0%, #ff61c0 100%);
+            color: #fff;
+            padding: 0.4em 1.1em;
+            border: none;
+            border-radius: 1.1em;
+            font-size: 0.95em;
+            font-weight: 600;
+            box-shadow: 0 4px 12px 0 rgba(255,97,192,0.13);
+            cursor: pointer;
+            transition: background 0.18s, transform 0.16s;
+            margin-top: 1.1em;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .filter-apply-btn:hover, .filter-apply-btn:focus {
+            background: linear-gradient(90deg, #ff61c0 0%, #ff70a6 100%);
+            transform: translateY(-1.5px) scale(1.03);
+            outline: none;
+        }
+
+        /* Optional: divider between filter sections */
+        .course-filter .filter-price:not(:last-child) {
+            border-bottom: 1px solid #f4f4f4;
+            padding-bottom: 10px;
+        }
+
+        .filter-available-row label {
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            user-select: none;
+        }
+
+
+        .tagify {
+            width: 100% !important;
+            min-width: 0 !important;
+            border: 1.5px solid #eee;
+            border-radius: 7px;
+            padding: 0 !important;
+            font-size: 1em;
+            background: #fff;
+            color: #444;
+            box-shadow: none;
+            margin-top: 3px;
+            transition: border-color 0.22s;
+            box-sizing: border-box;
+        }
+
+        .no-mentors-found {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+            text-align: center;
+            padding: 48px 16px 48px 16px;
+            border-radius: 18px;
+            background: #fff4fa;
+            box-shadow: 0 4px 16px 0 rgba(255, 112, 166, 0.07);
+            margin: 36px auto 36px auto;
+            max-width: 440px;
+        }
+
+        .no-mentors-illustration {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 14px auto;
+            background: url('https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f914.svg') center/contain no-repeat;
+            opacity: 0.95;
+        }
+
+    </style>
 </head>
 
 
@@ -61,6 +228,7 @@
                             type="text"
                             name="name"
                             class="search-input"
+                            th:value="${name}"
                             placeholder="Search for mentors..."
                     />
                     <button type="submit" class="search-btn" aria-label="Search">
@@ -79,43 +247,31 @@
                     <aside class="course-filter">
                         <form th:action="@{/mentors}" method="get" id="filterForm">
                             <input type="hidden" name="size_page" th:value="${param.size_page}"/>
-                            <h3>Filter</h3>
+                            <h3>Filter Mentor</h3>
 
                             <div class="filter-price">
                                 <h4 class="filter-subtitle">Min Rating</h4>
-                                <input type="number" name="rating" step="0.1" min="0" max="5"
-                                       th:value="${rating}" onchange="submitForm()"/>
+                                <input type="number" name="rating" step="0.1" min="0" max="5" placeholder="Enter minimum rating..."
+                                       th:value="${rating}"/>
                             </div>
 
                             <div class="filter-price">
                                 <h4 class="filter-subtitle">Expertise</h4>
-                                <ul class="price-filter" th:each="e : ${expertise}">
-                                    <li>
-                                        <label style="display: flex;">
-                                            <input class="custom-checkbox" type="checkbox"
-                                                   name="skill"
-                                                   th:value="${e}"
-                                                   th:checked="${selectedSkills != null and selectedSkills.contains(e)}"
-                                                   onchange="submitForm()"/>
-                                            <span style="margin-left: 0.5em; " th:text="${e}"></span>
-                                        </label>
-                                    </li>
-                                </ul>
+                                <input
+                                        id="expertise-input"
+                                        placeholder="Type and select skills"
+                                        autocomplete="off"
+                                        th:value="${expertiseInput}"
+                                />
+                                <input type="hidden" name="expertise" id="expertise-hidden">
                             </div>
-                            <div>
-                                <h4 class="filter-subtitle">Total Sessions (Min)</h4>
-                                <input type="number" name="totalSessions" min="0" th:value="${totalSessions}" onchange="submitForm()"/>
+
+                            <div class="filter-price">
+                                <h4 class="filter-subtitle">Min Total Sessions</h4>
+                                <input type="number" name="totalSessions" placeholder="Enter minimum total sessions..." min="0" th:value="${totalSessions}"/>
                             </div>
-                            <div>
-                                <h4 class="filter-subtitle">Available</h4>
-                                <input type="checkbox" name="isAvailable" th:checked="${isAvailable}" onchange="submitForm()"/>
-                            </div>
+                            <button type="submit" class="filter-apply-btn">Apply</button>
                         </form>
-                        <script>
-                            function submitForm() {
-                                document.getElementById('filterForm').submit()
-                            }
-                        </script>
                     </aside>
 
                     <script src="https://unpkg.com/lucide@latest"></script>
@@ -124,11 +280,6 @@
                         <div class="filter-bar">
                             <div class="course-topbar">
                                 <div class="view-toggle">
-                                    <button class="view-btn active" id="gridView" aria-label="Grid view"><i
-                                            class="fa fa-list" aria-hidden="true"></i></button>
-                                    <button class="view-btn" id="listView" aria-label="List view"><i class="fa fa-th"
-                                                                                                     aria-hidden="true"></i>
-                                    </button>
                                 </div>
                             </div>
                             <div style="display: flex">
@@ -220,6 +371,7 @@
                             </div>
 
                         </div>
+
                         <ul class="grid-list" th:with="mentors = ${mentorPage.content}">
                             <li class="card-container" th:each="mentor : ${mentors}">
                                 <div class="card course-card">
@@ -295,9 +447,17 @@
                                     ></a>
                                 </div>
                             </li>
-
                         </ul>
-
+                        <div id="noMentorsMsg" class="no-mentors-found" style="display:none">
+                            <div class="no-mentors-illustration"></div>
+                            <div>
+                                <h2>No mentors found</h2>
+                                <p>
+                                    Sorry, we couldn't find any mentors matching your search or filter.<br>
+                                    Try adjusting your filters or searching with different keywords.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <nav class="pagination">
@@ -359,6 +519,35 @@
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
+<script th:inline="javascript">
+    var recommendedSkills = [[${allExpertiseSkills}]];
+</script>
+
+<script>
+
+    var input = document.getElementById('expertise-input');
+    var hiddenInput = document.getElementById('expertise-hidden');
+    var tagify = new Tagify(input, {
+        whitelist: recommendedSkills,
+        enforceWhitelist: false,
+        dropdown: {
+            enabled: 1,
+            maxItems: 10,
+            position: "auto",
+            closeOnSelect: false
+        }
+    });
+
+    // Every time tags change, update the hidden input
+    tagify.on('change', function(e){
+        // Get array of tag values
+        var tags = tagify.value.map(function(tag) {
+            return tag.value;
+        });
+        // Join as a comma string
+        hiddenInput.value = tags.join(', ');
+    });
+</script>
 
 <script>
     // Toggle dropdown visibility
@@ -393,6 +582,22 @@
 </script>
 
 <script>
+    function updateNoMentorsMsg() {
+        // Select all visible mentor cards
+        const mentorCards = document.querySelectorAll('.grid-list .card-container');
+        let anyVisible = false;
+        mentorCards.forEach(item => {
+            if (item.style.display !== 'none') {
+                anyVisible = true;
+            }
+        });
+        // Show or hide the "no mentors" message
+        const noMentorsMsg = document.getElementById('noMentorsMsg');
+        if (noMentorsMsg) {
+            noMentorsMsg.style.display = anyVisible ? 'none' : 'flex';
+        }
+    }
+
     // lấy phần tử input tìm kiếm
     const searchInput = document.getElementById('searchInput')
 
@@ -400,24 +605,36 @@
     const courseItems = document.querySelectorAll('.grid-list .card-container')
 
     searchInput.addEventListener('input', function () {
-        const filterText = this.value.toLowerCase() // chữ thường để dễ so sánh
-
+        const filterText = this.value.toLowerCase();
         courseItems.forEach(item => {
-            // tìm thẻ chứa tên course (theo HTML bạn cho là h6.card-title)
-            const courseNameElement = item.querySelector('p.card-price')
-
-            if (!courseNameElement) return
-
-            const courseName = courseNameElement.textContent.toLowerCase()
-
-            // so sánh tên khóa học với từ khóa tìm kiếm
+            const courseNameElement = item.querySelector('p.card-price');
+            if (!courseNameElement) return;
+            const courseName = courseNameElement.textContent.toLowerCase();
             if (courseName.includes(filterText)) {
-                item.style.display = ''  // hiển thị
+                item.style.display = '';
             } else {
-                item.style.display = 'none'  // ẩn
+                item.style.display = 'none';
             }
-        })
-    })
+        });
+        updateNoMentorsMsg();
+    });
+
+    const ratingInput = document.querySelector('input[name="rating"]');
+    ratingInput.addEventListener('input', function() {
+        if (this.value < 0) {
+            this.value = 0;
+        }
+        if (this.value > 5) {
+            this.value = 5;
+        }
+    });
+
+    const sessionInput = document.querySelector('input[name="totalSessions"]');
+    sessionInput.addEventListener('input', function() {
+        if (this.value < 0) {
+            this.value = 0;
+        }
+    });
 </script>
 
 

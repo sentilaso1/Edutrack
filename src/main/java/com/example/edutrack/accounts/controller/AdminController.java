@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +63,7 @@ public class AdminController {
                 if (user.getId() != null) {
                         Staff staff = userService.getStaffByUserId(user.getId().toString());
                         if (staff != null) {
-                        role = staff.getRole().toString();
+                                role = staff.getRole().toString();
                         }
                 }
                 userDtos.add(new UserWithRoleDTO(
@@ -86,20 +87,67 @@ public class AdminController {
         @PostMapping("/users/{id}/lock")
         public String toggleLock(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
-                        User user = userService.getUserById(id);
-                        if (user == null) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng!");
+                        if (id == null || id.trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "User ID cannot be empty!");
                                 return "redirect:/admin/users";
                         }
-                        user.setIsLocked(!user.getIsLocked()); // Toggle lock state
-                        userService.saveUser(user);
-                        redirectAttributes.addFlashAttribute("successMessage",
-                                        user.getIsLocked() ? "Khóa người dùng thành công!"
-                                                        : "Mở khóa người dùng thành công!");
+
+                        UUID userId;
+                        try {
+                                userId = UUID.fromString(id);
+                        } catch (IllegalArgumentException e) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Invalid user ID format!");
+                                return "redirect:/admin/users";
+                        }
+
+                        User user = userService.getUserById(id);
+                        if (user == null) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "User not found!");
+                                return "redirect:/admin/users";
+                        }
+
+                        if (!user.getIsActive()) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Cannot lock/unlock inactive user!");
+                                return "redirect:/admin/users";
+                        }
+
+                        Staff staff = userService.getStaffByUserId(id);
+                        if (staff != null && staff.getRole() == Staff.Role.Admin) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Cannot lock/unlock admin account!");
+                                return "redirect:/admin/users";
+                        }
+
+                        boolean currentLockState = user.getIsLocked();
+                        user.setIsLocked(!currentLockState);
+                        try {
+                                userService.saveUser(user);
+                        } catch (IllegalArgumentException e) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Validation error when saving: " + e.getMessage());
+                                return "redirect:/admin/users";
+                        }
+                        if (user.getIsLocked()) {
+                                redirectAttributes.addFlashAttribute("successMessage", "User locked successfully!");
+                        } else {
+                                redirectAttributes.addFlashAttribute("successMessage", "User unlocked successfully!");
+                        }
+
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("User not found")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "User not found in system!");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "System error when changing lock status: " + e.getMessage());
+                        }
+                        return "redirect:/admin/users";
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Lỗi khi thay đổi trạng thái khóa: " + e.getMessage());
+                                        "Unknown error when changing lock status: " + e.getMessage());
+                        return "redirect:/admin/users";
                 }
+
                 return "redirect:/admin/users";
         }
 
@@ -127,19 +175,13 @@ public class AdminController {
         public String grantStaff(@PathVariable String id, @RequestParam String role,
                         RedirectAttributes redirectAttributes) {
                 try {
-                        if (role == null || role.isEmpty()) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn vai trò!");
-                                return "redirect:/admin/users";
-                        }
-                        Staff.Role staffRole;
-                        try {
-                                staffRole = Staff.Role.valueOf(role);
-                        } catch (IllegalArgumentException e) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Vai trò không hợp lệ!");
-                                return "redirect:/admin/users";
-                        }
-                        userService.grantStaffRole(id, Staff.Role.valueOf(role));
+                        Staff.Role staffRole = Staff.Role.valueOf(role);
+                        userService.grantStaffRole(id, staffRole);
                         redirectAttributes.addFlashAttribute("successMessage", "Cấp vai trò Staff thành công!");
+                } catch (IllegalArgumentException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Vai trò không hợp lệ!");
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
                                         "Lỗi khi cấp vai trò Staff: " + e.getMessage());
@@ -147,14 +189,30 @@ public class AdminController {
                 return "redirect:/admin/users";
         }
 
-        @PostMapping("/users/{id}/revoke-staff")      
+        @PostMapping("/users/{id}/revoke-staff")
         public String revokeStaff(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
                         userService.revokeStaffRole(id);
-                        redirectAttributes.addFlashAttribute("successMessage", "Hủy vai trò Staff thành công!");
+                        redirectAttributes.addFlashAttribute("successMessage", "Staff role revoked successfully!");
+
+                } catch (IllegalArgumentException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                        return "redirect:/admin/users";
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                        return "redirect:/admin/users";
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("User not found")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "User not found in system!");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "System error when revoking staff role: " + e.getMessage());
+                        }
+                        return "redirect:/admin/users";
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Lỗi khi hủy vai trò Staff: " + e.getMessage());
+                                        "Unknown error when revoking staff role: " + e.getMessage());
+                        return "redirect:/admin/users";
                 }
                 return "redirect:/admin/users";
         }

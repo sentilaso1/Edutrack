@@ -43,6 +43,7 @@ public class LandingPageConfigServiceImpl implements LandingPageConfigService {
         }
     }
 
+    // Hàm F3
     @Override
     @Transactional
     public void save(LandingPageConfig updatedConfig, MenteeLandingRole role) {

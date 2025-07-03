@@ -1,0 +1,87 @@
+<header th:fragment="header"
+        class="header"
+        data-header
+        xmlns:th="http://www.thymeleaf.org">
+    <div class="container">
+        <a th:href="@{/}" class="logo">
+            <img
+                    th:src="@{/assets/images/logo.svg}"
+                    width="145"
+                    height="27"
+                    alt="Youdemi home"
+            />
+        </a>
+
+        <nav class="navbar" data-navbar>
+            <div class="navbar-top">
+                <a th:href="@{/mentor}" class="logo">
+                    <img
+                            th:src="@{/assets/images/logo.svg}"
+                            width="145"
+                            height="27"
+                            alt="Youdemi home"
+                    />
+                </a>
+
+                <button
+                        class="nav-close-btn"
+                        aria-label="close menu"
+                        data-nav-toggler
+                >
+                    <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+                </button>
+            </div>
+
+            <ul class="navbar-list">
+                <li class="navbar-item">
+                    <a th:href="@{/mentor}" class="navbar-link title-sm" data-nav-link>Dashboard</a>
+                </li>
+
+                <li class="navbar-item">
+                    <a th:href="@{/mentor/cv/create}" class="navbar-link title-sm" data-nav-link>My CV</a>
+                </li>
+
+                <li class="navbar-item">
+                    <a th:href="@{/mentor/schedule}" class="navbar-link title-sm" data-nav-link>Weekly Schedule</a>
+                </li>
+
+                <li class="navbar-item">
+                    <a th:href="@{/mentor/sensor-class?status=PENDING}" class="navbar-link title-sm" data-nav-link>Request Class</a>
+                </li>
+
+                <li class="navbar-item">
+                    <a th:href="@{/mentor/working-date}" class="navbar-link title-sm" data-nav-link>My Working Schedule</a>
+                </li>
+
+                <li class="navbar-item">
+                    <a th:href="@{/mentor/price}" class="navbar-link title-sm" data-nav-link>Course Price</a>
+                </li>
+
+            </ul>
+
+
+        </nav>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div th:if="${session.loggedInUser == null}" style="display: flex">
+                <a th:href="@{/login}" class="btn btn-secondary">Sign In</a>
+                <a th:href="@{/signup}" class="btn btn-signup">Sign Up</a>
+            </div>
+
+            <div th:if="${session.loggedInUser != null}" style="display: flex; align-items: center; gap: 12px;">
+                <span style="color: #ff6b6b; font-weight: bold" class="title-sm" th:text="'👋 Hi, ' + ${session.loggedInUser.fullName}">Hi, User</span>
+                <th:block th:with="wallet = ${@walletService.findByUser(session.loggedInUser)}">
+                    <span th:if="${wallet.isPresent()}" style="" class="title-sm" th:text="${wallet.get().balanceFormatted} + ' VND'">0 VND</span>
+                </th:block>
+                <a th:href="@{/logout}" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+
+
+        <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+            <ion-icon name="menu-outline" aria-hidden="true"></ion-icon>
+        </button>
+
+        <div class="overlay" data-overlay data-nav-toggler></div>
+    </div>
+</header>

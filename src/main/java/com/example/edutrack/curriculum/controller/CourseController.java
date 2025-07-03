@@ -47,7 +47,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
-public class CourseController {
+public class
+CourseController {
     private final CourseServiceImpl courseServiceImpl;
     private final CourseTagServiceImpl courseTagServiceImpl;
     private final CourseTagService courseTagService;

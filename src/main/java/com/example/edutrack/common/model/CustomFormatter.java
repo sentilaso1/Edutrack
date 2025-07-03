@@ -10,8 +10,8 @@ public final class CustomFormatter {
     }
 
     private static String getNumberFormatPattern(boolean includeSign, boolean isInteger) {
-        String pattern = includeSign ? "+#,###" : "#,###";
-        return isInteger ? pattern : pattern + ".##";
+        String basePattern = includeSign ? "+#,###;−#,###" : "#,###;−#,###";
+        return isInteger ? basePattern : basePattern + ".##";
     }
 
     public static String formatNumberWithSpaces(Number number) {

@@ -43,8 +43,8 @@ public class EnrollmentSchedule {
     @Column(name = "attendance")
     private Attendance attendance = Attendance.NOT_YET;
 
-    @Column(name = "report", columnDefinition = "TEXT")
-    private String report;
+    @Column(name = "report")
+    private boolean report;
 
     @Column(name = "title_section")
     private String titleSection;
@@ -77,11 +77,11 @@ public class EnrollmentSchedule {
         this.date = date;
     }
 
-    public String getReport() {
+    public Boolean getReport() {
         return report;
     }
 
-    public void setReport(String report) {
+    public void setReport(Boolean report) {
         this.report = report;
     }
 

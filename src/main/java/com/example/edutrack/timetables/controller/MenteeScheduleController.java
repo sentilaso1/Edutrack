@@ -98,8 +98,8 @@ public class MenteeScheduleController {
         walletService.save(wallet);
 
         Transaction transaction = new Transaction(
-                totalCost,
-                "Checkout for Course Mentor: " + courseMentor.getId(),
+                -totalCost,
+                "Checkout for Course " + courseMentor.getCourse().getName() + " by " + courseMentor.getMentor().getFullName(),
                 wallet
         );
         transactionService.save(transaction);

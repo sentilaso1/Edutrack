@@ -253,4 +253,12 @@ public class CourseServiceImpl implements CourseService {
         this.delete(courseId);
     }
 
+    @Override
+    public Page<Course> findAllExcludingIds(List<UUID> excludeIds, Pageable pageable) {
+        if (excludeIds == null || excludeIds.isEmpty()) {
+            return courseRepository.findAll(pageable);
+        }
+        return courseRepository.findByIdNotIn(excludeIds, pageable);
+    }
+
 }

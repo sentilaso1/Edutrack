@@ -4,48 +4,37 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>EduTrack - Wallet History</title>
-    <link rel="stylesheet" href="/css/master.css"/>
-    <link rel="stylesheet" href="/css/colors.css"/>
-
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background: linear-gradient(to right, #e6f7f9, #ffeef0);
-            color: #333;
+        h2.headline-md {
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #2C3E50;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 20px;
+        .wallet-section-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
             background-color: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
 
         .controls {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            gap: 16px;
         }
 
-        .search-bar input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-            width: 250px;
-        }
-
-        .sort-dropdown select {
+        .search-bar input, .sort-dropdown select {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -56,7 +45,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
 
         th, td {
@@ -79,12 +68,15 @@
             justify-content: center;
             gap: 12px;
             font-size: 14px;
+            margin-top: 20px;
         }
 
         .pagination button {
-            text-decoration: none;
+            background: none;
+            border: none;
             color: #ff6666;
             font-weight: 500;
+            cursor: pointer;
         }
 
         .pagination span {
@@ -92,86 +84,87 @@
             color: #444;
         }
 
-        .visible {
-            visibility: visible;
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #ff6666;
+            text-decoration: none;
+            font-weight: bold;
         }
 
-        .invisible {
-            visibility: hidden;
+        .back-button:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>Wallet History</h1>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<main>
+    <section class="section course has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="container">
+            <h2 class="headline-md">Wallet History</h2>
 
-    <form class="controls" id="filter-form">
-        <div class="search-bar">
-            <input type="text" id="search" name="search" placeholder="Search Transaction..." th:value="${search != null ? search : ''}"/>
+            <a th:href="@{/wallet}" class="back-button"><i class="fas fa-arrow-left"></i> Back to Wallet</a>
+
+            <form class="card controls" id="filter-form">
+                <div class="search-bar">
+                    <input type="text" id="search" name="search" placeholder="Search Transaction..." th:value="${search != null ? search : ''}"/>
+                </div>
+                <div class="sort-dropdown">
+                    <label for="sort">Sorting Order: </label>
+                    <select id="sort" name="sort">
+                        <option value="desc" th:selected="${sort == null || sort.equals('desc')}">Date descending</option>
+                        <option value="asc" th:selected="${sort != null && sort.equals('asc')}">Date ascending</option>
+                    </select>
+                </div>
+            </form>
+
+            <div class="wallet-section-layout">
+                <div class="card">
+                    <div th:if="${page.totalElements == 0}" style="padding: 20px; text-align: center; color: #999;">
+                        No transaction history found.
+                    </div>
+
+                    <table th:if="${page.totalElements > 0}" th:with="transactions = ${page.content}">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Item</th>
+                            <th>Status</th>
+                            <th>Change</th>
+                            <th>Balance</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="tx : ${transactions}">
+                            <td th:text="${#dates.format(tx.transactionDate, 'MMM dd yyyy hh:mm:ss a')}">May 29 2025 1:25:21PM</td>
+                            <td th:text="${tx.transactionInfo}">Transaction Info</td>
+                            <td th:text="${tx.transactionStatus}">Purchase</td>
+                            <td th:text="${tx.transactionAmountFormatted}">+250.000</td>
+                            <td th:text="${tx.transactionBalanceFormatted}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination" th:if="${page.totalPages > 1}">
+                    <button id="first-page" th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">first</button>
+                    <button id="previous-page" th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">previous</button>
+                    <span th:text="${'page ' + pageNumber + ' of ' + page.totalPages}"></span>
+                    <button id="next-page" th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">next</button>
+                    <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? 'visible' : 'invisible'}">last</button>
+                </div>
+            </div>
         </div>
-        <div class="sort-dropdown">
-            <label for="sort">Sorting Order: </label>
-            <select id="sort" name="sort">
-                <option value="desc" th:selected="${sort == null || sort.equals('desc')}">Date descending</option>
-                <option value="asc" th:selected="${sort != null && sort.equals('asc')}">Date ascending</option>
-            </select>
-        </div>
-    </form>
-
-    <table th:with="transactions = ${page.content}">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Item</th>
-            <th>Status</th>
-            <th>Change</th>
-            <th>Balance</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tbody>
-        <tr th:each="tx : ${transactions}">
-            <td th:text="${#dates.format(tx.transactionDate, 'MMM dd yyyy hh:mm:ss a')}">May 29 2025 1:25:21PM</td>
-            <td th:text="${tx.transactionInfo}">Transaction Info</td>
-            <td th:text="${tx.transactionStatus}">Purchase</td>
-            <td th:text="${tx.transactionAmountFormatted}">
-                +250.000
-            </td>
-            <td th:text="${tx.transactionBalanceFormatted}"></td>
-        </tr>
-        </tbody>
-    </table>
-    <div class="pagination">
-        <button id="first-page" th:classappend="${(pageNumber > 1) ? 'visible' : 'invisible'}">
-            first
-        </button>
-
-        <button id="previous-page" th:classappend="${(page.hasPrevious()) ? 'visible' : 'invisible'}">
-            previous
-        </button>
-
-        <span th:text="${'page ' + pageNumber + ' of ' + page.totalPages}"></span>
-
-        <button id="next-page" th:classappend="${(page.hasNext()) ? 'visible' : 'invisible'}">
-            next
-        </button>
-
-        <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? 'visible' : 'invisible'}">
-            last
-        </button>
-
-    </div>
-</div>
-
-
+    </section>
+</main>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 <script th:inline="javascript">
     /*<![CDATA[*/
     const filterForm = document.getElementById("filter-form");
     const sortInput = document.getElementById("sort");
 
-    sortInput.addEventListener("change", (e) => {
-        filterForm.submit();
-    });
+    sortInput.addEventListener("change", () => filterForm.submit());
 
     document.getElementById('first-page').addEventListener('click', () => {
         filterForm.action = '/wallet/history/1';
@@ -189,8 +182,11 @@
         filterForm.action = '/wallet/history/' + [[${page.totalPages}]];
         filterForm.submit();
     });
-
     /*]]>*/
 </script>
+
+<script th:src="@{/assets/js/courlist.js}"></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
 </html>

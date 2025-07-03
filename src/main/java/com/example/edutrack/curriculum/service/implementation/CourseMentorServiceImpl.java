@@ -5,6 +5,7 @@ import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.model.CourseMentorId;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.repository.ApplicantsRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -174,6 +176,9 @@ public class CourseMentorServiceImpl implements CourseMentorService {
 
     @Override
     public List<CourseMentor> getRecommendedCourseMentors(UUID menteeId, int limit) {
+        if (limit <= 0) {
+            return Collections.emptyList();
+        }
         List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
         Set<String> tagTitles = new HashSet<>();
         for (Enrollment e : enrollments) {
@@ -185,8 +190,12 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         return getRecommendationsByTags(tagTitles, menteeId, limit);
     }
 
+    // Hàm F1
     @Override
     public List<CourseMentor> getRecommendedByHistory(UUID menteeId, int limit) {
+        if (limit <= 0) {
+            return Collections.emptyList();
+        }
         List<String> tagTitlesByMenteeId = tagRepository.findDistinctTagTitlesFromMenteeId(menteeId);
         List<String> mentorExpertiseByMenteeId = mentorRepository.findExpertiseOfMentorsByMentee(menteeId);
 
@@ -220,6 +229,31 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         return allPairs.stream()
                 .filter(cm -> feedbackRepository.findByMenteeIdAndCourseMentorId(menteeId, cm.getId()).isEmpty())
                 .collect(Collectors.toList());
+    }
+
+
+    public void updatePrices(UUID mentorId, List<UUID> courseIds, List<Double> prices) {
+        for (int i = 0; i < courseIds.size(); i++) {
+            UUID courseId = courseIds.get(i);
+            Double price = prices.get(i);
+            if (price != null) {
+                Optional<CourseMentor> opt = courseMentorRepository.findByCourse_IdAndMentor_Id(courseId, mentorId);
+                opt.ifPresent(cm -> {
+                    cm.setPrice(price);
+                    courseMentorRepository.save(cm);
+                });
+            }
+        }
+    }
+
+    @Override
+    public List<CourseMentor> findByMentorId(UUID mentorId) {
+        return courseMentorRepository.findByMentorId(mentorId);
+    }
+
+    @Override
+    public Page<CourseMentor> findByMentorIdPaged(UUID mentorId, Pageable pageable) {
+        return courseMentorRepository.findByMentorId(mentorId, pageable);
     }
 }
 

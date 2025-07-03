@@ -27,6 +27,9 @@ public class Feedback {
     @Column(columnDefinition = "DECIMAL(2,1)", nullable = false)
     private Double rating;
 
+    @Column(name = "is_anonymous", nullable = false)
+    private boolean isAnonymous = false;
+
     @ManyToOne
     @JoinColumn(name = "mentee_id")
     private Mentee mentee;
@@ -45,9 +48,10 @@ public class Feedback {
 
     public Feedback() {}
 
-    public Feedback(String content, Double rating, Mentee mentee, CourseMentor courseMentor) {
+    public Feedback(String content, Double rating, boolean isAnonymous, Mentee mentee, CourseMentor courseMentor) {
         this.content = content;
         this.rating = rating;
+        this.isAnonymous = isAnonymous;
         this.mentee = mentee;
         this.courseMentor = courseMentor;
         this.status = Status.ACTIVE;
@@ -75,6 +79,14 @@ public class Feedback {
 
     public void setRating(Double rating) {
         this.rating = rating;
+    }
+
+    public boolean isAnonymous() {
+        return isAnonymous;
+    }
+
+    public void setIsAnonymous(boolean isAnonymous) {
+        this.isAnonymous = isAnonymous;
     }
 
     public Mentee getMentee() {

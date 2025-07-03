@@ -127,6 +127,7 @@ img {
   border: 3px solid transparent;
   border-radius: 1rem;
   z-index: 1;
+  margin: 1rem;
   transition: border-color .4s;
 }
 
@@ -182,7 +183,7 @@ img {
   color: var(--white-color);
   font-weight: var(--font-semi-bold);
   padding-block: 1.5rem;
-  border-radius: 4rem;
+  border-radius: 6px;
   margin-block: 2rem;
   cursor: pointer;
   transition: background-color .4s, box-shadow .4s;
@@ -220,7 +221,7 @@ img {
   height: 32px;
   background-color: var(--body-color);
   box-shadow: 0 4px 8px hsla(0, 0%, 0%, .1);
-  border-radius: .5rem;
+  border-radius: 6px;
   display: grid;
   place-items: center;
   transition: transform .4s;
@@ -250,11 +251,16 @@ img {
 
 .login__access, 
 .login__register {
-  position: absolute;
-  left: 0;
-  right: 0;
   width: 100%;
   transition: transform .4s, opacity .4s .1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  padding: 6rem;
+  border-radius: 1rem;
+
 }
 
 .login__register {
@@ -343,8 +349,8 @@ img {
     width: 600px;
   }
   .login__title {
-    text-align: initial;
     margin-bottom: 3rem;
+    text-align: center;
   }
   .login__button {
     margin-bottom: 3rem;
