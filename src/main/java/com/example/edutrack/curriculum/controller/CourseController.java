@@ -254,9 +254,9 @@ CourseController {
         model.addAttribute("maxDate", maxDate);
         model.addAttribute("slots", Slot.values());
         model.addAttribute("dayLabels", Day.values());
-        boolean[][] slotDayMatrix = availableSlotMatrix(courseMentor.getMentor(), menteeOpt.get(), minDate, maxDate);
+        int[][] slotDayMatrix = availableSlotMatrix(courseMentor.getMentor(), menteeOpt.get(), minDate, maxDate);
         if(slotDayMatrix == null){
-            slotDayMatrix = new boolean[5][10];
+            slotDayMatrix = new int[5][10];
         }
 
         model.addAttribute("slotDayMatrix", slotDayMatrix);
@@ -290,7 +290,7 @@ CourseController {
         return "course-related-mentor";
     }
 
-    public boolean[][] availableSlotMatrix(Mentor mentor,
+    public int[][] availableSlotMatrix(Mentor mentor,
                                     Mentee mentee,
                                     LocalDate minDate,
                                     LocalDate maxDate) {
@@ -305,13 +305,15 @@ CourseController {
             currentDate = currentDate.plusDays(1);
         }
         int dayCount = dateList.size();
-        boolean[][] availableSlotMatrix = new boolean[Slot.values().length][dayCount];
+        int[][] availableSlotMatrix = new int[Slot.values().length][dayCount];
         for (int i = 0; i < Slot.values().length; i++) {
             for (int j = 0; j < dayCount; j++) {
                 Slot slot = Slot.values()[i];
                 LocalDate slotDate = dateList.get(j);
                 if(mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, slotDate) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, slotDate, mentee)){
-                    availableSlotMatrix[i][j] = true;
+                    availableSlotMatrix[i][j] = enrollmentService.getNumberOfPendingSlot(mentor, slotDate, slot);
+                }else{
+                    availableSlotMatrix[i][j] = -1;
                 }
             }
         }
