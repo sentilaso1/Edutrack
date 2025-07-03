@@ -235,6 +235,7 @@ public class MentorController {
         if (action.equals("approve")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
             enrollmentService.save(enrollment);
+            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
 
             menteeWallet.setOnHold(menteeWallet.getOnHold() - enrollment.getTransaction().getAbsoluteAmount());
             mentorWallet.setBalance(mentorWallet.getBalance() + enrollment.getTransaction().getAbsoluteAmount());

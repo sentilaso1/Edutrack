@@ -208,48 +208,6 @@ public class ManagerController {
     }
 
 
-    @GetMapping("/manager/create-class")
-    public String showCreateClass(Model model) {
-        List<Enrollment> enrollmentRequests = enrollmentService.findAllApprovedEnrollments();
-        model.addAttribute("enrollmentRequests", enrollmentRequests);
-        return "manager/create-class";
-    }
-
-    @GetMapping("manager/create-class/{eid}")
-    public String actionCreateClass(@PathVariable("eid") long eid,
-                                    @RequestParam String action) {
-        Enrollment enrollment = enrollmentService.findById(eid);
-        if (enrollment == null) {
-            return "redirect:/mentor/schedule?error=enrollmentNotFound";
-        }
-        if (action.equals("reject")) {
-            enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
-            enrollmentService.save(enrollment);
-            return "redirect:/manager/create-class?status=REJECTED&reject=" + eid;
-        }
-        if (action.equals("approve")) {
-            enrollment.setStatus(Enrollment.EnrollmentStatus.CREATED);
-            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
-            return "redirect:/manager/create-class?status=APPROVED&approve=" + eid;
-        }
-        if (action.equals("view")) {
-            return "redirect:/manager/create-class/" + eid + "/view";
-        }
-        return "redirect:/manager/create-class";
-    }
-
-    @GetMapping("/manager/create-class/{eid}/view")
-    public String viewSensorClass(@PathVariable Long eid,
-                                  Model model) {
-        Enrollment enrollment = enrollmentService.findById(eid);
-        String summary = enrollment.getScheduleSummary();
-
-
-        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(summary);
-        model.addAttribute("startTime", startTime);
-        return "manager/skill-register-request-detail";
-    }
-
     @GetMapping("/manager/landing-page")
     public String showLandingPageEditor(
             @RequestParam(defaultValue = "GUEST") MenteeLandingRole role,
