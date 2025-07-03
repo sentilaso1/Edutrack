@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -85,4 +86,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<CourseMentor> findCourseMentorByMentee(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
 
     List<Enrollment> findAllByMenteeId(UUID menteeId);
+
+    @Query("SELECT e FROM Enrollment e WHERE e.courseMentor.mentor = :mentor AND e.status = 'PENDING' ")
+    List<Enrollment> findAllPendingByMentorId(Mentor mentor);
 }
