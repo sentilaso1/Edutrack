@@ -342,7 +342,7 @@
                                 <p class="title-sm popular-label">🔥Popular</p>
                             </div>
 
-                            <a th:href="@{'/courses'(size_page=6, subject=${tag.tag.id})}"
+                            <a th:href="@{'/courses-only'(size_page=6, subject=${tag.tag.id})}"
                                class="layer-link"
                                aria-label="Browse courses in this category"></a>
                         </div>
@@ -350,7 +350,7 @@
                 </ul>
 
 
-                <a th:href="@{'/courses'(size_page=6, subject=${allCourseTagIds})}" class="btn btn-primary">
+                <a th:href="@{'/courses-only'(size_page=6, subject=${allCourseTagIds})}" class="btn btn-primary">
                     View All Categories
                 </a>
 
@@ -475,7 +475,7 @@
                 <div class="carousel-indicators" id="indicators1"></div>
 
                 <div class="view-more-wrapper text-center" style="margin-top: 30px;">
-                    <a th:href="@{/courses}" class="btn btn-primary">View More</a>
+                    <a th:href="@{/courses-only}" class="btn btn-primary">View More</a>
                 </div>
             </div>
         </section>
@@ -535,7 +535,7 @@
                     <button class="carousel-nav carousel-next" onclick="moveCarousel('carousel2', 1)">›</button>
                 </div>
                 <div class="view-more-wrapper text-center" style="margin-top: 30px;">
-                    <a th:href="@{/courses}" class="btn btn-primary">View More</a>
+                    <a th:href="@{/courses-only}" class="btn btn-primary">View More</a>
                 </div>
             </div>
         </section>

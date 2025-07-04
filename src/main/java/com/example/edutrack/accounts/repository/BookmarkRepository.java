@@ -2,6 +2,7 @@ package com.example.edutrack.accounts.repository;
 
 import com.example.edutrack.accounts.model.Bookmark;
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.curriculum.model.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -61,4 +62,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
             ORDER BY b.createdDate ASC
             """)
     Page<Bookmark> findAllByUserContainingTagCreatedDateAsc(@Param("tagId") List<Integer> tagId, @Param("userId") UUID userId, Pageable pageable);
+
+    boolean existsByCourseAndUser(Course course, User user);
 }
