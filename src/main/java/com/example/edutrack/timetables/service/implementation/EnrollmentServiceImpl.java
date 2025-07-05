@@ -113,9 +113,13 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public List<Enrollment> findOngoingEnrollments(UUID mentor) {
-        LocalDate today = LocalDate.now();
-        return enrollmentRepository.findOngoingEnrollments(today, mentor);
+    public List<Enrollment> findOngoingEnrollments(Mentor mentor) {
+        return enrollmentRepository.findOngoingEnrollments(mentor);
+    }
+
+    @Override
+    public Double getPercentComplete(Enrollment enrollment){
+        return enrollmentRepository.getPercentComplete(enrollment);
     }
 
     @Override
