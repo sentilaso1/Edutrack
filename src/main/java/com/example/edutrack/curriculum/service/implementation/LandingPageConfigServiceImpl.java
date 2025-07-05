@@ -163,11 +163,6 @@ public class LandingPageConfigServiceImpl implements LandingPageConfigService {
             }
         }
     }
-
-
-
-
-
 }
 
 

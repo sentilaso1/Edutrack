@@ -43,14 +43,14 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
                            @Param("date") LocalDate date);
 
     // Author: Nguyen Thanh Vinh
-    @Query("SELECT s FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId")
+    @Query("SELECT s FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId AND s.available = true")
     List<EnrollmentSchedule> findAllByMenteeId(@Param("menteeId") UUID menteeId);
 
     @Query("""
-                SELECT s FROM EnrollmentSchedule s
-                WHERE s.date BETWEEN :startDate AND :endDate
-                AND s.enrollment.courseMentor.mentor = :mentor
-            """)
+    SELECT s FROM EnrollmentSchedule s
+    WHERE s.date BETWEEN :startDate AND :endDate
+    AND s.enrollment.courseMentor.mentor = :mentor
+""")
     List<EnrollmentSchedule> findByMentorAndDateBetween(
             @Param("mentor") Mentor mentor,
             @Param("startDate") LocalDate startDate,
@@ -103,6 +103,7 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
       AND MONTH(s.date) = :month
       AND YEAR(s.date) = :year
       AND (:courseId IS NULL OR s.enrollment.courseMentor.course.id = :courseId)
+      AND s.available = true
 """)
     Page<EnrollmentSchedule> findByMenteeAndMonthWithCourseFilter(
             @Param("menteeId") UUID menteeId,
@@ -115,13 +116,15 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     List<EnrollmentSchedule> findEnrollmentScheduleByEnrollment(Enrollment enrollment);
 
     @Query("""
-            SELECT s FROM EnrollmentSchedule s
-            WHERE s.enrollment.mentee.id = :menteeId
-            AND s.enrollment.courseMentor.id = :courseMentorId
-            """)
+    SELECT s FROM EnrollmentSchedule s
+    WHERE s.enrollment.mentee.id = :menteeId
+    AND s.enrollment.courseMentor.id = :courseMentorId
+    AND s.available = true
+""")
     List<EnrollmentSchedule> findEnrollmentScheduleByMenteeAndCourseMentor(
             @Param("menteeId") UUID menteeId,
             @Param("courseMentorId") UUID courseMentorId);
+
 
     @Query("""
            SELECT COUNT(s) FROM EnrollmentSchedule s 
@@ -129,4 +132,23 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
            AND s.isTest = TRUE 
             """)
     int countTestSlotsByEnrollment(@Param("menteeId") UUID menteeId);
+
+    @Query("""
+            SELECT COUNT(s) FROM EnrollmentSchedule s
+            WHERE s.enrollment.id = :enrollmentId
+            """)
+    int countTotalSlot(Long enrollmentId);
+
+    List<EnrollmentSchedule> findByEnrollment_MenteeIdAndRescheduleStatusAndRequestedNewDateBetween(
+            UUID menteeId,
+            EnrollmentSchedule.RescheduleStatus rescheduleStatus,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
+    List<EnrollmentSchedule> findAllByRescheduleStatusAndRequestedNewDateBefore(
+            EnrollmentSchedule.RescheduleStatus rescheduleStatus,
+            LocalDate date
+    );
+
 }

@@ -278,6 +278,15 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
                         @Param("lastMonth") int lastMonth);
 
         List<CourseMentor> findByMentor_Id(UUID mentorId);
+
+        @Query("""
+    SELECT cm
+    FROM CourseMentor cm
+    WHERE cm.id NOT IN :excludedIds
+    ORDER BY FUNCTION('RAND')
+""")
+        List<CourseMentor> findRandomCourseMentorsExcluding(@Param("excludedIds") List<UUID> excludedIds, Pageable pageable);
+
         Page<CourseMentor> findByMentorId(UUID mentorId, Pageable pageable);
 }
 

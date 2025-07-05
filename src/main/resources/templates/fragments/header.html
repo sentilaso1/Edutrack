@@ -64,9 +64,6 @@
                     <a th:href="@{/schedules}" class="navbar-link title-sm" data-nav-link>Schedule</a>
                 </li>
 
-                <li class="navbar-item" th:if="${hasEnrollment}">
-                    <a th:href="@{/learning-tracker}" class="navbar-link title-sm" data-nav-link>Learning Tracker</a>
-                </li>
             </ul>
 
 
@@ -79,7 +76,6 @@
             </div>
 
             <div th:if="${session.loggedInUser != null}" style="display: flex; align-items: center; gap: 12px;">
-                <span style="color: #ff6b6b; font-weight: bold" class="title-sm" th:text="'👋 Hi, ' + ${session.loggedInUser.fullName}">Hi, User</span>
                 <th:block th:with="wallet = ${@walletService.findByUser(session.loggedInUser)}">
                     <a th:if="${wallet.isPresent()}" th:href="@{/wallet}" style="" class="title-sm" th:text="${wallet.get().balanceFormatted} + ' VND'">0 VND</a>
                 </th:block>

@@ -1,9 +1,7 @@
 package com.example.edutrack.timetables.service.implementation;
 
-import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.ScheduleDTO;
-import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
@@ -15,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -69,7 +67,6 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         }
         List<Slot> slot = new ArrayList<>();
         List<LocalDate> date = new ArrayList<>();
-
         parseDaySlotString(summary, date, slot);
         List<RequestedSchedule> requestedSchedules = new ArrayList<>();
         for (int i = 0; i < date.size(); i++) {
@@ -86,7 +83,6 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             }
             requestedSchedules.add(new RequestedSchedule(slot.get(i), Day.valueOf(date.get(i).getDayOfWeek().name()), date.get(i)));
         }
-
         return requestedSchedules;
     }
 
@@ -109,6 +105,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             }
         }
     }
+
 
     @Override
     public void saveEnrollmentSchedule(Enrollment enrollment) {
@@ -191,6 +188,12 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         return enrollmentScheduleRepository.findAllByMenteeId(menteeId);
     }
 
+
+    @Override
+    public int countTestSlot(UUID menteeId){
+        return enrollmentScheduleRepository.countTestSlotsByEnrollment(menteeId);
+    }
+
     @Override
     public List<ScheduleDTO> getScheduleDTOs(List<EnrollmentSchedule> schedules, UUID menteeId) {
         return schedules.stream().map(schedule -> {
@@ -198,6 +201,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             LocalTime start = slot.getStartTime();
             LocalTime end = slot.getEndTime();
             ScheduleDTO dto = new ScheduleDTO();
+            dto.setId(schedule.getId());
             dto.setSlot(slot.name());
             dto.setDay(schedule.getDate().getDayOfWeek().name());
             dto.setCourseName(schedule.getEnrollment().getCourseMentor().getCourse().getName());
@@ -209,12 +213,136 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             dto.setStartMinute(start.getMinute());
             dto.setHasTest(schedule.getTest() != null);
             dto.setDurationInMinutes((int) ChronoUnit.MINUTES.between(start, end));
+            dto.setCanReschedule(schedule.canRequestReschedule());
+            dto.setAvailable(schedule.isAvailable());
+            dto.setRescheduleStatus(schedule.getRescheduleStatus());
+            dto.setDate(schedule.getDate());
             return dto;
         }).toList();
     }
 
     @Override
-    public int countTestSlot(UUID menteeId){
-        return enrollmentScheduleRepository.countTestSlotsByEnrollment(menteeId);
+    public boolean submitRescheduleRequest(int scheduleId, Slot newSlot, LocalDate newDate,
+                                           String reason, UUID menteeId) {
+        try {
+            // Find the schedule
+            Optional<EnrollmentSchedule> optionalSchedule = enrollmentScheduleRepository.findById(scheduleId);
+            if (optionalSchedule.isEmpty()) {
+                return false;
+            }
+
+            EnrollmentSchedule schedule = optionalSchedule.get();
+
+            // Verify the schedule belongs to the mentee
+            if (!schedule.getEnrollment().getMentee().getId().equals(menteeId)) {
+                return false;
+            }
+
+            // Check if reschedule is allowed
+            if (!schedule.canRequestReschedule()) {
+                return false;
+            }
+
+            schedule.setRescheduleStatus(EnrollmentSchedule.RescheduleStatus.REQUESTED);
+            schedule.setRequestedNewSlot(newSlot);
+            schedule.setRequestedNewDate(newDate);
+            schedule.setRescheduleReason(reason);
+            schedule.setRescheduleRequestDate(LocalDate.now());
+            enrollmentScheduleRepository.save(schedule);
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
+
+
+    @Override
+    public ScheduleDTO getScheduleDTO(Long scheduleId, UUID menteeId) {
+        Optional<EnrollmentSchedule> optSchedule = enrollmentScheduleRepository.findById(scheduleId.intValue());
+        if (optSchedule.isEmpty()) return null;
+
+        EnrollmentSchedule schedule = optSchedule.get();
+        if (!schedule.getEnrollment().getMentee().getId().equals(menteeId)) return null;
+
+        return mapToScheduleDTO(schedule, menteeId);
+    }
+
+    @Override
+    public List<ScheduleDTO> getOccupiedSlotsForWeek(UUID menteeId, LocalDate weekStart, LocalDate weekEnd) {
+        List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findAllByMenteeId(menteeId).stream()
+                .filter(s -> !s.getDate().isBefore(weekStart) && !s.getDate().isAfter(weekEnd))
+                .toList();
+
+        return getScheduleDTOs(schedules, menteeId);
+    }
+
+    @Override
+    public boolean isSlotAvailable(UUID menteeId, Slot newSlot, LocalDate newDate, int scheduleId) {
+        return enrollmentScheduleRepository.findAllByMenteeId(menteeId).stream()
+                .filter(s -> s.getId() != scheduleId && s.isAvailable())
+                .noneMatch(s -> s.getSlot() == newSlot && s.getDate().equals(newDate));
+    }
+
+    private ScheduleDTO mapToScheduleDTO(EnrollmentSchedule schedule, UUID menteeId) {
+        Slot slot = schedule.getSlot();
+        LocalTime start = slot.getStartTime();
+        LocalTime end = slot.getEndTime();
+
+        ScheduleDTO dto = new ScheduleDTO();
+        dto.setId(schedule.getId());
+        dto.setSlot(slot.name());
+        dto.setDay(schedule.getDate().getDayOfWeek().name());
+        dto.setDate(schedule.getDate());
+        dto.setCourseName(schedule.getEnrollment().getCourseMentor().getCourse().getName());
+        dto.setMentorName(schedule.getEnrollment().getCourseMentor().getMentor().getFullName());
+        dto.setStartTime(start.toString());
+        dto.setMentorId(schedule.getEnrollment().getCourseMentor().getCourse().getId());
+        dto.setEndTime(end.toString());
+        dto.setStartHour(start.getHour());
+        dto.setStartMinute(start.getMinute());
+        dto.setDurationInMinutes((int) ChronoUnit.MINUTES.between(start, end));
+        dto.setEndHour(start.getHour() + (int) Math.ceil((double) ChronoUnit.MINUTES.between(start, end) / 60.0));
+        dto.setHasTest(schedule.getTest() != null && schedule.getTest());
+        dto.setDate(schedule.getDate());
+        dto.setAvailable(schedule.isAvailable());
+        dto.setCanReschedule(schedule.canRequestReschedule());
+        dto.setRescheduleStatus(schedule.getRescheduleStatus());
+
+        return dto;
+    }
+
+    @Override
+    public List<EnrollmentSchedule> getSlotsUnderReview(UUID menteeId, LocalDate startDate, LocalDate endDate) {
+        return  enrollmentScheduleRepository
+                .findByEnrollment_MenteeIdAndRescheduleStatusAndRequestedNewDateBetween(
+                        menteeId,
+                        EnrollmentSchedule.RescheduleStatus.REQUESTED,
+                        startDate,
+                        endDate
+                );
+    }
+
+    @Override
+    public boolean resetExpiredRescheduleRequests() {
+        LocalDate today = LocalDate.now();
+        List<EnrollmentSchedule> expiredRequests =
+                enrollmentScheduleRepository.findAllByRescheduleStatusAndRequestedNewDateBefore(
+                        EnrollmentSchedule.RescheduleStatus.REQUESTED, today);
+
+        if (expiredRequests.isEmpty()) return false;
+
+        for (EnrollmentSchedule schedule : expiredRequests) {
+            schedule.setAvailable(false);
+            schedule.setRescheduleStatus(EnrollmentSchedule.RescheduleStatus.NONE);
+            schedule.setRequestedNewSlot(null);
+            schedule.setRequestedNewDate(null);
+            schedule.setRescheduleReason(null);
+            schedule.setRescheduleRequestDate(null);
+        }
+
+        enrollmentScheduleRepository.saveAll(expiredRequests);
+        return true;
+}
 }

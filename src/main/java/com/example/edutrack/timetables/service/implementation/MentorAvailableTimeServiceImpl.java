@@ -4,15 +4,14 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.model.*;
-import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -155,6 +154,15 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
                 }
             }
         }
+    }
+
+    @Override
+    public List<MentorAvailableTimeDetails> findByMentorIdAndStatusAndDateRange(
+            UUID mentorId,
+            LocalDate startDate,
+            LocalDate endDate
+    ){
+        return  mentorAvailableTimeRepository.findByMentorIdAndStatusAndDateRange(mentorId, startDate, endDate);
     }
 
 

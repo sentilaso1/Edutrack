@@ -92,7 +92,7 @@ public class HomeControlller {
         LandingPageConfig config = landingPageConfigService.getConfigByRole(MenteeLandingRole.MENTEE_NEW);
         populateCommonModel(model, config);
 
-        model.addAttribute("heroHeadline", "Welcome, <span class=\"span\">" + user.getFullName() + "!</span>");
+        model.addAttribute("heroHeadline", "Welcome," + user.getFullName());
         model.addAttribute("userType", "newUser");
         model.addAttribute("showSchedulesLink", false);
         model.addAttribute("showDashboard", true);
