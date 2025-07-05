@@ -122,20 +122,20 @@ public class AccountsController {
 
                 // Validate email
                 if (!verifyEmail(email)) {
-                        redirectAttributes.addFlashAttribute("error", "Email không hợp lệ");
+                        redirectAttributes.addFlashAttribute("error", "Email is not valid");
                         return "redirect:/profile/" + id + "#edit";
                 }
 
                 // Validate phone
                 if (!verifyPhone(phone)) {
-                        redirectAttributes.addFlashAttribute("error", "Phone number không hợp lệ");
+                        redirectAttributes.addFlashAttribute("error", "Phone number is not valid (must start with 0 and be 10 or 11 digits)");
                         return "redirect:/profile/" + id + "#edit";
                 }
 
                 // Validate birthDate
                 if (!verifyBirthDate(birthDate)) {
                         redirectAttributes.addFlashAttribute("error",
-                                        "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng yyyy-MM-dd)");
+                                        "Birth date is not valid (must be a past date in yyyy-MM-dd format)");
                         return "redirect:/profile/" + id + "#edit";
                 }
 
@@ -147,7 +147,7 @@ public class AccountsController {
                                 return "redirect:/profile/" + id + "#edit";
                         }
                         if (expertise.trim().length() < 3 || expertise.trim().length() > 100) {
-                                redirectAttributes.addFlashAttribute("error", "Expertise phải từ 3 đến 100 ký tự");
+                                redirectAttributes.addFlashAttribute("error", "Expertise must be between 3 and 100 characters");
                                 return "redirect:/profile/" + id + "#edit";
                         }
                 }
@@ -156,7 +156,7 @@ public class AccountsController {
                 Mentee mentee = menteeService.getMenteeById(id);
                 if (mentor == null && mentee != null) {
                         if (interests != null && (interests.trim().length() < 3 || interests.trim().length() > 100)) {
-                                redirectAttributes.addFlashAttribute("error", "Interests phải từ 3 đến 100 ký tự");
+                                redirectAttributes.addFlashAttribute("error", "Interests must be between 3 and 100 characters");
                                 return "redirect:/profile/" + id + "#edit";
                         }
                 }

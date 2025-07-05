@@ -155,17 +155,17 @@ public class AdminController {
                 try {
                         User user = userService.getUserById(id);
                         if (user == null) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng!");
+                                redirectAttributes.addFlashAttribute("errorMessage", "Can not find user with ID: " + id);
                                 return "redirect:/admin/users";
                         }
                         user.setIsActive(!user.getIsActive()); // Toggle active state
                         userService.saveUser(user);
                         redirectAttributes.addFlashAttribute("successMessage",
-                                        user.getIsActive() ? "Kích hoạt người dùng thành công!"
-                                                        : "Hủy kích hoạt người dùng thành công!");
+                                        user.getIsActive() ? "Activate user successfully!"
+                                                        : "Deactivate user successfully!");
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Lỗi khi thay đổi trạng thái kích hoạt: " + e.getMessage());
+                                        "Error when change status: " + e.getMessage());
                 }
                 return "redirect:/admin/users";
         }
@@ -176,14 +176,14 @@ public class AdminController {
                 try {
                         Staff.Role staffRole = Staff.Role.valueOf(role);
                         userService.grantStaffRole(id, staffRole);
-                        redirectAttributes.addFlashAttribute("successMessage", "Cấp vai trò Staff thành công!");
+                        redirectAttributes.addFlashAttribute("successMessage", "Staff role granted successfully!");
                 } catch (IllegalArgumentException e) {
-                        redirectAttributes.addFlashAttribute("errorMessage", "Vai trò không hợp lệ!");
+                        redirectAttributes.addFlashAttribute("errorMessage", "Invalid role");
                 } catch (IllegalStateException e) {
                         redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Lỗi khi cấp vai trò Staff: " + e.getMessage());
+                                        "Error when grant staff role: " + e.getMessage());
                 }
                 return "redirect:/admin/users";
         }
