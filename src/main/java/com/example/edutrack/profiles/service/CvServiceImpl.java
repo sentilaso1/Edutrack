@@ -225,8 +225,17 @@ public class CvServiceImpl implements CvService {
 
     @Override
     public void createCV(CVForm cvRequest, UUID mentorId) {
+        CV cv = validateEntitiesAndBuildCV(cvRequest, mentorId);
+        cvRequest.parseSelectedCourses();
+        validateAndApplyCourseDetails(cvRequest, cv, mentorId);
+    }
+
+    public CV validateEntitiesAndBuildCV(CVForm cvRequest, UUID mentorId) {
         User user = userRepository.findById(cvRequest.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Mentor mentor = mentorRepository.findById(mentorId)
+                .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
 
         CV cv = new CV(
                 cvRequest.getSummary(),
@@ -243,63 +252,70 @@ public class CvServiceImpl implements CvService {
 
         cvRepository.save(cv);
 
-        cvRequest.parseSelectedCourses();
+        return cv;
+    }
+
+    public void validateAndApplyCourseDetails(CVForm cvRequest, CV cv, UUID mentorId) {
+        Map<UUID, CourseApplicationDetail> details = cvRequest.getCourseDetails();
+        if (details == null || details.isEmpty()) return;
 
         Mentor mentor = mentorRepository.findById(mentorId)
                 .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
 
-        Map<UUID, CourseApplicationDetail> details = cvRequest.getCourseDetails();
-        if (details == null || details.isEmpty()) return;
+        Set<UUID> newCourseIds = details.keySet();
+
+        // REMOVE any CourseMentor entries not in the new selection!
+        List<CourseMentor> oldMentorCourses = courseMentorRepository.findByMentorId(mentorId);
+        for (CourseMentor old : oldMentorCourses) {
+            if (!newCourseIds.contains(old.getCourse().getId())) {
+                courseMentorRepository.delete(old);
+            }
+        }
 
         for (Map.Entry<UUID, CourseApplicationDetail> entry : details.entrySet()) {
             UUID courseId = entry.getKey();
             CourseApplicationDetail detail = entry.getValue();
 
-            if (detail.getPrice() == null || detail.getPrice() <= 0) {
-                throw new IllegalArgumentException("Invalid price for course: " + courseId);
-            }
             if (detail.getDescription() == null || detail.getDescription().trim().isEmpty()) {
                 throw new IllegalArgumentException("Missing description for course: " + courseId);
             }
-
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
-            CVCourse cvCourse = new CVCourse(cv, course);
-            cvCourseRepository.save(cvCourse);
-
-            Optional<CourseMentor> existingOpt = courseMentorRepository.findByMentorAndCourse(mentor, course);
-
-            CourseMentor cm;
-            if (existingOpt.isPresent()) {
-                cm = existingOpt.get();
-
-                if (cm.getStatus() != ApplicationStatus.REJECTED) {
-                    continue;
-                }
-
-                cm.setPrice(detail.getPrice());
-                cm.setDescription(detail.getDescription());
-                cm.setStatus(ApplicationStatus.PENDING);
-                cm.setAppliedDate(LocalDateTime.now());
-            } else {
-                cm = new CourseMentor();
-                cm.setMentor(mentor);
-                cm.setCourse(course);
-                cm.setPrice(detail.getPrice());
-                cm.setDescription(detail.getDescription());
-                cm.setStatus(ApplicationStatus.PENDING);
-                cm.setAppliedDate(LocalDateTime.now());
-            }
-
-            courseMentorRepository.save(cm);
+            handleCourseMentorLogic(cv, mentor, course, detail);
         }
     }
 
+    public void handleCourseMentorLogic(CV cv, Mentor mentor, Course course, CourseApplicationDetail detail) {
+        cvCourseRepository.save(new CVCourse(cv, course));
+
+        Optional<CourseMentor> existingOpt = courseMentorRepository.findByMentorAndCourse(mentor, course);
+
+        CourseMentor cm;
+        if (existingOpt.isPresent()) {
+            cm = existingOpt.get();
+            if (cm.getStatus() != ApplicationStatus.REJECTED) {
+                return;
+            }
+            cm.setDescription(detail.getDescription());
+            cm.setStatus(ApplicationStatus.PENDING);
+            cm.setAppliedDate(LocalDateTime.now());
+        } else {
+            cm = new CourseMentor();
+            cm.setMentor(mentor);
+            cm.setCourse(course);
+            cm.setDescription(detail.getDescription());
+            cm.setStatus(ApplicationStatus.PENDING);
+            cm.setAppliedDate(LocalDateTime.now());
+        }
+        courseMentorRepository.save(cm);
+    }
+
+
+
     @Override
     public CV getCVById(UUID id) {
-        return cvRepository.findByUserId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cv not found with ID: " + id));
+        return cvRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -315,11 +331,9 @@ public class CvServiceImpl implements CvService {
         Optional<CV> optionalCv = cvRepository.findById(id);
         if (optionalCv.isPresent()) {
             CV cv = optionalCv.get();
-            if (cv.getStatus().equals("aiapproved")) {
-                cv.setStatus("approved");
-                cvRepository.save(cv);
-                return true;
-            }
+            cv.setStatus("approved");
+            cvRepository.save(cv);
+            return true;
         }
         return false;
     }
@@ -329,11 +343,9 @@ public class CvServiceImpl implements CvService {
         Optional<CV> optionalCv = cvRepository.findById(id);
         if (optionalCv.isPresent()) {
             CV cv = optionalCv.get();
-            if (cv.getStatus().equals("aiapproved")) {
-                cv.setStatus("rejected");
-                cvRepository.save(cv);
-                return true;
-            }
+            cv.setStatus("rejected");
+            cvRepository.save(cv);
+            return true;
         }
         return false;
     }

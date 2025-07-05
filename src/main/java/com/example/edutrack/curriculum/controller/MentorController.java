@@ -7,10 +7,13 @@ import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.service.MentorService;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.model.CourseMentorId;
 import com.example.edutrack.curriculum.model.Feedback;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
+import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import jakarta.servlet.http.HttpSession;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
@@ -21,35 +24,42 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Controller(value = "mentee")
 public class MentorController {
     private final MentorService mentorService;
+    private final MentorRepository mentorRepository;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
     private final MentorAvailableTimeService mentorAvailableTimeService;
     private final FeedbackRepository feedbackRepository;
     private final CourseRepository courseRepository;
+    private final CourseMentorService courseMentorService;
+    private final CourseMentorRepository courseMentorRepository;
 
     public MentorController(MentorService mentorService,
+                            MentorRepository mentorRepository,
                             CourseMentorServiceImpl courseMentorServiceImpl,
                             MentorAvailableTimeService mentorAvailableTimeService,
                             FeedbackRepository feedbackRepository,
-                            CourseRepository courseRepository) {
+                            CourseRepository courseRepository,
+                            CourseMentorService courseMentorService,
+                            CourseMentorRepository courseMentorRepository) {
         this.mentorService = mentorService;
+        this.mentorRepository = mentorRepository;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.feedbackRepository = feedbackRepository;
         this.courseRepository = courseRepository;
+        this.courseMentorService = courseMentorService;
+        this.courseMentorRepository = courseMentorRepository;
     }
 
     @GetMapping("/mentors")
@@ -87,12 +97,13 @@ public class MentorController {
 
         Pageable pageable = PageRequest.of(page - 1, size_page, sort);
 
-        Page<Mentor> mentorPage = mentorService.searchMentors(
+        Page<Mentor> mentorPage = mentorService.searchMentorsWithApprovedCV(
                 name, expertise, rating, totalSessions, isAvailable, pageable
         );
 
+        List<String> allSkills = mentorService.getAllMentorExpertiseFromApprovedCVs();
 
-
+        model.addAttribute("allExpertiseSkills", allSkills);
         model.addAttribute("mentorPage", mentorPage);
         model.addAttribute("page", page);
         model.addAttribute("name", name);
@@ -108,7 +119,7 @@ public class MentorController {
     }
 
     @GetMapping("/mentors/{id}")
-    public String viewMentorDetail(@PathVariable UUID id, Model model){
+    public String viewMentorDetail(@PathVariable UUID id, Model model, HttpSession session){
         List<CourseMentor> courseMentors = courseMentorServiceImpl.getCourseMentorByMentorId(id);
         Mentor mentor = mentorService.getMentorById(id).get();
         LocalDate endLocal = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
@@ -127,6 +138,7 @@ public class MentorController {
 
         List<Feedback> feedbacks = feedbackRepository.findByCourseMentor_Mentor_IdAndStatus(id, Feedback.Status.ACTIVE);
 
+        model.addAttribute("isLoggedIn", session.getAttribute("loggedInUser") != null);
         model.addAttribute("feedbacks", feedbacks);
         model.addAttribute("mentor", mentorService.getMentorById(id));
         model.addAttribute("courses", courseMentors);
@@ -160,5 +172,34 @@ public class MentorController {
         model.addAttribute("courseId", courseId);
 
         return "mentee/mentor-review";
+    }
+
+
+    @GetMapping("/mentor/price")
+    public String listMentorCourses(Model model,
+                                    HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        List<CourseMentor> courseMentors = courseMentorRepository.findByMentorId(user.getId());
+        model.addAttribute("courseMentors", courseMentors);
+        return "mentor/skill-price-set";
+    }
+
+    @PostMapping("/mentor/price/save")
+    public String saveAllPrices(
+            @RequestParam("courseId") List<UUID> courseIds,
+            @RequestParam("price") List<Double> prices,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        if (mentor == null) {
+            return "redirect:/login";
+        }
+        courseMentorService.updatePrices(mentor.getId(), courseIds, prices);
+        redirectAttributes.addFlashAttribute("success", "Prices updated!");
+        return "redirect:/mentor/price";
     }
 }

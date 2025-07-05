@@ -54,6 +54,8 @@ public class UserService {
         mentee.setTotalSessions(0);
         mentee.setInterests("");
         menteeRepository.save(mentee);
+
+        walletService.save(user);
     }
 
     public void registerMentor(User user) {
@@ -70,6 +72,8 @@ public class UserService {
         mentor.setExpertise("");
         mentor.setRating(0.0);
         mentorRepository.save(mentor);
+
+        walletService.save(user);
     }
 
     public boolean isMentor(User user){

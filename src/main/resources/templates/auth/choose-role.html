@@ -1,12 +1,132 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Choose Role</title>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head xmlns:th="http://www.thymeleaf.org">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!--
+    - primary meta tags
+    -->
+    <title>Youdemi</title>
+    <meta name="title" content="Youdemi"/>
+    <meta name="description" content="This is an education HTML template made by codewithsadee"/>
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .role-container {
+            border-radius: 20px;
+            padding: 60px 70px 54px 70px;
+            min-width: 400px;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 46px;
+            margin: 30px auto;
+        }
+        .role-title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ff7c96;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .role-buttons {
+            display: flex;
+            gap: 32px;
+            width: 100%;
+            justify-content: center;
+        }
+        .role-btn {
+            background: linear-gradient(135deg, #ff7c96, #ffb5c2);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 30px 70px;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(255, 124, 150, 0.16);
+            transition: background 0.18s, box-shadow 0.2s, transform 0.1s;
+        }
+        .role-btn:hover, .role-btn:focus {
+            background: linear-gradient(135deg, #ff2a7a, #ffa6b0);
+            box-shadow: 0 4px 20px rgba(255, 124, 150, 0.17);
+            outline: none;
+            transform: translateY(-2px) scale(1.04);
+        }
+        @media (max-width: 480px) {
+            .role-container {
+                padding: 26px 8vw 20px 8vw;
+                min-width: 0;
+            }
+            .role-buttons {
+                flex-direction: column;
+                gap: 18px;
+            }
+            .role-btn {
+                width: 100%;
+                padding: 15px 0;
+            }
+        }
+    </style>
+
+    <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <!--
+    - custom font link
+    -->
+
+    <!--
+    - custom css link
+    -->
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
 </head>
+
 <body>
-<form method="post" action="/choose-role">
-    <button type="submit" name="role" value="MENTEE">Mentee</button>
-    <button type="submit" name="role" value="MENTOR">Mentor</button>
-</form>
+
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<main>
+    <article>
+        <section
+                class="section course has-bg-image"
+                aria-labelledby="course-label"
+                th:style="|background-image: url('@{/assets/images/course-bg.png}')|"
+        >
+            <form method="post" action="/choose-role">
+                <div class="role-container">
+                    <div class="role-title">Choose Your Role</div>
+                    <div class="role-buttons">
+                        <button type="submit" name="role" value="MENTEE" class="role-btn">Mentee</button>
+                        <button type="submit" name="role" value="MENTOR" class="role-btn">Mentor</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+    </article>
+</main>
+
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+
+<!--
+- custom js link
+-->
+<!-- Custom JS -->
+<script th:src="@{/assets/js/courlist.js}"></script>
+
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
 </body>
 </html>

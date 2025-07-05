@@ -48,7 +48,7 @@ public class MentorController {
     public MentorController(EnrollmentScheduleService enrollmentScheduleService,
                             EnrollmentService enrollmentService,
                             MentorAvailableTimeService mentorAvailableTimeService, WalletService walletService, TransactionService transactionService,
-                                MentorService mentorService) {
+                            MentorService mentorService) {
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.enrollmentService = enrollmentService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
@@ -174,7 +174,7 @@ public class MentorController {
 
         LocalDate currentDate = LocalDate.now();
         if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isBefore(currentDate)) {
-            return "redirect:/mentor/schedule/" + esid +"?error=toolatetochange";
+            return "redirect:/mentor/schedule/" + esid + "?error=toolatetochange";
         }
 
         // Update relevant fields only
@@ -204,28 +204,55 @@ public class MentorController {
         if (!enrollment.getCourseMentor().getMentor().getId().equals(mentor.getId())) {
             return "redirect:/mentor/schedule?error=notMentor";
         }
+
+
+        Optional<Wallet> menteeWalletOpt = walletService.findByUser(enrollment.getMentee());
+        if (menteeWalletOpt.isEmpty()) {
+            return "redirect:/mentor/sensor-class?error=menteeWalletNotFound";
+        }
+        Wallet menteeWallet = menteeWalletOpt.get();
+
+        Optional<Wallet> mentorWalletOpt = walletService.findByUser(mentor);
+        if (mentorWalletOpt.isEmpty()) {
+            mentorWalletOpt = Optional.of(walletService.save(mentor));
+        }
+        Wallet mentorWallet = mentorWalletOpt.get();
+
         if (action.equals("reject")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
             enrollmentService.save(enrollment);
 
-            Optional<Wallet> walletOpt = walletService.findByUser(enrollment.getMentee());
-            if (walletOpt.isEmpty()) {
-                walletOpt = Optional.of(walletService.save(enrollment.getMentee()));
-            }
-
-            Wallet wallet = walletOpt.get();
-            wallet.setOnHold(wallet.getOnHold() - enrollment.getTransaction().getAmount());
-            wallet.setBalance(wallet.getBalance() + enrollment.getTransaction().getAmount());
-            walletService.save(wallet);
+            menteeWallet.setOnHold(menteeWallet.getOnHold() - enrollment.getTransaction().getAbsoluteAmount());
+            menteeWallet.setBalance(menteeWallet.getBalance() + enrollment.getTransaction().getAbsoluteAmount());
+            walletService.save(menteeWallet);
 
             enrollment.getTransaction().setStatus(Transaction.TransactionStatus.FAILED);
             transactionService.save(enrollment.getTransaction());
 
             return "redirect:/mentor/sensor-class?status=REJECTED&reject=" + eid;
         }
+
         if (action.equals("approve")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
             enrollmentService.save(enrollment);
+            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
+
+            menteeWallet.setOnHold(menteeWallet.getOnHold() - enrollment.getTransaction().getAbsoluteAmount());
+            mentorWallet.setBalance(mentorWallet.getBalance() + enrollment.getTransaction().getAbsoluteAmount());
+            walletService.save(menteeWallet);
+            walletService.save(mentorWalletOpt.get());
+
+            Transaction transaction = new Transaction(
+                    enrollment.getTransaction().getAbsoluteAmount(),
+                    "Registration for Course " + enrollment.getCourseMentor().getCourse().getName() + " by " + enrollment.getCourseMentor().getMentor().getFullName(),
+                    mentorWallet
+            );
+            transaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+            transactionService.save(transaction);
+
+            enrollment.getTransaction().setStatus(Transaction.TransactionStatus.COMPLETED);
+            transactionService.save(enrollment.getTransaction());
+
             return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
         }
         if (action.equals("view")) {
@@ -266,8 +293,8 @@ public class MentorController {
         List<MentorAvailableTimeDTO> setTime = mentorAvailableTimeService.findAllDistinctStartEndDates(mentor, enumValue);
         model.addAttribute("setTime", setTime);
 
-        if("REJECTED".equals(status) || "DRAFT".equals(status)){
-            if(setTime.size() == 1){
+        if ("REJECTED".equals(status) || "DRAFT".equals(status)) {
+            if (setTime.size() == 1) {
                 LocalDate startDate = setTime.get(0).getStartDate();
                 LocalDate endDate = setTime.get(0).getEndDate();
                 model.addAttribute("startDate", startDate);
@@ -283,9 +310,9 @@ public class MentorController {
             endLocal = LocalDate.parse(end, formatter);
         }
 
-        if("REJECTED".equals(status)){
+        if ("REJECTED".equals(status)) {
             List<MentorAvailableTime> foundMentorAvailableTime = mentorAvailableTimeService.findAllMentorAvailableTimeByEndDate(mentor, endLocal);
-            if(!foundMentorAvailableTime.isEmpty()){
+            if (!foundMentorAvailableTime.isEmpty()) {
                 model.addAttribute("reason", foundMentorAvailableTime.get(0).getReason());
             }
         }
@@ -319,7 +346,7 @@ public class MentorController {
             return "redirect:/login";
         }
 
-        if("ONGOING".equals(status)){
+        if ("ONGOING".equals(status)) {
             List<Enrollment> ongoingEnrollments = enrollmentService.findOngoingEnrollments(mentor.getId());
             model.addAttribute("ongoingEnrollments", ongoingEnrollments);
         }

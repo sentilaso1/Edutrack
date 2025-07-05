@@ -5,7 +5,9 @@ import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.model.Slot;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,4 +37,6 @@ public interface EnrollmentService {
     List<Enrollment> findAllApprovedEnrollments();
 
     List<CourseMentor> getCourseMentorsByMentee(UUID menteeId);
+
+    int getNumberOfPendingSlot(Mentor mentor, LocalDate date, Slot slot);
 }

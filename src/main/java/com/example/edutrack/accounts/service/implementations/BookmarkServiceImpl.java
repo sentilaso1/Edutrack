@@ -6,6 +6,7 @@ import com.example.edutrack.accounts.model.Bookmark;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.BookmarkRepository;
 import com.example.edutrack.accounts.service.interfaces.BookmarkService;
+import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.service.implementation.TagServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.TagService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class BookmarkServiceImpl implements BookmarkService {
@@ -126,6 +128,24 @@ public class BookmarkServiceImpl implements BookmarkService {
     }
 
     @Override
+    public Page<BookmarkDTO> queryAll(BookmarkFilterForm params, Pageable pageable, User user) {
+        String sort = params.getSort();
+        List<Integer> tagIds = params.getTags();
+
+        if (sort == null || sort.equals(BookmarkFilterForm.SORT_DATE_DESC)) {
+            if (tagIds == null || tagIds.isEmpty()) {
+                return this.findAllBookmarkWithCourseTagsDateDesc(pageable, user);
+            }
+            return this.findAllBookmarkContainingTagsDateDesc(pageable, user, tagIds);
+        }
+
+        if (tagIds == null || tagIds.isEmpty()) {
+            return this.findAllBookmarkWithCourseTagsDateAsc(pageable, user);
+        }
+        return this.findAllBookmarkContainingTagsDateAsc(pageable, user, tagIds);
+    }
+
+    @Override
     public List<Tag> findAllUniqueTags(List<BookmarkDTO> bookmarkDTOs) {
         return bookmarkDTOs.stream()
                 .flatMap(bookmarkDTO -> bookmarkDTO.getTags().stream())
@@ -172,6 +192,11 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     public void delete(Long id) {
         bookmarkRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean isBookmarkedByUser(Course course, User user) {
+        return bookmarkRepository.existsByCourseAndUser(course, user);
     }
 
     @Override

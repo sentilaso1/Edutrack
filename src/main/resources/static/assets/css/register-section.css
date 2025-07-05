@@ -401,7 +401,7 @@ body {
 
 /* Selected slot */
 .schedule-table .selected {
-    background: rgba(230, 148, 0, 0.86) !important;
+    background: rgb(255, 84, 98) !important;
     color: white !important;
     position: relative;
 }
@@ -413,7 +413,6 @@ body {
 }
 
 .schedule-table .selected::after {
-    content: '✓';
     position: absolute;
     top: 50%;
     left: 50%;

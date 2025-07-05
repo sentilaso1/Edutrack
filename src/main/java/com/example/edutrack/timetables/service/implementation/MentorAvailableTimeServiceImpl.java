@@ -114,6 +114,9 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
     @Override
     public void insertMentorAvailableTime(LocalDate startDate, LocalDate endDate, Mentor mentor){
         List<MentorAvailableTime> mentorAvailableTimes = findAllMentorAvailableTimeByEndDate(mentor, endDate);
+        if(mentorAvailableTimes.isEmpty()) {
+            return;
+        }
         List<Slot> slots = mentorAvailableTimes.stream().map(mat -> mat.getId().getSlot()).collect(Collectors.toList());
         List<Day> days = mentorAvailableTimes.stream().map(mat -> mat.getId().getDay()).collect(Collectors.toList());
 

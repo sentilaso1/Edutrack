@@ -5,9 +5,14 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
+import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,9 +24,11 @@ import java.util.UUID;
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
+    private final EnrollmentScheduleService enrollmentScheduleService;
 
-    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository) {
+    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository, EnrollmentScheduleService enrollmentScheduleService) {
         this.enrollmentRepository = enrollmentRepository;
+        this.enrollmentScheduleService = enrollmentScheduleService;
     }
 
     @Override
@@ -103,6 +110,22 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<CourseMentor> getCourseMentorsByMentee(UUID menteeId) {
         return enrollmentRepository.findCourseMentorByMentee(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+    }
+
+    @Override
+    public int getNumberOfPendingSlot(Mentor mentor, LocalDate date, Slot slot){
+        List<Enrollment> enrollment = enrollmentRepository.findAllPendingByMentorId(mentor);
+        List<String> summaries = enrollment.stream().map(Enrollment::getScheduleSummary).toList();
+        int count = 0;
+        for(String summary : summaries){
+            List<RequestedSchedule> requestedScheduleList = enrollmentScheduleService.findStartLearningTime(summary);
+            for(RequestedSchedule requestedSchedule : requestedScheduleList){
+                if(requestedSchedule.getSlot().equals(slot) && requestedSchedule.getRequestedDate().equals(date)){
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
 }

@@ -135,7 +135,7 @@
             <td style="max-width: 600px; word-break: break-word;">
                 <span style="font-weight: bold;" th:text="'Current feedback status: ' + ${r.feedback.status.name()}"></span>
                 <br>
-                <span th:text="${r.feedback.mentee.fullName} + ' says:'"></span>
+                <span th:text="(${r.feedback.isAnonymous} ? 'Anonymous Mentee' : ${r.feedback.mentee.fullName}) + ' says:'"></span>
                 <br>
                 <span th:text="${#strings.abbreviate(r.feedback.content, 500)}"></span>
             </td>
@@ -198,44 +198,31 @@
     });
 
     /*<![CDATA[*/
-    let reportWasRunning = false;
+    let wasRunningReport = false;
 
-    function pollReportBatchStatus() {
-        fetch('/api/report-batch/status')
+    function pollBatchStatus() {
+        fetch('/api/batch/status')
             .then(res => res.json())
             .then(status => {
-                if (!status.running && reportWasRunning) {
-                    // Only reload when switching from running -> not running
-                    location.reload();
-                }
-                reportWasRunning = status.running;
-
-                // Optionally update UI:
-                const reportBatchTimerElem = document.getElementById('report-batch-timer');
-                if (reportBatchTimerElem) {
-                    if (status.running) {
-                        reportBatchTimerElem.innerHTML = '<span>AI moderation is in progress...</span>';
-                    } else {
-                        // Show next batch timer if available
-                        const reportTimerElem = document.getElementById('report-timer');
-                        if (reportTimerElem && status.nextBatchMillis) {
-                            const now = Date.now();
-                            let secondsToNextBatch = Math.floor((status.nextBatchMillis - now) / 1000);
-                            if (secondsToNextBatch < 0) secondsToNextBatch = 0;
-                            reportTimerElem.textContent = formatMMSS(secondsToNextBatch);
-
-                            if (secondsToNextBatch === 0) {
-                                location.reload();
-                            }
-                        }
+                if (status.reportRunning) {
+                    wasRunningReport = true;
+                } else {
+                    if (wasRunningReport) {
+                        location.reload();
                     }
+                    wasRunningReport = false;
                 }
             })
             .catch(console.error);
     }
 
-    setInterval(pollReportBatchStatus, 10000);
-    pollReportBatchStatus();
+    setInterval(pollBatchStatus, 10000);
+
+    pollBatchStatus();
+
+    const reportBatchRunning = [[${reportBatchRunning}]];
+    const nextReportBatchMillis = [[${nextReportBatchMillis}]];
+    const timerElement = document.getElementById('report-timer');
 
     function formatMMSS(secs) {
         let min = Math.floor(secs / 60);
@@ -243,24 +230,24 @@
         return min.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
     }
 
-    // For initial countdown on page load:
-    const reportBatchRunning = [[${reportBatchRunning}]];
-    const nextReportBatchMillis = [[${nextReportBatchMillis}]];
-    const reportTimerElem = document.getElementById('report-timer');
-    if (reportTimerElem && !reportBatchRunning && nextReportBatchMillis > 0) {
-        function updateReportCountdown() {
-            const now = Date.now();
-            let secondsToNextBatch = Math.floor((nextReportBatchMillis - now) / 1000);
-            if (secondsToNextBatch < 0) secondsToNextBatch = 0;
-            reportTimerElem.textContent = formatMMSS(secondsToNextBatch);
-            if (secondsToNextBatch === 0) {
-                clearInterval(reportTimerInterval);
-                location.reload();
-            }
+    function updateCountdown() {
+        if (reportBatchRunning || nextReportBatchMillis < 0) return; // do not count down
+        const now = Date.now();
+        let secondsToNextBatch = Math.floor((nextReportBatchMillis - now) / 1000);
+        if (secondsToNextBatch < 0) secondsToNextBatch = 0;
+        timerElement.textContent = formatMMSS(secondsToNextBatch);
+
+        if (secondsToNextBatch === 0) {
+            clearInterval(timerInterval);
+            location.reload();
         }
-        updateReportCountdown();
-        var reportTimerInterval = setInterval(updateReportCountdown, 1000);
     }
+
+    if (timerElement && !reportBatchRunning && nextReportBatchMillis > 0) {
+        updateCountdown();
+        var timerInterval = setInterval(updateCountdown, 1000);
+    }
+    /*]]>*/
 </script>
 
 
