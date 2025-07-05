@@ -59,7 +59,7 @@ public class ContactControllerTest {
                 validContactForm.setMessage("Test message content");
         }
 
-        // Test Case 1: Valid contact form with no file attachment - Success path
+        // Test Case 3.1: Valid contact form with no file attachment - Success path
         @Test
         void testSendContactMail_ValidFormNoFile_Success() throws Exception {
                 // Arrange
@@ -78,7 +78,7 @@ public class ContactControllerTest {
                 verify(redirectAttributes, never()).addFlashAttribute(eq("error"), anyString());
         }
 
-        // Test Case 2: Valid contact form with valid file attachment - Success path
+        // Test Case 3.2: Valid contact form with valid file attachment - Success path
         @Test
         void testSendContactMail_ValidFormWithValidFile_Success() throws Exception {
                 // Arrange
@@ -99,7 +99,7 @@ public class ContactControllerTest {
                 verify(redirectAttributes).addFlashAttribute("success", "Your message has been sent successfully!");
         }
 
-        // Test Case 3: Invalid email - null email
+        // Test Case 3.3: Invalid email - null email
         @Test
         void testSendContactMail_NullEmail_Error() {
                 // Arrange
@@ -115,7 +115,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 4: Invalid email - invalid format
+        // Test Case 3.4: Invalid email - invalid format
         @Test
         void testSendContactMail_InvalidEmailFormat_Error() {
                 // Arrange
@@ -131,7 +131,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 5: Invalid phone - null phone
+        // Test Case 3.5: Invalid phone - null phone
         @Test
         void testSendContactMail_NullPhone_Error() {
                 // Arrange
@@ -147,7 +147,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 6: Invalid phone - wrong format
+        // Test Case 3.6: Invalid phone - wrong format
         @Test
         void testSendContactMail_InvalidPhoneFormat_Error() {
                 // Arrange
@@ -163,7 +163,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 7: Invalid subject - null subject
+        // Test Case 3.7: Invalid subject - null subject
         @Test
         void testSendContactMail_NullSubject_Error() {
                 // Arrange
@@ -179,7 +179,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 8: Invalid subject - empty subject
+        // Test Case 3.8: Invalid subject - empty subject
         @Test
         void testSendContactMail_EmptySubject_Error() {
                 // Arrange
@@ -195,7 +195,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 9: Invalid message - null message
+        // Test Case 3.9: Invalid message - null message
         @Test
         void testSendContactMail_NullMessage_Error() {
                 // Arrange
@@ -212,7 +212,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 10: Invalid message - message too long
+        // Test Case 3.10: Invalid message - message too long
         @Test
         void testSendContactMail_MessageTooLong_Error() {
                 // Arrange
@@ -230,7 +230,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 11: Invalid file - file too large
+        // Test Case 3.11: Invalid file - file too large
         @Test
         void testSendContactMail_FileTooLarge_Error() {
                 // Arrange
@@ -248,7 +248,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 12: Invalid file - unsupported extension
+        // Test Case 3.12: Invalid file - unsupported extension
         @Test
         void testSendContactMail_UnsupportedFileExtension_Error() {
                 // Arrange
@@ -267,7 +267,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 13: Invalid file - null filename
+        // Test Case 3.13: Invalid file - null filename
         @Test
         void testSendContactMail_NullFilename_Error() {
                 // Arrange
@@ -286,7 +286,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 14: Empty file - should be valid (file is optional)
+        // Test Case 3.14: Empty file - should be valid (file is optional)
         @Test
         void testSendContactMail_EmptyFile_Success() throws Exception {
                 // Arrange
@@ -305,7 +305,7 @@ public class ContactControllerTest {
                 verify(redirectAttributes).addFlashAttribute("success", "Your message has been sent successfully!");
         }
 
-        // Test Case 15: Exception during email sending
+        // Test Case 3.15: Exception during email sending
         @Test
         void testSendContactMail_EmailSendingException_Error() throws Exception {
                 // Arrange
@@ -323,7 +323,7 @@ public class ContactControllerTest {
                                 eq("Failed to send your message: Mail server error"));
         }
 
-        // Test Case 16: Boundary value - message exactly 1000 characters
+        // Test Case 3.16: Boundary value - message exactly 1000 characters
         @Test
         void testSendContactMail_MessageExactly1000Chars_Success() throws Exception {
                 // Arrange
@@ -343,7 +343,7 @@ public class ContactControllerTest {
                 verify(redirectAttributes).addFlashAttribute("success", "Your message has been sent successfully!");
         }
 
-        // Test Case 17: Boundary value - file exactly 5MB
+        // Test Case 3.17: Boundary value - file exactly 5MB
         @Test
         void testSendContactMail_FileExactly5MB_Success() throws Exception {
                 // Arrange
@@ -364,7 +364,7 @@ public class ContactControllerTest {
                 verify(redirectAttributes).addFlashAttribute("success", "Your message has been sent successfully!");
         }
 
-        // Test Case 18: Valid phone with 10 digits
+        // Test Case 3.18: Valid phone with 10 digits
         @Test
         void testSendContactMail_ValidPhone10Digits_Success() throws Exception {
                 // Arrange
@@ -383,7 +383,7 @@ public class ContactControllerTest {
                 verify(redirectAttributes).addFlashAttribute("success", "Your message has been sent successfully!");
         }
 
-        // Test Case 19: Valid phone with 11 digits
+        // Test Case 3.19: Valid phone with 11 digits
         @Test
         void testSendContactMail_ValidPhone11Digits_Success() throws Exception {
                 // Arrange
@@ -402,7 +402,7 @@ public class ContactControllerTest {
                 verify(redirectAttributes).addFlashAttribute("success", "Your message has been sent successfully!");
         }
 
-        // Test Case 20: Test all supported file extensions individually
+        // Test Suite 3.20: Test all supported file extensions individually
         @Test
         void testSendContactMail_PdfExtension_Success() throws Exception {
                 testFileExtension(".pdf");
@@ -423,6 +423,7 @@ public class ContactControllerTest {
                 testFileExtension(".txt");
         }
 
+        // Helper method to test file extensions
         private void testFileExtension(String extension) throws Exception {
                 // Arrange
                 when(file.isEmpty()).thenReturn(false);
@@ -442,7 +443,7 @@ public class ContactControllerTest {
                 verify(redirectAttributes).addFlashAttribute("success", "Your message has been sent successfully!");
         }
 
-        // Test Case 21: Empty message validation
+        // Test Case 3.21: Empty message validation
         @Test
         void testSendContactMail_EmptyMessage_Error() {
                 // Arrange
@@ -459,7 +460,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 22: Phone validation - too short
+        // Test Case 3.22: Phone validation - too short
         @Test
         void testSendContactMail_PhoneTooShort_Error() {
                 // Arrange
@@ -475,7 +476,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 23: Phone validation - too long
+        // Test Case 3.23: Phone validation - too long
         @Test
         void testSendContactMail_PhoneTooLong_Error() {
                 // Arrange
@@ -491,7 +492,7 @@ public class ContactControllerTest {
                 verify(mailSender, never()).createMimeMessage();
         }
 
-        // Test Case 24: File case sensitivity test
+        // Test Case 3.24: File case sensitivity test
         @Test
         void testSendContactMail_UpperCaseExtension_Success() throws Exception {
                 // Arrange

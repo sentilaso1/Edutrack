@@ -22,7 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
         private final UserRepository userRepository;
         private final StaffRepository staffRepository;
         private final MentorRepository mentorRepository;
@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService{
         private EntityManager entityManager;
 
         @Autowired
-        public UserServiceImpl(UserRepository userRepository, StaffRepository staffRepository, 
+        public UserServiceImpl(UserRepository userRepository, StaffRepository staffRepository,
                         MentorRepository mentorRepository, MenteeRepository menteeRepository) {
                 this.userRepository = userRepository;
                 this.staffRepository = staffRepository;
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService{
         @Override
         public User getUserById(String id) {
                 return userRepository.findById(UUID.fromString(id))
-                        .orElseThrow(() -> new RuntimeException("User not found"));
+                                .orElseThrow(() -> new RuntimeException("User not found"));
         }
 
         @Override
@@ -81,6 +81,7 @@ public class UserServiceImpl implements UserService{
                 userRepository.save(user);
         }
 
+        // Function 4
         @Override
         @Transactional
         public void grantStaffRole(String userId, Staff.Role role) {
@@ -144,6 +145,7 @@ public class UserServiceImpl implements UserService{
                 }
         }
 
+        // Function 1
         @Override
         public void revokeStaffRole(String id) {
                 if (id == null || id.trim().isEmpty()) {
@@ -184,7 +186,7 @@ public class UserServiceImpl implements UserService{
         }
 
         @Override
-        public Page<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive, 
+        public Page<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive,
                         Pageable pageable) {
                 return userRepository.searchUsers(email, fullName, isLocked, isActive, pageable);
         }
@@ -201,14 +203,14 @@ public class UserServiceImpl implements UserService{
                 }
 
         }
-        
+
         public UserStatsDTO getUserStatistics() {
                 long total = userRepository.count();
                 long active = userRepository.countByIsActiveTrue();
                 long locked = userRepository.countByIsLockedTrue();
                 return new UserStatsDTO(total, active, locked);
         }
-        
+
         public UserStats getSummaryStats() {
                 return new UserStats(150, 120, 30);
         }

@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -37,7 +36,6 @@ public class AdminController {
         @Autowired
         private RequestLogRepository requestLogRepository;
 
-
         @Autowired
         public AdminController(UserService userService, SystemConfigService systemConfigService,
                         ScheduledJobService scheduledJobService) {
@@ -45,34 +43,34 @@ public class AdminController {
                 this.systemConfigService = systemConfigService;
                 this.scheduledJobService = scheduledJobService;
         }
-        
+
         @GetMapping("/users")
         public String showUserManagement(Model model,
-                                        @RequestParam(required = false) String email,
-                                        @RequestParam(required = false) String fullName,
-                                        @RequestParam(required = false) Boolean isLocked,
-                                        @RequestParam(required = false) Boolean isActive,
-                                        @RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "5") int size) {
+                        @RequestParam(required = false) String email,
+                        @RequestParam(required = false) String fullName,
+                        @RequestParam(required = false) Boolean isLocked,
+                        @RequestParam(required = false) Boolean isActive,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "5") int size) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<User> userPage = userService.searchUsers(email, fullName, isLocked, isActive, pageable);
                 List<UserWithRoleDTO> userDtos = new ArrayList<>();
 
                 for (User user : userPage.getContent()) {
-                String role = "USER";
-                if (user.getId() != null) {
-                        Staff staff = userService.getStaffByUserId(user.getId().toString());
-                        if (staff != null) {
-                                role = staff.getRole().toString();
+                        String role = "USER";
+                        if (user.getId() != null) {
+                                Staff staff = userService.getStaffByUserId(user.getId().toString());
+                                if (staff != null) {
+                                        role = staff.getRole().toString();
+                                }
                         }
-                }
-                userDtos.add(new UserWithRoleDTO(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getFullName(),
-                        role,
-                        user.getIsLocked(),
-                        user.getIsActive()));
+                        userDtos.add(new UserWithRoleDTO(
+                                        user.getId(),
+                                        user.getEmail(),
+                                        user.getFullName(),
+                                        role,
+                                        user.getIsLocked(),
+                                        user.getIsActive()));
                 }
 
                 model.addAttribute("users", userDtos);
@@ -84,6 +82,7 @@ public class AdminController {
                 return "accounts/html/user-management";
         }
 
+        // Function 2
         @PostMapping("/users/{id}/lock")
         public String toggleLock(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
@@ -233,7 +232,8 @@ public class AdminController {
                         @RequestParam(required = false) String method,
                         @RequestParam(required = false) String uri,
                         Model model) {
-                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));;
+                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+                ;
                 Page<RequestLog> logPage = requestLogRepository.filterLogs(
                                 (ip != null && !ip.isEmpty()) ? ip : null,
                                 (method != null && !method.isEmpty()) ? method : null,
@@ -290,10 +290,10 @@ public class AdminController {
         }
 
         @GetMapping("/jobs")
-        public String viewJobs( @RequestParam(required = false) String search,
-                                @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "10") int size,
-                                Model model) {
+        public String viewJobs(@RequestParam(required = false) String search,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size,
+                        Model model) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<ScheduledJobDTO> jobPage = scheduledJobService.getJobs(search, pageable);
 
@@ -303,7 +303,7 @@ public class AdminController {
                 model.addAttribute("search", search);
                 return "accounts/html/scheduled-jobs";
         }
-        
+
         @PostMapping("/jobs/{id}/toggle")
         public String toggleJob(@PathVariable Long id, @RequestParam boolean active) {
                 scheduledJobService.toggleJob(id, active);
@@ -322,4 +322,3 @@ public class AdminController {
                 return "redirect:/admin/jobs";
         }
 }
-

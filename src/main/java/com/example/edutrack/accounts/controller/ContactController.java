@@ -75,6 +75,7 @@ public class ContactController {
                 return false;
         }
 
+        // Function 3
         @PostMapping("/send")
         public String sendContactMail(
                         @ModelAttribute ContactFormDTO contactForm,

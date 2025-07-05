@@ -102,6 +102,7 @@ public class AccountsController {
                 }
         }
 
+        // Function 5
         @PostMapping("/profile/{id}/edit")
         public String editProfile(@PathVariable String id,
                         @RequestParam String fullName,
