@@ -12,6 +12,7 @@ import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
+import com.example.edutrack.curriculum.service.interfaces.DashboardService;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
@@ -35,6 +36,7 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     private final EnrollmentServiceImpl enrollmentServiceImpl;
     private final EnrollmentRepository enrollmentRepository;
     private final FeedbackRepository feedbackRepository;
+    private final DashboardService dashboardService;
 
     @Autowired
     public CourseMentorServiceImpl(CourseMentorRepository courseMentorRepository,
@@ -44,7 +46,8 @@ public class CourseMentorServiceImpl implements CourseMentorService {
                                    MentorRepository mentorRepository,
                                    EnrollmentServiceImpl enrollmentServiceImpl,
                                    EnrollmentRepository enrollmentRepository,
-                                   FeedbackRepository feedbackRepository) {
+                                   FeedbackRepository feedbackRepository,
+                                   DashboardService dashboardService) {
         this.courseMentorRepository = courseMentorRepository;
         this.applicantsRepository = applicantsRepository;
         this.menteeRepository = menteeRepository;
@@ -53,6 +56,7 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         this.enrollmentServiceImpl = enrollmentServiceImpl;
         this.enrollmentRepository = enrollmentRepository;
         this.feedbackRepository = feedbackRepository;
+        this.dashboardService = dashboardService;
     }
 
     @Override
@@ -224,6 +228,8 @@ public class CourseMentorServiceImpl implements CourseMentorService {
 
         Set<CourseMentor> allPairs = enrollments.stream()
                 .map(Enrollment::getCourseMentor)
+                .filter(courseMentor ->
+                        dashboardService.hasCompletedCourse(courseMentor, menteeRepository.findById(menteeId).orElseThrow()).orElse(false))
                 .collect(Collectors.toSet());
 
         return allPairs.stream()

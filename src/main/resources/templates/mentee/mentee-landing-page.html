@@ -232,15 +232,15 @@
             border-radius: 25px;
             background: #f2f7fb;
             color: #222;
-            border: 1.5px solid #007bff;
+            border: 1.5px solid #fe8189;
             cursor: pointer;
             transition: all 0.16s;
             font-size: 1.07em;
         }
         #interest-modal-backdrop .tag.selected {
-            background: #007bff;
+            background: #fe8189;
             color: #fff;
-            border-color: #007bff;
+            border-color: #fe8189;
         }
         #interest-modal-backdrop .modal-actions {
             margin-top: 20px;
@@ -249,7 +249,7 @@
             justify-content: center;
         }
         #interest-modal-backdrop .btn-primary {
-            background: #007bff; color: #fff; border: none;
+            background: #fe8189; color: #fff; border: none;
             border-radius: 7px; padding: 9px 26px; font-size: 1em; cursor: pointer;
         }
         #interest-modal-backdrop .btn-primary:disabled { background: #bbb; }
@@ -258,7 +258,7 @@
             border-radius: 7px; padding: 9px 26px; font-size: 1em; cursor: pointer;
         }
         #interest-modal-backdrop input[type="text"] {
-            margin-top: 8px; width: 89%; padding: 7px 12px; border-radius: 6px; border: 1px solid #c0c0c0; font-size: 1em;
+            margin-top: 8px; width: 89%; padding: 7px 12px; border-radius: 6px; border: 1px solid #fe8189; font-size: 1em;
         }
         #interest-modal-backdrop #interest-msg {
             color: #d22632;
@@ -635,7 +635,7 @@
 <!-- Interest Selection Modal Layer -->
 <div id="interest-modal-backdrop" th:if="${showInterestModal}" style="display:flex;">
     <div class="interest-modal">
-        <h2>Select Your Interests</h2>
+        <h2>What skills do you want to learn?</h2>
         <input id="interest-search" type="text" placeholder="Search tags..." autocomplete="off"/>
         <div id="interest-tags" class="tag-list"></div>
         <div class="modal-actions">

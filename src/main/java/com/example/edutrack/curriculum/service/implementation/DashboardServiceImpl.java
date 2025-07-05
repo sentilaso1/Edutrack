@@ -107,13 +107,14 @@ public class DashboardServiceImpl implements DashboardService {
         return (int) Math.round((completed * 100.0) / total);
     }
 
+    @Override
     public Optional<Boolean> hasCompletedCourse(CourseMentor courseMentor, Mentee mentee) {
         List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findEnrollmentScheduleByMenteeAndCourseMentor(
                 mentee.getId(), courseMentor.getId()
         );
 
         if (schedules.isEmpty()) {
-            return Optional.empty();
+            return Optional.of(true);
         }
 
         boolean allPresent = schedules.stream()
