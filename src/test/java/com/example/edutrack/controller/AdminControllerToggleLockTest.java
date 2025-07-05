@@ -58,6 +58,7 @@ class AdminControllerToggleLockTest {
                 testStaff.setRole(Staff.Role.Manager);
         }
 
+        // TC 2.1
         @Test
         void testToggleLock_ManagerUser_Success() {
                 // Arrange
@@ -75,7 +76,7 @@ class AdminControllerToggleLockTest {
                 verify(userService).saveUser(testUser);
                 verify(redirectAttributes).addFlashAttribute("successMessage", "User locked successfully!");
         }
-
+        // TC 2.2
         @Test
         void testToggleLock_NullId_ShouldReturnErrorMessage() {
                 // Arrange
@@ -89,7 +90,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage", "User ID cannot be empty!");
                 verifyNoInteractions(userService);
         }
-
+        // TC 2.3
         @Test
         void testToggleLock_EmptyId_ShouldReturnErrorMessage() {
                 // Arrange
@@ -103,7 +104,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage", "User ID cannot be empty!");
                 verifyNoInteractions(userService);
         }
-
+        // TC 2.4
         @Test
         void testToggleLock_WhitespaceId_ShouldReturnErrorMessage() {
                 // Arrange
@@ -117,7 +118,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage", "User ID cannot be empty!");
                 verifyNoInteractions(userService);
         }
-
+        // TC 2.5
         @Test
         void testToggleLock_InvalidUuidFormat_ShouldReturnErrorMessage() {
                 // Arrange
@@ -131,7 +132,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage", "Invalid user ID format!");
                 verifyNoInteractions(userService);
         }
-
+        // TC 2.6
         @Test
         void testToggleLock_UserNotFound_ShouldReturnErrorMessage() {
                 // Arrange
@@ -145,7 +146,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage", "User not found!");
                 verify(userService).getUserById(validUserId);
         }
-
+        // TC 2.7
         @Test
         void testToggleLock_InactiveUser_ShouldReturnErrorMessage() {
                 // Arrange
@@ -161,7 +162,7 @@ class AdminControllerToggleLockTest {
                 verify(userService).getUserById(validUserId);
                 verify(userService, never()).getStaffByUserId(any());
         }
-
+        // TC 2.8
         @Test
         void testToggleLock_AdminUser_ShouldReturnErrorMessage() {
                 // Arrange
@@ -179,7 +180,7 @@ class AdminControllerToggleLockTest {
                 verify(userService).getStaffByUserId(validUserId);
                 verify(userService, never()).saveUser(any());
         }
-
+        // TC 2.9
         @Test
         void testToggleLock_LockUser_Success() {
                 // Arrange
@@ -197,7 +198,7 @@ class AdminControllerToggleLockTest {
                 verify(userService).saveUser(testUser);
                 verify(redirectAttributes).addFlashAttribute("successMessage", "User locked successfully!");
         }
-
+        // TC 2.10
         @Test
         void testToggleLock_UnlockUser_Success() {
                 // Arrange
@@ -214,7 +215,7 @@ class AdminControllerToggleLockTest {
                 verify(userService).saveUser(testUser);
                 verify(redirectAttributes).addFlashAttribute("successMessage", "User unlocked successfully!");
         }
-
+        // TC 2.11
         @Test
         void testToggleLock_NonStaffUser_Success() {
                 // Arrange
@@ -231,7 +232,7 @@ class AdminControllerToggleLockTest {
                 verify(userService).saveUser(testUser);
                 verify(redirectAttributes).addFlashAttribute("successMessage", "User locked successfully!");
         }
-
+        // TC 2.12
         @Test
         void testToggleLock_ValidationErrorOnSave_ShouldReturnErrorMessage() {
                 // Arrange
@@ -247,7 +248,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage",
                                 "Validation error when saving: Validation failed");
         }
-
+        // TC 2.13
         @Test
         void testToggleLock_RuntimeExceptionUserNotFound_ShouldReturnErrorMessage() {
                 // Arrange
@@ -261,7 +262,7 @@ class AdminControllerToggleLockTest {
                 assertEquals("redirect:/admin/users", result);
                 verify(redirectAttributes).addFlashAttribute("errorMessage", "User not found in system!");
         }
-
+        // TC 2.14
         @Test
         void testToggleLock_RuntimeExceptionOther_ShouldReturnErrorMessage() {
                 // Arrange
@@ -276,7 +277,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage",
                                 "System error when changing lock status: Database connection failed");
         }
-
+        // TC 2.15
         @Test
         void testToggleLock_NullPointerException_ShouldReturnErrorMessage() {
                 // Arrange
@@ -291,7 +292,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage",
                                 "System error when changing lock status: Null pointer error");
         }
-
+        // TC 2.16
         @Test
         void testToggleLock_RuntimeExceptionDuringSave_ShouldReturnErrorMessage() {
                 // Arrange
@@ -307,7 +308,7 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage",
                                 "System error when changing lock status: Save operation failed");
         }
-
+        // TC 2.17
         @Test
         void testToggleLock_UncheckedExceptionDuringSave_ShouldReturnErrorMessage() {
                 // Arrange
@@ -323,8 +324,8 @@ class AdminControllerToggleLockTest {
                 verify(redirectAttributes).addFlashAttribute("errorMessage",
                                 "System error when changing lock status: Invalid state error");
         }
-
-        @Test
+        // TC 2.18
+        @Test   
         void testToggleLock_BoundaryValidUuid_Success() {
                 // Arrange - Test with minimum valid UUID
                 String minValidUuid = "00000000-0000-0000-0000-000000000000";
@@ -339,7 +340,7 @@ class AdminControllerToggleLockTest {
                 assertEquals("redirect:/admin/users", result);
                 verify(redirectAttributes).addFlashAttribute("successMessage", "User locked successfully!");
         }
-
+        // TC 2.19
         @Test
         void testToggleLock_BoundaryMaxValidUuid_Success() {
                 // Arrange - Test with maximum valid UUID

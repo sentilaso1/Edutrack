@@ -72,6 +72,7 @@ class UserServiceRevokeStaffRoleTest {
                 adminStaff.setRole(Staff.Role.Admin);
         }
 
+        // TC 1.1
         @Test
         void testRevokeStaffRole_ValidInput_Success() {
                 String validId = validUserId.toString();
@@ -85,6 +86,7 @@ class UserServiceRevokeStaffRoleTest {
                 verify(staffRepository, times(1)).deleteById(validUserId);
         }
 
+        // TC 1.2
         @Test
         void testRevokeStaffRole_NullId_ThrowsIllegalArgumentException() {
                 IllegalArgumentException exception = assertThrows(
@@ -96,6 +98,7 @@ class UserServiceRevokeStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository);
         }
 
+        // TC 1.3
         @Test
         void testRevokeStaffRole_EmptyString_ThrowsIllegalArgumentException() {
                 IllegalArgumentException exception = assertThrows(
@@ -106,6 +109,7 @@ class UserServiceRevokeStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository);
         }
 
+        // TC 1.4
         @Test
         void testRevokeStaffRole_WhitespaceOnly_ThrowsIllegalArgumentException() {
                 IllegalArgumentException exception = assertThrows(
@@ -116,6 +120,7 @@ class UserServiceRevokeStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository);
         }
 
+        // TC 1.5
         @Test
         void testRevokeStaffRole_InvalidUUIDFormat_ThrowsIllegalArgumentException() {
                 IllegalArgumentException exception = assertThrows(
@@ -126,6 +131,7 @@ class UserServiceRevokeStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository);
         }
 
+        // TC 1.6
         @Test
         void testRevokeStaffRole_UserNotFound_ThrowsRuntimeException() {
                 String validId = validUserId.toString();
@@ -141,6 +147,7 @@ class UserServiceRevokeStaffRoleTest {
                 verifyNoInteractions(staffRepository);
         }
 
+        // TC 1.7
         @Test
         void testRevokeStaffRole_InactiveUser_ThrowsIllegalStateException() {
                 String validId = validUserId.toString();
@@ -156,6 +163,7 @@ class UserServiceRevokeStaffRoleTest {
                 verifyNoInteractions(staffRepository);
         }
 
+        // TC 1.8
         @Test
         void testRevokeStaffRole_NoStaffRole_ThrowsIllegalStateException() {
                 String validId = validUserId.toString();
@@ -173,6 +181,7 @@ class UserServiceRevokeStaffRoleTest {
                 verify(staffRepository, never()).deleteById(any());
         }
 
+        // TC 1.9
         @Test
         void testRevokeStaffRole_AdminRole_ThrowsIllegalStateException() {
                 String validId = validUserId.toString();
@@ -190,6 +199,7 @@ class UserServiceRevokeStaffRoleTest {
                 verify(staffRepository, never()).deleteById(any());
         }
 
+        // TC 1.10
         @Test
         void testRevokeStaffRole_LockedUser_ThrowsIllegalStateException() {
                 String validId = validUserId.toString();
@@ -207,6 +217,7 @@ class UserServiceRevokeStaffRoleTest {
                 verify(staffRepository, never()).deleteById(any());
         }
 
+        // TC 1.11
         @Test
         void testRevokeStaffRole_ValidUUIDEdgeCases_Success() {
                 UUID minUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
@@ -227,6 +238,7 @@ class UserServiceRevokeStaffRoleTest {
                 verify(staffRepository, times(1)).deleteById(minUUID);
         }
 
+        // TC 1.12
         @Test
         void testRevokeStaffRole_CompleteHappyPath_AllValidationsPass() {
                 String validId = validUserId.toString();
@@ -251,6 +263,7 @@ class UserServiceRevokeStaffRoleTest {
                 inOrder.verify(staffRepository).deleteById(validUserId);
         }
 
+        // TC 1.13
         @Test
         void testRevokeStaffRole_SpecialCharactersInUUID_ThrowsIllegalArgumentException() {
                 IllegalArgumentException exception = assertThrows(
@@ -261,6 +274,7 @@ class UserServiceRevokeStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository);
         }
 
+        // TC 1.14
         @Test
         void testRevokeStaffRole_DifferentStaffRoles_OnlyRegularStaffSuccess() {
                 String validId = validUserId.toString();
@@ -282,6 +296,7 @@ class UserServiceRevokeStaffRoleTest {
                 assertEquals("Cannot revoke admin role! Admin privileges cannot be removed.", exception.getMessage());
         }
 
+        // Helper method to create Staff objects with different roles
         private Staff createStaff(Staff.Role role) {
                 Staff staff = new Staff();
                 staff.setId(validUserId);
