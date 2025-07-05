@@ -42,7 +42,20 @@ public interface EnrollmentScheduleService {
 
     List<EnrollmentSchedule> getEnrollmentSchedulesByMentee(UUID menteeId);
 
+    int countTestSlot(UUID menteeId);
+
     List<ScheduleDTO> getScheduleDTOs(List<EnrollmentSchedule> schedules, UUID menteeId);
 
-    int countTestSlot(UUID menteeId);
+    boolean submitRescheduleRequest(int scheduleId, Slot newSlot, LocalDate newDate,
+                                    String reason, UUID menteeId);
+
+    ScheduleDTO getScheduleDTO(Long scheduleId, UUID menteeId);
+
+    List<ScheduleDTO> getOccupiedSlotsForWeek(UUID menteeId, LocalDate weekStart, LocalDate weekEnd);
+
+    boolean isSlotAvailable(UUID menteeId, Slot newSlot, LocalDate newDate, int scheduleId);
+
+    List<EnrollmentSchedule> getSlotsUnderReview(UUID menteeId, LocalDate startDate, LocalDate endDate);
+
+    boolean resetExpiredRescheduleRequests();
 }

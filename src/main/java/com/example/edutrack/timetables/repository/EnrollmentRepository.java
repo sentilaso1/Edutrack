@@ -39,6 +39,16 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findAcceptedEnrollmentsByMenteeId(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
 
     @Query("""
+        SELECT e FROM Enrollment e
+        WHERE e.mentee.id = :menteeId
+        AND e.status = :statuses
+        """)
+    List<Enrollment> findEnrollmentsByMenteeIdWithStatuses(
+            @Param("menteeId") UUID menteeId,
+            @Param("statuses") Enrollment.EnrollmentStatus statuses
+    );
+
+    @Query("""
             SELECT DISTINCT e.courseMentor
             FROM Enrollment e
             JOIN EnrollmentSchedule s ON s.enrollment.mentee = e.mentee AND s.enrollment.courseMentor.course = e.courseMentor.course
@@ -86,4 +96,16 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<CourseMentor> findCourseMentorByMentee(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
 
     List<Enrollment> findAllByMenteeId(UUID menteeId);
+
+    @Query("SELECT e FROM Enrollment e WHERE e.mentee.id = :menteeId " +
+            "AND e.status = :status " +
+            "AND e.scheduleSummary IS NOT NULL " +
+            "AND e.scheduleSummary != ''")
+    List<Enrollment> findByMenteeIdAndStatus(
+            @Param("menteeId") UUID menteeId,
+            @Param("status") Enrollment.EnrollmentStatus status
+    );
+
+    @Query("SELECT e FROM Enrollment e WHERE e.courseMentor.mentor = :mentor AND e.status = 'PENDING' ")
+    List<Enrollment> findAllPendingByMentorId(Mentor mentor);
 }

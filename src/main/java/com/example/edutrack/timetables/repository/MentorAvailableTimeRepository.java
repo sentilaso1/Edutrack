@@ -3,10 +3,7 @@ package com.example.edutrack.timetables.repository;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
-import com.example.edutrack.timetables.model.Day;
-import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.model.MentorAvailableTimeId;
-import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -88,4 +85,14 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
 
     @Query("SELECT MAX(mat.id.endDate) FROM MentorAvailableTime mat WHERE mat.mentor = :mentor AND mat.status = :enumValue")
     LocalDate findMaxEndDateByStatus(Mentor mentor, MentorAvailableTime.Status enumValue);
+
+    @Query("SELECT mat FROM MentorAvailableTimeDetails mat WHERE mat.mentor.id = :mentorId " +
+            "AND mat.date <= :endDate " +
+            "AND mat.date >= :startDate " +
+            "AND mat.mentee IS NULL")
+    List<MentorAvailableTimeDetails> findByMentorIdAndStatusAndDateRange(
+            @Param("mentorId") UUID mentorId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
