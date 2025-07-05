@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public interface MentorAvailableTimeService {
@@ -36,4 +37,10 @@ public interface MentorAvailableTimeService {
     void insertMentorAvailableTime(LocalDate startDate, LocalDate endDate, Mentor foundMentor);
 
     List<MentorAvailableTimeDetails> findByMentor(Mentor mentor);
+
+    List<MentorAvailableTimeDetails> findByMentorIdAndStatusAndDateRange(
+            UUID mentorId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 }

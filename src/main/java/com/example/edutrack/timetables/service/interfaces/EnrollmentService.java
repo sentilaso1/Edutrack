@@ -39,6 +39,8 @@ public interface EnrollmentService {
 
     List<CourseMentor> getCourseMentorsByMentee(UUID menteeId);
 
+    List<Enrollment> findPendingEnrollmentsForMentee(UUID menteeId);
+
     int getNumberOfPendingSlot(Mentor mentor, LocalDate date, Slot slot);
 
     List<Enrollment> getDuplicatedSchedules(Enrollment enrollment);

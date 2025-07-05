@@ -52,7 +52,7 @@ public class CourseManagerController {
         this.courseMentorService = courseMentorService;
     }
 
-    @GetMapping("/view")
+    @GetMapping("/course-dashboard")
     public String view(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String mentorSearch,

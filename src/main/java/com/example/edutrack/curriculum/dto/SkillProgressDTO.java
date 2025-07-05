@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class SkillProgressDTO {
+    public UUID courseId;
     private String courseTitle;
     private List<String> tags;
     private int progressPercentage;
@@ -15,7 +16,7 @@ public class SkillProgressDTO {
     private UUID mentorId;
     private LocalDate startDate;
 
-    public SkillProgressDTO(String courseTitle, LocalDate lastSessionDate, int sessionsCompleted, int progressPercentage,
+    public SkillProgressDTO(UUID courseId, String courseTitle, LocalDate lastSessionDate, int sessionsCompleted, int progressPercentage,
                             List<String> tags, int totalSessions,
                             String mentorName, UUID mentorId) {
         this.courseTitle = courseTitle;
@@ -27,6 +28,15 @@ public class SkillProgressDTO {
         this.mentorName = mentorName;
         this.mentorId = mentorId;
         this.startDate = startDate;
+        this.courseId = courseId;
+    }
+
+    public UUID getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(UUID courseId) {
+        this.courseId = courseId;
     }
 
     public int getTotalSessions() {

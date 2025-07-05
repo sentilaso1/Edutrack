@@ -667,3 +667,141 @@
     border-bottom: 4px solid #ff9900;
     font-weight: bold;
 }
+
+.btn-reschedule-cancel {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-reschedule-cancel:hover {
+    background: #545b62;
+}
+
+.btn-reschedule-submit {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-reschedule-submit:hover:not(:disabled) {
+    background: #218838;
+}
+
+.btn-reschedule-submit:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.btn-reschedule {
+    background: #ffc107;
+    color: #212529;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 5px;
+    transition: background-color 0.3s;
+    text-decoration: none;
+}
+
+.btn-reschedule:hover {
+    background: #e0a800;
+}
+
+.btn-reschedule:disabled {
+    background: #6c757d;
+    color: white;
+    cursor: not-allowed;
+}
+
+/* Slot unavailable (expired reschedule) */
+.unavailable-slot {
+    background-color: #ffe0e0 !important;
+    border: 1px solid #ff4d4d !important;
+    color: #b30000 !important;
+    position: relative;
+    cursor: not-allowed;
+}
+
+.slot-warning {
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+    color: #b30000;
+}
+
+.slot-cell.reviewing {
+    background-color: #FFF3CD !important;
+    border-color: #F0AD4E !important;
+    color: #856404 !important;
+    position: relative;
+    cursor: not-allowed;
+}
+
+.slot-cell.reviewing::after {
+    content: "Under Review";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.slot-cell.reviewing:hover {
+    background-color: #FFF3CD !important;
+}
+
+.slot-cell.reviewing .schedule-event {
+    opacity: 0.7;
+}
+
+.reviewing-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 243, 205, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.reviewing-text {
+    font-size: 10px;
+    font-weight: bold;
+    color: #856404;
+    text-align: center;
+}
+
+.slot-cell {
+    position: relative;
+}
+
+.reschedule-status.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+    background-color: #cccccc !important;
+    color: #666666 !important;
+}
+

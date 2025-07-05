@@ -5,11 +5,13 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
+import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,17 +28,38 @@ import java.util.UUID;
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
+    private final CourseMentorRepository courseMentorRepository;
+    private final EnrollmentScheduleRepository enrollmentScheduleRepository;
     private final EnrollmentScheduleService enrollmentScheduleService;
 
-    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository, EnrollmentScheduleService enrollmentScheduleService) {
+
+    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository, CourseMentorRepository courseMentorRepository, EnrollmentScheduleRepository enrollmentScheduleRepository, EnrollmentScheduleService enrollmentScheduleService) {
         this.enrollmentRepository = enrollmentRepository;
+        this.courseMentorRepository = courseMentorRepository;
+        this.enrollmentScheduleRepository = enrollmentScheduleRepository;
         this.enrollmentScheduleService = enrollmentScheduleService;
     }
 
     @Override
     public List<CourseMentor> getPopularCoursesForGuest(int maxCount) {
-        Pageable topPopular= PageRequest.of(0, maxCount);
-        return enrollmentRepository.findPopularCoursesByEnrollmentCount(topPopular, Enrollment.EnrollmentStatus.APPROVED);
+        Pageable topPopular = PageRequest.of(0, maxCount);
+
+        // Step 1: Fetch popular courses
+        List<CourseMentor> popularCourses = enrollmentRepository.findPopularCoursesByEnrollmentCount(topPopular, Enrollment.EnrollmentStatus.APPROVED);
+
+        // Step 2: If not enough, fetch random CourseMentors to fill the gap
+        if (popularCourses.size() < maxCount) {
+            int remaining = maxCount - popularCourses.size();
+
+            List<UUID> existingCourseMentorIds = popularCourses.stream()
+                    .map(CourseMentor::getId)
+                    .toList();
+
+            List<CourseMentor> fillerCourses = courseMentorRepository.findRandomCourseMentorsExcluding(existingCourseMentorIds, PageRequest.of(0, remaining));
+            popularCourses.addAll(fillerCourses);
+        }
+
+        return popularCourses;
     }
 
     public int getStudentCountByCourseMentor(UUID courseMentorId) {
@@ -63,7 +86,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public List<Enrollment> getEnrollmentsByMenteeId(UUID menteeId) {
-        return enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.CREATED);
+        return enrollmentRepository.findEnrollmentsByMenteeIdWithStatuses(
+                menteeId, Enrollment.EnrollmentStatus.APPROVED
+        );
     }
 
     @Override
@@ -112,6 +137,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<CourseMentor> getCourseMentorsByMentee(UUID menteeId) {
         return enrollmentRepository.findCourseMentorByMentee(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+    }
+
+    @Override
+    public List<Enrollment> findPendingEnrollmentsForMentee(UUID menteeId) {
+        return enrollmentRepository.findByMenteeIdAndStatus(
+                menteeId,
+                Enrollment.EnrollmentStatus.PENDING
+        );
     }
 
     @Override

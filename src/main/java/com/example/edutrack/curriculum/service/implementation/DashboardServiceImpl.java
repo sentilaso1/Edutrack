@@ -91,9 +91,10 @@ public class DashboardServiceImpl implements DashboardService {
         List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(
                 menteeId, Enrollment.EnrollmentStatus.APPROVED);
 
-        int total = enrollments.stream()
-                .mapToInt(Enrollment::getTotalSlots)
-                .sum();
+        int total = 0;
+        for (Enrollment e : enrollments) {
+            total += enrollmentScheduleRepository.countTotalSlot(e.getId());
+        }
 
         if (total == 0) return 0;
 
@@ -159,31 +160,42 @@ public class DashboardServiceImpl implements DashboardService {
         List<Enrollment> menteeEnrollment = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
         List<SkillProgressDTO> skillProgressList = new ArrayList<>();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+        DateTimeFormatter fullDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
 
         for (Enrollment e : menteeEnrollment) {
             CourseMentor courseMentor = e.getCourseMentor();
             Course course = courseMentor.getCourse();
             Mentor mentor = courseMentor.getMentor();
 
-            // --- Lọc theo từ khóa ---
+            // --- Keyword filter ---
             if (keyword != null && !keyword.isBlank()) {
                 if (!course.getName().toLowerCase().contains(keyword.toLowerCase())) {
                     continue;
                 }
             }
 
-            // --- Lọc theo mentor ---
+            // --- Mentor filter ---
             if (mentorId != null && mentor != null && !mentor.getId().equals(mentorId)) {
                 continue;
             }
 
-            // --- Lọc theo tháng từ startTime ---
+            // --- Month filter ---
             try {
-                LocalDateTime parsedStart = LocalDateTime.parse(e.getStartTime(), formatter);
+                String rawStartTime = e.getStartTime().trim();
+                LocalDateTime parsedStart;
+
+                if (rawStartTime.matches("^\\d{1,2}:\\d{2}$")) {
+                    // Time-only format (e.g., "12:00") → use today's date
+                    parsedStart = LocalDateTime.of(LocalDate.now(), LocalTime.parse(rawStartTime));
+                } else {
+                    // Full datetime string
+                    parsedStart = LocalDateTime.parse(rawStartTime, fullDateTimeFormatter);
+                }
+
                 if (selectedMonth != null && !YearMonth.from(parsedStart).equals(selectedMonth)) {
                     continue;
                 }
+
             } catch (Exception ex) {
                 continue;
             }
@@ -191,7 +203,7 @@ public class DashboardServiceImpl implements DashboardService {
             Long enrollmentId = e.getId();
             UUID courseId = course.getId();
 
-            int total = e.getTotalSlots() != null ? e.getTotalSlots() : 1;
+            int total = enrollmentScheduleRepository.countTotalSlot(enrollmentId);
             int completed = enrollmentScheduleRepository.countByEnrollment_IdAndAttendance(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
             int percentage = (total == 0) ? 0 : (int) Math.round((completed * 100.0) / total);
 
@@ -204,7 +216,7 @@ public class DashboardServiceImpl implements DashboardService {
             String mentorName = (mentor != null) ? mentor.getFullName() : "Unknown";
             UUID mentorUuid = (mentor != null) ? mentor.getId() : null;
 
-            SkillProgressDTO dto = new SkillProgressDTO(
+            SkillProgressDTO dto = new SkillProgressDTO(courseMentor.getId(),
                     course.getName(), lastSession, completed, percentage, tags, total, mentorName, mentorUuid
             );
 
@@ -213,6 +225,8 @@ public class DashboardServiceImpl implements DashboardService {
 
         return skillProgressList;
     }
+
+
 
     @Override
     public Page<EnrollmentSchedule> getFilteredSchedules(

@@ -6,11 +6,11 @@ import com.example.edutrack.curriculum.dto.*;
 import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.service.implementation.SuggestionServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.*;
-import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.EnrollmentSchedule;
-import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.dto.RequestedSchedule;
+import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
+import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,8 +26,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.List;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Controller
@@ -42,8 +43,9 @@ public class MenteeController {
     private final CourseTagService courseTagService;
     private final FeedbackService feedbackService;
     private final SuggestionService suggestionService;
+    private final MentorAvailableTimeService mentorAvailableTimeService;
 
-    public MenteeController(FeedbackService feedbackService, DashboardService dashboardService, GoalService goalService, CourseMentorService courseMentorService, EnrollmentService enrollmentService, MenteeRepository menteeRepository, EnrollmentScheduleService enrollmentScheduleService, HomeControlller homeControlller, CourseTagService courseTagService, SuggestionService suggestionService) {
+    public MenteeController(MentorAvailableTimeService mentorAvailableTimeService,FeedbackService feedbackService, DashboardService dashboardService, GoalService goalService, CourseMentorService courseMentorService, EnrollmentService enrollmentService, MenteeRepository menteeRepository, EnrollmentScheduleService enrollmentScheduleService, HomeControlller homeControlller, CourseTagService courseTagService, SuggestionService suggestionService) {
         this.dashboardService = dashboardService;
         this.courseMentorService = courseMentorService;
         this.enrollmentService = enrollmentService;
@@ -54,6 +56,7 @@ public class MenteeController {
         this.courseTagService = courseTagService;
         this.feedbackService = feedbackService;
         this.suggestionService = suggestionService;
+        this.mentorAvailableTimeService = mentorAvailableTimeService;
     }
 
     private UUID getSessionMentee(HttpSession session) {
@@ -291,6 +294,25 @@ public class MenteeController {
         return "redirect:/learning-tracker?activeTab=goals";
     }
 
+    @PostMapping("/report")
+    public String submitAttendanceReport(@RequestParam("scheduleId") int scheduleId,
+                                         @RequestParam("hasIssue") boolean hasIssue,
+                                         RedirectAttributes redirectAttributes) {
+        EnrollmentSchedule schedule = enrollmentScheduleService.findById(scheduleId);
+        if (schedule != null) {
+            schedule.setReport(hasIssue);
+            enrollmentScheduleService.save(schedule);
+
+            if (hasIssue) {
+                redirectAttributes.addFlashAttribute("success", "Issue reported successfully. Our team will review it.");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Thank you for confirming the session was satisfactory.");
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Session not found.");
+        }
+        return "redirect:/learning-tracker?activeTab=sessions";
+    }
 
 
     @PostMapping("/goals/delete/{id}")
@@ -351,8 +373,23 @@ public class MenteeController {
             @RequestParam(value = "weekOffset", defaultValue = "0") int weekOffset,
             Model model
     ) {
+        enrollmentScheduleService.resetExpiredRescheduleRequests();
         UUID menteeId = getSessionMentee(session);
+        if (menteeId == null){
+            return "redirect:/";
+        }
+
         LocalDate mondayOfWeek = LocalDate.now().plusWeeks(weekOffset).with(java.time.DayOfWeek.MONDAY);
+        LocalDate start = mondayOfWeek;
+        LocalDate end = mondayOfWeek.plusDays(6);
+
+        // DEBUG: Print basic info
+        System.out.println("=== SCHEDULE DEBUG ===");
+        System.out.println("MenteeId: " + menteeId);
+        System.out.println("CourseId: " + courseId);
+        System.out.println("Week start: " + start);
+        System.out.println("Week end: " + end);
+        System.out.println("WeekOffset: " + weekOffset);
 
         List<EnrollmentSchedule> schedules;
         if (courseId != null) {
@@ -361,14 +398,53 @@ public class MenteeController {
             schedules = enrollmentScheduleService.getEnrollmentSchedulesByMentee(menteeId);
         }
 
+        // DEBUG: Print raw schedules
+        System.out.println("Raw schedules count: " + schedules.size());
+        for (EnrollmentSchedule s : schedules) {
+            System.out.println("Raw Schedule: ID=" + s.getId() +
+                    ", Date=" + s.getDate() +
+                    ", Slot=" + s.getSlot() +
+                    ", Available=" + s.isAvailable());
+        }
 
-        // Lọc schedule theo tuần
-        LocalDate start = mondayOfWeek;
-        LocalDate end = mondayOfWeek.plusDays(6);
+        // Apply date filtering
         schedules = schedules.stream()
                 .filter(s -> !s.getDate().isBefore(start) && !s.getDate().isAfter(end))
                 .toList();
+
+        // DEBUG: Print filtered schedules
+        System.out.println("Filtered schedules count: " + schedules.size());
+        for (EnrollmentSchedule s : schedules) {
+            System.out.println("Filtered Schedule: ID=" + s.getId() +
+                    ", Date=" + s.getDate() +
+                    ", Slot=" + s.getSlot());
+        }
+
         List<ScheduleDTO> scheduleDTOs = enrollmentScheduleService.getScheduleDTOs(schedules, menteeId);
+
+        // DEBUG: Print DTOs
+        System.out.println("ScheduleDTOs count: " + scheduleDTOs.size());
+        for (ScheduleDTO dto : scheduleDTOs) {
+            System.out.println("DTO: Day=" + dto.getDay() +
+                    ", Slot=" + dto.getSlot() +
+                    ", Course=" + dto.getCourseName() +
+                    ", CanReschedule=" + dto.isCanReschedule() +
+                    ", RescheduleStatus=" + dto.getRescheduleStatus());
+        }
+
+        List<EnrollmentSchedule> reviewingSchedules = enrollmentScheduleService.getSlotsUnderReview(menteeId, start, end);
+        Set<String> reviewingSlotKeys = new HashSet<>();
+
+        System.out.println("=== REVIEWING SLOTS DEBUG ===");
+        for (EnrollmentSchedule dto : reviewingSchedules) {
+            if (dto.getRequestedNewDate() != null && dto.getRequestedNewSlot() != null) {
+                String slotKey = dto.getRequestedNewSlot().name() + "_" + dto.getRequestedNewDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                reviewingSlotKeys.add(slotKey.toUpperCase());
+                System.out.println("Added reviewing slot key: " + slotKey.toUpperCase());
+            }
+        }
+        System.out.println("Total reviewing slot keys: " + reviewingSlotKeys.size());
+
         List<CourseMentor> courses = enrollmentService.getCourseMentorsByMentee(menteeId);
         int testCount = enrollmentScheduleService.countTestSlot(menteeId);
         LocalDate today = LocalDate.now();
@@ -376,6 +452,12 @@ public class MenteeController {
                 .mapToObj(mondayOfWeek::plusDays)
                 .toList();
 
+        System.out.println("Days in week: " + daysInWeek);
+        System.out.println("Slots: " + Arrays.toString(Slot.values()));
+        System.out.println("ReviewingSlotKeys: " + reviewingSlotKeys);
+        System.out.println("==================");
+
+        model.addAttribute("reviewingSlotKeys", reviewingSlotKeys);
         model.addAttribute("todayDate", today);
         model.addAttribute("daysInWeek", daysInWeek);
         model.addAttribute("courses", courses);
@@ -391,5 +473,162 @@ public class MenteeController {
         return "mentee/mentee-calendar";
     }
 
+    @PostMapping("/schedules/reschedule-request")
+    public String submitRescheduleRequest(
+            @RequestParam("scheduleId") int scheduleId,
+            @RequestParam("newSlot") String newSlot,
+            @RequestParam("newDate") String newDate,
+            @RequestParam(value = "reason", required = false) String reason,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        UUID menteeId = getSessionMentee(session);
+        if (menteeId == null) {
+            return "redirect:/";
+        }
 
+        try {
+            Slot slot = Slot.valueOf(newSlot);
+            LocalDate date = LocalDate.parse(newDate);
+            if (!enrollmentScheduleService.isSlotAvailable(menteeId, slot, date, scheduleId)) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "The selected time slot is no longer available. Please choose another slot.");
+                return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+            }
+
+            boolean success = enrollmentScheduleService.submitRescheduleRequest(scheduleId, slot, date, reason, menteeId);
+
+            if (success) {
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Reschedule request submitted successfully! Your mentor will review it soon.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Failed to submit reschedule request. Please try again.");
+            }
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Invalid slot selection. Please try again.");
+            return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An unexpected error occurred. Please try again.");
+        }
+
+        return "redirect:/schedules";
+    }
+
+    @GetMapping("/schedules/reschedule")
+    public String showRescheduleForm(
+            @RequestParam("scheduleId") Long scheduleId,
+            @RequestParam(value = "weekOffset", defaultValue = "0") int weekOffset,
+            HttpSession session,
+            Model model
+    ) {
+        UUID menteeId = getSessionMentee(session);
+        if (menteeId == null) {
+            return "redirect:/";
+        }
+
+        ScheduleDTO currentSchedule = enrollmentScheduleService.getScheduleDTO(scheduleId, menteeId);
+        if (currentSchedule == null) {
+            return "redirect:/schedules";
+        }
+
+        LocalDate mondayOfWeek = LocalDate.now().plusWeeks(weekOffset).with(DayOfWeek.MONDAY);
+        LocalDate today = LocalDate.now();
+        List<LocalDate> daysInWeek = IntStream.range(0, 7)
+                .mapToObj(mondayOfWeek::plusDays)
+                .toList();
+
+        List<ScheduleDTO> occupiedSlots = enrollmentScheduleService.getOccupiedSlotsForWeek(
+                menteeId, mondayOfWeek, mondayOfWeek.plusDays(6)
+        );
+
+        Map<LocalDate, Set<Slot>> occupiedMap = new HashMap<>();
+        Set<String> occupiedSlotKeys = new HashSet<>();
+        Set<String> reviewingSlotKeys = new HashSet<>();
+
+        for (ScheduleDTO dto : occupiedSlots) {
+            if (!dto.getDate().isBefore(LocalDate.now())) {
+                occupiedMap.computeIfAbsent(dto.getDate(), k -> new HashSet<>())
+                        .add(Slot.valueOf(dto.getSlot()));
+                String slotKey = dto.getSlot() + "_" + dto.getDate().toString();
+                occupiedSlotKeys.add(slotKey);
+            }
+        }
+
+        List<EnrollmentSchedule> reviewingSlots = enrollmentScheduleService.getSlotsUnderReview(
+                menteeId, mondayOfWeek, mondayOfWeek.plusDays(6)
+        );
+
+        for (EnrollmentSchedule dto : reviewingSlots) {
+            if (!dto.getDate().isBefore(LocalDate.now())) {
+                String slotKey = dto.getRequestedNewSlot() + "_" + dto.getRequestedNewDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                reviewingSlotKeys.add(slotKey.toUpperCase());
+            }
+        }
+
+        for (LocalDate day : daysInWeek) {
+            if (!day.isAfter(LocalDate.now())) {
+                for (Slot slot : Slot.values()) {
+                    String slotKey = slot.name() + "_" + day.toString();
+                    occupiedSlotKeys.add(slotKey);
+                    occupiedMap.computeIfAbsent(day, k -> new HashSet<>()).add(slot);
+                }
+            }
+        }
+
+        UUID mentorId = currentSchedule.getMentorId();
+        List<MentorAvailableTimeDetails> mentorOccupiedSlots = mentorAvailableTimeService
+                .findByMentorIdAndStatusAndDateRange(mentorId, mondayOfWeek, mondayOfWeek.plusDays(6));
+        for (MentorAvailableTimeDetails mentorSlot : mentorOccupiedSlots) {
+            LocalDate slotDate = mentorSlot.getDate();
+            if (slotDate.isAfter(today.minusDays(1)) &&
+                    (slotDate.isEqual(mondayOfWeek) ||
+                            (slotDate.isAfter(mondayOfWeek) && slotDate.isBefore(mondayOfWeek.plusDays(7))))) {
+
+                Slot slot = mentorSlot.getSlot();
+                String slotKey = slot.name() + "_" + slotDate.toString();
+                occupiedSlotKeys.add(slotKey);
+                occupiedMap.computeIfAbsent(slotDate, k -> new HashSet<>()).add(slot);
+            }
+        }
+
+        List<Enrollment> menteePendingEnrollments = enrollmentService
+                .findPendingEnrollmentsForMentee(menteeId);
+
+        for (Enrollment enrollment : menteePendingEnrollments) {
+            if (enrollment.getScheduleSummary() != null && !enrollment.getScheduleSummary().isEmpty()) {
+                List<RequestedSchedule> requestedSchedules = enrollmentScheduleService
+                        .findStartLearningTime(enrollment.getScheduleSummary());
+
+                for (RequestedSchedule requestedSchedule : requestedSchedules) {
+                    LocalDate requestedDate = requestedSchedule.getRequestedDate();
+                    if (!requestedDate.isBefore(mondayOfWeek) &&
+                            !requestedDate.isAfter(mondayOfWeek.plusDays(6))) {
+
+                        Slot slot = requestedSchedule.getSlot();
+                        String slotKey = slot.name() + "_" + requestedDate.toString();
+                        occupiedSlotKeys.add(slotKey);
+                        occupiedMap.computeIfAbsent(requestedDate, k -> new HashSet<>()).add(slot);
+                    }
+                }
+            }
+        }
+
+        model.addAttribute("occupiedMap", occupiedMap);
+        model.addAttribute("occupiedSlotKeys", occupiedSlotKeys);
+        model.addAttribute("reviewingSlotKeys", reviewingSlotKeys);
+        model.addAttribute("currentSchedule", currentSchedule);
+        model.addAttribute("slots", Slot.values());
+        model.addAttribute("daysInWeek", daysInWeek);
+        model.addAttribute("todayDate", today);
+        model.addAttribute("occupiedSlots", occupiedSlots);
+        model.addAttribute("weekOffset", weekOffset);
+        model.addAttribute("mondayOfWeek", mondayOfWeek);
+
+        return "mentee/reshedule-page";
+    }
 }
