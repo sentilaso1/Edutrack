@@ -1,313 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Quản lý khóa học</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management - EduTrack Admin</title>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 30px 40px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% {
-                transform: translateX(-100%) translateY(-100%) rotate(45deg);
-            }
-            100% {
-                transform: translateX(100%) translateY(100%) rotate(45deg);
-            }
-        }
-
-        .header h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
-        }
-
-        .content-wrapper {
-            padding: 40px;
-        }
-
-        .filters-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e9ecef;
-        }
-
-        .filters-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-group label {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-
-        .form-input, .form-select {
-            padding: 12px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .form-input:hover, .form-select:hover {
-            border-color: #ced4da;
-        }
-
-        .date-range {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .date-range span {
-            color: #6c757d;
-            font-weight: 500;
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            color: white;
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
-        }
-
-        .create-section {
-            margin-bottom: 30px;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            color: #495057;
-            font-weight: 700;
-            padding: 20px 15px;
-            text-align: left;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        td {
-            padding: 18px 15px;
-            border-bottom: 1px solid #f1f3f4;
-            color: #495057;
-            vertical-align: middle;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-            transform: scale(1.01);
-            transition: all 0.2s ease;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .status-open {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-closed {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .action-links {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .action-links a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .action-links a:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-1px);
-        }
-
-        .action-links button {
-            color: #dc3545;
-            background: none;
-            border: none;
-            cursor: pointer;
-            text-decoration: underline;
-            font-weight: 600;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .action-links button:hover {
-            background: #dc3545;
-            color: white;
-            text-decoration: none;
-            transform: translateY(-1px);
-        }
-
         .notification-overlay {
             position: fixed;
             top: 0;
@@ -388,89 +87,11 @@
             transform: rotate(90deg);
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
-
-        .empty-state svg {
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        @media (max-width: 768px) {
-            .main-container {
-                margin: 10px;
-                border-radius: 15px;
-            }
-
-            .content-wrapper {
-                padding: 20px;
-            }
-
-            .header {
-                padding: 20px;
-            }
-
-            .header h2 {
-                font-size: 2rem;
-            }
-
-            .filters-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .date-range {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .filter-actions {
-                justify-content: center;
-            }
-
-            .action-links {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            table {
-                font-size: 0.9rem;
-            }
-
-            th, td {
-                padding: 12px 10px;
-            }
-        }
-
-        .mentor-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .applicant-count {
-            background: #fff3cd;
-            color: #856404;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .no-applicants {
-            color: #6c757d;
-            font-style: italic;
-            font-size: 0.9rem;
-        }
-
-        .course-name:hover {
-            color: #667eea !important;
-        }
-
-        .course-name.expanded .toggle-icon {
-            transform: rotate(90deg);
+        .mentor-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 0;
         }
 
         .mentor-list.expanded {
@@ -493,36 +114,104 @@
             animation: slideIn 0.3s ease-out;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .status-open {
-            background: #d1fae5 !important;
-            color: #065f46 !important;
+            background: #d1fae5;
+            color: #065f46;
         }
 
         .status-closed {
-            background: #fee2e2 !important;
-            color: #991b1b !important;
+            background: #fee2e2;
+            color: #991b1b;
         }
 
-        .action-links a:hover,
-        .action-links button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .pagination {
-            background: #e6e6e2;
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .filter-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .pagination-container {
+            background: white;
+            border-radius: 12px;
             padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
         }
 
         .pagination-list {
@@ -530,12 +219,37 @@
             display: flex;
             gap: 8px;
             padding: 0;
+            margin: 0;
+            justify-content: center;
         }
 
         .pagination-list li {
-            border: 1px solid #ccc;
-            padding: 6px 12px;
-            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .pagination-list li a,
+        .pagination-list li span {
+            display: block;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-list li.active {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .pagination-list li.active a {
+            color: white;
+            font-weight: 600;
+        }
+
+        .pagination-list li:not(.disabled):not(.active):hover {
+            background-color: #f3f4f6;
         }
 
         .pagination-list li.disabled {
@@ -543,206 +257,215 @@
             pointer-events: none;
         }
 
-        .pagination-list li.active {
-            background-color: #28a745;
-            color: white;
-            font-weight: bold;
+        .form-input, .form-select {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
         }
 
-        .pagination-list li a {
-            text-decoration: none;
-            color: inherit;
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
-
     </style>
 </head>
-<body>
-
-<!-- Success Message Overlay -->
-<div id="successOverlay" th:if="${successMessage}" class="notification-overlay">
-    <div class="notification-content notification-success">
-        <button class="close-btn" onclick="closeNotification('successOverlay')">&times;</button>
-
-        <!-- Success Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07.02l3.992-4.99a.75.75 0 1 0-1.14-.98L7.477 9.417 5.383 7.323a.75.75 0 0 0-1.06 1.06l2.647 2.647z"/>
-        </svg>
-
-        <p style="margin: 0;" th:text="${successMessage}"></p>
-    </div>
+<body class="bg-gray-100 flex">
+<!-- Sidebar -->
+<div class="w-64 bg-gray-800 text-white h-screen fixed">
+    <div class="p-4 text-2xl font-bold">EduTrack Admin</div>
+    <nav class="mt-4">
+        <a th:href="@{/manager/dashboard}" class="block py-2 px-4 hover:bg-gray-700">Dashboard</a>
+        <a th:href="@{/manager/course-dashboard}" class="block py-2 px-4 bg-gray-700">Courses</a>
+        <a th:href="@{/manager/mentees}" class="block py-2 px-4 hover:bg-gray-700">Mentees</a>
+        <a th:href="@{/manager/mentors}" class="block py-2 px-4 hover:bg-gray-700">Mentors</a>
+        <a th:href="@{/manager/payments}" class="block py-2 px-4 hover:bg-gray-700">Payments</a>
+    </nav>
 </div>
 
-<!-- Error Message Overlay -->
-<div id="errorOverlay" th:if="${errorMessage}" class="notification-overlay">
-    <div class="notification-content notification-error">
-        <button class="close-btn" onclick="closeNotification('errorOverlay')">&times;</button>
-
-        <!-- Error Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
-        </svg>
-
-        <p style="margin: 0;" th:text="${errorMessage}"></p>
+<!-- Main Content -->
+<div class="ml-64 flex-1 p-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Course Management</h1>
+        <p class="text-gray-600">Manage courses and mentors in the system</p>
     </div>
-</div>
 
-<div class="main-container">
-    <div class="header">
-        <h2>📚 Quản lý khóa học</h2>
-        <p>Hệ thống quản lý khóa học và giảng viên</p>
+    <!-- Notifications -->
+    <div id="successOverlay" th:if="${successMessage}" class="notification-overlay">
+        <div class="notification-content notification-success">
+            <button class="close-btn" onclick="closeNotification('successOverlay')">&times;</button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07.02l3.992-4.99a.75.75 0 1 0-1.14-.98L7.477 9.417 5.383 7.323a.75.75 0 0 0-1.06 1.06l2.647 2.647z"/>
+            </svg>
+            <p style="margin: 0;" th:text="${successMessage}"></p>
+        </div>
     </div>
-    <div class="content-wrapper">
-        <!-- Filters Section -->
-        <div class="filters-section">
-            <div class="filters-title">
-                🔍 Bộ lọc tìm kiếm
+
+    <div id="errorOverlay" th:if="${errorMessage}" class="notification-overlay">
+        <div class="notification-content notification-error">
+            <button class="close-btn" onclick="closeNotification('errorOverlay')">&times;</button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+            </svg>
+            <p style="margin: 0;" th:text="${errorMessage}"></p>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filter-card mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Search Filters</h3>
+        <form method="GET" action="/manager/view">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search by Course Name</label>
+                    <input type="text" id="search" name="search" class="form-input w-full"
+                           placeholder="Enter keywords..."
+                           th:value="${search}">
+                </div>
+
+                <div>
+                    <label for="mentorSearch" class="block text-sm font-medium text-gray-700 mb-1">Search by Mentor Name</label>
+                    <input type="text" id="mentorSearch" name="mentorSearch" class="form-input w-full"
+                           placeholder="Enter mentor name..."
+                           th:value="${mentorSearch}">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
+                    <select name="open" class="form-select w-full" th:value="${selectedOpen}">
+                        <option value="">All Status</option>
+                        <option value="true" th:selected="${selectedOpen == 'true'}">Open</option>
+                        <option value="false" th:selected="${selectedOpen == 'false'}">Closed</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
+                    <select id="sortBy" name="sortBy" class="form-select w-full">
+                        <option value="">-- No sorting --</option>
+                        <option value="name" th:selected="${sortBy == 'name'}">Name A-Z</option>
+                        <option value="createdDate" th:selected="${sortBy == 'createdDate'}">Latest Created</option>
+                        <option value="mentorName" th:selected="${sortBy == 'mentorName'}">Mentor Name A-Z</option>
+                    </select>
+                </div>
             </div>
 
-            <form method="GET" action="/manager/view">
-                <div class="filters-grid">
-                    <div class="filter-group">
-                        <label for="search">Tìm kiếm theo tên khóa học</label>
-                        <input type="text" id="search" name="search" class="form-input"
-                               placeholder="Nhập từ khóa..."
-                               th:value="${search}">
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="mentorSearch">Tìm kiếm theo tên giảng viên</label>
-                        <input type="text" id="mentorSearch" name="mentorSearch" class="form-input"
-                               placeholder="Nhập tên giảng viên..."
-                               th:value="${mentorSearch}">
-                    </div>
-
-                    <div class="filter-group">
-                        <label>Lọc theo trạng thái</label>
-                        <select name="open" class="form-select" th:value="${selectedOpen}">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="true" th:selected="${selectedOpen == 'true'}">🟢 Đang mở</option>
-                            <option value="false" th:selected="${selectedOpen == 'false'}">🔴 Đã đóng</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="sortBy">Sắp xếp theo</label>
-                        <select id="sortBy" name="sortBy" class="form-select">
-                            <option value="">-- Không sắp xếp --</option>
-                            <option value="name" th:selected="${sortBy == 'name'}">📝 Tên A-Z</option>
-                            <option value="createdDate" th:selected="${sortBy == 'createdDate'}">📅 Ngày tạo mới nhất
-                            </option>
-                            <option value="mentorName" th:selected="${sortBy == 'mentorName'}">👨‍🏫 Tên giảng viên A-Z
-                            </option>
-                        </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Creation Date</label>
+                    <div class="flex items-center gap-2">
+                        <input type="date" name="fromDate" class="form-input flex-1" th:value="${fromDate}">
+                        <span class="text-gray-500 text-sm">to</span>
+                        <input type="date" name="toDate" class="form-input flex-1" th:value="${toDate}">
                     </div>
                 </div>
+            </div>
 
-                <div class="filter-group" style="margin-bottom: 25px;">
-                    <label>Lọc theo ngày tạo</label>
-                    <div class="date-range">
-                        <input type="date" name="fromDate" class="form-input" th:value="${fromDate}">
-                        <span>đến</span>
-                        <input type="date" name="toDate" class="form-input" th:value="${toDate}">
-                    </div>
-                </div>
+            <div class="flex gap-3">
+                <button type="submit" class="btn-action btn-primary">
+                    🔍 Search
+                </button>
+                <a href="/manager/view" class="btn-action bg-gray-500 hover:bg-gray-600 text-white">
+                    🔄 Reset
+                </a>
+            </div>
+        </form>
+    </div>
 
-                <div class="filter-actions">
-                    <button type="submit" class="btn btn-success">🔍 Tìm kiếm</button>
-                    <a href="/manager/view" class="btn btn-secondary">🔄 Đặt lại</a>
-                </div>
-            </form>
-        </div>
+    <!-- Create Course Button -->
+    <div class="mb-6">
+        <a href="/manager/courses/create" class="btn-action btn-success">
+            ➕ Create New Course
+        </a>
+    </div>
 
-        <!-- Create Course Section -->
-        <div class="create-section">
-            <a href="/manager/courses/create" class="btn btn-success">➕ Tạo khóa học mới</a>
-        </div>
-
-        <!-- Table Section -->
-        <div class="table-container">
-            <table th:if="${#lists.size(courses) > 0}">
-                <thead>
+    <!-- Courses Table -->
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="w-full" th:if="${#lists.size(courses) > 0}">
+                <thead class="bg-gray-50">
                 <tr>
-                    <th>📚 Tên khóa học</th>
-                    <th>👨‍🏫 Ứng Viên</th>
-                    <th>📅 Ngày tạo</th>
-                    <th>🔰 Trạng thái</th>
-                    <th>⚙️ Hành động</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicants</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
                 </thead>
-                <tbody>
-                <tr th:each="course : ${courses}">
-                    <td>
-                        <a href="javascript:void(0);"
-                           th:onclick="'toggleMentorList(this)'"
-                           th:attr="data-course-id=${course.id}"
-                           style="cursor:pointer; text-decoration: none; color: #252847;">
-                            <strong th:text="${course.name}">Tên khóa học</strong>
-                        </a>
+                <tbody class="bg-white divide-y divide-gray-200">
+                <tr th:each="course : ${courses}" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div>
+                            <a href="javascript:void(0);"
+                               th:onclick="'toggleMentorList(this)'"
+                               th:attr="data-course-id=${course.id}"
+                               class="course-name-link text-blue-600 hover:text-blue-800 font-medium cursor-pointer">
+                                <span th:text="${course.name}">Course Name</span>
+                            </a>
 
-                        <!-- Mentor List - Collapsible -->
-                        <div th:id="'mentor-list-course-' + ${course.id}"
-                             class="mentor-list"
-                             style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; margin-top: 0;">
+                            <div th:id="'mentor-list-course-' + ${course.id}" class="mentor-list">
+                                <div th:if="${acceptedMentorMap[course.id] == null or #lists.isEmpty(acceptedMentorMap[course.id])}"
+                                     class="text-gray-500 italic p-3 bg-gray-50 rounded-md border-l-4 border-gray-300 mt-2">
+                                    ❌ No mentors assigned to this course
+                                </div>
 
-                            <!-- If no mentors -->
-                            <div th:if="${acceptedMentorMap[course.id] == null or #lists.isEmpty(acceptedMentorMap[course.id])}"
-                                 class="no-mentors"
-                                 style="color: #6b7280; font-style: italic; padding: 10px 15px; background: #f9fafb; border-radius: 6px; border-left: 4px solid #d1d5db; margin: 5px 0;">
-                                ❌ Chưa có mentor cho khóa này
-                            </div>
-
-                            <!-- Mentor items -->
-                            <div th:each="mentor : ${acceptedMentorMap[course.id]}"
-                                 class="mentor-item"
-                                 style="background: #f1f5f9; border-left: 4px solid #667eea; padding: 10px 15px; margin: 5px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                        <span class="mentor-name"
-                              style="font-weight: 500; color: #1e293b;"
-                              th:text="'👨‍💻 ' + ${mentor.fullName}">
-                            Tên mentor
-                        </span>
-                                <div class="mentor-actions" style="display: flex; gap: 8px;">
-                                    <a th:href="@{/manager/mentor/detail/{id}(id=${mentor.id})}"
-                                       style="background: #667eea; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; transition: background-color 0.3s ease;"
-                                       title="Xem chi tiết">
-                                        👁️ Chi tiết
-                                    </a>
+                                <div th:each="mentor : ${acceptedMentorMap[course.id]}"
+                                     class="mentor-item bg-blue-50 border-l-4 border-blue-400 p-3 mt-2 rounded-md flex justify-between items-center">
+                                            <span class="font-medium text-gray-800"
+                                                  th:text="'👨‍💻 ' + ${mentor.fullName}">
+                                                Mentor Name
+                                            </span>
+                                    <div class="flex gap-2">
+                                        <a th:href="@{/manager/mentor/detail/{id}(id=${mentor.id})}"
+                                           class="btn-action btn-primary text-xs">
+                                            👁️ Details
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <div class="mentor-info">
-                            <span th:if="${pendingApplicantCount[course.id] != null and pendingApplicantCount[course.id] > 0}"
-                                  class="applicant-count"
-                                  th:text="|${pendingApplicantCount[course.id]} ứng viên đang chờ|">
-                            </span>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div>
+                                    <span th:if="${pendingApplicantCount[course.id] != null and pendingApplicantCount[course.id] > 0}"
+                                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+                                          th:text="|${pendingApplicantCount[course.id]} pending|">
+                                    </span>
                             <span th:if="${pendingApplicantCount[course.id] == null or pendingApplicantCount[course.id] == 0}"
-                                  class="no-applicants"> Chưa có ứng viên
-                            </span>
+                                  class="text-gray-500 italic text-sm">
+                                        No applicants
+                                    </span>
                         </div>
                     </td>
-                    <td th:text="${#dates.format(course.createdDate, 'dd/MM/yyyy')}">Ngày</td>
-                    <td>
-                        <span class="status-badge"
-                              th:classappend="${course.open} ? 'status-open' : 'status-closed'"
-                              th:text="${course.open ? '🟢 Đang mở' : '🔴 Đã đóng'}"></span>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        th:text="${#dates.format(course.createdDate, 'MM/dd/yyyy')}">Date</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="status-badge"
+                                      th:classappend="${course.open} ? 'status-open' : 'status-closed'"
+                                      th:text="${course.open ? 'Open' : 'Closed'}"></span>
                     </td>
-                    <td>
-                        <div class="action-links">
-                            <a th:href="@{/manager/courses/edit/{id}(id=${course.id})}">✏️ Sửa</a>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex gap-2 flex-wrap">
+                            <a th:href="@{/manager/courses/edit/{id}(id=${course.id})}"
+                               class="btn-action btn-primary text-xs">✏️ Edit</a>
+
                             <a th:href="@{/manager/courses/toggle-open/{id}(id=${course.id})}"
-                               th:text="${course.open} ? '🔒 Đóng' : '🔓 Mở'">Mở/Đóng</a>
+                               class="btn-action btn-warning text-xs"
+                               th:text="${course.open} ? '🔒 Close' : '🔓 Open'">Toggle</a>
 
                             <a th:if="${(acceptedMentorMap[course.id] == null or #lists.isEmpty(acceptedMentorMap[course.id])) and pendingApplicantCount[course.id] > 0}"
-                               th:href="@{/admin/cv/list/1}">
-                                <strong>👥 Xem ứng viên</strong>
+                               th:href="@{/admin/cv/list/1}"
+                               class="btn-action btn-success text-xs">
+                                👥 View Applicants
                             </a>
 
-
                             <form th:action="@{/manager/courses/delete/{id}(id=${course.id})}" method="post"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn tác.')"
-                                  style="display: inline;">
-                                <button type="submit">🗑️ Xóa</button>
+                                  onsubmit="return confirm('Are you sure you want to delete this course? This action cannot be undone.')"
+                                  class="inline">
+                                <button type="submit" class="btn-action btn-danger text-xs">🗑️ Delete</button>
                             </form>
                         </div>
                     </td>
@@ -750,68 +473,82 @@
                 </tbody>
             </table>
 
-            <!-- Empty State -->
-            <div th:if="${#lists.size(courses) == 0}" class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+            <div th:if="${#lists.size(courses) == 0}" class="text-center py-12">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                 </svg>
-                <h3>Không tìm thấy khóa học nào</h3>
-                <p>Thử điều chỉnh bộ lọc hoặc tạo khóa học mới</p>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
+                <p class="text-gray-600">Try adjusting your filters or create a new course</p>
             </div>
-        </div>
-        <div class="pagination" th:if="${totalPages > 0}">
-            <ul class="pagination-list">
-                <!-- Nút Prev -->
-                <li th:classappend="${currentPage == 0} ? 'disabled'">
-                    <a th:href="@{/manager/view(
-                search=${search},
-                mentorSearch=${mentorSearch},
-                open=${selectedOpen},
-                sortBy=${sortBy},
-                fromDate=${fromDate != null ? #dates.format(fromDate, 'yyyy-MM-dd') : ''},
-                toDate=${toDate != null ? #dates.format(toDate, 'yyyy-MM-dd') : ''},
-                page=${currentPage - 1}
-            )}"
-                       th:if="${currentPage > 0}">« Trước</a>
-                    <span th:if="${currentPage == 0}">« Trước</span>
-                </li>
-
-                <!-- Các trang -->
-                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                    th:classappend="${i == currentPage} ? 'active'">
-                    <a th:href="@{/manager/view(
-                search=${search},
-                mentorSearch=${mentorSearch},
-                open=${selectedOpen},
-                sortBy=${sortBy},
-                fromDate=${fromDate != null ? #dates.format(fromDate, 'yyyy-MM-dd') : ''},
-                toDate=${toDate != null ? #dates.format(toDate, 'yyyy-MM-dd') : ''},
-                page=${i}
-            )}"
-                       th:text="${i + 1}">1</a>
-                </li>
-
-                <!-- Nút Next -->
-                <li th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                    <a th:href="@{/manager/view(
-                search=${search},
-                mentorSearch=${mentorSearch},
-                open=${selectedOpen},
-                sortBy=${sortBy},
-                fromDate=${fromDate != null ? #dates.format(fromDate, 'yyyy-MM-dd') : ''},
-                toDate=${toDate != null ? #dates.format(toDate, 'yyyy-MM-dd') : ''},
-                page=${currentPage + 1}
-            )}"
-                       th:if="${currentPage < totalPages - 1}">Sau »</a>
-                    <span th:if="${currentPage == totalPages - 1}">Sau »</span>
-                </li>
-            </ul>
         </div>
     </div>
 
+    <!-- Pagination -->
+    <div class="pagination-container mt-6" th:if="${totalPages > 0}">
+        <nav>
+            <ul class="pagination-list">
+                <!-- Previous Button -->
+                <li th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a th:href="@{/manager/view(
+                            search=${search},
+                            mentorSearch=${mentorSearch},
+                            open=${selectedOpen},
+                            sortBy=${sortBy},
+                            fromDate=${fromDate != null ? #dates.format(fromDate, 'yyyy-MM-dd') : ''},
+                            toDate=${toDate != null ? #dates.format(toDate, 'yyyy-MM-dd') : ''},
+                            page=${currentPage - 1}
+                        )}"
+                       th:if="${currentPage > 0}">« Previous</a>
+                    <span th:if="${currentPage == 0}">« Previous</span>
+                </li>
+
+                <!-- Page Numbers -->
+                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a th:href="@{/manager/view(
+                            search=${search},
+                            mentorSearch=${mentorSearch},
+                            open=${selectedOpen},
+                            sortBy=${sortBy},
+                            fromDate=${fromDate != null ? #dates.format(fromDate, 'yyyy-MM-dd') : ''},
+                            toDate=${toDate != null ? #dates.format(toDate, 'yyyy-MM-dd') : ''},
+                            page=${i}
+                        )}"
+                       th:text="${i + 1}">1</a>
+                </li>
+
+                <!-- Next Button -->
+                <li th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a th:href="@{/manager/view(
+                            search=${search},
+                            mentorSearch=${mentorSearch},
+                            open=${selectedOpen},
+                            sortBy=${sortBy},
+                            fromDate=${fromDate != null ? #dates.format(fromDate, 'yyyy-MM-dd') : ''},
+                            toDate=${toDate != null ? #dates.format(toDate, 'yyyy-MM-dd') : ''},
+                            page=${currentPage + 1}
+                        )}"
+                       th:if="${currentPage < totalPages - 1}">Next »</a>
+                    <span th:if="${currentPage == totalPages - 1}">Next »</span>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
 
 <script>
+    // Close notifications
+    function closeNotification(overlayId) {
+        const overlay = document.getElementById(overlayId);
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // Auto-close notifications
     window.addEventListener('DOMContentLoaded', function () {
         const successOverlay = document.getElementById('successOverlay');
         const errorOverlay = document.getElementById('errorOverlay');
@@ -829,16 +566,15 @@
         }
     });
 
+    // Toggle mentor list
     window.toggleMentorList = function(element) {
         const courseId = element.getAttribute('data-course-id');
         const mentorList = document.getElementById(`mentor-list-course-${courseId}`);
 
         if (mentorList) {
-            // Toggle expanded class
             mentorList.classList.toggle('expanded');
             element.classList.toggle('expanded');
 
-            // Add smooth animation
             if (mentorList.classList.contains('expanded')) {
                 mentorList.style.maxHeight = mentorList.scrollHeight + 'px';
             } else {
@@ -847,44 +583,7 @@
         }
     };
 
-    // Add smooth highlight effect when clicking
-    document.addEventListener('DOMContentLoaded', function() {
-        const courseNames = document.querySelectorAll('.course-name');
-
-        courseNames.forEach(courseName => {
-            courseName.addEventListener('click', function() {
-                const row = this.closest('tr');
-                row.style.background = '#f0f4ff';
-
-                setTimeout(() => {
-                    row.style.background = '';
-                }, 300);
-            });
-        });
-    });
-    // Đóng notification khi nhấn Enter hoặc Escape
-    document.addEventListener('keydown', function (event) {
-        if (event.key === "Enter" || event.key === "Escape") {
-            const successOverlay = document.getElementById('successOverlay');
-            const errorOverlay = document.getElementById('errorOverlay');
-
-            if (successOverlay) closeNotification('successOverlay');
-            if (errorOverlay) closeNotification('errorOverlay');
-        }
-    });
-
-    // Hàm đóng notification với hiệu ứng fade
-    function closeNotification(overlayId) {
-        const overlay = document.getElementById(overlayId);
-        if (overlay) {
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 300);
-        }
-    }
-
-    // Đóng notification khi click bên ngoài
+    // Close notifications on click outside or key press
     document.addEventListener('click', function (event) {
         const successOverlay = document.getElementById('successOverlay');
         const errorOverlay = document.getElementById('errorOverlay');
@@ -898,13 +597,15 @@
         }
     });
 
-    // Smooth scroll cho các form inputs khi focus
-    document.querySelectorAll('.form-input, .form-select').forEach(input => {
-        input.addEventListener('focus', function () {
-            this.scrollIntoView({behavior: 'smooth', block: 'center'});
-        });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === "Enter" || event.key === "Escape") {
+            const successOverlay = document.getElementById('successOverlay');
+            const errorOverlay = document.getElementById('errorOverlay');
+
+            if (successOverlay) closeNotification('successOverlay');
+            if (errorOverlay) closeNotification('errorOverlay');
+        }
     });
 </script>
-
 </body>
 </html>
