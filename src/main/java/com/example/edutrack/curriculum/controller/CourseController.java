@@ -284,6 +284,7 @@ CourseController {
                 .distinct()
                 .collect(Collectors.toList());
 
+        model.addAttribute("courseMentors", courseMentors);
         model.addAttribute("relatedMentors", relatedMentors);
         model.addAttribute("course", course);
 

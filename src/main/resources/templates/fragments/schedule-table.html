@@ -1,0 +1,20 @@
+<div th:fragment="scheduleTable">
+    <table class="schedule-table" th:if="${slotDayMatrix}">
+        <thead>
+        <tr>
+            <th style="background-color: #369F93FF">Time Slot</th>
+            <th style="background-color: #369F93FF"
+                th:each="day : ${dayLabels}"
+                th:text="${day.name().toLowerCase()}"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="slot, iStat : ${slots}">
+            <td th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
+            <td th:each="day, jStat : ${dayLabels}">
+                <div th:class="'mentor-button' + (${slotDayMatrix[iStat.index][jStat.index]} ? ' active' : '')"></div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
