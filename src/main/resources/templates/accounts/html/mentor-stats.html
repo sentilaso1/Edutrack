@@ -263,73 +263,73 @@
 <div class="main">
     <div class="header">
         <h1>Dashboard Income - Mentor</h1>
-        <p>Theo dõi hiệu suất và thu nhập của bạn</p>
+        <p>Monitor your performance and income</p>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
             <span class="mentor-icon">💰</span>
-            <h3>Tổng Thu Nhập</h3>
+            <h3>Total income</h3>
             <div class="value" id="total-income" th:text="${#numbers.formatInteger(incomeStats.totalIncome, 0, 'POINT')} + '₫'">
                 0₫
             </div>
-            <div class="change" th:text="${#numbers.formatDecimal(incomeStats.percentChange, 1, 1)} + '% so với tháng trước'">
+            <div class="change" th:text="${#numbers.formatDecimal(incomeStats.percentChange, 1, 1)} + '% compared to the previous month'">
                 0%
             </div>
         </div>
         <div class="stat-card">
             <span class="mentor-icon">👥</span>
-            <h3>Học Viên Đã Dạy</h3>
+            <h3>Students taught</h3>
             <div class="value" id="total-students">127</div>
-            <div class="change positive">+8 học viên mới</div>
+            <div class="change positive">+8 new student</div>
         </div>
         <div class="stat-card">
             <span class="mentor-icon">📚</span>
-            <h3>Khóa Học Hoàn Thành</h3>
+            <h3>Completed course</h3>
             <div class="value" id="completed-courses">23</div>
-            <div class="change positive">+3 khóa học</div>
+            <div class="change positive">+3 course</div>
         </div>
         <div class="stat-card">
             <span class="mentor-icon">⭐</span>
-            <h3>Đánh Giá Trung Bình</h3>
+            <h3>Average review</h3>
             <div class="value" id="average-rating">4.8⭐</div>
-            <div class="change positive">+0.2 điểm</div>
+            <div class="change positive">+0.2 point</div>
         </div>
     </div>
 
     <div class="charts-grid">
         <div class="chart-container">
-            <div class="chart-title">📈 Thu Nhập Theo Thời Gian</div>
+            <div class="chart-title">📈 Income over time</div>
             <canvas id="incomeChart"></canvas>
         </div>
     </div>
 
     <div class="charts-grid">
         <div class="chart-container">
-            <div class="chart-title">👥 Số Lượng Học Viên Theo Tháng</div>
+            <div class="chart-title">👥Number of students by month</div>
             <canvas id="studentsChart"></canvas>
         </div>
         <div class="chart-container">
-            <div class="chart-title">⏱️ Giờ Dạy Theo Tuần</div>
+            <div class="chart-title">⏱️ Weekly teaching time</div>
             <canvas id="hoursChart"></canvas>
         </div>
     </div>
 
     <div class="performance-metrics">
         <div class="metric-card">
-            <h4>Tỷ Lệ Hoàn Thành</h4>
+            <h4>Completed rate</h4>
             <div class="metric-value">94.5%</div>
         </div>
         <div class="metric-card">
-            <h4>Thời Gian Phản Hồi</h4>
+            <h4>Response time</h4>
             <div class="metric-value">2.3h</div>
         </div>
         <div class="metric-card">
-            <h4>Tỷ Lệ Tái Đăng Ký</h4>
+            <h4>Registration rate</h4>
             <div class="metric-value">87.2%</div>
         </div>
         <div class="metric-card">
-            <h4>Thu Nhập/Slot</h4>
+            <h4>Income per Slot</h4>
             <div class="metric-value" th:text="${#numbers.formatInteger(incomeStats.incomePerSlot, 0, 'POINT')} + '₫'">
                 0₫
             </div>

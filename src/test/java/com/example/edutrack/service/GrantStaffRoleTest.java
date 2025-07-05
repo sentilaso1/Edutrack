@@ -64,6 +64,7 @@ class GrantStaffRoleTest {
                 mockStaff.setCreatedDate(new Date());
         }
 
+        // TC 4.1
         @Test
         @DisplayName("Should throw IllegalArgumentException when userId is null")
         void testGrantStaffRole_NullUserId() {
@@ -75,6 +76,7 @@ class GrantStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository, mentorRepository, menteeRepository);
         }
 
+        // TC 4.2
         @Test
         @DisplayName("Should throw IllegalArgumentException when userId is empty string")
         void testGrantStaffRole_EmptyUserId() {
@@ -86,6 +88,7 @@ class GrantStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository, mentorRepository, menteeRepository);
         }
 
+        // TC 4.3
         @Test
         @DisplayName("Should throw IllegalArgumentException when userId is whitespace only")
         void testGrantStaffRole_WhitespaceUserId() {
@@ -97,6 +100,7 @@ class GrantStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository, mentorRepository, menteeRepository);
         }
 
+        // TC 4.4
         @Test
         @DisplayName("Should throw IllegalArgumentException when role is null")
         void testGrantStaffRole_NullRole() {
@@ -108,6 +112,7 @@ class GrantStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository, mentorRepository, menteeRepository);
         }
 
+        // TC 4.5
         @Test
         @DisplayName("Should throw IllegalArgumentException when userId has invalid UUID format")
         void testGrantStaffRole_InvalidUUIDFormat() {
@@ -120,6 +125,7 @@ class GrantStaffRoleTest {
                 verifyNoInteractions(userRepository, staffRepository, mentorRepository, menteeRepository);
         }
 
+        // TC 4.6
         @Test
         @DisplayName("Should handle userId with leading and trailing whitespace correctly")
         void testGrantStaffRole_UserIdWithWhitespace() {
@@ -131,6 +137,7 @@ class GrantStaffRoleTest {
                 verify(staffRepository).insertStaff(validUUID, "Admin");
         }
 
+        // TC 4.7
         @Test
         @DisplayName("Should throw RuntimeException when user is not found")
         void testGrantStaffRole_UserNotFound() {
@@ -144,6 +151,7 @@ class GrantStaffRoleTest {
                 verifyNoInteractions(staffRepository, mentorRepository, menteeRepository);
         }
 
+        // TC 4.8
         @Test
         @DisplayName("Should throw RuntimeException when getUserById throws unexpected exception")
         void testGrantStaffRole_GetUserByIdException() {
@@ -158,6 +166,7 @@ class GrantStaffRoleTest {
                 verify(userRepository).findById(validUUID);
         }
 
+        // TC 4.9
         @Test
         @DisplayName("Should throw IllegalStateException when user is inactive")
         void testGrantStaffRole_InactiveUser() {
@@ -173,6 +182,7 @@ class GrantStaffRoleTest {
                 verifyNoMoreInteractions(staffRepository, mentorRepository, menteeRepository);
         }
 
+        // TC 4.10
         @Test
         @DisplayName("Should throw IllegalStateException when user is locked")
         void testGrantStaffRole_LockedUser() {
@@ -188,6 +198,7 @@ class GrantStaffRoleTest {
                 verifyNoMoreInteractions(staffRepository, mentorRepository, menteeRepository);
         }
 
+        // TC 4.11
         @Test
         @DisplayName("Should throw IllegalStateException when user already has the same role")
         void testGrantStaffRole_ExistingStaffSameRole() {
@@ -206,6 +217,7 @@ class GrantStaffRoleTest {
                 verifyNoMoreInteractions(staffRepository);
         }
 
+        // TC 4.12
         @Test
         @DisplayName("Should update existing staff role when user has different role")
         void testGrantStaffRole_ExistingStaffDifferentRole() {
@@ -224,6 +236,7 @@ class GrantStaffRoleTest {
                 assertNotNull(mockStaff.getCreatedDate());
         }
 
+        // TC 4.13
         @Test
         @DisplayName("Should throw IllegalStateException when staff record not found for existing ID")
         void testGrantStaffRole_StaffNotFoundForExistingId() {
@@ -241,6 +254,7 @@ class GrantStaffRoleTest {
                 verify(staffRepository).findById(validUUID);
         }
 
+        // TC 4.14
         @Test
         @DisplayName("Should throw RuntimeException when saving existing staff fails")
         void testGrantStaffRole_SaveExistingStaffFailure() {
@@ -257,6 +271,7 @@ class GrantStaffRoleTest {
                 assertTrue(exception.getMessage().contains("Database save failed"));
         }
 
+        // TC 4.15
         @Test
         @DisplayName("Should throw IllegalStateException when user is already a mentor")
         void testGrantStaffRole_UserIsMentor() {
@@ -275,6 +290,7 @@ class GrantStaffRoleTest {
                 verifyNoInteractions(menteeRepository);
         }
 
+        // TC 4.16
         @Test
         @DisplayName("Should throw IllegalStateException when user is already a mentee")
         void testGrantStaffRole_UserIsMentee() {
@@ -294,6 +310,7 @@ class GrantStaffRoleTest {
                 verify(menteeRepository).existsById(validUUID);
         }
 
+        // TC 4.17
         @Test
         @DisplayName("Should successfully create new staff when all conditions are met")
         void testGrantStaffRole_SuccessfulCreation() {
@@ -307,6 +324,7 @@ class GrantStaffRoleTest {
                 verify(staffRepository).insertStaff(validUUID, "Admin");
         }
 
+        // TC 4.18
         @Test
         @DisplayName("Should handle all Staff.Role enum values correctly")
         void testGrantStaffRole_AllRoleEnumValues() {
@@ -320,6 +338,7 @@ class GrantStaffRoleTest {
                 }
         }
 
+        // TC 4.19
         @Test
         @DisplayName("Should throw RuntimeException when database insertion fails")
         void testGrantStaffRole_DatabaseInsertionFailure() {
@@ -335,6 +354,7 @@ class GrantStaffRoleTest {
                 verify(staffRepository).insertStaff(validUUID, "Admin");
         }
 
+        // TC 4.20
         @Test
         @DisplayName("Should handle exception when checking mentor existence")
         void testGrantStaffRole_MentorRepositoryException() {
@@ -350,6 +370,7 @@ class GrantStaffRoleTest {
                 assertEquals("Failed to grant staff role: Mentor repository error", exception.getMessage());
         }
 
+        // TC 4.21
         @Test
         @DisplayName("Should handle exception when checking mentee existence")
         void testGrantStaffRole_MenteeRepositoryException() {
@@ -366,6 +387,7 @@ class GrantStaffRoleTest {
                 assertEquals("Failed to grant staff role: Mentee repository error", exception.getMessage());
         }
 
+        // TC 4.22
         @Test
         @DisplayName("Should preserve original exception cause in RuntimeException")
         void testGrantStaffRole_ExceptionCausePreserved() {
@@ -382,6 +404,7 @@ class GrantStaffRoleTest {
                 assertEquals(originalException, exception.getCause());
         }
 
+        // TC 4.23
         @Test
         @DisplayName("Should rethrow IllegalStateException without wrapping")
         void testGrantStaffRole_IllegalStateExceptionNotWrapped() {
@@ -397,6 +420,7 @@ class GrantStaffRoleTest {
                 assertEquals("State validation failed", exception.getMessage());
         }
 
+        // TC 4.24
         @Test
         @DisplayName("Should handle valid UUID with different format variations")
         void testGrantStaffRole_ValidUUIDDifferentFormats() {
@@ -407,6 +431,7 @@ class GrantStaffRoleTest {
                 verify(staffRepository).insertStaff(validUUID, "Admin");
         }
 
+        // TC 4.25
         @Test
         @DisplayName("Should handle concurrent modification scenarios gracefully")
         void testGrantStaffRole_ConcurrentModification() {
@@ -426,6 +451,7 @@ class GrantStaffRoleTest {
                 assertEquals("Failed to grant staff role: Duplicate key constraint", exception.getMessage());
         }
 
+        // this method sets up the mocks for a successful staff role creation
         private void setupSuccessfulCreationMocks() {
                 when(userRepository.findById(validUUID)).thenReturn(Optional.of(mockUser));
                 when(staffRepository.existsById(validUUID)).thenReturn(false);

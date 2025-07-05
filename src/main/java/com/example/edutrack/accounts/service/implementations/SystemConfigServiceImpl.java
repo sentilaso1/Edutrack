@@ -3,7 +3,6 @@ package com.example.edutrack.accounts.service.implementations;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.edutrack.accounts.repository.PropertyRepository;
 import com.example.edutrack.accounts.model.Property;
@@ -16,11 +15,8 @@ import oshi.hardware.GlobalMemory;
 import oshi.hardware.HWDiskStore;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
-import java.util.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SystemConfigServiceImpl implements SystemConfigService {
