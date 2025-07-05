@@ -18,7 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -114,7 +116,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public int getNumberOfPendingSlot(Mentor mentor, LocalDate date, Slot slot){
-        List<Enrollment> enrollment = enrollmentRepository.findAllPendingByMentorId(mentor);
+        List<Enrollment> enrollment = enrollmentRepository.findByStatus(Enrollment.EnrollmentStatus.PENDING,mentor.getId());
         List<String> summaries = enrollment.stream().map(Enrollment::getScheduleSummary).toList();
         int count = 0;
         for(String summary : summaries){
@@ -126,6 +128,34 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             }
         }
         return count;
+    }
+
+    @Override
+    public List<Enrollment> getDuplicatedSchedules(Enrollment enrollment) {
+        List<Enrollment> pendingEnrollments = enrollmentRepository.findByStatus(Enrollment.EnrollmentStatus.PENDING, enrollment.getCourseMentor().getMentor().getId());
+
+        String[] schedules = enrollment.getScheduleSummary().split(";");
+        Iterator<Enrollment> iterator = pendingEnrollments.iterator();
+
+        while (iterator.hasNext()) {
+            Enrollment pendingEnrollment = iterator.next();
+            if (!isContainSchedule(pendingEnrollment, schedules) || (long) pendingEnrollment.getId() == enrollment.getId()) {
+                iterator.remove();
+            }
+        }
+
+        return pendingEnrollments;
+    }
+
+
+    private boolean isContainSchedule(Enrollment pendingEnrollment, String[] schedule) {
+        String summary = pendingEnrollment.getScheduleSummary();
+        for(String s : schedule){
+            if(summary.contains(s.trim())){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -44,7 +44,7 @@ public class EnrollmentSchedule {
     private Attendance attendance = Attendance.NOT_YET;
 
     @Column(name = "report")
-    private boolean report;
+    private Boolean report;
 
     @Column(name = "title_section")
     private String titleSection;

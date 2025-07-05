@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.Slot;
 
@@ -39,4 +40,6 @@ public interface EnrollmentService {
     List<CourseMentor> getCourseMentorsByMentee(UUID menteeId);
 
     int getNumberOfPendingSlot(Mentor mentor, LocalDate date, Slot slot);
+
+    List<Enrollment> getDuplicatedSchedules(Enrollment enrollment);
 }
