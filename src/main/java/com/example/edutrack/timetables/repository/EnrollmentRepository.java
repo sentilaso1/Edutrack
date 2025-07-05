@@ -86,7 +86,4 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<CourseMentor> findCourseMentorByMentee(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
 
     List<Enrollment> findAllByMenteeId(UUID menteeId);
-
-    @Query("SELECT e FROM Enrollment e WHERE e.courseMentor.mentor = :mentor AND e.status = 'PENDING' ")
-    List<Enrollment> findAllPendingByMentorId(Mentor mentor);
 }

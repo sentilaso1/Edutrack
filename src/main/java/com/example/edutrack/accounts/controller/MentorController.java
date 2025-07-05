@@ -117,7 +117,7 @@ public class MentorController {
         return "/mentor/mentor_calendar";
     }
 
-    @GetMapping("/mentor/sensor-class")
+    @GetMapping("/mentor/censor-class")
     public String viewSensorClassList(Model model,
                                       @RequestParam(defaultValue = "PENDING") Enrollment.EnrollmentStatus status,
                                       HttpSession session) {
@@ -189,7 +189,7 @@ public class MentorController {
     }
 
 
-    @GetMapping("/mentor/sensor-class/{eid}")
+    @GetMapping("/mentor/censor-class/{eid}")
     public String rejectRegistration(@PathVariable Long eid,
                                      @RequestParam String action,
                                      HttpSession session) {
@@ -204,11 +204,9 @@ public class MentorController {
         if (!enrollment.getCourseMentor().getMentor().getId().equals(mentor.getId())) {
             return "redirect:/mentor/schedule?error=notMentor";
         }
-
-
         Optional<Wallet> menteeWalletOpt = walletService.findByUser(enrollment.getMentee());
         if (menteeWalletOpt.isEmpty()) {
-            return "redirect:/mentor/sensor-class?error=menteeWalletNotFound";
+            return "redirect:/mentor/censor-class?error=menteeWalletNotFound";
         }
         Wallet menteeWallet = menteeWalletOpt.get();
 
@@ -229,10 +227,23 @@ public class MentorController {
             enrollment.getTransaction().setStatus(Transaction.TransactionStatus.FAILED);
             transactionService.save(enrollment.getTransaction());
 
-            return "redirect:/mentor/sensor-class?status=REJECTED&reject=" + eid;
+            return "redirect:/mentor/censor-class?status=REJECTED&reject=" + eid;
+        }
+
+        if("rejectAll".equals(action)){
+            List<Enrollment> duplicatedEnrollments = enrollmentService.getDuplicatedSchedules(enrollment);
+            for (Enrollment duplicatedEnrollment : duplicatedEnrollments) {
+                duplicatedEnrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
+                enrollmentService.save(enrollment);
+            }
+            return "redirect:/mentor/censor-class/" + eid + "/view?action=rejected_all";
         }
 
         if (action.equals("approve")) {
+            List<Enrollment> duplicatedEnrollment = enrollmentService.getDuplicatedSchedules(enrollment);
+            if (!duplicatedEnrollment.isEmpty()) {
+                return "redirect:/mentor/censor-class/" + eid + "/view?approve=fail";
+            }
             enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
             enrollmentService.save(enrollment);
             enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
@@ -253,15 +264,15 @@ public class MentorController {
             enrollment.getTransaction().setStatus(Transaction.TransactionStatus.COMPLETED);
             transactionService.save(enrollment.getTransaction());
 
-            return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
+            return "redirect:/mentor/censor-class?status=APPROVED&approve=" + eid;
         }
         if (action.equals("view")) {
-            return "redirect:/mentor/sensor-class/" + eid + "/view";
+            return "redirect:/mentor/censor-class/" + eid + "/view";
         }
-        return "redirect:/mentor/sensor-class";
+        return "redirect:/mentor/censor-class";
     }
 
-    @GetMapping("/mentor/sensor-class/{eid}/view")
+    @GetMapping("/mentor/censor-class/{eid}/view")
     public String viewSensorClass(@PathVariable Long eid,
                                   Model model,
                                   HttpSession session) {
@@ -270,12 +281,12 @@ public class MentorController {
             return "redirect:/login";
         }
         Enrollment enrollment = enrollmentService.findById(eid);
-        List<Slot> slots = new ArrayList<>();
-        List<LocalDate> dates = new ArrayList<>();
         String summary = enrollment.getScheduleSummary();
-
+        List<Enrollment> duplicatedEnrollment = enrollmentService.getDuplicatedSchedules(enrollment);
+        model.addAttribute("duplicatedEnrollments", duplicatedEnrollment);
         List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(summary);
         model.addAttribute("startTime", startTime);
+        model.addAttribute("enrollment", enrollment);
         return "mentor/skill-register-request-detail";
     }
 

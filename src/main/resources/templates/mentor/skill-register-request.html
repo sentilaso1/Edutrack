@@ -51,7 +51,7 @@
         }
 
         .arrow-btn {
-            padding: 8px 12px;
+            padding: 8px 20px;
             background: #f1f1f1;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -60,28 +60,68 @@
 
         .product-table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .product-table th,
-        .product-table td {
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            text-align: center;
+            border-collapse: separate;
+            border-spacing: 3px 12px;
         }
 
         .product-table th {
-            background: #f5f5f5;
+            background-color: #ff4d30;
+            color: white;
+            padding: 14px;
+            font-size: 14px;
+            text-transform: uppercase;
         }
 
-        .red-text {
-            color: red;
-            font-weight: bold;
+        .product-table td {
+            background-color: #fff3e0;
+            padding: 14px;
+            font-size: 14px;
+            color: #444;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(255, 167, 38, 0.08);
+            border-bottom: 1px solid #ffe0b2;
         }
 
-        .edit-btn,
-        .delete-btn,
+        .product-table tr:hover td {
+            background-color: #ffe0b2;
+            transition: background-color 0.3s ease;
+        }
+
+        .product-table tr td:first-child {
+            border-left: 4px solid #ff4d30;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .product-table thead {
+                display: none;
+            }
+
+            .product-table, .product-table tbody, .product-table tr, .product-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .product-table tr {
+                margin-bottom: 15px;
+            }
+
+            .product-table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            .product-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 20px;
+                font-weight: bold;
+                color: #ff6f00;
+                text-align: left;
+            }
+        }
+
         .more-btn{
             border: none;
             background: none;
@@ -93,16 +133,9 @@
             width: 3em;
             border-radius: 5px;
         }
-
-        .edit-btn {
-            background-color: green;
-        }
-
-        .delete-btn {
-            background-color: #a6000f;
-        }
         .more-btn {
-            background-color: #fac337;
+            width: 80%;
+            color: #ff4d30;
         }
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
@@ -116,7 +149,7 @@
     <div class="graph">
         <div class="product-section">
             <div class="tabs">
-                <form th:action="@{/mentor/sensor-class}" method="get">
+                <form th:action="@{/mentor/censor-class}" method="get">
                     <button class="tab"
                             name="status"
                             value="PENDING"
@@ -158,16 +191,14 @@
                 </select>
                 <button class="arrow-btn">↓</button>
             </div>
-            <p th:text="${param.status}"></p>
             <table class="product-table">
                 <thead>
                 <tr>
                     <th>Student Name</th>
                     <th>Skill</th>
                     <th>Total slots</th>
-                    <th>Start time</th>
+                    <th>Paid Price</th>
                     <th>Created Date</th>
-                    <th>Slot per Week</th>
                     <th style="min-width: 10em;" th:if="${param.status[0] == null or param.status[0] == 'PENDING'}">ACTION</th>
                 </tr>
                 </thead>
@@ -176,17 +207,12 @@
                     <td th:text="${item.mentee.fullName}">Monstera</td>
                     <td th:text="${item.courseMentor.course.name}">48.00</td>
                     <td th:text="${item.totalSlots}">39.02</td>
-                    <td th:text="${item.startTime}">8.98</td>
+                    <td th:text="${item.courseMentor.price * item.totalSlots}"></td>
                     <td th:text="${item.createdDate}">A/22</td>
-                    <td class="red-text" th:text="${item.scheduleSummary}">10 pcs</td>
                     <td  th:if="${param.status[0] == null or param.status[0] == 'PENDING'}">
-                        <form th:action="@{/mentor/sensor-class/{eid}(eid=${item.id})}">
-                            <button class="edit-btn" name="action" value="approve"><i class="fa fa-check"
-                                                                                      aria-hidden="true"></i></button>
-                            <button class="delete-btn" name="action" value="reject"><i class="fa fa-times"
-                                                                                       aria-hidden="true"></i></button>
+                        <form th:action="@{/mentor/censor-class/{eid}(eid=${item.id})}">
                             <button class="more-btn" name="action" value="view"><i class="fa fa-arrow-right"
-                                                                                     aria-hidden="true"></i></button>
+                                                                                     aria-hidden="true"></i> View</button>
                         </form>
                     </td>
                 </tr>
