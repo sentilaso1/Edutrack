@@ -7,6 +7,9 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.Slot;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,4 +49,6 @@ public interface EnrollmentService {
     List<Enrollment> getDuplicatedSchedules(Enrollment enrollment);
 
     Double getPercentComplete(Enrollment enrollment);
+
+    Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable);
 }

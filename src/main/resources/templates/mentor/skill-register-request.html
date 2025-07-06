@@ -137,6 +137,34 @@
             width: 80%;
             color: #ff4d30;
         }
+        .pagination{
+            display: flex;
+            justify-content: center;
+        }
+        .pagination ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .pagination ul li a {
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid #ff4d30;
+            color: #ff4d30;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .pagination ul li.active a,
+        .pagination ul li a:hover {
+            background-color: #ff4d30;
+            color: white;
+        }
+
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -180,17 +208,33 @@
                 </form>
 
             </div>
+            <form method="get" th:action="@{/mentor/censor-class}"  class="controls">
+                <input type="text" name="search" placeholder="Search a mentee" th:value="${search}" class="search-input">
 
-            <div class="controls">
-                <input type="text" placeholder="Search a product" class="search-input">
-                <select class="filter-select">
-                    <option>Filter by</option>
+                <input type="hidden" name="status" th:value="${param.status[0]}">
+                <select name="skill" class="filter-select">
+                    <option value="">Filter by Skill</option>
+                    <option th:each="s : ${skills}" th:value="${s.name}" th:text="${s.name}"
+                            th:selected="${skill} == ${s.name}"></option>
                 </select>
-                <select class="sort-select">
-                    <option>Sort by</option>
+
+                <select name="sort" class="sort-select">
+                    <option value="createdDateDesc" th:selected="${sort} == 'createdDateDesc'">Created Date Desc</option>
+                    <option value="createdDateAsc" th:selected="${sort} == 'createdDateAsc'">Created Date Asc</option>
+                    <option value="priceDesc" th:selected="${sort} == 'priceDesc'">Price Desc</option>
+                    <option value="priceAsc" th:selected="${sort} == 'priceAsc'">Price Asc</option>
                 </select>
-                <button class="arrow-btn">↓</button>
-            </div>
+
+                <select name="size" class="sort-select">
+                    <option th:value="5" th:selected="${size == 5}">5</option>
+                    <option th:value="10" th:selected="${size == 10}">10</option>
+                    <option th:value="15" th:selected="${size == 15}">15</option>
+                    <option th:value="20" th:selected="${size == 20}">20</option>
+                </select>
+
+                <button style="padding: 0.1em 1em; background-color: #ff4d30; border: none; color: white; border-radius: 6px" type="submit">Apply</button>
+            </form>
+
             <table class="product-table">
                 <thead>
                 <tr>
@@ -218,6 +262,42 @@
                 </tr>
                 </tbody>
             </table>
+            <div class="pagination">
+                <ul>
+                    <li th:if="${currentPage > 0}">
+                        <a th:href="@{/mentor/censor-class(
+                page=${currentPage - 1},
+                size=${size},
+                sort=${sort},
+                search=${search},
+                skill=${skill},
+                status=${status})}">&laquo; Prev</a>
+                    </li>
+
+                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a th:href="@{/mentor/censor-class(
+                page=${i},
+                size=${size},
+                sort=${sort},
+                search=${search},
+                skill=${skill},
+                status=${param.status})}"
+                           th:text="${i + 1}"></a>
+                    </li>
+
+                    <li th:if="${currentPage + 1 < totalPages}">
+                        <a th:href="@{/mentor/censor-class(
+                page=${currentPage + 1},
+                size=${size},
+                sort=${sort},
+                search=${search},
+                skill=${skill},
+                status=${param.status})}">Next &raquo;</a>
+                    </li>
+                </ul>
+            </div>
+
         </div>
     </div>
 </div>
