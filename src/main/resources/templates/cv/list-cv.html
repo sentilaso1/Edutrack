@@ -139,6 +139,13 @@
             font-weight: bold;
         }
 
+        .bg-aiapproved {
+            color: #fff;
+            background-color: #b3e5fc;
+            padding: 4px 10px;
+            font-weight: bold;
+        }
+
         .bg-pending {
             color: #fff;
             background-color: rgba(255, 205, 86, 0.8);
@@ -174,6 +181,12 @@
     <div class="grid-layout">
         <div class="filter-section">
             <h4>Filter CVs</h4>
+            <div id="batch-timer">
+                <span th:if="${batchRunning}">AI moderation is in progress...</span>
+                <span th:unless="${batchRunning}">
+                    Next AI moderation in <span id="timer"></span>
+                </span>
+            </div>
             <form id="filter-form">
                 <label for="sort">Sorting Order:</label>
                 <select name="sort" id="sort">
@@ -209,7 +222,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="cv : ${page.content}">
-                    <td th:text="${cv.status}" th:classappend="${cv.status.equals('approved') ? 'bg-approved' : (cv.status.equals('rejected') ? 'bg-rejected' : 'bg-pending')}"></td>
+                    <td th:text="${cv.status}" th:classappend="${cv.status.equals('approved') ? 'bg-approved' : (cv.status.equals('rejected') ? 'bg-rejected' : (cv.status.equals('aiapproved') ? 'bg-aiapproved' : 'bg-pending'))}"></td>
                     <td th:text="${cv.createdDate.toLocaleString()}"></td>
                     <td th:text="${cv.user.fullName}"></td>
                     <td><span th:each="skill : ${cv.getSkillItems()}" th:text="${skill}" class="tag-item"></span></td>
