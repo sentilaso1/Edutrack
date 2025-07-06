@@ -1,13 +1,23 @@
 package com.example.edutrack.timetables.service.implementation;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.dto.ScheduleDTO;
+import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.timetables.dto.EnrollmentAttendanceDTO;
+import com.example.edutrack.timetables.dto.EnrollmentAttendanceProjection;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -22,11 +32,15 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     private final EnrollmentScheduleRepository enrollmentScheduleRepository;
     private final MentorAvailableTimeRepository mentorAvailableTimeRepository;
     private final MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository;
+    private final MenteeRepository menteeRepository;
+    private final CourseMentorRepository courseMentorRepository;
 
-    public EnrollmentScheduleServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository, MentorAvailableTimeRepository mentorAvailableTimeRepository, MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository) {
+    public EnrollmentScheduleServiceImpl(EnrollmentScheduleRepository enrollmentScheduleRepository, MentorAvailableTimeRepository mentorAvailableTimeRepository, MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository, MenteeRepository menteeRepository, CourseMentorRepository courseMentorRepository) {
         this.enrollmentScheduleRepository = enrollmentScheduleRepository;
         this.mentorAvailableTimeRepository = mentorAvailableTimeRepository;
         this.mentorAvailableTimeDetailsRepository = mentorAvailableTimeDetailsRepository;
+        this.menteeRepository = menteeRepository;
+        this.courseMentorRepository = courseMentorRepository;
     }
 
     public void sortDayByWeek(List<Day> days, List<Slot> slots) {
@@ -49,8 +63,8 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
                     Slot s = slots.get(i);
                     slots.set(i, slots.get(j));
                     slots.set(j, s);
-                }else if(weekDays.indexOf(days.get(i).name()) == weekDays.indexOf(days.get(j).name())){
-                    if(slots.get(i).ordinal() > slots.get(j).ordinal()){
+                } else if (weekDays.indexOf(days.get(i).name()) == weekDays.indexOf(days.get(j).name())) {
+                    if (slots.get(i).ordinal() > slots.get(j).ordinal()) {
                         Slot s = slots.get(i);
                         slots.set(i, slots.get(j));
                         slots.set(j, s);
@@ -62,7 +76,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
     @Override
     public List<RequestedSchedule> findStartLearningTime(String summary) {
-        if(summary == null || summary.isEmpty()){
+        if (summary == null || summary.isEmpty()) {
             return new ArrayList<>();
         }
         List<Slot> slot = new ArrayList<>();
@@ -112,14 +126,14 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         String summary = enrollment.getScheduleSummary();
         List<RequestedSchedule> requestedSchedules = findStartLearningTime(summary);
 
-        for(RequestedSchedule requestedSchedule : requestedSchedules) {
+        for (RequestedSchedule requestedSchedule : requestedSchedules) {
             enrollmentScheduleRepository.save(new EnrollmentSchedule(enrollment, requestedSchedule.getSlot(), requestedSchedule.getRequestedDate()));
         }
 
         List<MentorAvailableTimeDetails> mentorAvailableTimeDetails = mentorAvailableTimeDetailsRepository.findByMentor(enrollment.getCourseMentor().getMentor());
-        for(MentorAvailableTimeDetails mentorAvailableTimeDetail : mentorAvailableTimeDetails) {
-            for (RequestedSchedule requestedSchedule : requestedSchedules){
-                if(mentorAvailableTimeDetail.getDate().equals(requestedSchedule.getRequestedDate()) && requestedSchedule.getSlot().equals(mentorAvailableTimeDetail.getSlot())) {
+        for (MentorAvailableTimeDetails mentorAvailableTimeDetail : mentorAvailableTimeDetails) {
+            for (RequestedSchedule requestedSchedule : requestedSchedules) {
+                if (mentorAvailableTimeDetail.getDate().equals(requestedSchedule.getRequestedDate()) && requestedSchedule.getSlot().equals(mentorAvailableTimeDetail.getSlot())) {
                     mentorAvailableTimeDetail.setMentee(enrollment.getMentee());
                     mentorAvailableTimeDetailsRepository.save(mentorAvailableTimeDetail);
                 }
@@ -148,18 +162,18 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     }
 
     @Override
-    public EnrollmentSchedule findById(int enrollmentScheduleId){
+    public EnrollmentSchedule findById(int enrollmentScheduleId) {
         return enrollmentScheduleRepository.findById(enrollmentScheduleId).orElseThrow(() -> new RuntimeException("Enrollment not found with id: " + enrollmentScheduleId));
     }
 
     @Override
-    public void save(EnrollmentSchedule schedule){
+    public void save(EnrollmentSchedule schedule) {
         enrollmentScheduleRepository.save(schedule);
     }
 
     @Override
     public Map<String, Integer> getWeeklyStats(UUID menteeId) {
-        List<EnrollmentSchedule> schedules =enrollmentScheduleRepository.findAllByMenteeId(menteeId);
+        List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findAllByMenteeId(menteeId);
         LocalDate now = LocalDate.now();
         LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
         LocalDate endOfWeek = now.with(DayOfWeek.SUNDAY);
@@ -190,7 +204,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
 
     @Override
-    public int countTestSlot(UUID menteeId){
+    public int countTestSlot(UUID menteeId) {
         return enrollmentScheduleRepository.countTestSlotsByEnrollment(menteeId);
     }
 
@@ -315,7 +329,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
     @Override
     public List<EnrollmentSchedule> getSlotsUnderReview(UUID menteeId, LocalDate startDate, LocalDate endDate) {
-        return  enrollmentScheduleRepository
+        return enrollmentScheduleRepository
                 .findByEnrollment_MenteeIdAndRescheduleStatusAndRequestedNewDateBetween(
                         menteeId,
                         EnrollmentSchedule.RescheduleStatus.REQUESTED,
@@ -344,5 +358,37 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
         enrollmentScheduleRepository.saveAll(expiredRequests);
         return true;
-}
+    }
+
+    @Override
+    public Page<EnrollmentAttendanceDTO> findAllSchedulesToBeConfirmed(Pageable pageable) {
+        Page<EnrollmentAttendanceProjection> projections = enrollmentScheduleRepository.findAllSchedulesToBeConfirmed(pageable);
+
+        List<EnrollmentAttendanceDTO> dtoList = projections.stream().map(projection -> {
+            Optional<Mentee> mentee = menteeRepository.findById(projection.getMenteeId());
+            if (mentee.isEmpty()) {
+                return null;
+            }
+
+            CourseMentor courseMentor = null;
+            try {
+                courseMentor = courseMentorRepository.findById(projection.getCourseMentorId());
+            } catch (RuntimeException e) {
+                return null;
+            }
+
+            return new EnrollmentAttendanceDTO(
+                    projection.getId(),
+                    mentee.get(),
+                    courseMentor
+            );
+        }).filter(Objects::nonNull).toList();
+
+        return new PageImpl<>(dtoList, pageable, projections.getTotalElements());
+    }
+
+    @Override
+    public Page<EnrollmentSchedule> findScheduleByEnrollment(Long enrollmentId, Pageable pageable) {
+        return enrollmentScheduleRepository.findSchedulesByEnrollment(enrollmentId, pageable);
+    }
 }
