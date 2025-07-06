@@ -15,8 +15,10 @@ import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -120,6 +122,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public Double getPercentComplete(Enrollment enrollment){
         return enrollmentRepository.getPercentComplete(enrollment);
+    }
+
+    @Override
+    public Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable) {
+        return enrollmentRepository.findAll(spec, pageable);
     }
 
     @Override
