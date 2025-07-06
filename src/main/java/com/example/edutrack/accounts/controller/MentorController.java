@@ -6,6 +6,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.curriculum.service.implementation.CourseServiceImpl;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
@@ -14,12 +15,18 @@ import com.example.edutrack.timetables.service.implementation.EnrollmentSchedule
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
+import com.example.edutrack.timetables.specification.EnrollmentSpecifications;
 import com.example.edutrack.transactions.model.Transaction;
 import com.example.edutrack.transactions.model.Wallet;
 import com.example.edutrack.transactions.service.TransactionService;
 import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +50,8 @@ public class MentorController {
 
     @Autowired
     public CourseMentorRepository courseMentorRepository;
+    @Autowired
+    private CourseServiceImpl courseServiceImpl;
 
     @Autowired
     public MentorController(EnrollmentScheduleService enrollmentScheduleService,
@@ -118,18 +127,52 @@ public class MentorController {
     }
 
     @GetMapping("/mentor/censor-class")
-    public String viewSensorClassList(Model model,
-                                      @RequestParam(defaultValue = "PENDING") Enrollment.EnrollmentStatus status,
-                                      HttpSession session) {
+    public String viewSensorClassList(
+            Model model,
+            @RequestParam(defaultValue = "PENDING") Enrollment.EnrollmentStatus status,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "skill", required = false) String skill,
+            @RequestParam(value = "sort", defaultValue = "createdDateDesc") String sort,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            HttpSession session) {
+
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
         }
-        List<Enrollment> enrollmentList = enrollmentService.findByStatusAndMentor(status, mentor.getId());
+
+        // Xây dựng sắp xếp
+        Sort sortOption = switch (sort) {
+            case "priceAsc" -> Sort.by("transaction.amount").ascending();
+            case "priceDesc" -> Sort.by("transaction.amount").descending();
+            case "createdDateAsc" -> Sort.by("createdDate").ascending();
+            default -> Sort.by("createdDate").descending();
+        };
+
+        Pageable pageable = PageRequest.of(page, size, sortOption);
+
+        Specification<Enrollment> spec = Specification.<Enrollment>where(
+                        (root, query, cb) -> cb.equal(root.get("courseMentor").get("mentor").get("id"), mentor.getId())
+                )
+                .and((root, query, cb) -> cb.equal(root.get("status"), status))
+                .and(EnrollmentSpecifications.searchMentee(search))
+                .and(EnrollmentSpecifications.filterBySkill(skill));
+
+        Page<Enrollment> enrollmentPage = enrollmentService.findAll(spec, pageable);
+
         model.addAttribute("status", status);
-        model.addAttribute("enrollmentList", enrollmentList);
+        model.addAttribute("enrollmentList", enrollmentPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", enrollmentPage.getTotalPages());
+        model.addAttribute("search", search);
+        model.addAttribute("skill", skill);
+        model.addAttribute("skills", courseServiceImpl.findAll());
+        model.addAttribute("sort", sort);
+        model.addAttribute("size", size);
         return "mentor/skill-register-request";
     }
+
 
     @GetMapping("/mentor/schedule/{esid}")
     public String menteeReview(Model model, @PathVariable Integer esid, HttpSession session) {
