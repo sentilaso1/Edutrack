@@ -6,6 +6,7 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MenteeServiceImpl;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
+import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
@@ -13,10 +14,8 @@ import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
-import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.model.MentorAvailableTimeDetails;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
@@ -38,8 +37,6 @@ import org.springframework.web.bind.annotation.*;
 import com.example.edutrack.curriculum.model.Course;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -278,7 +275,7 @@ CourseController {
     public String courseMentorList(@PathVariable("courseId") UUID courseId, Model model) {
 
         Course course = courseRepository.findById(courseId).get();
-        List<CourseMentor> courseMentors = courseMentorRepository.findByCourse_Id(courseId);
+        List<CourseMentor> courseMentors = courseMentorRepository.findByCourse_IdAndStatus(courseId, ApplicationStatus.ACCEPTED);
         List<Mentor> relatedMentors = courseMentors.stream()
                 .map(CourseMentor::getMentor)
                 .distinct()

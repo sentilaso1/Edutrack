@@ -446,6 +446,7 @@
             flex-direction: column;
             align-items: flex-start;
             margin-bottom: 0.13rem;
+            width: 100%;
         }
         .mentee-name {
             font-weight: 600;
@@ -525,6 +526,7 @@
         }
 
         .expertise-pills {
+            width: 100%;
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
@@ -537,6 +539,23 @@
             font-size: 0.8rem;
             font-weight: 500;
             display: inline-block;
+        }
+
+        .available-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .available-list > div:nth-last-child(1):nth-child(odd) {
+            grid-column: span 2;
+        }
+
+        .empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #888;
+            padding: 2rem;
         }
 
         .pill-blue    { background: #e0f3ff; color: #1877f2; }
@@ -631,12 +650,16 @@
         <div class="section-header">
             <h2>Available Mentors</h2>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 2rem">
+        <div class="available-list">
+            <div th:if="${courseMentors == null || #lists.isEmpty(courseMentors)}" class="empty-message">
+                <p style="text-align: center">No mentor available for this course.</p>
+            </div>
+            <div th:each="courseMentor : ${courseMentors}"
+                 th:if="${courseMentors != null and !#lists.isEmpty(courseMentors)}">
             <a
                style="text-decoration: none; color: inherit;"
-               th:each="courseMentor : ${courseMentors}"
-               th:if="${courseMentors != null and !#lists.isEmpty(courseMentors)}">
-            <div class="review__card course-card" style="width: 70%;">
+               >
+            <div class="review__card course-card">
                 <div class="review-card-header">
                     <div class="review-avatar">
                         <img th:src="@{'/avatar/' + ${courseMentor.mentor.id}}"
@@ -645,53 +668,7 @@
                              onerror="this.onerror=null;this.src='/assets/images/default-avatar.svg';"
                              class="mentee-avatar"/>
                     </div>
-                    <div class="review-info-main">
-                        <div class="mentee-course-row">
-                            <span class="mentee-name" th:text="${courseMentor.mentor.fullName}">Mentee Name</span>
-                            <div style="display: flex; gap: 0.5rem">
-                                <span class="review-date" style="margin-left: 0.3rem">expert in</span>
-                                <div class="expertise-pills">
-                                            <span th:each="exp : ${courseMentor.mentor.expertiseItem}"
-                                                  class="pill"
-                                                  th:text="${exp}">
-                                                Expertise
-                                            </span>
-                                </div>
-                            </div>
-                        </div>
-                        <!----->
-                        <div th:with="
-                            rating=${courseMentor.mentor.rating != null ? courseMentor.mentor.rating : 0},
-                            fullStars=${T(java.lang.Math).floor(rating)},
-                            hasHalfStar=${(rating - fullStars) >= 0.5},
-                            emptyStars=${5 - fullStars - (hasHalfStar ? 1 : 0)}">
-                                            <div class="review-rating-stars">
-                                  <span th:if="${fullStars > 0}">
-                                    <span th:each="star : ${#numbers.sequence(1, fullStars)}">
-                                      <i class="ri-star-fill"></i>
-                                    </span>
-                                  </span>
-                                                <span th:if="${hasHalfStar}">
-                                    <i class="ri-star-half-fill"></i>
-                                  </span>
-                                                <span th:if="${emptyStars > 0}">
-                                  <span th:each="star : ${#numbers.sequence(0, emptyStars - 1)}">
-                                    <i class="ri-star-line"></i>
-                                  </span>
-                                </span>
-                            </div>
-                        </div>
-                        <span th:text="${courseMentor.mentor.totalSessions} + ' sessions Completed'">Total Sessions</span><br>
-                        <img th:if="${courseMentor.mentor != null and courseMentor.mentor.isAvailable}"
-                             th:src="@{/assets/images/dot-green.svg}" width="16" height="16" alt="Online" />
-                        <img th:if="${courseMentor.mentor != null and !courseMentor.mentor.isAvailable}"
-                             th:src="@{/assets/images/dot-red.svg}" width="16" height="16" alt="Offline" />
-                        <span class="span">
-                                                    <span th:text="${courseMentor.mentor != null ? (courseMentor.mentor.isAvailable ? 'Available' : 'Not Available') : 'No Mentor'}">
-                                                        Mentor Availability
-                                                    </span>
-                                                </span>
-                    </div>
+
                     <div class="review-date" style="gap: 0.1rem;">
 
                         <span class="span">
@@ -702,11 +679,60 @@
                                                 </span>
                     </div>
                 </div>
+                <div class="review-info-main">
+                    <div class="mentee-course-row">
+                        <span class="mentee-name" th:text="${courseMentor.mentor.fullName}">Mentee Name</span>
+                        <div style="display: flex; gap: 0.5rem; width: 100%">
+                            <span class="review-date" style="margin-left: 0.3rem">expert in</span>
+                            <div class="expertise-pills">
+                                            <span th:each="exp, stat : ${courseMentor.mentor.expertiseItem}"
+                                                  th:if="${stat.index < 3}"
+                                                  class="pill"
+                                                  th:text="${exp}">
+                                                Expertise
+                                            </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!----->
+                    <div th:with="
+                            rating=${courseMentor.mentor.rating != null ? courseMentor.mentor.rating : 0},
+                            fullStars=${T(java.lang.Math).floor(rating)},
+                            hasHalfStar=${(rating - fullStars) >= 0.5},
+                            emptyStars=${5 - fullStars - (hasHalfStar ? 1 : 0)}">
+                        <div class="review-rating-stars">
+                                  <span th:if="${fullStars > 0}">
+                                    <span th:each="star : ${#numbers.sequence(1, fullStars)}">
+                                      <i class="ri-star-fill"></i>
+                                    </span>
+                                  </span>
+                            <span th:if="${hasHalfStar}">
+                                    <i class="ri-star-half-fill"></i>
+                                  </span>
+                            <span th:if="${emptyStars > 0}">
+                                  <span th:each="star : ${#numbers.sequence(0, emptyStars - 1)}">
+                                    <i class="ri-star-line"></i>
+                                  </span>
+                                </span>
+                        </div>
+                    </div>
+                    <span th:text="${courseMentor.mentor.totalSessions} + ' sessions Completed'">Total Sessions</span><br>
+                    <img th:if="${courseMentor.mentor != null and courseMentor.mentor.isAvailable}"
+                         th:src="@{/assets/images/dot-green.svg}" width="16" height="16" alt="Online" />
+                    <img th:if="${courseMentor.mentor != null and !courseMentor.mentor.isAvailable}"
+                         th:src="@{/assets/images/dot-red.svg}" width="16" height="16" alt="Offline" />
+                    <span class="span">
+                                                    <span th:text="${courseMentor.mentor != null ? (courseMentor.mentor.isAvailable ? 'Available' : 'Not Available') : 'No Mentor'}">
+                                                        Mentor Availability
+                                                    </span>
+                                                </span>
+                </div>
                 <div class="review-card-content" th:text="${courseMentor.mentor.bio}">
                     Bio
                 </div>
             </div>
             </a>
+            </div>
         </div>
     </div>
 </section>
