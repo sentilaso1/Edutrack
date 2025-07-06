@@ -59,6 +59,17 @@ public class Enrollment {
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
 
+    public Double getPercentComplete() {
+        return percentComplete;
+    }
+
+    public void setPercentComplete(Double percentComplete) {
+        this.percentComplete = percentComplete;
+    }
+
+    @Transient
+    private Double percentComplete;
+
     private String formatScheduleList(List<Slot> slots, List<LocalDate> days) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < days.size(); i++) {

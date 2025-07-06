@@ -19,24 +19,24 @@ import java.util.UUID;
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @Query("""
-            SELECT e.courseMentor
-            FROM Enrollment e
-            WHERE e.status = :enrollmentStatus
-            GROUP BY e.courseMentor
-            ORDER BY COUNT(e.id) DESC
-           """)
-    List<CourseMentor> findPopularCoursesByEnrollmentCount(Pageable pageable, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
+             SELECT e.courseMentor
+             FROM Enrollment e
+             WHERE e.status = :enrollmentStatus
+             GROUP BY e.courseMentor
+             ORDER BY COUNT(e.id) DESC
+            """)
+    List<CourseMentor> findPopularCoursesByEnrollmentCount(Pageable pageable, @Param("enrollmentStatus") Enrollment.EnrollmentStatus status);
 
 
     int countByCourseMentor_IdAndStatus(UUID courseMentorId, Enrollment.EnrollmentStatus status);
 
 
     @Query("""
-            SELECT e FROM Enrollment e
-            WHERE e.mentee.id = :menteeId
-              AND e.status = :enrollmentStatus
-           """)
-    List<Enrollment> findAcceptedEnrollmentsByMenteeId(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
+             SELECT e FROM Enrollment e
+             WHERE e.mentee.id = :menteeId
+               AND e.status = :enrollmentStatus
+            """)
+    List<Enrollment> findAcceptedEnrollmentsByMenteeId(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus") Enrollment.EnrollmentStatus status);
 
     @Query("""
         SELECT e FROM Enrollment e
@@ -49,13 +49,13 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     );
 
     @Query("""
-            SELECT DISTINCT e.courseMentor
-            FROM Enrollment e
-            JOIN EnrollmentSchedule s ON s.enrollment.mentee = e.mentee AND s.enrollment.courseMentor.course = e.courseMentor.course
-            WHERE e.mentee.id = :menteeId
-              AND e.status = :enrollmentStatus
-           """)
-    List<CourseMentor> findInProgressCourses(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
+             SELECT DISTINCT e.courseMentor
+             FROM Enrollment e
+             JOIN EnrollmentSchedule s ON s.enrollment.mentee = e.mentee AND s.enrollment.courseMentor.course = e.courseMentor.course
+             WHERE e.mentee.id = :menteeId
+               AND e.status = :enrollmentStatus
+            """)
+    List<CourseMentor> findInProgressCourses(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus") Enrollment.EnrollmentStatus status);
 
     @Query("SELECT e FROM Enrollment e WHERE e.courseMentor.mentor.id = :mentorId AND e.status = :status")
     List<Enrollment> findByStatus(Enrollment.EnrollmentStatus status, UUID mentorId);
@@ -63,21 +63,18 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT e.courseMentor.course FROM Enrollment e WHERE e.mentee.id = :menteeId AND e.status = :status ")
     List<Course> findByMenteeIdAndEnrollmentStatus(@Param("menteeId") UUID menteeId, @Param("status") Enrollment.EnrollmentStatus status);
 
-    @Query(value = """
-    SELECT DISTINCT e.* FROM enrollments e
-    JOIN enrollment_schedule es ON e.id = es.enrollment_id
-    JOIN course_mentor cm ON e.course_mentor_id = cm.id
-    WHERE e.status = 'APPROVED'
-      AND cm.mentor_user_id = :mentorId
-      AND es.date <= :today
-      AND (
-          SELECT COUNT(*) FROM enrollment_schedule
-          WHERE enrollment_id = e.id
-            AND date <= :today
-            AND attendance <> 'CANCELLED'
-      ) < e.total_slots
-""", nativeQuery = true)
-    List<Enrollment> findOngoingEnrollments(@Param("today") LocalDate today, @Param("mentorId") UUID mentorId);
+    @Query("""
+                SELECT DISTINCT e
+                FROM Enrollment e
+                WHERE e.courseMentor.mentor = :mentor
+                AND e.status = 'APPROVED'
+                 AND e.totalSlots > (
+                    SELECT COUNT(es)
+                    FROM EnrollmentSchedule es
+                    WHERE es.enrollment = e AND es.attendance = 'PRESENT' AND es.report = true
+                )
+            """)
+    List<Enrollment> findOngoingEnrollments(Mentor mentor);
 
     @Query("SELECT e FROM Enrollment e WHERE e.status = 'APPROVED'")
     List<Enrollment> findAllApprovedEnrollments();
@@ -87,15 +84,24 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Mentor> findDistinctMentorsByMenteeId(@Param("menteeId") UUID menteeId, @Param("status") Enrollment.EnrollmentStatus status);
 
     @Query("""
-            SELECT DISTINCT e.courseMentor
-            FROM Enrollment e
-            JOIN EnrollmentSchedule s ON s.enrollment.mentee = e.mentee AND s.enrollment.courseMentor.course = e.courseMentor.course
-            WHERE e.mentee.id = :menteeId
-              AND e.status = :enrollmentStatus
-           """)
-    List<CourseMentor> findCourseMentorByMentee(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus")Enrollment.EnrollmentStatus status);
+             SELECT DISTINCT e.courseMentor
+             FROM Enrollment e
+             JOIN EnrollmentSchedule s ON s.enrollment.mentee = e.mentee AND s.enrollment.courseMentor.course = e.courseMentor.course
+             WHERE e.mentee.id = :menteeId
+               AND e.status = :enrollmentStatus
+            """)
+    List<CourseMentor> findCourseMentorByMentee(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus") Enrollment.EnrollmentStatus status);
 
     List<Enrollment> findAllByMenteeId(UUID menteeId);
+
+    @Query("""
+            SELECT COUNT(es)
+            FROM EnrollmentSchedule es
+            WHERE es.enrollment = :enrollment
+            AND es.attendance = 'PRESENT'
+            AND es.report = true
+            """)
+    Double getPercentComplete(Enrollment enrollment);
 
     @Query("SELECT e FROM Enrollment e WHERE e.mentee.id = :menteeId " +
             "AND e.status = :status " +
