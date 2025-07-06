@@ -1,16 +1,15 @@
 package com.example.edutrack.timetables.service.interfaces;
 
-import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.curriculum.dto.ScheduleDTO;
-import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.timetables.dto.EnrollmentAttendanceDTO;
+import com.example.edutrack.timetables.dto.EnrollmentAttendanceProjection;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
-import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -42,9 +41,9 @@ public interface EnrollmentScheduleService {
 
     List<EnrollmentSchedule> getEnrollmentSchedulesByMentee(UUID menteeId);
 
-    int countTestSlot(UUID menteeId);
-
     List<ScheduleDTO> getScheduleDTOs(List<EnrollmentSchedule> schedules, UUID menteeId);
+
+    int countTestSlot(UUID menteeId);
 
     boolean submitRescheduleRequest(int scheduleId, Slot newSlot, LocalDate newDate,
                                     String reason, UUID menteeId);
@@ -58,4 +57,8 @@ public interface EnrollmentScheduleService {
     List<EnrollmentSchedule> getSlotsUnderReview(UUID menteeId, LocalDate startDate, LocalDate endDate);
 
     boolean resetExpiredRescheduleRequests();
+
+    Page<EnrollmentAttendanceDTO> findAllSchedulesToBeConfirmed(Pageable pageable);
+
+    Page<EnrollmentSchedule> findScheduleByEnrollment(Long enrollmentId, Pageable pageable);
 }

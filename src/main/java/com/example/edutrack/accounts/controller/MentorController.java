@@ -230,7 +230,7 @@ public class MentorController {
             return "redirect:/mentor/censor-class?status=REJECTED&reject=" + eid;
         }
 
-        if("rejectAll".equals(action)){
+        if ("rejectAll".equals(action)) {
             List<Enrollment> duplicatedEnrollments = enrollmentService.getDuplicatedSchedules(enrollment);
             for (Enrollment duplicatedEnrollment : duplicatedEnrollments) {
                 duplicatedEnrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
@@ -356,11 +356,13 @@ public class MentorController {
         if (mentor == null) {
             return "redirect:/login";
         }
-
-        if ("ONGOING".equals(status)) {
-            List<Enrollment> ongoingEnrollments = enrollmentService.findOngoingEnrollments(mentor.getId());
-            model.addAttribute("ongoingEnrollments", ongoingEnrollments);
+        List<Enrollment> ongoingEnrollments = enrollmentService.findOngoingEnrollments(mentor);
+        for(Enrollment ongoingEnrollment : ongoingEnrollments){
+            Double percent = (enrollmentService.getPercentComplete(ongoingEnrollment)/ongoingEnrollment.getTotalSlots())*100;
+            percent = Math.round(percent * 10.0) / 10.0;
+            ongoingEnrollment.setPercentComplete(percent);
         }
+        model.addAttribute("ongoingEnrollments", ongoingEnrollments);
 
         return "mentor/mentor-class";
     }

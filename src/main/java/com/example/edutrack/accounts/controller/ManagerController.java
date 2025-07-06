@@ -9,23 +9,19 @@ import com.example.edutrack.curriculum.model.MenteeLandingRole;
 import com.example.edutrack.curriculum.service.interfaces.LandingPageConfigService;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
-import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
 import com.example.edutrack.timetables.model.Slot;
-import com.example.edutrack.timetables.service.implementation.EnrollmentScheduleServiceImpl;
-import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.accounts.service.interfaces.ManagerStatsService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.apache.catalina.Manager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,10 +34,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import com.example.edutrack.accounts.dto.ManagerStatsDTO;
-import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -55,6 +49,8 @@ public class ManagerController {
     private final ManagerStatsService managerStatsService;
     private final LandingPageConfigService landingPageConfigService;
     private final EndpointRegistry endpointRegistry;
+
+    public static final int ENROLLMENT_PAGE_SIZE = 30;
 
     @Autowired
     public ManagerController(MentorService mentorService,
@@ -126,6 +122,42 @@ public class ManagerController {
             @RequestParam(defaultValue = "week") String period) {
         ManagerStatsDTO stats = managerStatsService.getManagerStats(period);
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/manager/schedules")
+    public String redirectShowSchedules(Model model) {
+        return "redirect:/manager/schedules/1";
+    }
+
+    @GetMapping("/manager/schedules/{page}")
+    public String showSchedules(Model model, @PathVariable Integer page) {
+        if (page - 1 < 0) {
+            return "redirect:/404";
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, ENROLLMENT_PAGE_SIZE);
+
+        model.addAttribute("page", page);
+        model.addAttribute(
+                "schedulePage",
+                enrollmentScheduleService.findAllSchedulesToBeConfirmed(pageable)
+        );
+        return "manager/schedules";
+    }
+
+    @GetMapping("/manager/schedules/view/{eid}")
+    public String showScheduleDetails(@PathVariable Long eid, Model model) {
+        Enrollment enrollment;
+        try {
+            enrollment = enrollmentService.findById(eid);
+        } catch (RuntimeException e) {
+            return "redirect:/manager/schedules?error=enrollment_not_found";
+        }
+
+
+        model.addAttribute("schedules", enrollmentScheduleService.findScheduleByEnrollment(eid, PageRequest.of(0, 10)));
+        model.addAttribute("enrollment", enrollment);
+        return "manager/schedule-details";
     }
 
     private LocalDateTime getStartDateByPeriod(String period) {

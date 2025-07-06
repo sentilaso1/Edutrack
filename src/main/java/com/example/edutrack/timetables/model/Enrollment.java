@@ -16,7 +16,7 @@ public class Enrollment {
         PENDING,
         APPROVED,
         REJECTED,
-        CREATED,
+        @Deprecated CREATED,
         CANCELLED;
 
         @Override
@@ -58,6 +58,17 @@ public class Enrollment {
     @OneToOne
     @JoinColumn(name = "transaction_id")
     private Transaction transaction;
+
+    public Double getPercentComplete() {
+        return percentComplete;
+    }
+
+    public void setPercentComplete(Double percentComplete) {
+        this.percentComplete = percentComplete;
+    }
+
+    @Transient
+    private Double percentComplete;
 
     private String formatScheduleList(List<Slot> slots, List<LocalDate> days) {
         StringBuilder sb = new StringBuilder();

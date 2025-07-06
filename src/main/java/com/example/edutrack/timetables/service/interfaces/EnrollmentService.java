@@ -27,7 +27,7 @@ public interface EnrollmentService {
 
     Enrollment findById(Long id);
 
-    List<Enrollment> findOngoingEnrollments(UUID mentor);
+    List<Enrollment> findOngoingEnrollments(Mentor mentor);
 
     List<Course> findCourseByMenteeIdAndEnrollmentStatus(UUID menteeId);
 
@@ -44,4 +44,6 @@ public interface EnrollmentService {
     int getNumberOfPendingSlot(Mentor mentor, LocalDate date, Slot slot);
 
     List<Enrollment> getDuplicatedSchedules(Enrollment enrollment);
+
+    Double getPercentComplete(Enrollment enrollment);
 }

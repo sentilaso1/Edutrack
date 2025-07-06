@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule - Blue Theme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="w-64 bg-blue-800 text-white h-screen fixed">
+    <div class="p-6 text-2xl font-bold border-b border-blue-600">EduTrack Manager</div>
+    <nav class="mt-6 space-y-1 px-4">
+        <a th:href="@{/manager/dashboard}" class="block py-2 px-3 rounded hover:bg-blue-700">Dashboard</a>
+        <a th:href="@{/manager/mentees}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentees</a>
+        <a th:href="@{/manager/mentors}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentors</a>
+        <a th:href="@{/manager/payments}" class="block py-2 px-3 rounded hover:bg-blue-700">Payments</a>
+    </nav>
+</div>
+<div class="ml-64 min-h-screen p-10">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="overflow-x-auto">
+            <div class="flex items-center justify-start mb-4">
+                <a th:href="@{/manager/schedules}"
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                    ← Return
+                </a>
+            </div>
+
+            <div class="mb-4">
+                <p>
+                    Mentor: <span class="font-semibold" th:text="${enrollment.courseMentor.mentor.fullName}"></span>
+                </p>
+                <p>
+                    Mentee: <span class="font-semibold" th:text="${enrollment.mentee.fullName}"></span>
+                </p>
+            </div>
+
+            <table class="min-w-full border border-blue-200 rounded-lg">
+                <thead>
+                <tr class="bg-blue-600 text-white text-sm text-left">
+                    <th class="px-4 py-2">Date</th>
+                    <th class="px-4 py-2">Slot</th>
+                    <th class="px-4 py-2">Attendance</th>
+                    <th class="px-4 py-2">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="schedule : ${schedules}" class="text-sm border-b">
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.date}"></td>
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.slot}"></td>
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.attendance}"></td>
+                    <td class="px-4 py-3 text-gray-800">
+                        <button>
+                            <a th:href="@{/manager/schedules/{id}(id=${schedule.id})}"
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                                View
+                            </a>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

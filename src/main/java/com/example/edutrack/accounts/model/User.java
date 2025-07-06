@@ -201,6 +201,10 @@ public class User {
         isActive = active;
     }
 
+    public User getUser() {
+        return this;
+    }
+
     @Override
     public String toString() {
         return "User{" +

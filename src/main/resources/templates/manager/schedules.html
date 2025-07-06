@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule - Blue Theme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex">
+<div class="w-64 bg-blue-800 text-white h-screen fixed">
+    <div class="p-6 text-2xl font-bold border-b border-blue-600">EduTrack Manager</div>
+    <nav class="mt-6 space-y-1 px-4">
+        <a th:href="@{/manager/dashboard}" class="block py-2 px-3 rounded hover:bg-blue-700">Dashboard</a>
+        <a th:href="@{/manager/mentees}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentees</a>
+        <a th:href="@{/manager/mentors}" class="block py-2 px-3 rounded hover:bg-blue-700">Mentors</a>
+        <a th:href="@{/manager/payments}" class="block py-2 px-3 rounded hover:bg-blue-700">Payments</a>
+    </nav>
+</div>
+<div class="ml-64 flex-1 min-h-screen p-10">
+    <div class="bg-white rounded-xl shadow-md p-6 h-full w-full">
+        <div class="overflow-x-auto h-full w-full">
+            <div class="flex items-center justify-start mb-4">
+                <a th:href="@{/manager/dashboard}"
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                    ← Return
+                </a>
+            </div>
+
+            <table class="min-w-full border border-blue-200 rounded-lg">
+                <thead>
+                <tr class="bg-blue-600 text-white text-sm text-left">
+                    <th class="px-4 py-2">Id</th>
+                    <th class="px-4 py-2">Mentor</th>
+                    <th class="px-4 py-2">Mentee</th>
+                    <th class="px-4 py-2">Action</th>
+                </tr>
+                </thead>
+                <tbody th:with="schedules = ${schedulePage}">
+                <tr th:each="schedule : ${schedules}" class="text-sm border-b">
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.id}"></td>
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.courseMentor.mentor.fullName}"></td>
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.mentee.fullName}"></td>
+                    <td class="px-4 py-3 text-gray-800">
+                        <button>
+                            <a th:href="@{/manager/schedules/view/{id}(id=${schedule.id})}"
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                                View
+                            </a>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination Bar -->
+            <div class="flex justify-center mt-6" th:with="totalPages=${schedulePage.totalPages}, currentPage=${page}">
+                <nav class="inline-flex items-center space-x-1">
+                    <a th:if="${currentPage > 1}"
+                       th:href="@{'/manager/schedules/' + ${currentPage - 1}}"
+                       class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
+                        ← Prev
+                    </a>
+
+                    <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                        <a th:href="@{'/manager/schedules/' + ${i}}"
+                           th:text="${i}"
+                           th:class="'px-3 py-2 rounded ' +
+                                     (${i} == ${currentPage} ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 transition')">
+                        </a>
+                    </span>
+
+                    <a th:if="${currentPage < totalPages}"
+                       th:href="@{'/manager/schedules/' + ${currentPage + 1}}"
+                       class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
+                        Next →
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

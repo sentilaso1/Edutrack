@@ -1,5 +1,9 @@
 package com.example.edutrack.service;
 
+import com.example.edutrack.accounts.repository.MenteeRepository;
+import com.example.edutrack.accounts.service.interfaces.MenteeService;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Slot;
@@ -21,6 +25,8 @@ public class EnrollmentScheduleServiceTest {
     private EnrollmentScheduleRepository enrollmentScheduleRepository;
     private MentorAvailableTimeRepository mentorAvailableTimeRepository;
     private MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository;
+    private MenteeRepository menteeRepository;
+    private CourseMentorRepository courseMentorRepository;
 
     private EnrollmentScheduleServiceImpl enrollmentScheduleService;
 
@@ -29,11 +35,15 @@ public class EnrollmentScheduleServiceTest {
         enrollmentScheduleRepository = Mockito.mock(EnrollmentScheduleRepository.class);
         mentorAvailableTimeRepository = Mockito.mock(MentorAvailableTimeRepository.class);
         mentorAvailableTimeDetailsRepository = Mockito.mock(MentorAvailableTimeDetailsRepository.class);
+        menteeRepository = Mockito.mock(MenteeRepository.class);
+        courseMentorRepository = Mockito.mock(CourseMentorRepository.class);
 
         enrollmentScheduleService = new EnrollmentScheduleServiceImpl(
                 enrollmentScheduleRepository,
                 mentorAvailableTimeRepository,
-                mentorAvailableTimeDetailsRepository
+                mentorAvailableTimeDetailsRepository,
+                menteeRepository,
+                courseMentorRepository
         );
     }
     //test findStartLearningTime function
