@@ -1,14 +1,10 @@
 package com.example.edutrack.profiles.controller;
 
-import com.example.edutrack.accounts.controller.MentorController;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MentorRepository;
-import com.example.edutrack.accounts.service.implementations.UserServiceImpl;
-import com.example.edutrack.auth.service.UserService;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.repository.CVCourseRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
@@ -16,10 +12,8 @@ import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.repository.CvRepository;
-import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.profiles.service.interfaces.CvService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,11 +24,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 public class CvController {
@@ -78,11 +70,10 @@ public class CvController {
         LocalDateTime lastEnd = cvService.getLastBatchEnd();
         long delaySeconds = 60;
         long nextBatchMillis = running
-                ? -1 // special flag for UI
+                ? -1
                 : lastEnd.plusSeconds(delaySeconds).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
 
-        // TODO: Optizimize case when all skills are already selected
         if (tags == null || tags.isEmpty() || tags.contains("all")) {
             tags = uniqueSkills;
         }
@@ -123,7 +114,7 @@ public class CvController {
                              @RequestParam(defaultValue = "1") int page,
                              @RequestParam(defaultValue = "1") int registeredPage,
                              @RequestParam(defaultValue = "3") int size,
-                             HttpSession session) throws JsonProcessingException {
+                             HttpSession session) {
         if (page - 1 < 0) {
             return "redirect:/404";
         }

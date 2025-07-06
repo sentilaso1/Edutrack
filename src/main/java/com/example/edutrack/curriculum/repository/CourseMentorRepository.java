@@ -291,5 +291,7 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
 
     @Query("SELECT cm FROM CourseMentor cm WHERE cm.id = :courseMentorId")
     CourseMentor findById(UUID courseMentorId);
+
+    List<CourseMentor> findByCourse_IdAndStatus(UUID courseId, ApplicationStatus status);
 }
 
