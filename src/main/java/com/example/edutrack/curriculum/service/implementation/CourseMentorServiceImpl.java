@@ -3,10 +3,7 @@ package com.example.edutrack.curriculum.service.implementation;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.CourseMentorId;
-import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.ApplicantsRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
@@ -21,7 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -260,6 +256,11 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     @Override
     public Page<CourseMentor> findByMentorIdPaged(UUID mentorId, Pageable pageable) {
         return courseMentorRepository.findByMentorId(mentorId, pageable);
+    }
+
+    @Override
+    public boolean existsByCourseIdAndStatus(UUID courseId, ApplicationStatus status) {
+        return courseMentorRepository.existsByCourseIdAndStatus(courseId, status);
     }
 }
 

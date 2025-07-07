@@ -3,6 +3,7 @@ package com.example.edutrack.curriculum.controller;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.service.MentorService;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -12,6 +13,9 @@ import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
+import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import jakarta.servlet.http.HttpSession;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.model.Day;
@@ -39,6 +43,8 @@ public class MentorController {
     private final CourseRepository courseRepository;
     private final CourseMentorService courseMentorService;
     private final CourseMentorRepository courseMentorRepository;
+    private final EnrollmentScheduleService enrollmentScheduleService;
+    private final MentorRepository mentorRepository;
 
     public MentorController(MentorService mentorService,
                             CourseMentorServiceImpl courseMentorServiceImpl,
@@ -46,14 +52,25 @@ public class MentorController {
                             FeedbackRepository feedbackRepository,
                             CourseRepository courseRepository,
                             CourseMentorService courseMentorService,
-                            CourseMentorRepository courseMentorRepository) {
+                            CourseMentorRepository courseMentorRepository,
+                            EnrollmentScheduleService enrollmentScheduleService, MentorRepository mentorRepository) {
         this.mentorService = mentorService;
+        this.mentorRepository = mentorRepository;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.feedbackRepository = feedbackRepository;
         this.courseRepository = courseRepository;
         this.courseMentorService = courseMentorService;
         this.courseMentorRepository = courseMentorRepository;
+        this.enrollmentScheduleService = enrollmentScheduleService;
+    }
+
+    private UUID getSessionMentor(HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return null;
+        }
+        return loggedInUser.getId();
     }
 
     @GetMapping("/mentors")
@@ -245,4 +262,43 @@ public class MentorController {
         return "fragments/schedule-table :: scheduleTable";
     }
 
+
+    @GetMapping("/mentor/requests")
+    public String showRescheduleRequests(Model model, HttpSession session) {
+        UUID mentorId = getSessionMentor(session);
+        if (mentorId == null) return "redirect:/login";
+        List<EnrollmentSchedule> requests = enrollmentScheduleService.getPendingRequestsForMentor(mentorId);
+        model.addAttribute("requests", requests);
+        return "mentor/mentor-requests";
+    }
+
+    @PostMapping("/mentor/requests/approve")
+    public String handleApproveRequest(@RequestParam("scheduleId") int scheduleId, RedirectAttributes redirectAttributes, HttpSession session) {
+        UUID mentorId = getSessionMentor(session);
+        if (mentorId == null) return "redirect:/login";
+
+        enrollmentScheduleService.approveRescheduleRequest(scheduleId);
+        redirectAttributes.addFlashAttribute("successMessage", "Request approved successfully!");
+        return "redirect:/mentor/requests";
+    }
+
+    @PostMapping("/mentor/requests/reject")
+    public String handleRejectRequest(
+            @RequestParam("scheduleId") int scheduleId,
+            @RequestParam("reason") String reason,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        UUID mentorId = getSessionMentor(session);
+        if (mentorId == null) return "redirect:/login";
+
+        if (reason == null || reason.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Rejection reason cannot be empty.");
+            return "redirect:/mentor/requests";
+        }
+
+        enrollmentScheduleService.rejectRescheduleRequest(scheduleId, reason.trim());
+        redirectAttributes.addFlashAttribute("successMessage", "Request rejected successfully.");
+        return "redirect:/mentor/requests";
+    }
 }
