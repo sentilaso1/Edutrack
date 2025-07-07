@@ -40,6 +40,17 @@
         .slot-cell-request.reviewing:hover {
             background-color: #FFF3CD !important;
         }
+
+        .reason-section textarea.error {
+            border: 1px solid red;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -75,16 +86,14 @@
                     </div>
                 </div>
 
-                <!-- New Schedule Selection -->
                 <div class="new-schedule-section">
                     <h3><i class="fas fa-calendar-plus"></i> Select New Schedule</h3>
 
-                    <form id="rescheduleForm" method="post" th:action="@{/schedules/reschedule-request}">
+                    <form id="rescheduleForm" method="post" th:action="@{/schedules/reschedule-request}" novalidate>
                         <input type="hidden" name="scheduleId" th:value="${currentSchedule.id}"/>
                         <input type="hidden" id="selectedSlot" name="newSlot" value=""/>
                         <input type="hidden" id="selectedDate" name="newDate" value=""/>
 
-                        <!-- Week Navigation -->
                         <div class="week-nav-request">
                             <a th:href="@{/schedules/reschedule(scheduleId=${currentSchedule.id}, weekOffset=${weekOffset - 1})}"
                                class="week-button-request">← Previous Week</a>
@@ -96,7 +105,6 @@
                                class="week-button-request">Next Week →</a>
                         </div>
 
-                        <!-- Schedule Grid -->
                         <div class="schedule-grid-request">
                             <!-- Header row -->
                             <div class="time-header-request">Time</div>
@@ -106,7 +114,6 @@
                                  th:text="${#temporals.format(day, 'EEEE')}">
                             </div>
 
-                            <!-- Time slots -->
                             <th:block th:each="slot : ${slots}">
                                 <div class="time-cell-request"
                                      th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></div>
@@ -137,7 +144,6 @@
                             </th:block>
                         </div>
 
-                        <!-- Selection Info -->
                         <div id="selectionInfo" class="selection-info">
                             <h4><i class="fas fa-check-circle"></i> Selected Schedule</h4>
                             <p><strong>Day:</strong> <span id="selectedDayName"></span></p>
@@ -145,13 +151,13 @@
                             <p><strong>Time:</strong> <span id="selectedTimeRange"></span></p>
                         </div>
 
-                        <!-- Reason Section -->
                         <div class="reason-section">
-                            <label for="reason"><i class="fas fa-comment-alt"></i> Reason for Reschedule
-                                (Optional)</label>
+                            <label for="reason"><i class="fas fa-comment-alt"></i> Reason for Reschedule</label>
                             <textarea id="reason" name="reason"
                                       placeholder="Please provide a reason for rescheduling this session..."></textarea>
+                            <span id="reason-error" class="error-message"></span>
                         </div>
+
 
                         <!-- Action Buttons -->
                         <div class="action-buttons">
@@ -216,14 +222,28 @@
             month: 'long',
             day: 'numeric'
         };
-        return date.toLocaleDateString('en-US', options);
+        return date.toLocaleDateString('en-US', { ...options, timeZone: 'UTC' });
     }
 
     document.getElementById('rescheduleForm').addEventListener('submit', function (e) {
+        const reasonTextarea = document.getElementById('reason');
+        const reasonError = document.getElementById('reason-error');
+        const reasonValue = reasonTextarea.value.trim();
+        reasonTextarea.classList.remove('error');
+        reasonError.style.display = 'none';
+        reasonError.textContent = '';
+
+        if (reasonValue === '') {
+            e.preventDefault();
+            reasonTextarea.classList.add('error');
+            reasonError.textContent = 'Can not be empty';
+            reasonError.style.display = 'block';
+            return;
+        }
         if (!selectedSlotElement) {
             e.preventDefault();
             alert('Please select a new time slot before submitting.');
-            return false;
+            return;
         }
 
         const dayName = selectedSlotElement.dataset.dayName;
@@ -232,7 +252,6 @@
 
         if (!confirm(`Are you sure you want to request a reschedule to ${dayName} ${startTime} - ${endTime}?`)) {
             e.preventDefault();
-            return false;
         }
     });
 </script>

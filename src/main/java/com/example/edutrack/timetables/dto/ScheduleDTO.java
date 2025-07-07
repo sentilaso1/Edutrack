@@ -1,4 +1,4 @@
-package com.example.edutrack.curriculum.dto;
+package com.example.edutrack.timetables.dto;
 
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 
@@ -14,25 +14,21 @@ public class ScheduleDTO {
     private String startTime;
     private String endTime;
     private UUID mentorId;
-
+    private String title;
     private int startHour;
     private int startMinute;
     private int durationInMinutes;
     private int endHour;
     private boolean available;
-
+    private int rescheduleCount;
     private boolean hasTest;
     private boolean canReschedule;
     private EnrollmentSchedule.RescheduleStatus rescheduleStatus;
     private LocalDate date;
-
+    private EnrollmentSchedule.Attendance attendance;
     public ScheduleDTO() {}
 
-    public ScheduleDTO(Long id, String slot, String day, String courseName, String mentorName,
-                       String startTime, String endTime,
-                       int startHour, int startMinute, int durationInMinutes,
-                       boolean hasTest, boolean canReschedule,
-                       EnrollmentSchedule.RescheduleStatus rescheduleStatus, LocalDate date, UUID mentorId, boolean available) {
+    public ScheduleDTO(int rescheduleCount, String title,Long id, String slot, String day, String courseName, String mentorName, String startTime, String endTime, UUID mentorId, int startHour, int startMinute, int durationInMinutes, int endHour, boolean available, boolean hasTest, boolean canReschedule, EnrollmentSchedule.RescheduleStatus rescheduleStatus, LocalDate date, EnrollmentSchedule.Attendance attendance) {
         this.id = id;
         this.slot = slot;
         this.day = day;
@@ -40,16 +36,43 @@ public class ScheduleDTO {
         this.mentorName = mentorName;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.mentorId = mentorId;
         this.startHour = startHour;
         this.startMinute = startMinute;
         this.durationInMinutes = durationInMinutes;
-        this.endHour = startHour + (int) Math.ceil(durationInMinutes / 60.0);
+        this.endHour = endHour;
+        this.available = available;
         this.hasTest = hasTest;
         this.canReschedule = canReschedule;
         this.rescheduleStatus = rescheduleStatus;
+        this.title = title;
         this.date = date;
-        this.mentorId = mentorId;
-        this.available = available;
+        this.attendance = attendance;
+        this.rescheduleCount = rescheduleCount;
+    }
+
+    public int getRescheduleCount() {
+        return rescheduleCount;
+    }
+
+    public void setRescheduleCount(int rescheduleCount) {
+        this.rescheduleCount = rescheduleCount;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public EnrollmentSchedule.Attendance getAttendance() {
+        return attendance;
+    }
+
+    public void setAttendance(EnrollmentSchedule.Attendance attendance) {
+        this.attendance = attendance;
     }
 
     public boolean isAvailable() {

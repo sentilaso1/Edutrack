@@ -147,10 +147,8 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
             LocalDate endDate
     );
 
-    List<EnrollmentSchedule> findAllByRescheduleStatusAndRequestedNewDateBefore(
-            EnrollmentSchedule.RescheduleStatus rescheduleStatus,
-            LocalDate date
-    );
+    @Query("SELECT es FROM EnrollmentSchedule es WHERE es.enrollment.mentee.id = :menteeId AND es.enrollment.courseMentor.id = :courseMentorId AND es.rescheduleStatus = 'REQUESTED' AND es.requestedNewDate BETWEEN :startDate AND :endDate")
+    List<EnrollmentSchedule> findReviewingSlotsByCourse(UUID menteeId, UUID courseMentorId, LocalDate startDate, LocalDate endDate);
 
 
     @Query(value = """
@@ -182,4 +180,9 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
               AND es.date BETWEEN NOW() - INTERVAL 7 DAY AND NOW()
             """, nativeQuery = true)
     Page<EnrollmentSchedule> findSchedulesByEnrollment(Long enrollmentId, Pageable pageable);
+    List<EnrollmentSchedule> findAllByRescheduleStatus(EnrollmentSchedule.RescheduleStatus status);
+
+    Long countByEnrollmentAndRescheduleStatusNot(Enrollment enrollment, EnrollmentSchedule.RescheduleStatus status);
+    @Query("SELECT es FROM EnrollmentSchedule es WHERE es.enrollment.courseMentor.mentor.id = :mentorId AND es.rescheduleStatus = 'REQUESTED'")
+    List<EnrollmentSchedule> findPendingRequestsForMentor(@Param("mentorId") UUID mentorId);
 }

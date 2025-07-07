@@ -1,5 +1,6 @@
 package com.example.edutrack.service;
 
+import com.example.edutrack.common.service.implementations.EmailService;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
@@ -28,6 +29,7 @@ public class EnrollmentScheduleServiceTest {
     private MenteeRepository menteeRepository;
     private CourseMentorRepository courseMentorRepository;
 
+    private EmailService emailService;
     private EnrollmentScheduleServiceImpl enrollmentScheduleService;
 
     @BeforeEach
@@ -37,13 +39,14 @@ public class EnrollmentScheduleServiceTest {
         mentorAvailableTimeDetailsRepository = Mockito.mock(MentorAvailableTimeDetailsRepository.class);
         menteeRepository = Mockito.mock(MenteeRepository.class);
         courseMentorRepository = Mockito.mock(CourseMentorRepository.class);
-
+        emailService = Mockito.mock(EmailService.class);
         enrollmentScheduleService = new EnrollmentScheduleServiceImpl(
                 enrollmentScheduleRepository,
                 mentorAvailableTimeRepository,
                 mentorAvailableTimeDetailsRepository,
                 menteeRepository,
-                courseMentorRepository
+                courseMentorRepository,
+                emailService
         );
     }
     //test findStartLearningTime function

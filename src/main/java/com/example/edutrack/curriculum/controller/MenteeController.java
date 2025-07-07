@@ -4,16 +4,16 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.dto.*;
 import com.example.edutrack.curriculum.model.*;
-import com.example.edutrack.curriculum.service.implementation.SuggestionServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.*;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
+import com.example.edutrack.timetables.dto.ScheduleActivityBannerDTO;
+import com.example.edutrack.timetables.dto.ScheduleDTO;
 import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +28,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Controller
@@ -373,11 +372,12 @@ public class MenteeController {
             @RequestParam(value = "weekOffset", defaultValue = "0") int weekOffset,
             Model model
     ) {
-        enrollmentScheduleService.resetExpiredRescheduleRequests();
         UUID menteeId = getSessionMentee(session);
         if (menteeId == null){
             return "redirect:/";
         }
+        List<ScheduleActivityBannerDTO> activityBanners = enrollmentScheduleService.collectRecentActivityBanners(menteeId);
+        model.addAttribute("activityBanners", activityBanners);
 
         LocalDate mondayOfWeek = LocalDate.now().plusWeeks(weekOffset).with(java.time.DayOfWeek.MONDAY);
         LocalDate start = mondayOfWeek;
@@ -432,18 +432,26 @@ public class MenteeController {
                     ", RescheduleStatus=" + dto.getRescheduleStatus());
         }
 
-        List<EnrollmentSchedule> reviewingSchedules = enrollmentScheduleService.getSlotsUnderReview(menteeId, start, end);
-        Set<String> reviewingSlotKeys = new HashSet<>();
+        Map<String, ScheduleDTO> reviewingSlotsMap = new HashMap<>();
+
+        List<EnrollmentSchedule> reviewingSchedules;
+        if (courseId != null) {
+            reviewingSchedules = enrollmentScheduleService.getSlotsUnderReviewByCourse(menteeId, courseId, start, end);
+        } else {
+            reviewingSchedules = enrollmentScheduleService.getSlotsUnderReview(menteeId, start, end);
+        }
 
         System.out.println("=== REVIEWING SLOTS DEBUG ===");
-        for (EnrollmentSchedule dto : reviewingSchedules) {
-            if (dto.getRequestedNewDate() != null && dto.getRequestedNewSlot() != null) {
-                String slotKey = dto.getRequestedNewSlot().name() + "_" + dto.getRequestedNewDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                reviewingSlotKeys.add(slotKey.toUpperCase());
-                System.out.println("Added reviewing slot key: " + slotKey.toUpperCase());
+        for (EnrollmentSchedule reviewingSchedule : reviewingSchedules) {
+            if (reviewingSchedule.getRequestedNewDate() != null && reviewingSchedule.getRequestedNewSlot() != null) {
+                String slotKey = reviewingSchedule.getRequestedNewSlot().name() + "_" + reviewingSchedule.getRequestedNewDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                ScheduleDTO pendingDTO = new ScheduleDTO();
+                pendingDTO.setTitle(reviewingSchedule.getTitleSection());
+                pendingDTO.setCourseName(reviewingSchedule.getEnrollment().getCourseMentor().getCourse().getName());
+                pendingDTO.setMentorName(reviewingSchedule.getEnrollment().getCourseMentor().getMentor().getFullName());
+                reviewingSlotsMap.put(slotKey.toUpperCase(), pendingDTO);
             }
         }
-        System.out.println("Total reviewing slot keys: " + reviewingSlotKeys.size());
 
         List<CourseMentor> courses = enrollmentService.getCourseMentorsByMentee(menteeId);
         int testCount = enrollmentScheduleService.countTestSlot(menteeId);
@@ -451,13 +459,7 @@ public class MenteeController {
         List<LocalDate> daysInWeek = IntStream.range(0, 7)
                 .mapToObj(mondayOfWeek::plusDays)
                 .toList();
-
-        System.out.println("Days in week: " + daysInWeek);
-        System.out.println("Slots: " + Arrays.toString(Slot.values()));
-        System.out.println("ReviewingSlotKeys: " + reviewingSlotKeys);
-        System.out.println("==================");
-
-        model.addAttribute("reviewingSlotKeys", reviewingSlotKeys);
+        model.addAttribute("reviewingSlotsMap", reviewingSlotsMap);
         model.addAttribute("todayDate", today);
         model.addAttribute("daysInWeek", daysInWeek);
         model.addAttribute("courses", courses);
@@ -478,13 +480,18 @@ public class MenteeController {
             @RequestParam("scheduleId") int scheduleId,
             @RequestParam("newSlot") String newSlot,
             @RequestParam("newDate") String newDate,
-            @RequestParam(value = "reason", required = false) String reason,
+            @RequestParam("reason") String reason,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         UUID menteeId = getSessionMentee(session);
         if (menteeId == null) {
             return "redirect:/";
+        }
+        if (reason == null || reason.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Reason for rescheduling cannot be empty.");
+            String redirectUrl = "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+            return redirectUrl;
         }
 
         try {
@@ -496,14 +503,20 @@ public class MenteeController {
                 return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
             }
 
-            boolean success = enrollmentScheduleService.submitRescheduleRequest(scheduleId, slot, date, reason, menteeId);
+            boolean success = enrollmentScheduleService.submitRescheduleRequest(scheduleId, slot, date, reason.trim(), menteeId);
 
             if (success) {
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Reschedule request submitted successfully! Your mentor will review it soon.");
             } else {
-                redirectAttributes.addFlashAttribute("errorMessage",
-                        "Failed to submit reschedule request. Please try again.");
+                EnrollmentSchedule schedule = enrollmentScheduleService.findById(scheduleId);
+                Long count = enrollmentScheduleService.countEnrollmentSchedulesHaveRescheduleRequest(schedule.getEnrollment());
+
+                if (count >= 2) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "You have used all of your reschedule requests for this course.");
+                } else {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to submit reschedule request. Please try again.");
+                }
             }
 
         } catch (IllegalArgumentException e) {
