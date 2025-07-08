@@ -15,6 +15,7 @@
         <a th:href="@{/manager/payments}" class="block py-2 px-3 rounded hover:bg-blue-700">Payments</a>
     </nav>
 </div>
+
 <div class="ml-64 flex-1 min-h-screen p-10">
     <div class="bg-white rounded-xl shadow-md p-6 h-full w-full">
         <div class="overflow-x-auto h-full w-full">
@@ -25,6 +26,35 @@
                 </a>
             </div>
 
+            <!-- Filter Form -->
+            <form method="get" action="/manager/schedules" class="flex items-center space-x-4 mb-6">
+                <!-- Mentor Filter -->
+                <select id="mentorFilter" name="mentorId"
+                        class="block w-48 px-3 py-2 bg-white border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        onchange="this.form.submit()">
+                    <option value="">All Mentors</option>
+                    <option th:each="mentor : ${mentors}"
+                            th:value="${mentor.id}"
+                            th:text="${mentor.fullName}"
+                            th:selected="${mentor.id.toString() == selectedMentor}">
+                    </option>
+                </select>
+
+                <!-- Mentee Filter -->
+                <select id="menteeFilter" name="menteeId"
+                        class="block w-48 px-3 py-2 bg-white border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        onchange="this.form.submit()">
+                    <option value="">All Mentees</option>
+                    <option th:each="mentee : ${mentees}"
+                            th:value="${mentee.id}"
+                            th:text="${mentee.fullName}"
+                            th:selected="${mentee.id.toString() == selectedMentee}">
+                    </option>
+                </select>
+
+            </form>
+
+            <!-- Table -->
             <table class="min-w-full border border-blue-200 rounded-lg">
                 <thead>
                 <tr class="bg-blue-600 text-white text-sm text-left">
@@ -40,28 +70,27 @@
                     <td class="px-4 py-3 text-gray-800" th:text="${schedule.courseMentor.mentor.fullName}"></td>
                     <td class="px-4 py-3 text-gray-800" th:text="${schedule.mentee.fullName}"></td>
                     <td class="px-4 py-3 text-gray-800">
-                        <button>
-                            <a th:href="@{/manager/schedules/view/{id}(id=${schedule.id})}"
-                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
-                                View
-                            </a>
-                        </button>
+                        <a th:href="@{/manager/schedules/view/{id}(id=${schedule.id})}"
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                            View
+                        </a>
                     </td>
                 </tr>
                 </tbody>
             </table>
 
             <!-- Pagination Bar -->
-            <div class="flex justify-center mt-6" th:with="totalPages=${schedulePage.totalPages}, currentPage=${page}">
+            <div class="flex justify-center mt-6"
+                 th:with="totalPages=${schedulePage.totalPages}, currentPage=${page}">
                 <nav class="inline-flex items-center space-x-1">
                     <a th:if="${currentPage > 1}"
-                       th:href="@{'/manager/schedules/' + ${currentPage - 1}}"
+                       th:href="@{'/manager/schedules/' + ${currentPage - 1} + '?menteeId=' + ${selectedMentee} + '&mentorId=' + ${selectedMentor}}"
                        class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
                         ← Prev
                     </a>
 
                     <span th:each="i : ${#numbers.sequence(1, totalPages)}">
-                        <a th:href="@{'/manager/schedules/' + ${i}}"
+                        <a th:href="@{'/manager/schedules/' + ${i} + '?menteeId=' + ${selectedMentee} + '&mentorId=' + ${selectedMentor}}"
                            th:text="${i}"
                            th:class="'px-3 py-2 rounded ' +
                                      (${i} == ${currentPage} ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 transition')">
@@ -69,7 +98,7 @@
                     </span>
 
                     <a th:if="${currentPage < totalPages}"
-                       th:href="@{'/manager/schedules/' + ${currentPage + 1}}"
+                       th:href="@{'/manager/schedules/' + ${currentPage + 1} + '?menteeId=' + ${selectedMentee} + '&mentorId=' + ${selectedMentor}}"
                        class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
                         Next →
                     </a>

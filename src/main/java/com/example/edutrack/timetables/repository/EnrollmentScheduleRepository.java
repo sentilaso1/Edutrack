@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
+public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer>, EnrollmentScheduleRepositoryCustom {
     @Query("SELECT COUNT(e) > 0 FROM Enrollment e " +
             "JOIN EnrollmentSchedule es ON es.enrollment = e " +
             "WHERE e.courseMentor.mentor = :mentor " +

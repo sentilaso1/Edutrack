@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.repository;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -115,4 +116,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     );
 
     Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable);
+
+    @Query("SELECT DISTINCT e.mentee FROM Enrollment e")
+    List<Mentee> findAllUniqueMentees();
+
+    @Query("SELECT DISTINCT e.courseMentor.mentor FROM Enrollment e")
+    List<Mentor> findAllUniqueMentors();
 }

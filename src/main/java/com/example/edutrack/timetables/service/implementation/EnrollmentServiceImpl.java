@@ -1,6 +1,7 @@
 package com.example.edutrack.timetables.service.implementation;
 
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
@@ -127,6 +128,16 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable) {
         return enrollmentRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    public List<Mentor> findAllUniqueMentors() {
+        return enrollmentRepository.findAllUniqueMentors();
+    }
+
+    @Override
+    public List<Mentee> findAllUniqueMentees() {
+        return enrollmentRepository.findAllUniqueMentees();
     }
 
     @Override

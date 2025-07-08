@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.service.interfaces;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
@@ -51,4 +52,8 @@ public interface EnrollmentService {
     Double getPercentComplete(Enrollment enrollment);
 
     Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable);
+
+    List<Mentor> findAllUniqueMentors();
+
+    List<Mentee> findAllUniqueMentees();
 }

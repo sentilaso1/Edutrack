@@ -71,8 +71,10 @@ public interface EnrollmentScheduleService {
     @Transactional
     void rejectRescheduleRequest(int scheduleId, String reason);
 
-
     Page<EnrollmentAttendanceDTO> findAllSchedulesToBeConfirmed(Pageable pageable);
 
+    Page<EnrollmentAttendanceDTO> findAllSchedulesToBeConfirmedFiltered(Pageable pageable, String menteeId, String mentorId);
+
     Page<EnrollmentSchedule> findScheduleByEnrollment(Long enrollmentId, Pageable pageable);
+
 }

@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -385,8 +386,9 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
         return activityBanners;
     }
+
     @Override
-    public Long countEnrollmentSchedulesHaveRescheduleRequest(Enrollment enrollment){
+    public Long countEnrollmentSchedulesHaveRescheduleRequest(Enrollment enrollment) {
         return enrollmentScheduleRepository.countByEnrollmentAndRescheduleStatusNot(enrollment, EnrollmentSchedule.RescheduleStatus.NONE);
     }
 
@@ -511,6 +513,11 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     @Override
     public Page<EnrollmentSchedule> findScheduleByEnrollment(Long enrollmentId, Pageable pageable) {
         return enrollmentScheduleRepository.findSchedulesByEnrollment(enrollmentId, pageable);
+    }
+
+    @Override
+    public Page<EnrollmentAttendanceDTO> findAllSchedulesToBeConfirmedFiltered(Pageable pageable, String menteeId, String mentorId) {
+        return enrollmentScheduleRepository.findScheduleToBeConfirmedFiltered(pageable, menteeId, mentorId);
     }
 
 }

@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import com.example.edutrack.accounts.dto.ManagerStatsDTO;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -125,23 +126,37 @@ public class ManagerController {
     }
 
     @GetMapping("/manager/schedules")
-    public String redirectShowSchedules(Model model) {
-        return "redirect:/manager/schedules/1";
+    public String redirectShowSchedules(@RequestParam(required = false) String menteeId,
+                                        @RequestParam(required = false) String mentorId) {
+        String queryParams = "";
+
+        if (menteeId != null) queryParams += "&menteeId=" + menteeId;
+        if (mentorId != null) queryParams += "&mentorId=" + mentorId;
+
+        return "redirect:/manager/schedules/1" + (queryParams.isEmpty() ? "" : "?" + queryParams.substring(1));
     }
 
     @GetMapping("/manager/schedules/{page}")
-    public String showSchedules(Model model, @PathVariable Integer page) {
-        if (page - 1 < 0) {
-            return "redirect:/404";
-        }
+    public String showSchedules(Model model,
+                                @PathVariable Integer page,
+                                @RequestParam(required = false) String menteeId,
+                                @RequestParam(required = false) String mentorId) {
+
+        if (page - 1 < 0) return "redirect:/404";
 
         Pageable pageable = PageRequest.of(page - 1, ENROLLMENT_PAGE_SIZE);
 
+        model.addAttribute("mentors", enrollmentService.findAllUniqueMentors());
+        model.addAttribute("mentees", enrollmentService.findAllUniqueMentees());
         model.addAttribute("page", page);
+        model.addAttribute("selectedMentee", menteeId);
+        model.addAttribute("selectedMentor", mentorId);
+
         model.addAttribute(
                 "schedulePage",
-                enrollmentScheduleService.findAllSchedulesToBeConfirmed(pageable)
+                enrollmentScheduleService.findAllSchedulesToBeConfirmedFiltered(pageable, menteeId, mentorId)
         );
+
         return "manager/schedules";
     }
 
@@ -431,26 +446,16 @@ public class ManagerController {
 
             if (field.startsWith("hero")) {
                 return "hero";
-            }
-
-            else if (field.startsWith("category") || field.equals("tagSuggestion")) {
+            } else if (field.startsWith("category") || field.equals("tagSuggestion")) {
                 return "categories";
-            }
-
-            else if (field.startsWith("about")) {
+            } else if (field.startsWith("about")) {
                 return "about";
-            }
-
-            else if (field.startsWith("sectionOne") || field.startsWith("sectionTwo") ||
+            } else if (field.startsWith("sectionOne") || field.startsWith("sectionTwo") ||
                     field.startsWith("courseSection")) {
                 return "courses";
-            }
-
-            else if (field.startsWith("mentor")) {
+            } else if (field.startsWith("mentor")) {
                 return "mentor";
-            }
-
-            else if (field.startsWith("footer") || field.equals("copyrightText")) {
+            } else if (field.startsWith("footer") || field.equals("copyrightText")) {
                 return "footer";
             }
         }
