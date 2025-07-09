@@ -167,139 +167,142 @@
 
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
-</div>
-</div>
-<div class="main">
-    <div class="graph">
-        <div class="product-section">
-            <div class="tabs">
-                <form th:action="@{/mentor/censor-class}" method="get">
-                    <button class="tab"
-                            name="status"
-                            value="PENDING"
-                            th:classappend="${status.name() == 'PENDING'} ? ' active' : ''">
-                        Pending
-                    </button>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <div class="graph">
+            <div class="product-section">
+                <div class="tabs">
+                    <form th:action="@{/mentor/censor-class}" method="get" style="display: flex">
+                        <button class="tab"
+                                name="status"
+                                value="PENDING"
+                                th:classappend="${status.name() == 'PENDING'} ? ' active' : ''">
+                            Pending
+                        </button>
 
-                    <button class="tab"
-                            name="status"
-                            value="APPROVED"
-                            th:classappend="${status.name() == 'APPROVED'} ? ' active' : ''">
-                        Approved
-                    </button>
+                        <button class="tab"
+                                name="status"
+                                value="APPROVED"
+                                th:classappend="${status.name() == 'APPROVED'} ? ' active' : ''">
+                            Approved
+                        </button>
 
-                    <button class="tab"
-                            name="status"
-                            value="REJECTED"
-                            th:classappend="${status.name() == 'REJECTED'} ? ' active' : ''">
-                        Rejected
-                    </button>
+                        <button class="tab"
+                                name="status"
+                                value="REJECTED"
+                                th:classappend="${status.name() == 'REJECTED'} ? ' active' : ''">
+                            Rejected
+                        </button>
 
-                    <button class="tab"
-                            name="status"
-                            value="CANCELLED"
-                            th:classappend="${status.name() == 'CANCELLED'} ? ' active' : ''">
-                        Cancel
-                    </button>
+                        <button class="tab"
+                                name="status"
+                                value="CANCELLED"
+                                th:classappend="${status.name() == 'CANCELLED'} ? ' active' : ''">
+                            Cancel
+                        </button>
+                    </form>
+
+                </div>
+                <form method="get" th:action="@{/mentor/censor-class}"  class="controls">
+                    <input type="text" name="search" placeholder="Search a mentee" th:value="${search}" class="search-input">
+
+                    <input type="hidden" name="status" th:value="${param.status[0]}">
+                    <select name="skill" class="filter-select">
+                        <option value="">Filter by Skill</option>
+                        <option th:each="s : ${skills}" th:value="${s.name}" th:text="${s.name}"
+                                th:selected="${skill} == ${s.name}"></option>
+                    </select>
+
+                    <select name="sort" class="sort-select">
+                        <option value="createdDateDesc" th:selected="${sort} == 'createdDateDesc'">Created Date Desc</option>
+                        <option value="createdDateAsc" th:selected="${sort} == 'createdDateAsc'">Created Date Asc</option>
+                        <option value="priceDesc" th:selected="${sort} == 'priceDesc'">Price Desc</option>
+                        <option value="priceAsc" th:selected="${sort} == 'priceAsc'">Price Asc</option>
+                    </select>
+
+                    <select name="size" class="sort-select">
+                        <option th:value="5" th:selected="${size == 5}">5</option>
+                        <option th:value="10" th:selected="${size == 10}">10</option>
+                        <option th:value="15" th:selected="${size == 15}">15</option>
+                        <option th:value="20" th:selected="${size == 20}">20</option>
+                    </select>
+
+                    <button style="padding: 0.1em 1em; background-color: #ff4d30; border: none; color: white; border-radius: 6px" type="submit">Apply</button>
                 </form>
 
-            </div>
-            <form method="get" th:action="@{/mentor/censor-class}"  class="controls">
-                <input type="text" name="search" placeholder="Search a mentee" th:value="${search}" class="search-input">
-
-                <input type="hidden" name="status" th:value="${param.status[0]}">
-                <select name="skill" class="filter-select">
-                    <option value="">Filter by Skill</option>
-                    <option th:each="s : ${skills}" th:value="${s.name}" th:text="${s.name}"
-                            th:selected="${skill} == ${s.name}"></option>
-                </select>
-
-                <select name="sort" class="sort-select">
-                    <option value="createdDateDesc" th:selected="${sort} == 'createdDateDesc'">Created Date Desc</option>
-                    <option value="createdDateAsc" th:selected="${sort} == 'createdDateAsc'">Created Date Asc</option>
-                    <option value="priceDesc" th:selected="${sort} == 'priceDesc'">Price Desc</option>
-                    <option value="priceAsc" th:selected="${sort} == 'priceAsc'">Price Asc</option>
-                </select>
-
-                <select name="size" class="sort-select">
-                    <option th:value="5" th:selected="${size == 5}">5</option>
-                    <option th:value="10" th:selected="${size == 10}">10</option>
-                    <option th:value="15" th:selected="${size == 15}">15</option>
-                    <option th:value="20" th:selected="${size == 20}">20</option>
-                </select>
-
-                <button style="padding: 0.1em 1em; background-color: #ff4d30; border: none; color: white; border-radius: 6px" type="submit">Apply</button>
-            </form>
-
-            <table class="product-table">
-                <thead>
-                <tr>
-                    <th>Student Name</th>
-                    <th>Skill</th>
-                    <th>Total slots</th>
-                    <th>Paid Price</th>
-                    <th>Created Date</th>
-                    <th style="min-width: 10em;" th:if="${param.status[0] == null or param.status[0] == 'PENDING'}">ACTION</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item : ${enrollmentList}">
-                    <td th:text="${item.mentee.fullName}">Monstera</td>
-                    <td th:text="${item.courseMentor.course.name}">48.00</td>
-                    <td th:text="${item.totalSlots}">39.02</td>
-                    <td th:text="${item.courseMentor.price * item.totalSlots}"></td>
-                    <td th:text="${item.createdDate}">A/22</td>
-                    <td  th:if="${param.status[0] == null or param.status[0] == 'PENDING'}">
-                        <form th:action="@{/mentor/censor-class/{eid}(eid=${item.id})}">
-                            <button class="more-btn" name="action" value="view"><i class="fa fa-arrow-right"
-                                                                                     aria-hidden="true"></i> View</button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="pagination">
-                <ul>
-                    <li th:if="${currentPage > 0}">
-                        <a th:href="@{/mentor/censor-class(
+                <table class="product-table">
+                    <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Skill</th>
+                        <th>Total slots</th>
+                        <th>Paid Price</th>
+                        <th>Created Date</th>
+                        <th style="min-width: 10em;" th:if="${param.status[0] == null or param.status[0] == 'PENDING'}">ACTION</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${enrollmentList}">
+                        <td th:text="${item.mentee.fullName}">Monstera</td>
+                        <td th:text="${item.courseMentor.course.name}">48.00</td>
+                        <td th:text="${item.totalSlots}">39.02</td>
+                        <td th:text="${item.courseMentor.price * item.totalSlots}"></td>
+                        <td th:text="${item.createdDate}">A/22</td>
+                        <td  th:if="${param.status[0] == null or param.status[0] == 'PENDING'}">
+                            <form th:action="@{/mentor/censor-class/{eid}(eid=${item.id})}">
+                                <button class="more-btn" name="action" value="view"><i class="fa fa-arrow-right"
+                                                                                       aria-hidden="true"></i> View</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    <ul>
+                        <li th:if="${currentPage > 0}">
+                            <a th:href="@{/mentor/censor-class(
                 page=${currentPage - 1},
                 size=${size},
                 sort=${sort},
                 search=${search},
                 skill=${skill},
                 status=${status})}">&laquo; Prev</a>
-                    </li>
+                        </li>
 
-                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${i == currentPage} ? 'active'">
-                        <a th:href="@{/mentor/censor-class(
+                        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a th:href="@{/mentor/censor-class(
                 page=${i},
                 size=${size},
                 sort=${sort},
                 search=${search},
                 skill=${skill},
                 status=${param.status})}"
-                           th:text="${i + 1}"></a>
-                    </li>
+                               th:text="${i + 1}"></a>
+                        </li>
 
-                    <li th:if="${currentPage + 1 < totalPages}">
-                        <a th:href="@{/mentor/censor-class(
+                        <li th:if="${currentPage + 1 < totalPages}">
+                            <a th:href="@{/mentor/censor-class(
                 page=${currentPage + 1},
                 size=${size},
                 sort=${sort},
                 search=${search},
                 skill=${skill},
                 status=${param.status})}">Next &raquo;</a>
-                    </li>
-                </ul>
-            </div>
+                        </li>
+                    </ul>
+                </div>
 
+            </div>
         </div>
     </div>
 </div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 </body>
 </html>

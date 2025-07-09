@@ -12,17 +12,23 @@ a{
 }
 
 
-body {
+.body {
+    margin-top: 98px;
     background: #f6f9fc;
     display: flex;
     min-height: 100vh;
 }
 
 .sidebar {
+    margin-top: 2.3em;
+    margin-left: 1em;
     width: 240px;
     background: #fff;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
     padding: 2rem 1rem;
+    color: hsl(240, 6%, 51%);
+    height: fit-content;
+    border-radius: 15px;: ;
 }
 
 .sidebar h2 {
@@ -47,11 +53,11 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #333;
     cursor: pointer;
     border-bottom: 1px solid #00000021;
     padding: 0.7em 0 0.5em;
     font-weight: bold;
+    color: hsl(240, 6%, 51%);
 }
 
 .main {
@@ -63,7 +69,6 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
 }
 
 .stats {
@@ -87,6 +92,7 @@ body {
 }
 
 .graph, .timeline {
+    margin-top: 1em;
     background: white;
     border-radius: 16px;
     padding: 1.5rem;
