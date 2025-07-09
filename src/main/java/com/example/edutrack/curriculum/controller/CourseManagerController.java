@@ -2,10 +2,7 @@ package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseFormDTO;
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.Tag;
-import com.example.edutrack.curriculum.model.TeachingMaterial;
+import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.service.implementation.*;
@@ -188,6 +185,13 @@ public class CourseManagerController {
             return "redirect:/manager/view";
         }
 
+        // Check if course has assigned mentor
+        boolean hasMentor = courseMentorService.existsByCourseIdAndStatus(id, ApplicationStatus.ACCEPTED);
+        if (hasMentor) {
+            model.addAttribute("errorMessage", "Cannot edit this course because it has assigned mentors!");
+            return "redirect:/manager/view";
+        }
+
         CourseFormDTO form = new CourseFormDTO();
         form.setName(course.getName());
         form.setDescription(course.getDescription());
@@ -209,6 +213,13 @@ public class CourseManagerController {
                              BindingResult bindingResult,
                              Model model,
                              RedirectAttributes redirectAttributes) {
+
+        boolean hasMentor = courseMentorService.existsByCourseIdAndStatus(id, ApplicationStatus.ACCEPTED);
+        if (hasMentor) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot edit this course because it has assigned mentors!");
+            return "redirect:/manager/view";
+        }
+
         List<TeachingMaterial> materials = teachingMaterials.findByCourseId(id);
         int currentFileCount = materials != null ? materials.size() : 0;
 
@@ -228,10 +239,10 @@ public class CourseManagerController {
 
         String fileError = null;
         if (totalFileCount > 5) {
-            fileError = "Vượt quá giới hạn! Hiện tại: " + currentFileCount +
-                    " file, thêm mới: " + newFileCount + " file. Tối đa 5 file.";
+            fileError = "File limit exceeded! Current: " + currentFileCount +
+                    " files, adding: " + newFileCount + " files. Maximum 5 files allowed.";
         } else if (totalFileCount < 1) {
-            fileError = "Khóa học phải có ít nhất 1 tài liệu!";
+            fileError = "Course must have at least 1 material!";
         }
 
         if (fileError != null || bindingResult.hasErrors()) {
@@ -243,7 +254,7 @@ public class CourseManagerController {
             model.addAttribute("fileError", fileError);
 
             if (bindingResult.hasErrors()) {
-                model.addAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin đã nhập!");
+                model.addAttribute("errorMessage", "Please check the information entered!");
             }
 
             return "manager-course-edit";
@@ -251,7 +262,7 @@ public class CourseManagerController {
 
         try {
             courseService.update(id, courseFormDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật khóa học thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "Course updated successfully!");
             redirectAttributes.addFlashAttribute("courseId", id);
         } catch (Exception e) {
             System.out.println("[ERROR] Exception when updating course: " + e.getMessage());
@@ -261,7 +272,7 @@ public class CourseManagerController {
             model.addAttribute("materials", materials);
             model.addAttribute("courseForm", courseFormDTO);
             model.addAttribute("courseId", id);
-            model.addAttribute("errorMessage", "Lỗi khi cập nhật khóa học: " + e.getMessage());
+            model.addAttribute("errorMessage", "Error updating course: " + e.getMessage());
             return "manager-course-edit";
         }
 
@@ -272,10 +283,17 @@ public class CourseManagerController {
     public String deleteMaterial(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
             UUID courseId = teachingMaterials.findCourseByMaterialId(id).getId();
+            boolean hasMentor = courseMentorService.existsByCourseIdAndStatus(courseId, ApplicationStatus.ACCEPTED);
+            if (hasMentor) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete material because this course has assigned mentors!");
+                return "redirect:/manager/courses/edit/" + courseId;
+            }
+
             teachingMaterials.deleteById(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Material deleted successfully!");
             return "redirect:/manager/courses/edit/" + courseId;
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa tài liệu: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting material: " + e.getMessage());
             return "redirect:/manager/view";
         }
     }
@@ -283,14 +301,19 @@ public class CourseManagerController {
     @PostMapping("/courses/delete/{id}")
     public String deleteCourse(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         try {
+            boolean hasMentor = courseMentorService.existsByCourseIdAndStatus(id, ApplicationStatus.ACCEPTED);
+            if (hasMentor) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete this course because it has assigned mentors!");
+                return "redirect:/manager/view";
+            }
+
             courseService.deleteCourseWithRelatedData(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa khóa học thành công");
+            redirectAttributes.addFlashAttribute("successMessage", "Course deleted successfully");
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa khóa học: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting course: " + e.getMessage());
         }
         return "redirect:/manager/view";
     }
-
 
 }

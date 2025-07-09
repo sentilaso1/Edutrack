@@ -15,140 +15,6 @@
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/mentee-calendar-style.css}"/>
 
-    <style>
-        .slot-cell.reviewing {
-            background-color: #FFF3CD !important;
-            border-color: #F0AD4E !important;
-            color: #856404 !important;
-            position: relative;
-            cursor: not-allowed;
-        }
-
-        .slot-cell.reviewing::after {
-            content: "Under Review";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            white-space: nowrap;
-            z-index: 1;
-        }
-
-        .slot-cell.reviewing:hover {
-            background-color: #FFF3CD !important;
-        }
-
-        .slot-cell.reviewing .schedule-event {
-            opacity: 0.7;
-        }
-
-        /* New styles for reschedule highlighting */
-        .slot-cell.has-reschedule {
-            background-color: #E3F2FD !important;
-            border-color: #2196F3 !important;
-            color: #1565C0 !important;
-            position: relative;
-            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
-        }
-
-        .slot-cell.has-reschedule::before {
-            content: "Rescheduling";
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background-color: #2196F3;
-            color: white;
-            font-size: 8px;
-            font-weight: bold;
-            padding: 1px 4px;
-            border-radius: 2px;
-            z-index: 3;
-        }
-
-        .slot-cell.has-reschedule:hover {
-            background-color: #BBDEFB !important;
-            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.5);
-        }
-
-        .slot-cell.has-reschedule .schedule-event {
-            opacity: 0.9;
-            border-left: 3px solid #2196F3;
-        }
-
-        /* Enhanced reschedule status styling */
-        .reschedule-status {
-            position: absolute;
-            bottom: 2px;
-            left: 2px;
-            font-size: 8px;
-            font-weight: bold;
-            padding: 1px 3px;
-            border-radius: 2px;
-            z-index: 2;
-            text-transform: uppercase;
-        }
-
-        .reschedule-status.pending {
-            background-color: #FF9800;
-            color: white;
-        }
-
-        .reschedule-status.approved {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .reschedule-status.rejected {
-            background-color: #F44336;
-            color: white;
-        }
-
-        .reschedule-status.requested {
-            background-color: #e498d9;
-            font-weight: bold;
-            color: white;
-        }
-
-        .reviewing-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 243, 205, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .reviewing-text {
-            font-size: 10px;
-            font-weight: bold;
-            color: #856404;
-            text-align: center;
-        }
-
-        .slot-cell {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        /* Priority handling - reviewing takes precedence over reschedule */
-        .slot-cell.reviewing.has-reschedule {
-            background-color: #FFF3CD !important;
-            border-color: #F0AD4E !important;
-            color: #856404 !important;
-        }
-
-        .slot-cell.reviewing.has-reschedule::before {
-            display: none;
-        }
-    </style>
 </head>
 <body>
 <th:block th:insert="~{fragments/header :: header}"></th:block>
@@ -156,6 +22,27 @@
     <section class="section has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
         <div class="container">
             <h2 class="section-title">Learning Schedule</h2>
+            <div th:if="${successMessage}" class="flash-alert flash-alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${successMessage}"></span>
+            </div>
+
+            <div th:if="${errorMessage}" class="flash-alert flash-alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span th:text="${errorMessage}"></span>
+            </div>
+            <div th:if="${activityBanners != null and !activityBanners.isEmpty()}" class="activity-banner-container">
+                <h4><i class="fas fa-history"></i> Recent Activities</h4>
+                <div th:each="banner : ${activityBanners}"
+                     th:classappend="${#strings.contains(banner.message, 'Approved') ? 'banner-success' :
+                          (#strings.contains(banner.message, 'Rejected') or #strings.contains(banner.message, 'Canceled') ? 'banner-danger' : 'banner-info')}"
+                     class="activity-banner">
+
+                    <p th:text="${banner.message}"></p>
+
+                    <span class="banner-date" th:text="${#temporals.format(banner.updateDate, 'dd/MM HH:mm')}"></span>
+                </div>
+            </div>
             <div class="schedule-page">
                 <div class="schedule-sidebar">
                     <h4><i class="fas fa-calendar-check"></i> Upcoming meeting</h4>
@@ -203,30 +90,36 @@
                     </div>
 
                     <div class="schedule-grid">
-                        <!-- Header row -->
                         <div class="time-header">Time</div>
                         <div class="day-header"
                              th:each="day : ${daysInWeek}"
                              th:classappend="${day.equals(todayDate)} ? ' today-border' : ''"
                              th:text="${#temporals.format(day, 'EEEE')}">
                         </div>
+
                         <th:block th:each="slot : ${slots}">
                             <div class="time-cell" th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></div>
 
-                            <th:block th:each="day : ${daysInWeek}" th:with="dayIndex=${dayStat.index}">
+                            <th:block th:each="day : ${daysInWeek}">
                                 <th:block th:with="slotKey=${slot.name() + '_' + #temporals.format(day, 'yyyy-MM-dd')}">
+
                                     <div class="slot-cell"
                                          th:data-slot="${slot.name()}"
                                          th:data-day="${#temporals.format(day, 'yyyy-MM-dd')}"
-                                         th:classappend="${day.equals(todayDate) ? ' today-border' : ''} +
-                                                        ${#sets.contains(reviewingSlotKeys, slotKey.toUpperCase()) ? ' reviewing' : ''}">
+                                         th:classappend="${day.equals(todayDate) ? ' today-border' : ''}">
 
                                         <div th:each="schedule : ${schedules}"
-                                             th:if="${schedule.day} == ${#temporals.format(day, 'EEEE').toUpperCase()} and ${schedule.slot} == ${slot.name()}"
+                                             th:if="${schedule.day == #temporals.format(day, 'EEEE').toUpperCase() and schedule.slot == slot.name()}"
                                              class="schedule-event"
-                                             th:classappend="${(!schedule.available ? ' unavailable-slot' : '') +
-                                              (#sets.contains(reviewingSlotKeys, slotKey.toUpperCase()) ? ' reviewing' : '') +
-                                              (schedule.rescheduleStatus != null and schedule.rescheduleStatus.name() != 'NONE' ? ' has-reschedule' : '')}"
+                                             th:classappend="
+                            ${schedule.date.isBefore(todayDate) ?
+                                (schedule.attendance.name() == 'PRESENT' ? 'attended' : (schedule.attendance.name() == 'ABSENT' ? 'absent' : 'past-unattended')) :
+                                (schedule.rescheduleStatus.name() == 'REQUESTED' ? 'pending-reschedule' : (!schedule.available ? 'unavailable-slot' : ''))
+                            }"
+                                             th:data-date="${schedule.date}"
+                                             th:data-attendance="${schedule.attendance}"
+                                             th:data-title="${schedule.title}"
+                                             th:data-reschedule-count="${schedule.rescheduleCount}"
                                              th:data-course="${schedule.courseName}"
                                              th:data-mentor="${schedule.mentorName}"
                                              th:data-slot="${schedule.slot}"
@@ -239,21 +132,22 @@
                                              th:data-reschedule-status="${schedule.rescheduleStatus}"
                                              onclick="showEventDetails(this)">
 
-                                            <div class="event-title" th:text="${schedule.courseName}"></div>
+                                            <div class="event-title" th:text="${schedule.title != null ? schedule.title : schedule.courseName}"></div>
                                             <div class="event-subtitle" th:text="${schedule.mentorName}"></div>
 
-                                            <div th:if="${schedule.rescheduleStatus != null and schedule.rescheduleStatus.name() != 'NONE'}"
-                                                 th:class="${'reschedule-status ' + schedule.rescheduleStatus.name().toLowerCase() +
-               (schedule.rescheduleStatus.name() == 'REQUESTED' ? ' disabled' : '')}"
+                                            <div th:if="${schedule.rescheduleStatus != null and schedule.rescheduleStatus.name() != 'NONE' and schedule.rescheduleStatus.name() != 'REQUESTED'}"
+                                                 th:class="${'reschedule-status ' + schedule.rescheduleStatus.name().toLowerCase()}"
                                                  th:text="${schedule.rescheduleStatus.name()}"></div>
-
-                                            <div th:if="${!schedule.available}" class="slot-warning">
-                                                Reschedule expired – contact mentor
-                                            </div>
                                         </div>
-                                        <div th:if="${#sets.contains(reviewingSlotKeys, slotKey.toUpperCase())}"
-                                             class="reviewing-overlay">
-                                            <span class="reviewing-text">Under Review</span>
+
+                                        <div th:if="${reviewingSlotsMap.containsKey(slotKey.toUpperCase())}"
+                                             th:with="pendingSchedule=${reviewingSlotsMap.get(slotKey.toUpperCase())}"
+                                             class="schedule-event pending-new-slot">
+                                            <div class="event-title" th:text="${pendingSchedule.title != null ? pendingSchedule.title : pendingSchedule.courseName}"></div>
+                                            <div class="event-subtitle" th:text="${pendingSchedule.mentorName}"></div>
+                                            <div class="pending-status-badge">
+                                                <i class="fas fa-hourglass-half"></i> Under Review
+                                            </div>
                                         </div>
                                     </div>
                                 </th:block>
@@ -270,11 +164,11 @@
 <div id="eventModal" class="modal hidden">
     <div class="modal-content">
         <span class="close-button" onclick="toggleModal(false)">&times;</span>
-        <h3 id="modalCourse"></h3>
+        <h3 id="modalTitle"></h3>
+        <p id="modalCourseName"></p>
         <p id="modalMentor"></p>
         <p id="modalTime"></p>
         <p id="modalDay"></p>
-
         <div id="testButtonWrapper" style="margin-top: 10px;">
             <a id="takeTestLink" class="btnTest" th:href="@{'/tests/take?slot=' + __slot__ + '&day=' + __day__}"
                style="display: none;">Take Test</a>
@@ -288,6 +182,7 @@
                 Request Reschedule
             </a>
         </div>
+        <div id="limitNotice" class="reschedule-limit-notice" style="display: none;"></div>
 
     </div>
 </div>
@@ -309,29 +204,47 @@
             modal.classList.add('hidden');
         }
     }
+    document.addEventListener('DOMContentLoaded', function() {
+        const alertElement = document.querySelector('.flash-alert');
+
+        if (alertElement) {
+            setTimeout(function() {
+                alertElement.classList.add('fade-out');
+
+                setTimeout(function() {
+                    alertElement.remove();
+                }, 500);
+
+            }, 5000);
+        }
+    });
 
     function showEventDetails(eventElement) {
+        const dateStr = eventElement.dataset.date;
+        const rescheduleStatus = eventElement.dataset.rescheduleStatus;
+        const canReschedule = eventElement.dataset.canReschedule === "true";
+        const rescheduleCount = parseInt(eventElement.dataset.rescheduleCount);
+        const hasTest = eventElement.dataset.hasTest === "true";
         const course = eventElement.dataset.course;
         const mentor = eventElement.dataset.mentor;
+        const title = eventElement.dataset.title;
         const slot = eventElement.dataset.slot;
         const day = eventElement.dataset.day;
-        const hasTest = eventElement.dataset.hasTest === "true";
         const startTime = eventElement.dataset.startTime;
         const endTime = eventElement.dataset.endTime;
         const scheduleId = eventElement.dataset.scheduleId;
-        const canReschedule = eventElement.dataset.canReschedule === "true";
-        const rescheduleStatus = eventElement.dataset.rescheduleStatus;
-
-        if (rescheduleStatus && rescheduleStatus.toUpperCase() === 'REQUESTED') {
+        const eventDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (eventDate < today || (rescheduleStatus && rescheduleStatus.toUpperCase() === 'REQUESTED')) {
             return;
         }
-
         currentScheduleId = scheduleId;
-        document.getElementById('modalCourse').textContent = course;
+        document.getElementById('modalTitle').textContent = (title && title.trim() !== 'null') ? title : course;
+        document.getElementById('modalCourseName').textContent= `Course: ${course}`;
         document.getElementById('modalMentor').textContent = `Mentor: ${mentor}`;
         document.getElementById('modalDay').textContent = `Day: ${day}`;
         document.getElementById('modalTime').textContent = `Time: ${startTime} - ${endTime}`;
-
         const testLink = document.getElementById('takeTestLink');
         if (hasTest) {
             testLink.style.display = 'inline-block';
@@ -341,18 +254,20 @@
         }
 
         const rescheduleButton = document.getElementById('rescheduleButton');
-        console.log('canReschedule:', canReschedule, 'rescheduleStatus:', rescheduleStatus);
-        if (canReschedule && rescheduleStatus.toUpperCase() === 'NONE') {
-            rescheduleButton.href = `/schedules/reschedule?scheduleId=${scheduleId}`;
+        const limitNotice = document.getElementById('limitNotice');
+        rescheduleButton.style.display = 'none';
+        limitNotice.style.display = 'none';
+
+        if (canReschedule) {
             rescheduleButton.style.display = 'inline-block';
-        } else {
-            rescheduleButton.style.display = 'none';
-            rescheduleButton.href = '#';
+            rescheduleButton.href = `/schedules/reschedule?scheduleId=${scheduleId}`;
+        } else if (rescheduleCount >= 2) {
+            limitNotice.textContent = 'You have used all 2 reschedule requests for this course.';
+            limitNotice.style.display = 'block';
         }
 
         toggleModal(true);
     }
-    // Debug function to check reviewing slots
     document.addEventListener('DOMContentLoaded', function () {
         console.log('=== FRONTEND DEBUG ===');
         const reviewingSlots = document.querySelectorAll('.slot-cell.reviewing');
@@ -360,8 +275,6 @@
         reviewingSlots.forEach(slot => {
             console.log('Reviewing slot:', slot.dataset.slot, slot.dataset.day);
         });
-
-        // Debug reschedule slots
         const rescheduleSlots = document.querySelectorAll('.slot-cell.has-reschedule');
         console.log('Found reschedule slots:', rescheduleSlots.length);
         rescheduleSlots.forEach(slot => {

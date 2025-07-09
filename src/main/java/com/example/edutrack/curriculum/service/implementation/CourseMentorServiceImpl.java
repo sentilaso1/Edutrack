@@ -3,15 +3,13 @@ package com.example.edutrack.curriculum.service.implementation;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.CourseMentorId;
-import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.ApplicantsRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.repository.TagRepository;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
+import com.example.edutrack.curriculum.service.interfaces.DashboardService;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
@@ -20,7 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +32,7 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     private final EnrollmentServiceImpl enrollmentServiceImpl;
     private final EnrollmentRepository enrollmentRepository;
     private final FeedbackRepository feedbackRepository;
+    private final DashboardService dashboardService;
 
     @Autowired
     public CourseMentorServiceImpl(CourseMentorRepository courseMentorRepository,
@@ -44,7 +42,8 @@ public class CourseMentorServiceImpl implements CourseMentorService {
                                    MentorRepository mentorRepository,
                                    EnrollmentServiceImpl enrollmentServiceImpl,
                                    EnrollmentRepository enrollmentRepository,
-                                   FeedbackRepository feedbackRepository) {
+                                   FeedbackRepository feedbackRepository,
+                                   DashboardService dashboardService) {
         this.courseMentorRepository = courseMentorRepository;
         this.applicantsRepository = applicantsRepository;
         this.menteeRepository = menteeRepository;
@@ -53,6 +52,7 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         this.enrollmentServiceImpl = enrollmentServiceImpl;
         this.enrollmentRepository = enrollmentRepository;
         this.feedbackRepository = feedbackRepository;
+        this.dashboardService = dashboardService;
     }
 
     @Override
@@ -224,6 +224,8 @@ public class CourseMentorServiceImpl implements CourseMentorService {
 
         Set<CourseMentor> allPairs = enrollments.stream()
                 .map(Enrollment::getCourseMentor)
+                .filter(courseMentor ->
+                        dashboardService.hasCompletedCourse(courseMentor, menteeRepository.findById(menteeId).orElseThrow()).orElse(false))
                 .collect(Collectors.toSet());
 
         return allPairs.stream()
@@ -254,6 +256,11 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     @Override
     public Page<CourseMentor> findByMentorIdPaged(UUID mentorId, Pageable pageable) {
         return courseMentorRepository.findByMentorId(mentorId, pageable);
+    }
+
+    @Override
+    public boolean existsByCourseIdAndStatus(UUID courseId, ApplicationStatus status) {
+        return courseMentorRepository.existsByCourseIdAndStatus(courseId, status);
     }
 }
 

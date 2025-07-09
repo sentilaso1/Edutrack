@@ -7,7 +7,6 @@ import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.service.MentorService;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.CourseMentorId;
 import com.example.edutrack.curriculum.model.Feedback;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
@@ -15,6 +14,8 @@ import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import jakarta.servlet.http.HttpSession;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.model.Day;
@@ -24,34 +25,35 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Controller(value = "mentee")
 public class MentorController {
     private final MentorService mentorService;
-    private final MentorRepository mentorRepository;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
     private final MentorAvailableTimeService mentorAvailableTimeService;
     private final FeedbackRepository feedbackRepository;
     private final CourseRepository courseRepository;
     private final CourseMentorService courseMentorService;
     private final CourseMentorRepository courseMentorRepository;
+    private final EnrollmentScheduleService enrollmentScheduleService;
+    private final MentorRepository mentorRepository;
 
     public MentorController(MentorService mentorService,
-                            MentorRepository mentorRepository,
                             CourseMentorServiceImpl courseMentorServiceImpl,
                             MentorAvailableTimeService mentorAvailableTimeService,
                             FeedbackRepository feedbackRepository,
                             CourseRepository courseRepository,
                             CourseMentorService courseMentorService,
-                            CourseMentorRepository courseMentorRepository) {
+                            CourseMentorRepository courseMentorRepository,
+                            EnrollmentScheduleService enrollmentScheduleService, MentorRepository mentorRepository) {
         this.mentorService = mentorService;
         this.mentorRepository = mentorRepository;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
@@ -60,6 +62,15 @@ public class MentorController {
         this.courseRepository = courseRepository;
         this.courseMentorService = courseMentorService;
         this.courseMentorRepository = courseMentorRepository;
+        this.enrollmentScheduleService = enrollmentScheduleService;
+    }
+
+    private UUID getSessionMentor(HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return null;
+        }
+        return loggedInUser.getId();
     }
 
     @GetMapping("/mentors")
@@ -108,6 +119,7 @@ public class MentorController {
         model.addAttribute("page", page);
         model.addAttribute("name", name);
         model.addAttribute("expertise", expertise);
+
         model.addAttribute("rating", rating);
         model.addAttribute("selectedSkills", selectedSkills);
         model.addAttribute("totalSessions", totalSessions);
@@ -119,17 +131,34 @@ public class MentorController {
     }
 
     @GetMapping("/mentors/{id}")
-    public String viewMentorDetail(@PathVariable UUID id, Model model, HttpSession session){
+    public String viewMentorDetail(@PathVariable UUID id,
+                                   @RequestParam(value = "month", required = false) String month,
+                                   Model model,
+                                   HttpSession session){
         List<CourseMentor> courseMentors = courseMentorServiceImpl.getCourseMentorByMentorId(id);
+
+        LocalDate now = LocalDate.now();
+        LocalDate selectedMonth = (month != null)
+                ? LocalDate.parse(month + "-01")
+                : now.withDayOfMonth(1);
+
+        LocalDate endLocal = selectedMonth.withDayOfMonth(selectedMonth.lengthOfMonth());
+
         Mentor mentor = mentorService.getMentorById(id).get();
-        LocalDate endLocal = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
         List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
         boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
 
-        for (MentorAvailableSlotDTO dto : setSlots) {
-            int slotIndex = dto.getSlot().ordinal();
-            int dayIndex = dto.getDay().ordinal();
-            slotDayMatrix[slotIndex][dayIndex] = true;
+        List<Map<String, String>> selectableMonths = new ArrayList<>();
+        DateTimeFormatter valueFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        DateTimeFormatter labelFormatter = DateTimeFormatter.ofPattern("MMMM yyyy");
+        for (int i = 0; i < 5; i++) {
+            LocalDate monthDate = now.plusMonths(i);
+            String value = monthDate.format(valueFormatter);
+            String label = monthDate.format(labelFormatter);
+            Map<String, String> item = new HashMap<>();
+            item.put("value", value);
+            item.put("label", label);
+            selectableMonths.add(item);
         }
 
         model.addAttribute("slotDayMatrix", slotDayMatrix);
@@ -137,6 +166,9 @@ public class MentorController {
         model.addAttribute("dayLabels", Day.values());
 
         List<Feedback> feedbacks = feedbackRepository.findByCourseMentor_Mentor_IdAndStatus(id, Feedback.Status.ACTIVE);
+
+        model.addAttribute("selectableMonths", selectableMonths);
+        model.addAttribute("selectedMonth", selectedMonth.format(valueFormatter));
 
         model.addAttribute("isLoggedIn", session.getAttribute("loggedInUser") != null);
         model.addAttribute("feedbacks", feedbacks);
@@ -201,5 +233,72 @@ public class MentorController {
         courseMentorService.updatePrices(mentor.getId(), courseIds, prices);
         redirectAttributes.addFlashAttribute("success", "Prices updated!");
         return "redirect:/mentor/price";
+    }
+
+    @GetMapping("/mentors/{id}/schedule-table")
+    public String getScheduleTable(
+            @PathVariable UUID id,
+            @RequestParam("month") String month,
+            Model model
+    ) {
+        LocalDate selectedMonth = LocalDate.parse(month + "-01");
+        LocalDate endLocal = selectedMonth.withDayOfMonth(selectedMonth.lengthOfMonth());
+
+        Mentor mentor = mentorService.getMentorById(id).get();
+
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
+
+        for (MentorAvailableSlotDTO dto : setSlots) {
+            int slotIndex = dto.getSlot().ordinal();
+            int dayIndex = dto.getDay().ordinal();
+            slotDayMatrix[slotIndex][dayIndex] = true;
+        }
+
+        model.addAttribute("slotDayMatrix", slotDayMatrix);
+        model.addAttribute("slots", Slot.values());
+        model.addAttribute("dayLabels", Day.values());
+
+        return "fragments/schedule-table :: scheduleTable";
+    }
+
+
+    @GetMapping("/mentor/requests")
+    public String showRescheduleRequests(Model model, HttpSession session) {
+        UUID mentorId = getSessionMentor(session);
+        if (mentorId == null) return "redirect:/login";
+        List<EnrollmentSchedule> requests = enrollmentScheduleService.getPendingRequestsForMentor(mentorId);
+        model.addAttribute("requests", requests);
+        return "mentor/mentor-requests";
+    }
+
+    @PostMapping("/mentor/requests/approve")
+    public String handleApproveRequest(@RequestParam("scheduleId") int scheduleId, RedirectAttributes redirectAttributes, HttpSession session) {
+        UUID mentorId = getSessionMentor(session);
+        if (mentorId == null) return "redirect:/login";
+
+        enrollmentScheduleService.approveRescheduleRequest(scheduleId);
+        redirectAttributes.addFlashAttribute("successMessage", "Request approved successfully!");
+        return "redirect:/mentor/requests";
+    }
+
+    @PostMapping("/mentor/requests/reject")
+    public String handleRejectRequest(
+            @RequestParam("scheduleId") int scheduleId,
+            @RequestParam("reason") String reason,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        UUID mentorId = getSessionMentor(session);
+        if (mentorId == null) return "redirect:/login";
+
+        if (reason == null || reason.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Rejection reason cannot be empty.");
+            return "redirect:/mentor/requests";
+        }
+
+        enrollmentScheduleService.rejectRescheduleRequest(scheduleId, reason.trim());
+        redirectAttributes.addFlashAttribute("successMessage", "Request rejected successfully.");
+        return "redirect:/mentor/requests";
     }
 }

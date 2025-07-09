@@ -1,5 +1,6 @@
 package com.example.edutrack.timetables.service.interfaces;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
@@ -55,4 +56,8 @@ public interface EnrollmentService {
     Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable);
 
     Page<Enrollment> findEnrollmentsWithFilters(Mentor mentor, String status, String courseName, String menteeName, Pageable pageable);
+
+    List<Mentor> findAllUniqueMentors();
+
+    List<Mentee> findAllUniqueMentees();
 }

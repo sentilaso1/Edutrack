@@ -1,6 +1,7 @@
 package com.example.edutrack.timetables.service.implementation;
 
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
@@ -163,6 +164,15 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return new PageImpl<>(pageContent, pageable, enrollments.size());
     }
 
+    public List<Mentor> findAllUniqueMentors() {
+        return enrollmentRepository.findAllUniqueMentors();
+    }
+
+    @Override
+    public List<Mentee> findAllUniqueMentees() {
+        return enrollmentRepository.findAllUniqueMentees();
+    }
+
     @Override
     public List<Enrollment> findAllApprovedEnrollments() {
         return enrollmentRepository.findAllApprovedEnrollments();
@@ -172,7 +182,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public List<Course> findCourseByMenteeIdAndEnrollmentStatus(UUID menteeId){
         return enrollmentRepository.findByMenteeIdAndEnrollmentStatus(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
-
 
     @Override
     public List<Mentor> findMentorsByMentee(UUID menteeId) {
@@ -225,7 +234,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return pendingEnrollments;
     }
 
-
     private boolean isContainSchedule(Enrollment pendingEnrollment, String[] schedule) {
         String summary = pendingEnrollment.getScheduleSummary();
         for(String s : schedule){
@@ -235,5 +243,4 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
         return false;
     }
-
 }

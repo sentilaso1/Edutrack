@@ -2,6 +2,7 @@ package com.example.edutrack.timetables.repository;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.timetables.dto.EnrollmentAttendanceProjection;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
@@ -9,6 +10,7 @@ import com.example.edutrack.timetables.model.Slot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer> {
+public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSchedule, Integer>, EnrollmentScheduleRepositoryCustom, JpaSpecificationExecutor<EnrollmentSchedule> {
     @Query("SELECT COUNT(e) > 0 FROM Enrollment e " +
             "JOIN EnrollmentSchedule es ON es.enrollment = e " +
             "WHERE e.courseMentor.mentor = :mentor " +
@@ -47,10 +49,10 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     List<EnrollmentSchedule> findAllByMenteeId(@Param("menteeId") UUID menteeId);
 
     @Query("""
-    SELECT s FROM EnrollmentSchedule s
-    WHERE s.date BETWEEN :startDate AND :endDate
-    AND s.enrollment.courseMentor.mentor = :mentor
-""")
+                SELECT s FROM EnrollmentSchedule s
+                WHERE s.date BETWEEN :startDate AND :endDate
+                AND s.enrollment.courseMentor.mentor = :mentor
+            """)
     List<EnrollmentSchedule> findByMentorAndDateBetween(
             @Param("mentor") Mentor mentor,
             @Param("startDate") LocalDate startDate,
@@ -98,13 +100,13 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
 
     //Author: Nguyen Thanh Vinh
     @Query("""
-    SELECT s FROM EnrollmentSchedule s
-    WHERE s.enrollment.mentee.id = :menteeId
-      AND MONTH(s.date) = :month
-      AND YEAR(s.date) = :year
-      AND (:courseId IS NULL OR s.enrollment.courseMentor.course.id = :courseId)
-      AND s.available = true
-""")
+                SELECT s FROM EnrollmentSchedule s
+                WHERE s.enrollment.mentee.id = :menteeId
+                  AND MONTH(s.date) = :month
+                  AND YEAR(s.date) = :year
+                  AND (:courseId IS NULL OR s.enrollment.courseMentor.course.id = :courseId)
+                  AND s.available = true
+            """)
     Page<EnrollmentSchedule> findByMenteeAndMonthWithCourseFilter(
             @Param("menteeId") UUID menteeId,
             @Param("month") int month,
@@ -116,21 +118,21 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     List<EnrollmentSchedule> findEnrollmentScheduleByEnrollment(Enrollment enrollment);
 
     @Query("""
-    SELECT s FROM EnrollmentSchedule s
-    WHERE s.enrollment.mentee.id = :menteeId
-    AND s.enrollment.courseMentor.id = :courseMentorId
-    AND s.available = true
-""")
+                SELECT s FROM EnrollmentSchedule s
+                WHERE s.enrollment.mentee.id = :menteeId
+                AND s.enrollment.courseMentor.id = :courseMentorId
+                AND s.available = true
+            """)
     List<EnrollmentSchedule> findEnrollmentScheduleByMenteeAndCourseMentor(
             @Param("menteeId") UUID menteeId,
             @Param("courseMentorId") UUID courseMentorId);
 
 
     @Query("""
-           SELECT COUNT(s) FROM EnrollmentSchedule s 
-           WHERE s.enrollment.mentee.id = :menteeId
-           AND s.isTest = TRUE 
-            """)
+            SELECT COUNT(s) FROM EnrollmentSchedule s 
+            WHERE s.enrollment.mentee.id = :menteeId
+            AND s.isTest = TRUE 
+             """)
     int countTestSlotsByEnrollment(@Param("menteeId") UUID menteeId);
 
     @Query("""
@@ -146,9 +148,43 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
             LocalDate endDate
     );
 
-    List<EnrollmentSchedule> findAllByRescheduleStatusAndRequestedNewDateBefore(
-            EnrollmentSchedule.RescheduleStatus rescheduleStatus,
-            LocalDate date
-    );
+    @Query("SELECT es FROM EnrollmentSchedule es WHERE es.enrollment.mentee.id = :menteeId AND es.enrollment.courseMentor.id = :courseMentorId AND es.rescheduleStatus = 'REQUESTED' AND es.requestedNewDate BETWEEN :startDate AND :endDate")
+    List<EnrollmentSchedule> findReviewingSlotsByCourse(UUID menteeId, UUID courseMentorId, LocalDate startDate, LocalDate endDate);
 
+
+    @Query(value = """
+                SELECT
+                    e.id AS id,
+                    BIN_TO_UUID(e.mentee_id) AS menteeId,
+                    BIN_TO_UUID(e.course_mentor_id) AS courseMentorId
+                FROM enrollments e
+                JOIN enrollment_schedule es ON e.id = es.enrollment_id
+                WHERE es.date BETWEEN NOW() - INTERVAL 7 DAY AND NOW()
+                GROUP BY e.id
+                ORDER BY e.id DESC
+            """,
+            countQuery = """
+                        SELECT COUNT(*)
+                        FROM enrollments e
+                        JOIN enrollment_schedule es ON e.id = es.enrollment_id
+                        WHERE es.date BETWEEN NOW() - INTERVAL 7 DAY AND NOW()
+                        GROUP BY e.id
+                        ORDER BY e.id DESC
+                    """,
+            nativeQuery = true)
+    Page<EnrollmentAttendanceProjection> findAllSchedulesToBeConfirmed(Pageable pageable);
+
+    @Query(value = """
+            SELECT *
+            FROM enrollment_schedule es
+            WHERE es.enrollment_id = :enrollmentId
+              AND es.date BETWEEN NOW() - INTERVAL 7 DAY AND NOW()
+            """, nativeQuery = true)
+    Page<EnrollmentSchedule> findSchedulesByEnrollment(Long enrollmentId, Pageable pageable);
+
+    List<EnrollmentSchedule> findAllByRescheduleStatus(EnrollmentSchedule.RescheduleStatus status);
+
+    Long countByEnrollmentAndRescheduleStatusNot(Enrollment enrollment, EnrollmentSchedule.RescheduleStatus status);
+    @Query("SELECT es FROM EnrollmentSchedule es WHERE es.enrollment.courseMentor.mentor.id = :mentorId AND es.rescheduleStatus = 'REQUESTED'")
+    List<EnrollmentSchedule> findPendingRequestsForMentor(@Param("mentorId") UUID mentorId);
 }

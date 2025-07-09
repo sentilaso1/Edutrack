@@ -162,7 +162,9 @@
         }
 
 
-        .tagify {
+        .tagify,
+        .tagify:before,
+        .tagify:after {
             width: 100% !important;
             min-width: 0 !important;
             border: 1.5px solid #eee;
@@ -174,7 +176,16 @@
             box-shadow: none;
             margin-top: 3px;
             transition: border-color 0.22s;
-            box-sizing: border-box;
+            box-sizing: initial !important;
+        }
+
+        .tagify__tag > div > * {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            vertical-align: top;
+            transition: .8s ease, .1s color;
+            white-space: nowrap;
         }
 
         .no-mentors-found {
@@ -199,6 +210,37 @@
             background: url('https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f914.svg') center/contain no-repeat;
             opacity: 0.95;
         }
+
+        .expertise-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .pill {
+            background: #e0f3ff;
+            color: #1877f2;
+            border-radius: 20px;
+            padding: 4px 8px;
+            font-size: 1.25rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .pill-blue    { background: #e0f3ff; color: #1877f2; }
+        .pill-green   { background: #e7fae7; color: #21a019; }
+        .pill-orange  { background: #fff6e0; color: #ff9800; }
+        .pill-purple  { background: #f3e7fa; color: #a259e7; }
+        .pill-pink    { background: #ffe0f3; color: #e91e63; }
+        .pill-teal    { background: #e0fafa; color: #009688; }
+        .pill-cyan    { background: #e0f7fa; color: #00bcd4; }
+        .pill-lime    { background: #f9ffe0; color: #afb42b; }
+        .pill-indigo  { background: #e0e7ff; color: #3f51b5; }
+        .pill-brown   { background: #fbeee6; color: #795548; }
+        .pill-gray    { background: #f2f2f2; color: #616161; }
+        .pill-amber   { background: #fff8e1; color: #ffc107; }
+
 
     </style>
 </head>
@@ -416,7 +458,14 @@
                                             </div>
                                         </div>
 
-                                        <h6 class="title-lg card-title" th:text="${mentor.expertise}">Expertises</h6>
+                                        <div class="expertise-pills">
+                                            <span th:each="exp, stat : ${mentor.expertiseItem}"
+                                                  th:if="${stat.index < 3}"
+                                                  class="pill"
+                                                  th:text="${exp}">
+                                                Expertise
+                                            </span>
+                                        </div>
 
                                         <div class="card-meta wrapper card-meta-inlayout">
                                             <p class="title-sm">
@@ -521,12 +570,19 @@
 
 <script th:inline="javascript">
     var recommendedSkills = [[${allExpertiseSkills}]];
+    var initialExpertise = [[${#strings.escapeJavaScript(param.expertise)}]];
 </script>
 
 <script>
 
     var input = document.getElementById('expertise-input');
     var hiddenInput = document.getElementById('expertise-hidden');
+
+    if (initialExpertise) {
+        hiddenInput.value = initialExpertise;
+        input.value = initialExpertise;
+    }
+
     var tagify = new Tagify(input, {
         whitelist: recommendedSkills,
         enforceWhitelist: false,
@@ -538,15 +594,13 @@
         }
     });
 
-    // Every time tags change, update the hidden input
     tagify.on('change', function(e){
-        // Get array of tag values
         var tags = tagify.value.map(function(tag) {
             return tag.value;
         });
-        // Join as a comma string
         hiddenInput.value = tags.join(', ');
     });
+
 </script>
 
 <script>
@@ -636,6 +690,43 @@
         }
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const colorClasses = [
+            'pill-blue', 'pill-green', 'pill-orange', 'pill-purple', 'pill-pink', 'pill-teal',
+            'pill-cyan', 'pill-lime', 'pill-indigo', 'pill-brown', 'pill-gray', 'pill-amber'
+        ];
+
+
+        const pills = Array.from(document.querySelectorAll('.pill'));
+
+        const uniqueSkills = [...new Set(pills.map(p => p.textContent.trim().toLowerCase()))];
+
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        const shuffledColors = shuffle(colorClasses.slice());
+        const skillColorMap = {};
+
+        uniqueSkills.forEach((skill, idx) => {
+
+            skillColorMap[skill] = shuffledColors[idx % shuffledColors.length];
+        });
+
+
+        pills.forEach(pill => {
+            const skill = pill.textContent.trim().toLowerCase();
+            pill.classList.add(skillColorMap[skill]);
+        });
+    });
+</script>
+
 
 
 </body>

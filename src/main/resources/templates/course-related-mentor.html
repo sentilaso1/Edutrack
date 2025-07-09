@@ -446,6 +446,7 @@
             flex-direction: column;
             align-items: flex-start;
             margin-bottom: 0.13rem;
+            width: 100%;
         }
         .mentee-name {
             font-weight: 600;
@@ -523,6 +524,52 @@
             filter: drop-shadow(0 0 4px #ffb3b3);
             transform: scale(1.1);
         }
+
+        .expertise-pills {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pill {
+            background: #e0f3ff;
+            color: #1877f2;
+            border-radius: 20px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .available-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .available-list > div:nth-last-child(1):nth-child(odd) {
+            grid-column: span 2;
+        }
+
+        .empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #888;
+            padding: 2rem;
+        }
+
+        .pill-blue    { background: #e0f3ff; color: #1877f2; }
+        .pill-green   { background: #e7fae7; color: #21a019; }
+        .pill-orange  { background: #fff6e0; color: #ff9800; }
+        .pill-purple  { background: #f3e7fa; color: #a259e7; }
+        .pill-pink    { background: #ffe0f3; color: #e91e63; }
+        .pill-teal    { background: #e0fafa; color: #009688; }
+        .pill-cyan    { background: #e0f7fa; color: #00bcd4; }
+        .pill-lime    { background: #f9ffe0; color: #afb42b; }
+        .pill-indigo  { background: #e0e7ff; color: #3f51b5; }
+        .pill-brown   { background: #fbeee6; color: #795548; }
+        .pill-gray    { background: #f2f2f2; color: #616161; }
+        .pill-amber   { background: #fff8e1; color: #ffc107; }
 
 
         /* Responsive Design */
@@ -603,74 +650,89 @@
         <div class="section-header">
             <h2>Available Mentors</h2>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 2rem">
-            <a th:href="@{'/mentors/' + ${mentor.id}}"
+        <div class="available-list">
+            <div th:if="${courseMentors == null || #lists.isEmpty(courseMentors)}" class="empty-message">
+                <p style="text-align: center">No mentor available for this course.</p>
+            </div>
+            <div th:each="courseMentor : ${courseMentors}"
+                 th:if="${courseMentors != null and !#lists.isEmpty(courseMentors)}">
+            <a
                style="text-decoration: none; color: inherit;"
-               th:each="mentor : ${relatedMentors}"
-               th:if="${relatedMentors != null and !#lists.isEmpty(relatedMentors)}">
-            <div class="review__card course-card" style="width: 70%;">
+               >
+            <div class="review__card course-card">
                 <div class="review-card-header">
                     <div class="review-avatar">
-                        <img th:src="@{'/avatar/' + ${mentor.id}}"
-                             th:alt="${mentor.fullName}"
+                        <img th:src="@{'/avatar/' + ${courseMentor.mentor.id}}"
+                             th:alt="${courseMentor.mentor.fullName}"
                              style="width: 60px; height: 60px;"
                              onerror="this.onerror=null;this.src='/assets/images/default-avatar.svg';"
                              class="mentee-avatar"/>
                     </div>
-                    <div class="review-info-main">
-                        <div class="mentee-course-row">
-                            <span class="mentee-name" th:text="${mentor.fullName}">Mentee Name</span>
-                            <div style="display: flex; gap: 0.5rem">
-                                <span class="review-date" style="margin-left: 0.3rem">expert in</span>
-                                <span class="review-course-name" th:text="${mentor.expertise}">Course Name</span>
+
+                    <div class="review-date" style="gap: 0.1rem;">
+
+                        <span class="span">
+                                                    <a th:href="@{'/mentors/' + ${courseMentor.mentor.id}}" th:text="'View Mentor Profile'"></a>
+                                                </span>
+                        <span class="span">
+                                                    <a th:href="@{'/courses/' + ${courseMentor.id}}" th:text="'View Course'"></a>
+                                                </span>
+                    </div>
+                </div>
+                <div class="review-info-main">
+                    <div class="mentee-course-row">
+                        <span class="mentee-name" th:text="${courseMentor.mentor.fullName}">Mentee Name</span>
+                        <div style="display: flex; gap: 0.5rem; width: 100%">
+                            <span class="review-date" style="margin-left: 0.3rem">expert in</span>
+                            <div class="expertise-pills">
+                                            <span th:each="exp, stat : ${courseMentor.mentor.expertiseItem}"
+                                                  th:if="${stat.index < 3}"
+                                                  class="pill"
+                                                  th:text="${exp}">
+                                                Expertise
+                                            </span>
                             </div>
                         </div>
-                        <!----->
-                        <div th:with="
-                            rating=${mentor.rating != null ? mentor.rating : 0},
+                    </div>
+                    <!----->
+                    <div th:with="
+                            rating=${courseMentor.mentor.rating != null ? courseMentor.mentor.rating : 0},
                             fullStars=${T(java.lang.Math).floor(rating)},
                             hasHalfStar=${(rating - fullStars) >= 0.5},
                             emptyStars=${5 - fullStars - (hasHalfStar ? 1 : 0)}">
-                                            <div class="review-rating-stars">
+                        <div class="review-rating-stars">
                                   <span th:if="${fullStars > 0}">
                                     <span th:each="star : ${#numbers.sequence(1, fullStars)}">
                                       <i class="ri-star-fill"></i>
                                     </span>
                                   </span>
-                                                <span th:if="${hasHalfStar}">
+                            <span th:if="${hasHalfStar}">
                                     <i class="ri-star-half-fill"></i>
                                   </span>
-                                                <span th:if="${emptyStars > 0}">
+                            <span th:if="${emptyStars > 0}">
                                   <span th:each="star : ${#numbers.sequence(0, emptyStars - 1)}">
                                     <i class="ri-star-line"></i>
                                   </span>
                                 </span>
-                            </div>
                         </div>
                     </div>
-                    <div class="review-date" style="gap: 0.1rem;">
-                        <a class="flag-link">
-                <span class="flag-icon">
-                  <img th:if="${mentor != null and mentor.isAvailable}"
-                       th:src="@{/assets/images/dot-green.svg}" width="16" height="16" alt="Online" />
-                                                <img th:if="${mentor != null and !mentor.isAvailable}"
-                                                     th:src="@{/assets/images/dot-red.svg}" width="16" height="16" alt="Offline" />
-                                                <span class="span">
-                                                    <span th:text="${mentor != null ? (mentor.isAvailable ? 'Available' : 'Not Available') : 'No Mentor'}">
+                    <span th:text="${courseMentor.mentor.totalSessions} + ' sessions Completed'">Total Sessions</span><br>
+                    <img th:if="${courseMentor.mentor != null and courseMentor.mentor.isAvailable}"
+                         th:src="@{/assets/images/dot-green.svg}" width="16" height="16" alt="Online" />
+                    <img th:if="${courseMentor.mentor != null and !courseMentor.mentor.isAvailable}"
+                         th:src="@{/assets/images/dot-red.svg}" width="16" height="16" alt="Offline" />
+                    <span class="span">
+                                                    <span th:text="${courseMentor.mentor != null ? (courseMentor.mentor.isAvailable ? 'Available' : 'Not Available') : 'No Mentor'}">
                                                         Mentor Availability
                                                     </span>
-
                                                 </span>
-                </span>
-                        </a>
-                        <span th:text="${mentor.totalSessions} + ' sessions Completed'">Total Sessions</span>
-                    </div>
                 </div>
-                <div class="review-card-content" th:text="${mentor.bio}">
+                <div class="review-card-content" th:text="${courseMentor.mentor.bio}">
                     Bio
                 </div>
             </div>
             </a>
+            </div>
         </div>
     </div>
 </section>
@@ -707,6 +769,42 @@
         distance: '50px',
         origin: 'top',
         duration: 1000
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const colorClasses = [
+            'pill-blue', 'pill-green', 'pill-orange', 'pill-purple', 'pill-pink', 'pill-teal',
+            'pill-cyan', 'pill-lime', 'pill-indigo', 'pill-brown', 'pill-gray', 'pill-amber'
+        ];
+
+
+        const pills = Array.from(document.querySelectorAll('.pill'));
+
+        const uniqueSkills = [...new Set(pills.map(p => p.textContent.trim().toLowerCase()))];
+
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        const shuffledColors = shuffle(colorClasses.slice());
+        const skillColorMap = {};
+
+        uniqueSkills.forEach((skill, idx) => {
+
+            skillColorMap[skill] = shuffledColors[idx % shuffledColors.length];
+        });
+
+
+        pills.forEach(pill => {
+            const skill = pill.textContent.trim().toLowerCase();
+            pill.classList.add(skillColorMap[skill]);
+        });
     });
 </script>
 </body>
