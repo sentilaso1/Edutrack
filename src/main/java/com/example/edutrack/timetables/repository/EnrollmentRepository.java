@@ -78,6 +78,19 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             """)
     List<Enrollment> findOngoingEnrollments(Mentor mentor);
 
+    @Query("""
+                SELECT DISTINCT e
+                FROM Enrollment e
+                WHERE e.courseMentor.mentor = :mentor
+                AND e.status = 'APPROVED'
+                 AND e.totalSlots <= (
+                    SELECT COUNT(es)
+                    FROM EnrollmentSchedule es
+                    WHERE es.enrollment = e AND es.attendance = 'PRESENT' AND es.report = true
+                )
+            """)
+    List<Enrollment> findCompletedEnrollments(Mentor mentor);
+
     @Query("SELECT e FROM Enrollment e WHERE e.status = 'APPROVED'")
     List<Enrollment> findAllApprovedEnrollments();
 
