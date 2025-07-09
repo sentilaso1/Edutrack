@@ -13,12 +13,10 @@
         }
 
         .mentor-section-bg {
-            background-image: url('/assets/images/course-bg.png');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
             min-height: 100vh;
-            padding: 120px 0 64px 0;
         }
 
         .dashboard-header h1 {
@@ -37,9 +35,8 @@
         .cv-section, .courses-section {
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(255, 124, 150, 0.07);
             padding: 27px 24px 20px 24px;
-            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -270,181 +267,179 @@
     <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-
-    <!--
-    - custom font link
-    -->
-
-    <!--
-    - custom css link
-    -->
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+
 </head>
 <body>
-<th:block th:insert="~{fragments/mentor-header :: header}"></th:block>
-<main>
-    <article>
-        <section class="mentor-section-bg">
-            <div class="container">
-                <div class="dashboard-header">
-                    <h1>My CV</h1>
-                </div>
-                <div class="main-content">
-                    <!-- LEFT: CV fields -->
-                    <div class="cv-section">
-                        <h2>Create your CV</h2>
-                        <div th:if="${cvStatus == 'approved'}" class="alert-info">
-                            Your CV is approved and can no longer be edited.
-                        </div>
-                        <div th:if="${cvStatus == 'pending'}" class="alert-info">
-                            Your CV is being evaluated by the manager
-                        </div>
-                        <div th:if="${cvStatus == 'rejected'}" class="alert-info">
-                            Your CV is rejected, you can create new CV
-                        </div>
-                        <form th:action="@{/mentor/cv/create}" method="post" id="cvForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="summary">Summary</label>
-                                    <textarea id="summary" name="summary" maxlength="1024" class="large-textarea"
-                                              th:text="${cv.summary}" required
-                                              placeholder="Brief overview of your professional background and goals..."
-                                              th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <main>
+            <article>
+                <section class="mentor-section-bg">
+                    <div class="container" style="margin-top: 1em">
+                        <div class="main-content">
+                            <!-- LEFT: CV fields -->
+                            <div class="cv-section">
+                                <h2>Create your CV</h2>
+                                <div th:if="${cvStatus == 'approved'}" class="alert-info">
+                                    Your CV is approved and can no longer be edited.
                                 </div>
-                                <div class="form-group">
-                                    <label for="experienceYears">Years of experience</label>
-                                    <input type="number" id="experienceYears" name="experienceYears"
-                                           th:field="${cv.experienceYears}"
-                                           min="0" max="100" required placeholder="0"
-                                           th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}">
+                                <div th:if="${cvStatus == 'pending'}" class="alert-info">
+                                    Your CV is being evaluated by the manager
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="skills">Skills & Tech Stacks</label>
-                                <textarea id="skills" name="skills" maxlength="1024" class="large-textarea" required
-                                          th:text="${cv.skills}"
-                                          placeholder="List your technical skills, programming languages, frameworks, tools..."
-                                          th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="education">Education</label>
-                                <textarea id="education" name="education" maxlength="1024" required
-                                          th:text="${cv.education}"
-                                          placeholder="Degrees, institutions, graduation dates, relevant coursework..."
-                                          th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="certifications">Certifications</label>
-                                <textarea id="certifications" name="certifications" maxlength="1024" required
-                                          th:text="${cv.certifications}"
-                                          placeholder="Professional certifications, licenses, achievements..."
-                                          th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="experience">Experience</label>
-                                <textarea id="experience" name="experience" maxlength="1024" class="large-textarea" required
-                                          th:text="${cv.experience}"
-                                          placeholder="List of experiences, your past workplaces, products..."
-                                          th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="languages">Languages</label>
-                                <textarea id="languages" name="languages" maxlength="1024" required
-                                          th:text="${cv.languages}"
-                                          placeholder="Languages spoken and proficiency levels..."
-                                          th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="portfolioUrl">Portfolio URL</label>
-                                <input id="portfolioUrl" name="portfolioUrl" type="url" required
-                                       th:field="${cv.portfolioUrl}"
-                                       placeholder="https://your-portfolio-website.com"
-                                       th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}">
-                            </div>
-                            <input type="hidden" name="userId" th:value="${userId}">
-                            <input type="hidden" name="selectedCourses" id="selectedCoursesInput"/>
-                        </form>
-                    </div>
-                    <!-- RIGHT: Registered Courses -->
-                    <div class="courses-section">
-                        <!-- Available Courses (hide if CV approved) -->
-                        <!-- Available Courses Section -->
-                        <div th:if="${cvStatus == 'new' || cvStatus == 'rejected'}">
-                            <h2>Available Courses</h2>
-                            <div id="available-courses-list">
-                                <div th:if="${availableCoursePage != null && !availableCoursePage.isEmpty()}">
-                                    <div th:each="course : ${availableCoursePage.content}" class="course-card" th:attr="data-course-id=${course.id}">
-                                        <div class="course-title" th:text="${course.name}">Course Name</div>
-                                        <div class="course-description" th:text="${course.description}"></div>
-                                        <div class="course-meta">
-                                            <span th:text="'Created date: ' + ${#dates.format(course.createdDate, 'dd/MM/yyyy')}"></span>
+                                <div th:if="${cvStatus == 'rejected'}" class="alert-info">
+                                    Your CV is rejected, you can create new CV
+                                </div>
+                                <form th:action="@{/mentor/cv/create}" method="post" id="cvForm">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="summary">Summary</label>
+                                            <textarea id="summary" name="summary" maxlength="1024" class="large-textarea"
+                                                      th:text="${cv.summary}" required
+                                                      placeholder="Brief overview of your professional background and goals..."
+                                                      th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
                                         </div>
-                                        <button class="add-btn" type="button" th:attr="data-course-id=${course.id}">+</button>
+                                        <div class="form-group">
+                                            <label for="experienceYears">Years of experience</label>
+                                            <input type="number" id="experienceYears" name="experienceYears"
+                                                   th:field="${cv.experienceYears}"
+                                                   min="0" max="100" required placeholder="0"
+                                                   th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}">
+                                        </div>
                                     </div>
-                                    <!-- Pagination controls (move outside if needed) -->
-                                </div>
-                                <div>
-                                    <p id="no-available-courses-msg"
-                                       th:if="${availableCoursePage == null || availableCoursePage.isEmpty()}">
-                                        You haven't registered any course.
-                                    </p>
-                                </div>
+                                    <div class="form-group">
+                                        <label for="skills">Skills & Tech Stacks</label>
+                                        <textarea id="skills" name="skills" maxlength="1024" class="large-textarea" required
+                                                  th:text="${cv.skills}"
+                                                  placeholder="List your technical skills, programming languages, frameworks, tools..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="education">Education</label>
+                                        <textarea id="education" name="education" maxlength="1024" required
+                                                  th:text="${cv.education}"
+                                                  placeholder="Degrees, institutions, graduation dates, relevant coursework..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="certifications">Certifications</label>
+                                        <textarea id="certifications" name="certifications" maxlength="1024" required
+                                                  th:text="${cv.certifications}"
+                                                  placeholder="Professional certifications, licenses, achievements..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="experience">Experience</label>
+                                        <textarea id="experience" name="experience" maxlength="1024" class="large-textarea" required
+                                                  th:text="${cv.experience}"
+                                                  placeholder="List of experiences, your past workplaces, products..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="languages">Languages</label>
+                                        <textarea id="languages" name="languages" maxlength="1024" required
+                                                  th:text="${cv.languages}"
+                                                  placeholder="Languages spoken and proficiency levels..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="portfolioUrl">Portfolio URL</label>
+                                        <input id="portfolioUrl" name="portfolioUrl" type="url" required
+                                               th:field="${cv.portfolioUrl}"
+                                               placeholder="https://your-portfolio-website.com"
+                                               th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}">
+                                    </div>
+                                    <input type="hidden" name="userId" th:value="${userId}">
+                                    <input type="hidden" name="selectedCourses" id="selectedCoursesInput"/>
+                                </form>
                             </div>
-                        </div>
+                            <!-- RIGHT: Registered Courses -->
+                            <div class="courses-section">
+                                <!-- Available Courses (hide if CV approved) -->
+                                <!-- Available Courses Section -->
+                                <div th:if="${cvStatus == 'new' || cvStatus == 'rejected'}">
+                                    <h2>Available Courses</h2>
+                                    <div id="available-courses-list">
+                                        <div th:if="${availableCoursePage != null && !availableCoursePage.isEmpty()}">
+                                            <div th:each="course : ${availableCoursePage.content}" class="course-card" th:attr="data-course-id=${course.id}">
+                                                <div class="course-title" th:text="${course.name}">Course Name</div>
+                                                <div class="course-description" th:text="${course.description}"></div>
+                                                <div class="course-meta">
+                                                    <span th:text="'Created date: ' + ${#dates.format(course.createdDate, 'dd/MM/yyyy')}"></span>
+                                                </div>
+                                                <button class="add-btn" type="button" th:attr="data-course-id=${course.id}">+</button>
+                                            </div>
+                                            <!-- Pagination controls (move outside if needed) -->
+                                        </div>
+                                        <div>
+                                            <p id="no-available-courses-msg"
+                                               th:if="${availableCoursePage == null || availableCoursePage.isEmpty()}">
+                                                You haven't registered any course.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <!-- Registered Courses Section -->
-                        <h2 style="margin-top:32px;">Your Registered Courses</h2>
-                        <div id="registered-courses-list">
-                            <div th:if="${registeredCoursePage != null && !registeredCoursePage.isEmpty()}">
-                                <div th:each="cm : ${registeredCoursePage.content}" class="course-card"
-                                     th:attr="data-course-id=${cm.course.id}, data-description=${cm.description}">
-                                    <div class="course-title" th:text="${cm.course.name}"></div>
-                                    <div class="course-description" th:text="${cm.course.description}"></div>
-                                    <div>
-                                        <div class="mentor-card-desc-header">Teaching Description:</div>
-                                        <div th:if="${cvStatus == 'new' or cvStatus == 'rejected'}">
-                                            <div class="form-group dynamic-inputs">
+                                <!-- Registered Courses Section -->
+                                <h2 style="margin-top:32px;">Your Registered Courses</h2>
+                                <div id="registered-courses-list">
+                                    <div th:if="${registeredCoursePage != null && !registeredCoursePage.isEmpty()}">
+                                        <div th:each="cm : ${registeredCoursePage.content}" class="course-card"
+                                             th:attr="data-course-id=${cm.course.id}, data-description=${cm.description}">
+                                            <div class="course-title" th:text="${cm.course.name}"></div>
+                                            <div class="course-description" th:text="${cm.course.description}"></div>
+                                            <div>
+                                                <div class="mentor-card-desc-header">Teaching Description:</div>
+                                                <div th:if="${cvStatus == 'new' or cvStatus == 'rejected'}">
+                                                    <div class="form-group dynamic-inputs">
                                                 <textarea class="course-desc" required
                                                           placeholder="Describe how you will teach this course"
                                                           th:text="${cm.description}">
                                                 </textarea>
+                                                    </div>
+                                                </div>
+                                                <div th:if="${cvStatus != 'new' and cvStatus != 'rejected'}" class="mentor-card-desc" th:text="${cm.description}"></div>
                                             </div>
+                                            <div class="course-meta">
+                                                <span th:text="'Created date: ' + ${#dates.format(cm.course.createdDate, 'dd/MM/yyyy')}"></span>
+                                            </div>
+                                            <!-- Remove button (if not approved) -->
+                                            <button class="remove-btn"
+                                                    th:if="${cvStatus == 'new' || cvStatus == 'rejected'}"
+                                                    type="button"
+                                                    style="background:#fa6262; color: #fff; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; position: absolute; top: 13px; right: 13px; transition: background 0.15s, transform 0.14s; cursor: pointer;">
+                                                -
+                                            </button>
                                         </div>
-                                        <div th:if="${cvStatus != 'new' and cvStatus != 'rejected'}" class="mentor-card-desc" th:text="${cm.description}"></div>
                                     </div>
-                                    <div class="course-meta">
-                                        <span th:text="'Created date: ' + ${#dates.format(cm.course.createdDate, 'dd/MM/yyyy')}"></span>
+                                    <div>
+                                        <p id="no-registered-courses-msg"
+                                           th:if="${registeredCoursePage == null || registeredCoursePage.isEmpty()}">
+                                            You haven't registered any course.
+                                        </p>
                                     </div>
-                                    <!-- Remove button (if not approved) -->
-                                    <button class="remove-btn"
-                                            th:if="${cvStatus == 'new' || cvStatus == 'rejected'}"
-                                            type="button"
-                                            style="background:#fa6262; color: #fff; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; position: absolute; top: 13px; right: 13px; transition: background 0.15s, transform 0.14s; cursor: pointer;">
-                                        -
-                                    </button>
                                 </div>
                             </div>
-                            <div>
-                                <p id="no-registered-courses-msg"
-                                   th:if="${registeredCoursePage == null || registeredCoursePage.isEmpty()}">
-                                    You haven't registered any course.
-                                </p>
+                        </div>
+                        <div class="button-center-wrapper">
+                            <div id="courseWarning" style="display:none; color: #d8000c; background: #ffcccc; border-radius:6px; padding:10px; text-align:center; font-weight:500;">
+                                Please select at least one course to create your CV.
                             </div>
+                            <button type="submit" class="create-btn" form="cvForm"
+                                    th:if="${cvStatus != 'approved'}">Create CV</button>
                         </div>
                     </div>
-                </div>
-                <div class="button-center-wrapper">
-                    <div id="courseWarning" style="display:none; color: #d8000c; background: #ffcccc; border-radius:6px; padding:10px; text-align:center; font-weight:500;">
-                        Please select at least one course to create your CV.
-                    </div>
-                    <button type="submit" class="create-btn" form="cvForm"
-                            th:if="${cvStatus != 'approved'}">Create CV</button>
-                </div>
-            </div>
-        </section>
-    </article>
-</main>
+                </section>
+            </article>
+        </main>
+    </div>
+
+</div>
+
 
 
 <th:block th:insert="~{fragments/footer :: footer}"></th:block>

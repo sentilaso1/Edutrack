@@ -6,64 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Thu Nhập - Mentor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            color: #e53935;
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            font-weight: 300;
-        }
-
-        .period-selector {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .period-btn {
-            background: #ff6b35;
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .period-btn.active {
-            background: rgba(255, 255, 255, 0.9);
-            color: #ff6b35;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .period-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-        }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 25px;
             margin-bottom: 40px;
         }
@@ -255,87 +203,91 @@
         }
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
 </head>
 
 <body>
-<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <div >
+            <h2>Dashboard Income - Mentor</h2>
+        </div>
 
-<div class="main">
-    <div class="header">
-        <h1>Dashboard Income - Mentor</h1>
-        <p>Monitor your performance and income</p>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <span class="mentor-icon">💰</span>
-            <h3>Total income</h3>
-            <div class="value" id="total-income" th:text="${#numbers.formatInteger(incomeStats.totalIncome, 0, 'POINT')} + '₫'">
-                0₫
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="mentor-icon">💰</span>
+                <h3>Total income</h3>
+                <div class="value" id="total-income" th:text="${#numbers.formatInteger(incomeStats.totalIncome, 0, 'POINT')} + '₫'">
+                    0₫
+                </div>
+                <div class="change" th:text="${#numbers.formatDecimal(incomeStats.percentChange, 1, 1)} + '% compared to the previous month'">
+                    0%
+                </div>
             </div>
-            <div class="change" th:text="${#numbers.formatDecimal(incomeStats.percentChange, 1, 1)} + '% compared to the previous month'">
-                0%
+            <div class="stat-card">
+                <span class="mentor-icon">👥</span>
+                <h3>Students taught</h3>
+                <div class="value" id="total-students">127</div>
+                <div class="change positive">+8 new student</div>
+            </div>
+            <div class="stat-card">
+                <span class="mentor-icon">📚</span>
+                <h3>Completed course</h3>
+                <div class="value" id="completed-courses">23</div>
+                <div class="change positive">+3 course</div>
+            </div>
+            <div class="stat-card">
+                <span class="mentor-icon">⭐</span>
+                <h3>Average review</h3>
+                <div class="value" id="average-rating">4.8⭐</div>
+                <div class="change positive">+0.2 point</div>
             </div>
         </div>
-        <div class="stat-card">
-            <span class="mentor-icon">👥</span>
-            <h3>Students taught</h3>
-            <div class="value" id="total-students">127</div>
-            <div class="change positive">+8 new student</div>
-        </div>
-        <div class="stat-card">
-            <span class="mentor-icon">📚</span>
-            <h3>Completed course</h3>
-            <div class="value" id="completed-courses">23</div>
-            <div class="change positive">+3 course</div>
-        </div>
-        <div class="stat-card">
-            <span class="mentor-icon">⭐</span>
-            <h3>Average review</h3>
-            <div class="value" id="average-rating">4.8⭐</div>
-            <div class="change positive">+0.2 point</div>
-        </div>
-    </div>
 
-    <div class="charts-grid">
-        <div class="chart-container">
-            <div class="chart-title">📈 Income over time</div>
-            <canvas id="incomeChart"></canvas>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">📈 Income over time</div>
+                <canvas id="incomeChart"></canvas>
+            </div>
         </div>
-    </div>
 
-    <div class="charts-grid">
-        <div class="chart-container">
-            <div class="chart-title">👥Number of students by month</div>
-            <canvas id="studentsChart"></canvas>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">👥Number of students by month</div>
+                <canvas id="studentsChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">⏱️ Weekly teaching time</div>
+                <canvas id="hoursChart"></canvas>
+            </div>
         </div>
-        <div class="chart-container">
-            <div class="chart-title">⏱️ Weekly teaching time</div>
-            <canvas id="hoursChart"></canvas>
-        </div>
-    </div>
 
-    <div class="performance-metrics">
-        <div class="metric-card">
-            <h4>Completed rate</h4>
-            <div class="metric-value">94.5%</div>
-        </div>
-        <div class="metric-card">
-            <h4>Response time</h4>
-            <div class="metric-value">2.3h</div>
-        </div>
-        <div class="metric-card">
-            <h4>Registration rate</h4>
-            <div class="metric-value">87.2%</div>
-        </div>
-        <div class="metric-card">
-            <h4>Income per Slot</h4>
-            <div class="metric-value" th:text="${#numbers.formatInteger(incomeStats.incomePerSlot, 0, 'POINT')} + '₫'">
-                0₫
+        <div class="performance-metrics">
+            <div class="metric-card">
+                <h4>Completed rate</h4>
+                <div class="metric-value">94.5%</div>
+            </div>
+            <div class="metric-card">
+                <h4>Response time</h4>
+                <div class="metric-value">2.3h</div>
+            </div>
+            <div class="metric-card">
+                <h4>Registration rate</h4>
+                <div class="metric-value">87.2%</div>
+            </div>
+            <div class="metric-card">
+                <h4>Income per Slot</h4>
+                <div class="metric-value" th:text="${#numbers.formatInteger(incomeStats.incomePerSlot, 0, 'POINT')} + '₫'">
+                    0₫
+                </div>
             </div>
         </div>
     </div>
 </div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
 
 <script th:inline="javascript">
     const mentorData = {

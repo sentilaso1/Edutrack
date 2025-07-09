@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Enrollment Schedule</title>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         .product-section p {
@@ -93,45 +94,49 @@
     </style>
 </head>
 <body>
-<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
-
-<div class="main">
-    <div class="graph">
-        <div class="product-section">
-            <table class="product-table">
-                <thead>
-                <tr>
-                    <th>Session</th>
-                    <th>Date</th>
-                    <th>Slot</th>
-                    <th>Attendance</th>
-                    <th>Score</th>
-                    <th>Test?</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item, iStat : ${enrollmentSchedules}">
-                    <td th:text="${iStat.index + 1}"></td>
-                    <td th:text="${item.date}"></td>
-                    <td th:text="${item.slot}"></td>
-                    <td>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <div class="graph">
+            <div class="product-section">
+                <table class="product-table">
+                    <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Date</th>
+                        <th>Slot</th>
+                        <th>Attendance</th>
+                        <th>Score</th>
+                        <th>Test?</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item, iStat : ${enrollmentSchedules}">
+                        <td th:text="${iStat.index + 1}"></td>
+                        <td th:text="${item.date}"></td>
+                        <td th:text="${item.slot}"></td>
+                        <td>
                                 <span th:class="'status-badge status-' + ${item.attendance.toString().toLowerCase()}"
                                       th:text="${item.attendance}"></span>
-                    </td>
-                    <td th:text="${item.score != null ? item.score : '—'}"
-                        th:classappend="${item.score == null} ? 'score-null' : ''"></td>
-                    <td th:text="${item.test ? 'Yes' : 'No'}"></td>
-                    <td>
-                        <a th:href="@{/mentor/schedule/{eid}(eid=${item.id})}" class="action-link">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                        </td>
+                        <td th:text="${item.score != null ? item.score : '—'}"
+                            th:classappend="${item.score == null} ? 'score-null' : ''"></td>
+                        <td th:text="${item.test ? 'Yes' : 'No'}"></td>
+                        <td>
+                            <a th:href="@{/mentor/schedule/{eid}(eid=${item.id})}" class="action-link">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
 </body>
 </html>

@@ -182,75 +182,78 @@
         }
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
-<div class="main">
-    <div class="dashboard-header">
-        <h1>Pending Reschedule Requests</h1>
-    </div>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <div class="graph">
+            <div class="dashboard-header">
+                <h2>Pending Reschedule Requests</h2>
+            </div>
+            <div th:if="${successMessage}" class="alert alert-success auto-hide-alert" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-error auto-hide-alert" th:text="${errorMessage}"></div>
 
-    <div class="graph">
-        <div th:if="${successMessage}" class="alert alert-success auto-hide-alert" th:text="${successMessage}"></div>
-        <div th:if="${errorMessage}" class="alert alert-error auto-hide-alert" th:text="${errorMessage}"></div>
-
-        <div th:if="${requests.isEmpty()}">
-            <p>No pending requests.</p>
-        </div>
+            <div th:if="${requests.isEmpty()}">
+                <p>No pending requests.</p>
+            </div>
 
             <table th:if="${!requests.isEmpty()}" class="product-table">
-            <thead>
-            <tr>
-                <th>Mentee</th>
-                <th>Course</th>
-                <th>Request Time</th>
-                <th>Original Time</th>
-                <th>Requested Time</th>
-                <th>Reason</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="req : ${requests}">
-                <td th:text="${req.enrollment.mentee.fullName}"></td>
-                <td th:text="${req.enrollment.courseMentor.course.name}"></td>
-                <td th:text="${#temporals.format(req.rescheduleRequestDate, 'dd-MMM-yyyy HH:mm')}"></td>
-                <td th:text="|${#temporals.format(req.date, 'dd-MMM-yyyy')} at ${req.slot.startTime}|"></td>
-                <td th:text="|${#temporals.format(req.requestedNewDate, 'dd-MMM-yyyy')} at ${req.requestedNewSlot.startTime}|"></td>
-                <td th:text="${req.rescheduleReason}"></td>
-                <td class="actions">
-                    <form th:action="@{/mentor/requests/approve}" method="post" style="display:inline;">
-                        <input type="hidden" name="scheduleId" th:value="${req.id}"/>
-                        <button type="submit" class="btn btn-approve">Approve</button>
-                    </form>
-                    <button type="button" class="btn btn-reject" th:attr="data-schedule-id=${req.id}">
-                        Reject
-                    </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                <thead>
+                <tr>
+                    <th>Mentee</th>
+                    <th>Course</th>
+                    <th>Request Time</th>
+                    <th>Original Time</th>
+                    <th>Requested Time</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="req : ${requests}">
+                    <td th:text="${req.enrollment.mentee.fullName}"></td>
+                    <td th:text="${req.enrollment.courseMentor.course.name}"></td>
+                    <td th:text="${#temporals.format(req.rescheduleRequestDate, 'dd-MMM-yyyy HH:mm')}"></td>
+                    <td th:text="|${#temporals.format(req.date, 'dd-MMM-yyyy')} at ${req.slot.startTime}|"></td>
+                    <td th:text="|${#temporals.format(req.requestedNewDate, 'dd-MMM-yyyy')} at ${req.requestedNewSlot.startTime}|"></td>
+                    <td th:text="${req.rescheduleReason}"></td>
+                    <td class="actions">
+                        <form th:action="@{/mentor/requests/approve}" method="post" style="display:inline;">
+                            <input type="hidden" name="scheduleId" th:value="${req.id}"/>
+                            <button type="submit" class="btn btn-approve">Approve</button>
+                        </form>
+                        <button type="button" class="btn btn-reject" th:attr="data-schedule-id=${req.id}">
+                            Reject
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
 
-    <div id="rejectModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Reason for Rejection</h2>
-            <p>Please provide a reason for rejecting this reschedule request.</p>
-            <form id="rejectForm" th:action="@{/mentor/requests/reject}" method="post">
-                <input type="hidden" id="modalScheduleId" name="scheduleId" value=""/>
-                <textarea id="rejectionReason" name="reason" placeholder="Enter reason here..." required></textarea>
-                <span id="reason-error" class="error-message">Reason cannot be empty.</span>
-                <div class="modal-actions">
-                    <button type="button" id="cancelReject" class="btn btn-cancel">Cancel</button>
-                    <button type="submit" class="btn btn-reject">Confirm Reject</button>
-                </div>
-            </form>
+        <div id="rejectModal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>Reason for Rejection</h2>
+                <p>Please provide a reason for rejecting this reschedule request.</p>
+                <form id="rejectForm" th:action="@{/mentor/requests/reject}" method="post">
+                    <input type="hidden" id="modalScheduleId" name="scheduleId" value=""/>
+                    <textarea id="rejectionReason" name="reason" placeholder="Enter reason here..." required></textarea>
+                    <span id="reason-error" class="error-message">Reason cannot be empty.</span>
+                    <div class="modal-actions">
+                        <button type="button" id="cancelReject" class="btn btn-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-reject">Confirm Reject</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
