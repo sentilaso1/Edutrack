@@ -4,31 +4,74 @@
     <meta charset="UTF-8">
     <title>Reschedule Requests</title>
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 2rem;
-        }
 
         h1 {
             color: #333;
         }
 
-        table {
+        .product-table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
+            border-collapse: separate;
+            border-spacing: 3px 12px;
         }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
+        .product-table th {
+            background-color: #ff4d30;
+            color: white;
+            padding: 14px;
+            font-size: 14px;
+            text-transform: uppercase;
         }
 
-        th {
-            background-color: #f2f2f2;
+        .product-table td {
+            background-color: #fff3e0;
+            padding: 14px;
+            font-size: 14px;
+            color: #444;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(255, 167, 38, 0.08);
+            border-bottom: 1px solid #ffe0b2;
         }
 
+        .product-table tr:hover td {
+            background-color: #ffe0b2;
+            transition: background-color 0.3s ease;
+        }
+
+        .product-table tr td:first-child {
+            border-left: 4px solid #ff4d30;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .product-table thead {
+                display: none;
+            }
+
+            .product-table, .product-table tbody, .product-table tr, .product-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .product-table tr {
+                margin-bottom: 15px;
+            }
+
+            .product-table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            .product-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 20px;
+                font-weight: bold;
+                color: #ff6f00;
+                text-align: left;
+            }
+        }
         .actions form, .actions .btn {
             display: inline-block;
             margin-right: 5px;
@@ -138,66 +181,76 @@
             opacity: 0;
         }
     </style>
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<h1>Pending Reschedule Requests</h1>
+<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+<div class="main">
+    <div class="dashboard-header">
+        <h1>Pending Reschedule Requests</h1>
+    </div>
 
-<div th:if="${successMessage}" class="alert alert-success auto-hide-alert" th:text="${successMessage}"></div>
-<div th:if="${errorMessage}" class="alert alert-error auto-hide-alert" th:text="${errorMessage}"></div>
+    <div class="graph">
+        <div th:if="${successMessage}" class="alert alert-success auto-hide-alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error auto-hide-alert" th:text="${errorMessage}"></div>
 
-<div th:if="${requests.isEmpty()}">
-    <p>No pending requests.</p>
-</div>
+        <div th:if="${requests.isEmpty()}">
+            <p>No pending requests.</p>
+        </div>
 
-<!-- Phần table và modal giữ nguyên như cũ -->
-<table th:if="${!requests.isEmpty()}">
-    <thead>
-    <tr>
-        <th>Mentee</th>
-        <th>Course</th>
-        <th>Request Time</th>
-        <th>Original Time</th>
-        <th>Requested Time</th>
-        <th>Reason</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="req : ${requests}">
-        <td th:text="${req.enrollment.mentee.fullName}"></td>
-        <td th:text="${req.enrollment.courseMentor.course.name}"></td>
-        <td th:text="${#temporals.format(req.rescheduleRequestDate, 'dd-MMM-yyyy HH:mm')}"></td>
-        <td th:text="|${#temporals.format(req.date, 'dd-MMM-yyyy')} at ${req.slot.startTime}|"></td>
-        <td th:text="|${#temporals.format(req.requestedNewDate, 'dd-MMM-yyyy')} at ${req.requestedNewSlot.startTime}|"></td>
-        <td th:text="${req.rescheduleReason}"></td>
-        <td class="actions">
-            <form th:action="@{/mentor/requests/approve}" method="post" style="display:inline;">
-                <input type="hidden" name="scheduleId" th:value="${req.id}"/>
-                <button type="submit" class="btn btn-approve">Approve</button>
+            <table th:if="${!requests.isEmpty()}" class="product-table">
+            <thead>
+            <tr>
+                <th>Mentee</th>
+                <th>Course</th>
+                <th>Request Time</th>
+                <th>Original Time</th>
+                <th>Requested Time</th>
+                <th>Reason</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="req : ${requests}">
+                <td th:text="${req.enrollment.mentee.fullName}"></td>
+                <td th:text="${req.enrollment.courseMentor.course.name}"></td>
+                <td th:text="${#temporals.format(req.rescheduleRequestDate, 'dd-MMM-yyyy HH:mm')}"></td>
+                <td th:text="|${#temporals.format(req.date, 'dd-MMM-yyyy')} at ${req.slot.startTime}|"></td>
+                <td th:text="|${#temporals.format(req.requestedNewDate, 'dd-MMM-yyyy')} at ${req.requestedNewSlot.startTime}|"></td>
+                <td th:text="${req.rescheduleReason}"></td>
+                <td class="actions">
+                    <form th:action="@{/mentor/requests/approve}" method="post" style="display:inline;">
+                        <input type="hidden" name="scheduleId" th:value="${req.id}"/>
+                        <button type="submit" class="btn btn-approve">Approve</button>
+                    </form>
+                    <button type="button" class="btn btn-reject" th:attr="data-schedule-id=${req.id}">
+                        Reject
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div id="rejectModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Reason for Rejection</h2>
+            <p>Please provide a reason for rejecting this reschedule request.</p>
+            <form id="rejectForm" th:action="@{/mentor/requests/reject}" method="post">
+                <input type="hidden" id="modalScheduleId" name="scheduleId" value=""/>
+                <textarea id="rejectionReason" name="reason" placeholder="Enter reason here..." required></textarea>
+                <span id="reason-error" class="error-message">Reason cannot be empty.</span>
+                <div class="modal-actions">
+                    <button type="button" id="cancelReject" class="btn btn-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-reject">Confirm Reject</button>
+                </div>
             </form>
-            <button type="button" class="btn btn-reject" th:attr="data-schedule-id=${req.id}">
-                Reject
-            </button>
-        </td>
-    </tr>
-    </tbody>
-</table>
-
-<div id="rejectModal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Reason for Rejection</h2>
-        <p>Please provide a reason for rejecting this reschedule request.</p>
-        <form id="rejectForm" th:action="@{/mentor/requests/reject}" method="post">
-            <input type="hidden" id="modalScheduleId" name="scheduleId" value=""/>
-            <textarea id="rejectionReason" name="reason" placeholder="Enter reason here..." required></textarea>
-            <span id="reason-error" class="error-message">Reason cannot be empty.</span>
-            <div class="modal-actions">
-                <button type="button" id="cancelReject" class="btn btn-cancel">Cancel</button>
-                <button type="submit" class="btn btn-reject">Confirm Reject</button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
