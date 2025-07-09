@@ -124,6 +124,50 @@
             font-size: 18px;
             color: orange;
         }
+        .pagination{
+            display: flex;
+            justify-content: center;
+        }
+        .pagination ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .pagination ul li a {
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid #ff4d30;
+            color: #ff4d30;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .pagination ul li.active a,
+        .pagination ul li a:hover {
+            background-color: #ff4d30;
+            color: white;
+        }
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -151,24 +195,61 @@
             </form>
         </div>
         <div class="container">
-            <div class="course-card" th:each="enrollment : ${ongoingEnrollments}">
-                <a th:href="@{'/mentor/classes/' + ${enrollment.id}}" style="display: grid; grid-template-columns: 6fr 1fr">
+
+            <!-- FORM FILTER -->
+            <form method="get" th:action="@{/mentor/classes}" style="margin-bottom: 20px;" class="controls">
+                <input type="hidden" name="status" th:value="${status}"/>
+                <input type="hidden" name="sortDir" th:value="${sortDir}"/>
+
+                <input type="text" name="courseName" th:value="${courseName}" list="courseList"
+                       placeholder="Search By Skill..." class="search-input"/>
+                <datalist id="courseList">
+                    <option th:each="e : ${enrollmentPage.content}" th:value="${e.courseMentor.course.name}"/>
+                </datalist>
+
+                <input type="text" name="menteeName" th:value="${menteeName}" list="menteeList"
+                       placeholder="Search By Mentee..." class="search-input"/>
+                <datalist id="menteeList">
+                    <option th:each="e : ${enrollmentPage.content}" th:value="${e.mentee.fullName}"/>
+                </datalist>
+
+                <select name="size" class="sort-select">
+                    <option th:value="5" th:selected="${size == 5}">5</option>
+                    <option th:value="10" th:selected="${size == 10}">10</option>
+                    <option th:value="15" th:selected="${size == 15}">15</option>
+                    <option th:value="20" th:selected="${size == 20}">20</option>
+                </select>
+
+                <button type="submit" style="padding: 0.5em; background-color: #ff4d30; border: none; color: white; border-radius: 6px">Filter</button>
+
+                <a th:href="@{/mentor/classes(
+                status=${status},
+                courseName=${courseName},
+                menteeName=${menteeName},
+                sortDir=${reverseSortDir},
+                size=${size},
+                page=0
+            )}">
+                    Created Date <span th:text="${sortDir == 'asc' ? '↑' : '↓'}"></span>
+                </a>
+            </form>
+
+            <!-- SẮP XẾP -->
+
+            <!-- ENROLLMENT LIST -->
+            <div class="course-card" th:each="enrollment : ${enrollmentPage.content}">
+                <a th:href="@{'/mentor/classes/' + ${enrollment.id}}"
+                   style="display: grid; grid-template-columns: 6fr 1fr">
                     <div>
-                        <div class="course-title" th:text="${enrollment.courseMentor.course.name}">Introduction to
-                            Java
+                        <div class="course-title" th:text="${enrollment.courseMentor.course.name}">Course Name</div>
+                        <div class="course-subtitle" th:text="'Mentee: ' + ${enrollment.mentee.fullName}">Mentee</div>
+                        <div class="course-desc" th:text="${enrollment.courseMentor.course.description}">Course
+                            Description
                         </div>
-                        <div class="course-subtitle" th:text="'Mentee: '+ ${enrollment.mentee.fullName}">Introduction to
-                            Java
-                        </div>
-                        <div class="course-desc" th:text="${enrollment.courseMentor.course.description}">This course
-                            covers the basics of Java programming including syntax, OOP principles, and standard
-                            libraries.
-                        </div>
-                        <div class="course-date" th:text="'Created Date: '+ ${enrollment.createdDate}">Created date:
-                            09/06/2025
+                        <div class="course-date" th:text="'Created Date: ' + ${enrollment.createdDate}">Created Date
                         </div>
                     </div>
-                    <div class="progress-circle" data-percent="75">
+                    <div class="progress-circle" th:attr="data-percent=${enrollment.percentComplete}">
                         <svg class="circle">
                             <circle class="bg" cx="50%" cy="50%" r="45"></circle>
                             <circle class="progress"
@@ -179,7 +260,51 @@
                     </div>
                 </a>
             </div>
+
+            <!-- PHÂN TRANG -->
+            <div class="pagination">
+                <ul>
+                    <!-- Prev -->
+                    <li th:if="${enrollmentPage.number > 0}">
+                        <a th:href="@{/mentor/classes(
+                page=${enrollmentPage.number - 1},
+                size=${enrollmentPage.size},
+                sortDir=${sortDir},
+                courseName=${courseName},
+                menteeName=${menteeName},
+                status=${status}
+            )}">&laquo; Prev</a>
+                    </li>
+
+                    <!-- Page numbers -->
+                    <li th:each="i : ${#numbers.sequence(0, enrollmentPage.totalPages - 1)}"
+                        th:classappend="${i == enrollmentPage.number} ? 'active'">
+                        <a th:href="@{/mentor/classes(
+                page=${i},
+                size=${enrollmentPage.size},
+                sortDir=${sortDir},
+                courseName=${courseName},
+                menteeName=${menteeName},
+                status=${status}
+            )}" th:text="${i + 1}">1</a>
+                    </li>
+
+                    <!-- Next -->
+                    <li th:if="${enrollmentPage.number + 1 < enrollmentPage.totalPages}">
+                        <a th:href="@{/mentor/classes(
+                page=${enrollmentPage.number + 1},
+                size=${enrollmentPage.size},
+                sortDir=${sortDir},
+                courseName=${courseName},
+                menteeName=${menteeName},
+                status=${status}
+            )}">Next &raquo;</a>
+                    </li>
+                </ul>
+            </div>
+
         </div>
+
     </div>
 </div>
 </body>

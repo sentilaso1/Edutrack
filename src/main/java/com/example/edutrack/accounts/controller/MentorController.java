@@ -391,21 +391,41 @@ public class MentorController {
         return "accounts/html/mentor-stats";
     }
 
-    @GetMapping("mentor/classes")
+    @GetMapping("/mentor/classes")
     public String mentorClasses(Model model,
                                 HttpSession session,
-                                @RequestParam(defaultValue = "ONGOING") String status) {
+                                @RequestParam(defaultValue = "ONGOING") String status,
+                                @RequestParam(required = false) String courseName,
+                                @RequestParam(required = false) String menteeName,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "5") int size,
+                                @RequestParam(defaultValue = "desc") String sortDir) {
+
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
-        if (mentor == null) {
-            return "redirect:/login";
+        if (mentor == null) return "redirect:/login";
+
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by("createdDate").ascending() :
+                Sort.by("createdDate").descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Enrollment> enrollmentPage = enrollmentService.findEnrollmentsWithFilters(
+                mentor, status, courseName, menteeName, pageable
+        );
+
+        for (Enrollment e : enrollmentPage) {
+            Double percent = (enrollmentService.getPercentComplete(e) / e.getTotalSlots()) * 100;
+            e.setPercentComplete(Math.round(percent * 10.0) / 10.0);
         }
-        List<Enrollment> ongoingEnrollments = enrollmentService.findOngoingEnrollments(mentor);
-        for(Enrollment ongoingEnrollment : ongoingEnrollments){
-            Double percent = (enrollmentService.getPercentComplete(ongoingEnrollment)/ongoingEnrollment.getTotalSlots())*100;
-            percent = Math.round(percent * 10.0) / 10.0;
-            ongoingEnrollment.setPercentComplete(percent);
-        }
-        model.addAttribute("ongoingEnrollments", ongoingEnrollments);
+
+        model.addAttribute("enrollmentPage", enrollmentPage);
+        model.addAttribute("status", status);
+        model.addAttribute("courseName", courseName);
+        model.addAttribute("menteeName", menteeName);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("size", size);
+        model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
 
         return "mentor/mentor-class";
     }

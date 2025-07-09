@@ -33,6 +33,8 @@ public interface EnrollmentService {
 
     List<Enrollment> findOngoingEnrollments(Mentor mentor);
 
+    List<Enrollment> findCompletedEnrollments(Mentor mentor);
+
     List<Course> findCourseByMenteeIdAndEnrollmentStatus(UUID menteeId);
 
     Enrollment save(Enrollment enrollment);
@@ -52,6 +54,8 @@ public interface EnrollmentService {
     Double getPercentComplete(Enrollment enrollment);
 
     Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable);
+
+    Page<Enrollment> findEnrollmentsWithFilters(Mentor mentor, String status, String courseName, String menteeName, Pageable pageable);
 
     List<Mentor> findAllUniqueMentors();
 

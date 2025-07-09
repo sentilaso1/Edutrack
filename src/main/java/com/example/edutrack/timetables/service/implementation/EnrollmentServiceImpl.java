@@ -17,16 +17,14 @@ import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleServ
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -121,6 +119,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public List<Enrollment> findCompletedEnrollments(Mentor mentor) {
+        return enrollmentRepository.findCompletedEnrollments(mentor);
+    }
+
+    @Override
     public Double getPercentComplete(Enrollment enrollment){
         return enrollmentRepository.getPercentComplete(enrollment);
     }
@@ -131,6 +134,36 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public Page<Enrollment> findEnrollmentsWithFilters(Mentor mentor, String status, String courseName, String menteeName, Pageable pageable) {
+        List<Enrollment> enrollments = "ONGOING".equalsIgnoreCase(status)
+                ? enrollmentRepository.findOngoingEnrollments(mentor)
+                : enrollmentRepository.findCompletedEnrollments(mentor);
+
+        if (courseName != null && !courseName.trim().isEmpty()) {
+            enrollments = enrollments.stream()
+                    .filter(e -> e.getCourseMentor().getCourse().getName().toLowerCase().contains(courseName.toLowerCase()))
+                    .toList();
+        }
+
+        if (menteeName != null && !menteeName.trim().isEmpty()) {
+            enrollments = enrollments.stream()
+                    .filter(e -> e.getMentee().getFullName().toLowerCase().contains(menteeName.toLowerCase()))
+                    .toList();
+        }
+
+        Comparator<Enrollment> comparator = Comparator.comparing(Enrollment::getCreatedDate);
+        if (pageable.getSort().stream().anyMatch(order -> order.getProperty().equals("createdDate") && order.getDirection().isDescending())) {
+            comparator = comparator.reversed();
+        }
+        enrollments = enrollments.stream().sorted(comparator).toList();
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), enrollments.size());
+        List<Enrollment> pageContent = enrollments.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, enrollments.size());
+    }
+
     public List<Mentor> findAllUniqueMentors() {
         return enrollmentRepository.findAllUniqueMentors();
     }
@@ -149,7 +182,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public List<Course> findCourseByMenteeIdAndEnrollmentStatus(UUID menteeId){
         return enrollmentRepository.findByMenteeIdAndEnrollmentStatus(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
-
 
     @Override
     public List<Mentor> findMentorsByMentee(UUID menteeId) {
@@ -202,7 +234,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return pendingEnrollments;
     }
 
-
     private boolean isContainSchedule(Enrollment pendingEnrollment, String[] schedule) {
         String summary = pendingEnrollment.getScheduleSummary();
         for(String s : schedule){
@@ -212,5 +243,4 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
         return false;
     }
-
 }
