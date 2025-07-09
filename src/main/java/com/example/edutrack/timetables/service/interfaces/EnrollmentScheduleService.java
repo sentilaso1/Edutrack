@@ -77,4 +77,5 @@ public interface EnrollmentScheduleService {
 
     Page<EnrollmentSchedule> findScheduleByEnrollment(Long enrollmentId, Pageable pageable);
 
+    Page<EnrollmentSchedule> findScheduleByEnrollmentWithFilters(Long enrollmentId, String attendanceStatus, String slot, Pageable pageable);
 }

@@ -9,10 +9,7 @@ import com.example.edutrack.curriculum.model.MenteeLandingRole;
 import com.example.edutrack.curriculum.service.interfaces.LandingPageConfigService;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
-import com.example.edutrack.timetables.model.Day;
-import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
@@ -20,8 +17,10 @@ import com.example.edutrack.accounts.service.interfaces.ManagerStatsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -161,7 +160,12 @@ public class ManagerController {
     }
 
     @GetMapping("/manager/schedules/view/{eid}")
-    public String showScheduleDetails(@PathVariable Long eid, Model model) {
+    public String showScheduleDetails(@PathVariable Long eid,
+                                      @RequestParam(required = false) String attendance,
+                                      @RequestParam(required = false) String slot,
+                                      @RequestParam(required = false) String dateDirection,
+                                      @RequestParam(required = false) String slotDirection,
+                                      Model model) {
         Enrollment enrollment;
         try {
             enrollment = enrollmentService.findById(eid);
@@ -169,9 +173,27 @@ public class ManagerController {
             return "redirect:/manager/schedules?error=enrollment_not_found";
         }
 
+        // Apply only one sorting priority
+        Sort sort = Sort.unsorted();
+        if (dateDirection != null && !dateDirection.isEmpty()) {
+            sort = Sort.by(Sort.Direction.fromString(dateDirection), "date");
+        } else if (slotDirection != null && !slotDirection.isEmpty()) {
+            sort = Sort.by(Sort.Direction.fromString(slotDirection), "slot");
+        }
 
-        model.addAttribute("schedules", enrollmentScheduleService.findScheduleByEnrollment(eid, PageRequest.of(0, 10)));
+        Pageable pageable = PageRequest.of(0, 10, sort);
+
+        Page<EnrollmentSchedule> schedulePage = enrollmentScheduleService.findScheduleByEnrollmentWithFilters(
+                eid, attendance, slot, pageable
+        );
+
         model.addAttribute("enrollment", enrollment);
+        model.addAttribute("schedulePage", schedulePage);
+        model.addAttribute("selectedAttendanceStatus", attendance);
+        model.addAttribute("selectedSlot", slot);
+        model.addAttribute("dateDirection", dateDirection);
+        model.addAttribute("slotDirection", slotDirection);
+
         return "manager/schedule-details";
     }
 

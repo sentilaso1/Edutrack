@@ -9,6 +9,7 @@ import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.timetables.dto.*;
 import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
+import com.example.edutrack.timetables.repository.EnrollmentScheduleSpecification;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -513,6 +515,16 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     @Override
     public Page<EnrollmentSchedule> findScheduleByEnrollment(Long enrollmentId, Pageable pageable) {
         return enrollmentScheduleRepository.findSchedulesByEnrollment(enrollmentId, pageable);
+    }
+
+    @Override
+    public Page<EnrollmentSchedule> findScheduleByEnrollmentWithFilters(Long enrollmentId, String attendanceStatus, String slot, Pageable pageable) {
+        Specification<EnrollmentSchedule> spec = EnrollmentScheduleSpecification.byEnrollment(enrollmentId)
+                .and(EnrollmentScheduleSpecification.withAttendanceStatus(attendanceStatus))
+                .and(EnrollmentScheduleSpecification.withSlot(slot))
+                .and(EnrollmentScheduleSpecification.withinLast7Days());
+
+        return enrollmentScheduleRepository.findAll(spec, pageable);
     }
 
     @Override
