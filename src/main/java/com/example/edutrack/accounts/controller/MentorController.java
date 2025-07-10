@@ -10,6 +10,7 @@ import com.example.edutrack.curriculum.service.implementation.CourseServiceImpl;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
+import com.example.edutrack.timetables.dto.UpcomingScheduleDTO;
 import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.service.implementation.EnrollmentScheduleServiceImpl;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
@@ -74,6 +75,18 @@ public class MentorController {
         if (mentor == null) {
             return "redirect:/login";
         }
+
+        int pendingClassRequests = enrollmentService.countPendingClassRequests(mentor);
+        int classesThisWeek = enrollmentScheduleService.countClassesThisWeek(mentor);
+        int teachingMentees = enrollmentService.countTeachingMentees(mentor);
+        List<UpcomingScheduleDTO> upcomingClasses = enrollmentScheduleService.getUpcomingSchedules(mentor, 3);
+
+        model.addAttribute("mentor", mentor);
+        model.addAttribute("pendingClassRequests", pendingClassRequests);
+        model.addAttribute("classesThisWeek", classesThisWeek);
+        model.addAttribute("teachingMentees", teachingMentees);
+        model.addAttribute("upcomingClasses", upcomingClasses);
+
         return "/mentor/mentor-dashboard";
     }
 

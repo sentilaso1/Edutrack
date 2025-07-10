@@ -5,7 +5,6 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,7 +13,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,10 +40,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findAcceptedEnrollmentsByMenteeId(@Param("menteeId") UUID menteeId, @Param("enrollmentStatus") Enrollment.EnrollmentStatus status);
 
     @Query("""
-        SELECT e FROM Enrollment e
-        WHERE e.mentee.id = :menteeId
-        AND e.status = :statuses
-        """)
+            SELECT e FROM Enrollment e
+            WHERE e.mentee.id = :menteeId
+            AND e.status = :statuses
+            """)
     List<Enrollment> findEnrollmentsByMenteeIdWithStatuses(
             @Param("menteeId") UUID menteeId,
             @Param("statuses") Enrollment.EnrollmentStatus statuses
@@ -135,4 +133,21 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @Query("SELECT DISTINCT e.courseMentor.mentor FROM Enrollment e")
     List<Mentor> findAllUniqueMentors();
+
+    @Query("""
+                SELECT COUNT(e)
+                FROM Enrollment e
+                WHERE e.courseMentor.mentor = :mentor
+                  AND e.status = 'PENDING'
+            """)
+    int countPendingClassRequest(Mentor mentor);
+
+    @Query("""
+            SELECT COUNT(DISTINCT e.mentee)
+            FROM Enrollment e
+            JOIN EnrollmentSchedule es ON es.enrollment = e
+            WHERE e.courseMentor.mentor = :mentor
+              AND es.attendance = 'NOT_YET'
+            """)
+    int countTeachingMentees(Mentor mentor);
 }
