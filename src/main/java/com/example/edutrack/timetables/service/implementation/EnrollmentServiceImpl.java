@@ -9,13 +9,11 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -171,6 +169,16 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<Mentee> findAllUniqueMentees() {
         return enrollmentRepository.findAllUniqueMentees();
+    }
+
+    @Override
+    public int countPendingClassRequests(Mentor mentor) {
+        return enrollmentRepository.countPendingClassRequest(mentor);
+    }
+
+    @Override
+    public int countTeachingMentees(Mentor mentor) {
+        return enrollmentRepository.countTeachingMentees(mentor);
     }
 
     @Override

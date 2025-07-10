@@ -29,4 +29,13 @@ public enum Slot {
     public String toString() {
         return name().toLowerCase();
     }
+
+    public String getFormattedTime() {
+        return String.format(
+                "Slot %s: %s - %s",
+                this.toString().replace("slot_", ""),
+                startTime.toString(),
+                endTime.toString()
+        );
+    }
 }

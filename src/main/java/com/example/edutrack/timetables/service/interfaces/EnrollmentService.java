@@ -60,4 +60,8 @@ public interface EnrollmentService {
     List<Mentor> findAllUniqueMentors();
 
     List<Mentee> findAllUniqueMentees();
+
+    int countPendingClassRequests(Mentor mentor);
+
+    int countTeachingMentees(Mentor mentor);
 }

@@ -1,10 +1,7 @@
 package com.example.edutrack.timetables.service.interfaces;
 
 import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.timetables.dto.ScheduleActivityBannerDTO;
-import com.example.edutrack.timetables.dto.ScheduleDTO;
-import com.example.edutrack.timetables.dto.EnrollmentAttendanceDTO;
-import com.example.edutrack.timetables.dto.RequestedSchedule;
+import com.example.edutrack.timetables.dto.*;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
@@ -78,4 +75,8 @@ public interface EnrollmentScheduleService {
     Page<EnrollmentSchedule> findScheduleByEnrollment(Long enrollmentId, Pageable pageable);
 
     Page<EnrollmentSchedule> findScheduleByEnrollmentWithFilters(Long enrollmentId, String attendanceStatus, String slot, Pageable pageable);
+
+    int countClassesThisWeek(Mentor mentor);
+
+    List<UpcomingScheduleDTO> getUpcomingSchedules(Mentor mentor, int limit);
 }

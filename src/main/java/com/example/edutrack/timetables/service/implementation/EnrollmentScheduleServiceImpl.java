@@ -161,6 +161,40 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     }
 
     @Override
+    public int countClassesThisWeek(Mentor mentor) {
+        LocalDate weekStart = LocalDate.now().with(DayOfWeek.MONDAY);
+        LocalDate weekEnd = weekStart.plusDays(6);
+
+        return (this.findByMentorAndDateBetween(mentor, weekStart, weekEnd)).size();
+    }
+
+    @Override
+    public List<UpcomingScheduleDTO> getUpcomingSchedules(Mentor mentor, int limit) {
+        List<UpcomingScheduleDTO> result = new ArrayList<>();
+
+        LocalDate weekStart = LocalDate.now();
+        LocalDate weekEnd = weekStart.plusMonths(1);
+
+        List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findByMentorAndDateBetween(mentor, weekStart, weekEnd);
+        int count = 0;
+
+        for (EnrollmentSchedule schedule : schedules) {
+            if (count >= limit) {
+                break;
+            }
+
+            result.add(new UpcomingScheduleDTO(
+                    schedule,
+                    schedule.getEnrollment().getCourseMentor().getCourse(),
+                    schedule.getEnrollment().getMentee()
+            ));
+            count++;
+        }
+
+        return result;
+    }
+
+    @Override
     public EnrollmentSchedule findById(Integer esid) {
         return enrollmentScheduleRepository.findById(esid).get();
     }
