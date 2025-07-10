@@ -281,12 +281,13 @@ body {
 .header .btn { display: none; }
 
 .header {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   padding-block: 32px;
   z-index: 100000;
+  background-color: white;
 }
 
 .header.active {
