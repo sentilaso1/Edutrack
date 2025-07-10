@@ -48,23 +48,14 @@
         .course-filter {
             background: #fff;
             border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 18px 0 rgba(70,31,80,0.07), 0 1.5px 4px 0 rgba(70,31,80,0.04);
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             padding: 18px 14px 15px 14px;
-            max-width: 200px;
-            min-width: 150px;
+            width: 100rem;
+            min-width: 200px;
             margin-top: 16px;
             margin-bottom: 20px;
             transition: box-shadow 0.22s;
-        }
-
-        .course-filter h3 {
-            font-size: 1.15em;
-            font-weight: 700;
-            color: #222;
-            margin-bottom: 8px;
-            letter-spacing: 0.01em;
-            text-align: center;
         }
 
         .filter-price,
@@ -73,10 +64,9 @@
         }
 
         .filter-subtitle {
-            font-weight: 700;
-            font-size: 0.97em;
-            color: #666;
-            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 10px;
             letter-spacing: 0.01em;
         }
 
@@ -126,11 +116,11 @@
         }
 
         .filter-apply-btn {
-            background: linear-gradient(90deg, #ff70a6 0%, #ff61c0 100%);
+            background: #ff8086fc;
             color: #fff;
-            padding: 0.4em 1.1em;
+            padding: 0.4em 2em;
             border: none;
-            border-radius: 1.1em;
+            border-radius: 6px;
             font-size: 0.95em;
             font-weight: 600;
             box-shadow: 0 4px 12px 0 rgba(255,97,192,0.13);
@@ -143,15 +133,9 @@
         }
 
         .filter-apply-btn:hover, .filter-apply-btn:focus {
-            background: linear-gradient(90deg, #ff61c0 0%, #ff70a6 100%);
+            background: rgba(255, 128, 134, 0.83);
             transform: translateY(-1.5px) scale(1.03);
             outline: none;
-        }
-
-        /* Optional: divider between filter sections */
-        .course-filter .filter-price:not(:last-child) {
-            border-bottom: 1px solid #f4f4f4;
-            padding-bottom: 10px;
         }
 
         .filter-available-row label {

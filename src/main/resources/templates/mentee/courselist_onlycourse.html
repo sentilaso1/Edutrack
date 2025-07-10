@@ -113,15 +113,6 @@
 
                     <script src="https://unpkg.com/lucide@latest"></script>
                     <div class="course-listing">
-                        <div class="filter-bar">
-                            <div class="course-topbar">
-                                <div class="view-toggle">
-                                    <button class="view-btn active" id="gridView" aria-label="Grid view"><i class="fa fa-list"></i></button>
-                                    <button class="view-btn" id="listView" aria-label="List view"><i class="fa fa-th"></i></button>
-                                </div>
-                            </div>
-                        </div>
-
                         <ul class="grid-list" th:with="courses = ${coursePage.content}">
                             <li class="card-container" th:each="course : ${courses}">
                                 <div class="card course-card">
