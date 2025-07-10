@@ -151,8 +151,8 @@
 
                         <div class="filter-price">
                             <h4 class="filter-subtitle">Sort by</h4>
-                            <select class="custom-checkbox" name="sort" id="sort">
-                                <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Newest
+                            <select name="sort" id="sort">
+                                <option value="date-desc" th:selected="${sort == null || sort.isEmpty() || sort == 'date-desc'}">Newest
                                 </option>
                                 <option value="date-asc" th:selected="${sort == 'date-asc'}">Oldest</option>
                             </select>

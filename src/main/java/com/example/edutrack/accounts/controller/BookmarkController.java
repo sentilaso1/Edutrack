@@ -69,6 +69,7 @@ public class BookmarkController {
         model.addAttribute("page", bookmarkPage);
         model.addAttribute("tags", tags);
         model.addAttribute("selectedTags", selectedTags);
+        model.addAttribute("sort", params.getSort());
 
         return "/bookmarks/list-bookmark";
     }
