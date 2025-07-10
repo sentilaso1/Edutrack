@@ -11,10 +11,14 @@ a{
     color: inherit;
 }
 
+body{
+    background-image: url('/assets/images/course-bg.png');
+    background-size: cover;
+    background-position: center;
+}
 
 .body {
     margin-top: 98px;
-    background: #f6f9fc;
     display: flex;
     min-height: 100vh;
 }

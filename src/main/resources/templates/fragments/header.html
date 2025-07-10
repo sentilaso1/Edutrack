@@ -59,11 +59,6 @@
                     <a th:href="@{/reviews}" class="navbar-link title-sm" data-nav-link>Review</a>
                 </li>
 
-                <!-- Chỉ hiện nếu có enrollment -->
-                <li class="navbar-item" th:if="${hasEnrollment}">
-                    <a th:href="@{/schedules}" class="navbar-link title-sm" data-nav-link>Schedule</a>
-                </li>
-
             </ul>
 
 
@@ -90,4 +85,5 @@
 
         <div class="overlay" data-overlay data-nav-toggler></div>
     </div>
+    <script th:src="@{/assets/js/courlist.js}"></script>
 </header>

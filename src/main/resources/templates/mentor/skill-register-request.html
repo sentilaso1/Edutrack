@@ -176,6 +176,10 @@
     <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
     <div class="main">
         <div class="graph">
+            <div class="dashboard-header">
+                <h2>Requested Classes</h2>
+            </div>
+
             <div class="product-section">
                 <div class="tabs">
                     <form th:action="@{/mentor/censor-class}" method="get" style="display: flex">
