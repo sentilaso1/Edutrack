@@ -171,7 +171,6 @@
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
 </head>
 <body>
@@ -186,14 +185,17 @@
 
             <div class="tabs">
                 <form th:action="@{/mentor/classes}" method="get" style="display: flex">
-                    <button class="tab active"
-                            name="status"
-                            value=ONGOING>
-                        On Going
-                    </button>
                     <button class="tab"
                             name="status"
-                            value="COMPLETED">
+                            value="ONGOING"
+                            th:classappend="${status == 'ONGOING'} ? ' active' : ''">
+                        On Going
+                    </button>
+
+                    <button class="tab"
+                            name="status"
+                            value="COMPLETED"
+                            th:classappend="${status == 'COMPLETED'} ? ' active' : ''">
                         Completed
                     </button>
                 </form>

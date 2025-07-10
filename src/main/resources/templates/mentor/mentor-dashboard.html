@@ -27,14 +27,13 @@
         }
     </style>
 </head>
-<body>
+<body style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
 <th:block th:insert="~{fragments/header :: header}"></th:block>
-<div class="body"
-     style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+<div class="body">
     <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
     <div class="main">
         <div class="dashboard-header">
-            <h1>Dashboard</h1>
+            <h2>Dashboard</h2>
         </div>
         <div class="stats">
             <div class="card">
@@ -122,6 +121,5 @@
 </div>
 
 <th:block th:insert="~{fragments/footer :: footer}"></th:block>
-
 </body>
 </html>
