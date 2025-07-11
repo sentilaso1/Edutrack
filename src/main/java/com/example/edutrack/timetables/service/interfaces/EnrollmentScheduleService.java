@@ -79,4 +79,7 @@ public interface EnrollmentScheduleService {
     int countClassesThisWeek(Mentor mentor);
 
     List<UpcomingScheduleDTO> getUpcomingSchedules(Mentor mentor, int limit);
+
+    @Transactional
+    void processExpiredRequests();
 }
