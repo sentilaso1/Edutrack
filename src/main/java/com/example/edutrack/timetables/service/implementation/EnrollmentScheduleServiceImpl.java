@@ -566,4 +566,33 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         return enrollmentScheduleRepository.findScheduleToBeConfirmedFiltered(pageable, menteeId, mentorId);
     }
 
+    @Override
+    @Transactional
+    public void processExpiredRequests() {
+        LocalDate today = LocalDate.now();
+        List<EnrollmentSchedule> pendingRequests = enrollmentScheduleRepository.findAllByRescheduleStatus(EnrollmentSchedule.RescheduleStatus.REQUESTED);
+
+        for (EnrollmentSchedule schedule : pendingRequests) {
+            boolean updated = false;
+
+            // Ngày muốn đổi đã qua -> Reset yêu cầu
+            if (schedule.getRequestedNewDate() != null && schedule.getRequestedNewDate().isBefore(today) && schedule.getDate().isAfter(today.minusDays(1))) {
+                schedule.setRescheduleStatus(EnrollmentSchedule.RescheduleStatus.NONE);
+                schedule.setRescheduleReason("AUTO_CANCELED_EXPIRED_REQUESTED_DATE");
+                updated = true;
+            }
+            // Ngày học gốc đã qua -> Đánh dấu vắng mặt
+            else if (schedule.getDate().isBefore(today)) {
+                schedule.setRescheduleStatus(EnrollmentSchedule.RescheduleStatus.REJECTED);
+                schedule.setAttendance(EnrollmentSchedule.Attendance.ABSENT);
+                schedule.setRescheduleReason("AUTO_REJECTED_EXPIRED_ORIGINAL_DATE");
+                updated = true;
+            }
+
+            if (updated) {
+                schedule.setRescheduleStatusUpdateDate(LocalDateTime.now());
+                enrollmentScheduleRepository.save(schedule);
+            }
+        }
+    }
 }

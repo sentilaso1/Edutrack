@@ -372,6 +372,7 @@ public class MenteeController {
             @RequestParam(value = "weekOffset", defaultValue = "0") int weekOffset,
             Model model
     ) {
+        enrollmentScheduleService.processExpiredRequests();
         UUID menteeId = getSessionMentee(session);
         if (menteeId == null){
             return "redirect:/";
@@ -539,6 +540,7 @@ public class MenteeController {
             HttpSession session,
             Model model
     ) {
+        enrollmentScheduleService.processExpiredRequests();
         UUID menteeId = getSessionMentee(session);
         if (menteeId == null) {
             return "redirect:/";
