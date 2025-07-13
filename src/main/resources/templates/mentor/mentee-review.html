@@ -45,6 +45,7 @@
             }
 
             /* Cơ bản */
+
             .participate-button {
                 padding: 6px 12px;
                 margin: 4px;
@@ -56,6 +57,7 @@
             }
 
             /* Present được chọn -> xanh */
+
             input[value="PRESENT"]:checked + .present {
                 background-color: #4CAF50;
                 color: white;
@@ -63,6 +65,7 @@
             }
 
             /* Absent được chọn -> đỏ */
+
             input[value="ABSENT"]:checked + .absent {
                 background-color: #f44336;
                 color: white;
@@ -70,6 +73,7 @@
             }
 
             /* Ẩn radio */
+
             input[type="radio"] {
                 display: none;
             }
@@ -78,6 +82,17 @@
             .submit-review {
                 margin-top: 1rem;
                 background: rgba(255, 87, 34, 0.86);
+                color: white;
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .reschedule {
+                margin-top: 1rem;
+                background: #4CAF50;
                 color: white;
                 padding: 0.5rem 1rem;
                 border: none;
@@ -111,8 +126,53 @@
                 text-align: center;
             }
         }
+        .open-modal-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Nền mờ modal */
+        .modal {
+            display: none; /* Ẩn mặc định */
+            position: fixed;
+            z-index: 100000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: scroll;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Nội dung modal */
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 70vw;
+            position: relative;
+        }
+
+        /* Nút đóng */
+        .close-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/reschedule-page-style.css}"/>
 </head>
 <body style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
 <th:block th:insert="~{fragments/header :: header}"></th:block>
@@ -122,16 +182,20 @@
         <div class="dashboard-header">
             <h2 th:text=" 'Class: ' + ${enrollmentSchedule.enrollment.courseMentor.course.name}">Class: Programming
                 Fundamental with C</h2>
-            <div>
-                <div style="display: flex"><strong>Date: </strong><span th:text="${' ' + enrollmentSchedule.date}"> 06/05/2025</span></div>
+            <div style="display: flex; align-items: center">
+                <div style="display: flex"><strong>Date: </strong><span th:text="${' ' + enrollmentSchedule.date}"> 06/05/2025</span>
+                </div>
 
                 <form th:action="@{/mentor/schedule/mark-as-test-day}">
                     <input type="hidden" name="esid" th:value="${enrollmentSchedule.id}">
                     <button class="submit-review" style="margin-left: 1rem"
-                            th:text="${!enrollmentSchedule.test ? '☆ Mark as Test Day' : '⭐ Remove Test Day' }">☆ Mark as
+                            th:text="${!enrollmentSchedule.test ? '☆ Mark as Test Day' : '⭐ Remove Test Day' }">☆ Mark
+                        as
                         Test Day
                     </button>
                 </form>
+                <button class="reschedule" onclick="openModal()" style="margin-left: 1rem">Reschedule
+                </button>
             </div>
         </div>
         <h3 th:text=" 'Mentee: ' + ${enrollmentSchedule.enrollment.mentee.fullName}"
@@ -142,11 +206,13 @@
                 <h3>Lesson Summary</h3>
                 <div class="field">
                     <h5>Name of Lesson: </h5>
-                    <textarea class="name" name="titleSection" th:field="*{titleSection}" th:value="${enrollmentSchedule.titleSection}"></textarea>
+                    <textarea class="name" name="titleSection" th:field="*{titleSection}"
+                              th:value="${enrollmentSchedule.titleSection}"></textarea>
                 </div>
                 <div class="field">
                     <h5>Brief Description: </h5>
-                    <textarea class="description" name="description" th:field="*{description}" th:value="${enrollmentSchedule.description}"></textarea>
+                    <textarea class="description" name="description" th:field="*{description}"
+                              th:value="${enrollmentSchedule.description}"></textarea>
                 </div>
             </div>
 
@@ -162,32 +228,85 @@
                         <td th:text="${enrollmentSchedule.enrollment.mentee.fullName}">Le Phuong Linh Nga</td>
                         <td>
                             <label class="participate-option">
-                                <input type="radio" name="attendance" th:field="*{attendance}" value="PRESENT" th:checked="${enrollmentSchedule.attendance.name().equals('NOT_YET') || enrollmentSchedule.attendance.name().equals('PRESENT') ? 'checked' : ''}">
+                                <input type="radio" name="attendance" th:field="*{attendance}" value="PRESENT"
+                                       th:checked="${enrollmentSchedule.attendance.name().equals('NOT_YET') || enrollmentSchedule.attendance.name().equals('PRESENT') ? 'checked' : ''}">
                                 <span class="participate-button present">Present</span>
                             </label>
 
                             <label class="participate-option">
-                                <input type="radio" name="attendance" th:field="*{attendance}" value="ABSENT" th:checked="${enrollmentSchedule.attendance.name().equals('REJECTED')}">
+                                <input type="radio" name="attendance" th:field="*{attendance}" value="ABSENT"
+                                       th:checked="${enrollmentSchedule.attendance.name().equals('REJECTED')}">
                                 <span class="participate-button absent">Absent</span>
                             </label>
                         </td>
 
                         <td>
-                            <input type="number" class="input-score" th:field="*{score}" th:value="${enrollmentSchedule.score}" placeholder="0-10" min="0" max="10">
+                            <input type="number" class="input-score" th:field="*{score}"
+                                   th:value="${enrollmentSchedule.score}" placeholder="0-10" min="0" max="10">
                         </td>
                     </tr>
                 </table>
                 <textarea name="report" placeholder="Write your review here..."
-                          style="width: 100%; height: 100px; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ccc;" th:field="*{report}" th:value="${enrollmentSchedule.report}"></textarea>
+                          style="width: 100%; height: 100px; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ccc;"
+                          th:field="*{report}" th:value="${enrollmentSchedule.report}"></textarea>
                 <button class="submit-review">Submit Review</button>
             </div>
         </form>
 
-        <div class="footer">
-            Designed | AC 2022
+        <div class="modal" id="myModal">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal()">X</button>
+                <div class="current-schedule-info">
+                    <h3><i class="fas fa-calendar-alt"></i> Current Schedule</h3>
+                    <div class="current-info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-book"></i>
+                            <span><strong>Course:</strong> <span th:text="${enrollmentSchedule.enrollment.courseMentor.course.name}">Java Programming</span></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user-tie"></i>
+                            <span><strong>Mentee:</strong> <span th:text="${enrollmentSchedule.enrollment.mentee.fullName}">John Doe</span></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-day"></i>
+                            <span><strong>Day:</strong> <span th:text="${enrollmentSchedule.date}">Monday</span></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>Time:</strong> <span
+                                    th:text="${enrollmentSchedule.slot.startTime + ' - ' + enrollmentSchedule.slot.endTime}">07:30 - 09:00</span></span>
+                        </div>
+                    </div>
+                </div>
+                <form th:action="@{/mentor/reschedule-request}" method="post">
+                    <div class="field">
+                        <h5>Reason: </h5>
+                        <textarea class="name" name="reason"></textarea>
+                    </div>
+                    <input type="hidden" name="eid" th:value="${enrollmentSchedule.id}">
+                    <div style="display: flex; justify-content: center"><button type="submit"  class="submit-review">Submit Request</button></div>
+                </form>
+
+            </div>
         </div>
     </div>
 </div>
+<script>
+    function openModal() {
+        document.getElementById('myModal').style.display = 'block'
+    }
+
+    function closeModal() {
+        document.getElementById('myModal').style.display = 'none'
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('myModal')
+        if (event.target === modal) {
+            closeModal()
+        }
+    }
+</script>
 <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
 </body>

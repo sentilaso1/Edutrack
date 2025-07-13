@@ -481,7 +481,7 @@ public class MenteeController {
             @RequestParam("scheduleId") int scheduleId,
             @RequestParam("newSlot") String newSlot,
             @RequestParam("newDate") String newDate,
-            @RequestParam("reason") String reason,
+            @RequestParam(value = "reason", required = false) String reason,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -489,12 +489,15 @@ public class MenteeController {
         if (menteeId == null) {
             return "redirect:/";
         }
-        if (reason == null || reason.trim().isEmpty()) {
+        EnrollmentSchedule schedule = enrollmentScheduleService.findById(scheduleId);
+        if ( (reason == null || reason.trim().isEmpty()) && (schedule.getRescheduleReason() == null || schedule.getRescheduleReason().trim().isEmpty())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Reason for rescheduling cannot be empty.");
             String redirectUrl = "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
             return redirectUrl;
         }
-
+        if(schedule.getRescheduleReason() != null && !schedule.getRescheduleReason().trim().isEmpty()){
+            reason = schedule.getRescheduleReason();
+        }
         try {
             Slot slot = Slot.valueOf(newSlot);
             LocalDate date = LocalDate.parse(newDate);
@@ -510,9 +513,7 @@ public class MenteeController {
                 redirectAttributes.addFlashAttribute("successMessage",
                         "Reschedule request submitted successfully! Your mentor will review it soon.");
             } else {
-                EnrollmentSchedule schedule = enrollmentScheduleService.findById(scheduleId);
                 Long count = enrollmentScheduleService.countEnrollmentSchedulesHaveRescheduleRequest(schedule.getEnrollment());
-
                 if (count >= 2) {
                     redirectAttributes.addFlashAttribute("errorMessage", "You have used all of your reschedule requests for this course.");
                 } else {
@@ -525,17 +526,18 @@ public class MenteeController {
                     "Invalid slot selection. Please try again.");
             return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
 
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "An unexpected error occurred. Please try again.");
         }
+//        catch (Exception e) {
+//            redirectAttributes.addFlashAttribute("errorMessage",
+//                    "An unexpected error occurred. Please try again.");
+//        }
 
         return "redirect:/schedules";
     }
 
     @GetMapping("/schedules/reschedule")
     public String showRescheduleForm(
-            @RequestParam("scheduleId") Long scheduleId,
+            @RequestParam("scheduleId") Integer scheduleId,
             @RequestParam(value = "weekOffset", defaultValue = "0") int weekOffset,
             HttpSession session,
             Model model
@@ -547,6 +549,7 @@ public class MenteeController {
         }
 
         ScheduleDTO currentSchedule = enrollmentScheduleService.getScheduleDTO(scheduleId, menteeId);
+        EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(scheduleId);
         if (currentSchedule == null) {
             return "redirect:/schedules";
         }
@@ -643,6 +646,7 @@ public class MenteeController {
         model.addAttribute("occupiedSlots", occupiedSlots);
         model.addAttribute("weekOffset", weekOffset);
         model.addAttribute("mondayOfWeek", mondayOfWeek);
+        model.addAttribute("enrollmentSchedule", enrollmentSchedule);
 
         return "mentee/reshedule-page";
     }
