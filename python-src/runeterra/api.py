@@ -29,8 +29,9 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 def chat_endpoint(req: ChatRequest):
-    history = req.history or create_history()
-    chat_history = [HumanMessage(msg) if idx % 2 == 0 else AIMessage(msg)
-                    for idx, msg in enumerate(req.history)] if req.history else create_history()
+    chat_history = create_history()
+    if req.history:
+        chat_history += [HumanMessage(msg) if idx % 2 == 0 else AIMessage(msg)
+                     for idx, msg in enumerate(req.history)]
     reply = ask(req.message, chat_history, llm)
     return {"reply": reply}
