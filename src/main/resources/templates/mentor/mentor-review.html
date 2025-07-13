@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+            href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+            rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Reschedule Requests</title>
+    <style>
+
+        h1 {
+            color: #333;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 3px 12px;
+        }
+
+        .product-table th {
+            background-color: #ff4d30;
+            color: white;
+            padding: 14px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .product-table td {
+            background-color: #fff3e0;
+            padding: 14px;
+            font-size: 14px;
+            color: #444;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(255, 167, 38, 0.08);
+            border-bottom: 1px solid #ffe0b2;
+        }
+
+        .product-table tr:hover td {
+            background-color: #ffe0b2;
+            transition: background-color 0.3s ease;
+        }
+
+        .product-table tr td:first-child {
+            border-left: 4px solid #ff4d30;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .product-table thead {
+                display: none;
+            }
+
+            .product-table, .product-table tbody, .product-table tr, .product-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .product-table tr {
+                margin-bottom: 15px;
+            }
+
+            .product-table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            .product-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 20px;
+                font-weight: bold;
+                color: #ff6f00;
+                text-align: left;
+            }
+        }
+        .actions form, .actions .btn {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-approve {
+            background-color: #28a745;
+        }
+
+        .btn-reject {
+            background-color: #dc3545;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .modal-content textarea.error {
+            border-color: red;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .modal-actions {
+            text-align: right;
+            margin-top: 1rem;
+        }
+
+        .modal-actions .btn {
+            margin-left: 10px;
+        }
+
+        .schedule-section {
+            padding: 40px !important;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .schedule-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+
+        .schedule-table th {
+            background: linear-gradient(135deg, #ff7b7b, #ff9999);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .schedule-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            background: white;
+        }
+
+        .schedule-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #ff7b7b, #ff9999);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .course-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .course-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+
+        .course-card h4 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .course-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .back-button-container {
+            background: white;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+
+        .back-button i {
+            font-size: 1.1rem;
+        }
+
+        /* Review Section */
+        .review__grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .review__card.course-card {
+            background: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 2rem 2rem 1.2rem 2rem;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .review-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .review-avatar {
+            flex: 0 0 auto;
+        }
+        .mentee-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2.5px solid #fa6262;
+            background: #f6f8fb;
+        }
+        .review-info-main {
+            flex: 1 1 auto;
+        }
+        .mentee-course-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.13rem;
+        }
+
+        .review-course-name {
+            font-size: 1.5rem;
+            color: #fa6262;
+            background: #fbe4e4;
+            border-radius: 0.75rem;
+            padding: 0.18em 0.85em;
+            font-weight: 500;
+        }
+
+        .review-date {
+            margin-left: auto;
+            font-size: 1.47rem;
+            color: #999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-end;
+            gap: 0.4em;
+            white-space: nowrap;
+        }
+        .review-card-content {
+            margin-top: 0.5rem;
+            font-size: 1.58rem;
+            color: #444;
+            line-height: 1.6;
+            padding: 0.3rem;
+            word-break: break-word;
+            background: #f7f7f9;
+            border-radius: 0.5rem;
+        }
+
+
+    </style>
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <div class="graph">
+            <div class="dashboard-header">
+                <h2>Pending Reschedule Requests</h2>
+            </div>
+            <section class="schedule-section" style="padding: 80px 0;" id="reviews">
+
+                            <div class="review__card course-card" th:each="feedback : ${feedbacks}" th:if="${feedbacks != null and !#lists.isEmpty(feedbacks)}">
+                                <div class="review-card-header">
+                                    <div class="review-avatar">
+                                        <img th:if="${feedback.isAnonymous}"
+                                             th:src="@{/assets/images/default-avatar.svg}"
+                                             alt="Anonymous Mentee"
+                                             style="width: 60px; height: 60px;"
+                                             class="mentee-avatar" />
+
+                                        <img th:unless="${feedback.isAnonymous}"
+                                             th:src="@{/avatar/{id}(id=${feedback.mentee.id})}"
+                                             th:alt="${feedback.mentee.fullName}"
+                                             style="width: 60px; height: 60px;"
+                                             class="mentee-avatar" />
+                                    </div>
+                                    <div class="review-info-main">
+                                        <div class="mentee-course-row">
+                                            <span th:text="${feedback.isAnonymous} ? 'Anonymous Mentee' : ${feedback.mentee.fullName}"></span>
+                                            <div style="display: flex; gap: 0.5rem">
+                                                <span class="review-date" style="margin-left: 0.3rem">for</span>
+                                                <span class="review-course-name" th:text="${feedback.courseMentor.course.name}">Course Name</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="review-date" style="gap: 0.1rem;">
+                                        <span th:text="${#temporals.format(feedback.createdDate, 'dd/MM/yyyy')}">Date</span>
+                                    </div>
+                                </div>
+                                <div class="review-card-content" th:text="${feedback.content}">
+                                    Review content...
+                                </div>
+                            </div>
+                            <div th:if="${feedbacks == null or #lists.isEmpty(feedbacks)}"
+                                 style="margin: 3rem auto; text-align: center; color: #888;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5em;">😶</div>
+                                <div style="font-size: 1.2rem;">No reviews yet.<br>Be the first to share your feedback!</div>
+                            </div>
+
+
+            </section>
+        </div>
+
+    </div>
+</div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+<script>
+
+</script>
+
+</body>
+</html>
