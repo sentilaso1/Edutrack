@@ -293,7 +293,9 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         try {
             // Find the schedule
             Optional<EnrollmentSchedule> optionalSchedule = enrollmentScheduleRepository.findById(scheduleId);
+            //1
             if (optionalSchedule.isEmpty()) {
+                System.out.println("BUG IN IF 1");
                 return false;
             }
 
@@ -304,8 +306,10 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
                     EnrollmentSchedule.RescheduleStatus.NONE
             );
 
-            if (rescheduleCount >= 2) {
-                return false;
+            if(schedule.getRescheduleReason() == null || schedule.getRescheduleReason().isEmpty()){
+                if (rescheduleCount >= 2) {
+                    return false;
+                }
             }
             if (!schedule.getEnrollment().getMentee().getId().equals(menteeId)) {
                 return false;
@@ -317,7 +321,9 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             schedule.setRescheduleStatus(EnrollmentSchedule.RescheduleStatus.REQUESTED);
             schedule.setRequestedNewSlot(newSlot);
             schedule.setRequestedNewDate(newDate);
-            schedule.setRescheduleReason(reason);
+            if(schedule.getRescheduleReason() == null || schedule.getRescheduleReason().isEmpty()){
+                schedule.setRescheduleReason("MENTEE: " + reason);
+            }
             schedule.setRescheduleRequestDate(LocalDate.now());
             enrollmentScheduleRepository.save(schedule);
             sendRescheduleNotificationToMentor(schedule);
@@ -331,8 +337,8 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
 
     @Override
-    public ScheduleDTO getScheduleDTO(Long scheduleId, UUID menteeId) {
-        Optional<EnrollmentSchedule> optSchedule = enrollmentScheduleRepository.findById(scheduleId.intValue());
+    public ScheduleDTO getScheduleDTO(Integer scheduleId, UUID menteeId) {
+        Optional<EnrollmentSchedule> optSchedule = enrollmentScheduleRepository.findById(scheduleId);
         if (optSchedule.isEmpty()) return null;
 
         EnrollmentSchedule schedule = optSchedule.get();
