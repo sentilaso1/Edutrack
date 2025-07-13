@@ -301,4 +301,16 @@ public class MentorController {
         redirectAttributes.addFlashAttribute("successMessage", "Request rejected successfully.");
         return "redirect:/mentor/requests";
     }
+
+    @GetMapping("/mentor/your-review")
+    public String showMentorReview(Model model, HttpSession session) {
+        if (session == null) {
+            return "redirect:/login";
+        }
+        Mentor currentMentor = (Mentor) session.getAttribute("loggedInUser");
+        UUID id = currentMentor.getId();
+        List<Feedback> feedbacks = feedbackRepository.findByCourseMentor_Mentor_IdAndStatus(id, Feedback.Status.ACTIVE);
+        model.addAttribute("feedbacks", feedbacks);
+        return "mentor/mentor-review";
+    }
 }
