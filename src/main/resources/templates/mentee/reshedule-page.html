@@ -108,7 +108,7 @@
                         <div class="schedule-grid-request">
                             <!-- Header row -->
                             <div class="time-header-request">Time</div>
-                            <div class="day-header-request"
+                            <div class="day-header"
                                  th:each="day : ${daysInWeek}"
                                  th:classappend="${day.equals(todayDate)} ? ' today-border' : ''"
                                  th:text="${#temporals.format(day, 'EEEE')}">

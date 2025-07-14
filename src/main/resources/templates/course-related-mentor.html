@@ -8,6 +8,8 @@
             rel="stylesheet"
     />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
     <title>Course related Mentors</title>
     <style>
         * {
@@ -621,16 +623,13 @@
         }
     </style>
 </head>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 <body>
-<div class="back-button-container">
-    <div class="container">
-        <button class="back-button" onclick="history.back()">
-            <i class="ri-arrow-left-line"></i>
-            <span>Back</span>
-        </button>
-    </div>
-</div>
 <!-- Hero Section -->
+<main>
+
+
+</main>
 <section class="hero">
     <div class="container">
         <div class="hero-content">
@@ -737,7 +736,6 @@
     </div>
 </section>
 
-
 <script src="https://unpkg.com/scrollreveal"></script>
 <script>
     // Initialize ScrollReveal animations
@@ -807,5 +805,11 @@
         });
     });
 </script>
+<script th:src="@{/assets/js/courlist.js}"></script>
+
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 </html>
