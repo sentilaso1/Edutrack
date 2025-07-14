@@ -2,6 +2,7 @@ package com.example.edutrack.auth.service;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
@@ -85,4 +86,5 @@ public class UserService {
         Optional<Mentee> mentee = menteeRepository.findById(user.getId());
         return mentee.isPresent();
     }
+
 }
