@@ -71,9 +71,10 @@ public class ManagerController {
     }
 
     @GetMapping("/manager/dashboard")
-    public String showDashboard(Model model) {
-        model.addAttribute("mentorCount", mentorService.countAll());
-        model.addAttribute("menteeCount", menteeService.countAll());
+    public String showDashboard(Model model, @RequestParam(defaultValue = "week") String period) {
+        ManagerStatsDTO stats = managerStatsService.getManagerStats(period);
+        model.addAttribute("stats", stats);
+        model.addAttribute("currentPeriod", period);
 
         return "manager/dashboard";
     }
@@ -88,14 +89,6 @@ public class ManagerController {
     public String showMentors(Model model) {
         model.addAttribute("mentors", mentorService.findAll());
         return "manager/mentors";
-    }
-
-    @GetMapping("/manager/stats")
-    public String showStats(Model model, @RequestParam(defaultValue = "week") String period) {
-        ManagerStatsDTO stats = managerStatsService.getManagerStats(period);
-        model.addAttribute("stats", stats);
-        model.addAttribute("currentPeriod", period);
-        return "accounts/html/manager-stats";
     }
 
     @GetMapping("/manager/api/revenue-chart")
