@@ -29,7 +29,7 @@
         </div>
 
         <!-- Login form -->
-        <form th:action="@{/admin/login}" method="post" style="display: flex; flex-direction: column ;justify-content: center; align-items: center">
+        <form th:action="@{/login/admin}" method="post" style="display: flex; flex-direction: column ;justify-content: center; align-items: center">
             <div th:if="${error}" style="color: red;">[[${error}]]</div>
             <div class="text-input">
                 <i class="ri-user-fill"></i>
