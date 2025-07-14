@@ -1,6 +1,7 @@
 package com.example.edutrack.common.controller;
 
 import com.example.edutrack.accounts.model.User;
+import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -11,9 +12,11 @@ import org.springframework.ui.Model;
 public class GlobalModelAdvice {
 
     private final EnrollmentService enrollmentService;
+    private MentorRepository mentorRepository;
 
-    public GlobalModelAdvice(EnrollmentService enrollmentService) {
+    public GlobalModelAdvice(EnrollmentService enrollmentService, MentorRepository mentorRepository) {
         this.enrollmentService = enrollmentService;
+        this.mentorRepository = mentorRepository;
     }
 
     @ModelAttribute
@@ -28,5 +31,14 @@ public class GlobalModelAdvice {
             model.addAttribute("hasEnrollment", false);
             model.addAttribute("isLoggedIn", false);
         }
+    }
+
+    @ModelAttribute("isMentor")
+    public boolean addGlobalAttributes(HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return false;
+        }
+        return mentorRepository.existsById(loggedInUser.getId());
     }
 }
