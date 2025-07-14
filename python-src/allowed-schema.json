@@ -1,0 +1,509 @@
+{
+  "tables": [
+    {
+      "table_name": "mentees",
+      "columns": [
+        {
+          "name": "interests",
+          "type": "varchar(512)",
+          "nullable": true
+        },
+        {
+          "name": "total_sessions",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "user_id",
+          "type": "binary(16)",
+          "nullable": false,
+          "primary_key": true,
+          "foreign_key": {
+            "referenced_table": "users",
+            "referenced_column": "id",
+            "constraint_name": "FKp71v7q7aw3n9bjbuh82p2bexn"
+          }
+        }
+      ]
+    },
+    {
+      "table_name": "course_mentor",
+      "columns": [
+        {
+          "name": "id",
+          "type": "binary(16)",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "applied_date",
+          "type": "datetime(6)",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "price",
+          "type": "double",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "values": [
+            "ACCEPTED",
+            "PENDING",
+            "REJECTED"
+          ],
+          "nullable": true
+        },
+        {
+          "name": "syllabus",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "course_id",
+          "type": "binary(16)",
+          "nullable": true,
+          "foreign_key": {
+            "referenced_table": "courses",
+            "referenced_column": "id",
+            "constraint_name": "FK6nqsdy5uomfsrxm9ybokmo6jd"
+          }
+        },
+        {
+          "name": "mentor_user_id",
+          "type": "binary(16)",
+          "nullable": true,
+          "foreign_key": {
+            "referenced_table": "mentors",
+            "referenced_column": "user_id",
+            "constraint_name": "FK20c0x06s21swrl6fx3d373dia"
+          }
+        }
+      ]
+    },
+    {
+      "table_name": "course_tags",
+      "columns": [
+        {
+          "name": "course_id",
+          "type": "binary(16)",
+          "nullable": false,
+          "primary_key": true,
+          "foreign_key": {
+            "referenced_table": "courses",
+            "referenced_column": "id",
+            "constraint_name": "FKjqwlxw962j7q9wdogwnrctc2p"
+          }
+        },
+        {
+          "name": "tag_id",
+          "type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "foreign_key": {
+            "referenced_table": "tags",
+            "referenced_column": "id",
+            "constraint_name": "FKle4e0o8293pd96wrrfl77ij42"
+          }
+        }
+      ]
+    },
+    {
+      "table_name": "courses",
+      "columns": [
+        {
+          "name": "id",
+          "type": "binary(16)",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "created_date",
+          "type": "datetime(6)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "tinytext",
+          "nullable": false
+        },
+        {
+          "name": "is_open",
+          "type": "bit(1)",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "unique": true
+        }
+      ]
+    },
+    {
+      "table_name": "feedbacks",
+      "columns": [
+        {
+          "name": "id",
+          "type": "binary(16)",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "content",
+          "type": "tinytext",
+          "nullable": false
+        },
+        {
+          "name": "created_date",
+          "type": "datetime(6)",
+          "nullable": false
+        },
+        {
+          "name": "is_anonymous",
+          "type": "bit(1)",
+          "nullable": false
+        },
+        {
+          "name": "rating",
+          "type": "decimal(2,1)",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "values": [
+            "ACTIVE",
+            "HIDDEN"
+          ],
+          "nullable": false
+        },
+        {
+          "name": "course_mentor_id",
+          "type": "binary(16)",
+          "nullable": true,
+          "foreign_key": {
+            "referenced_table": "course_mentor",
+            "referenced_column": "id",
+            "constraint_name": "FKqii7i6dy9xyd8lyuw6huss4q6"
+          }
+        },
+        {
+          "name": "mentee_id",
+          "type": "binary(16)",
+          "nullable": true,
+          "foreign_key": {
+            "referenced_table": "mentees",
+            "referenced_column": "user_id",
+            "constraint_name": "FKcibf44kruq42fsana88vvhe2e"
+          }
+        }
+      ]
+    },
+    {
+      "table_name": "mentors",
+      "columns": [
+        {
+          "name": "expertise",
+          "type": "varchar(512)",
+          "nullable": true
+        },
+        {
+          "name": "is_available",
+          "type": "bit(1)",
+          "nullable": true
+        },
+        {
+          "name": "rating",
+          "type": "decimal(2,1)",
+          "nullable": true
+        },
+        {
+          "name": "total_sessions",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "user_id",
+          "type": "binary(16)",
+          "nullable": false,
+          "primary_key": true,
+          "foreign_key": {
+            "referenced_table": "users",
+            "referenced_column": "id",
+            "constraint_name": "FKmciiqqph74b3gqsw9615l9cwp"
+          }
+        }
+      ]
+    },
+    {
+      "table_name": "tags",
+      "columns": [
+        {
+          "name": "id",
+          "type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "type": "varchar(255)",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "table_name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "binary(16)",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "avatar",
+          "type": "longblob",
+          "nullable": true
+        },
+        {
+          "name": "bio",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "birth_date",
+          "type": "datetime(6)",
+          "nullable": true
+        },
+        {
+          "name": "created_date",
+          "type": "datetime(6)",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false,
+          "unique": true
+        },
+        {
+          "name": "full_name",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "gender",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "is_active",
+          "type": "bit(1)",
+          "nullable": false
+        },
+        {
+          "name": "is_locked",
+          "type": "bit(1)",
+          "nullable": false
+        },
+        {
+          "name": "password",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "phone",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "reset_token",
+          "type": "varchar(255)",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "table_name": "mentor_available_time_details",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "date",
+          "type": "date",
+          "nullable": false
+        },
+        {
+          "name": "slot",
+          "type": "enum",
+          "values": [
+            "SLOT_1",
+            "SLOT_2",
+            "SLOT_3",
+            "SLOT_4",
+            "SLOT_5"
+          ],
+          "nullable": false
+        },
+        {
+          "name": "mentee_id",
+          "type": "binary(16)",
+          "nullable": true,
+          "foreign_key": {
+            "referenced_table": "mentees",
+            "referenced_column": "user_id",
+            "constraint_name": "FK7ejclij8jbans550vsup2l1qh"
+          }
+        },
+        {
+          "name": "mentor_id",
+          "type": "binary(16)",
+          "nullable": false,
+          "foreign_key": {
+            "referenced_table": "mentors",
+            "referenced_column": "user_id",
+            "constraint_name": "FKcjtwnjmh2i01bwnetk8r7l5t2"
+          }
+        }
+      ]
+    },
+    {
+      "table_name": "mentor_available_time",
+      "columns": [
+        {
+          "name": "day",
+          "type": "enum",
+          "values": [
+            "FRIDAY",
+            "MONDAY",
+            "SATURDAY",
+            "SUNDAY",
+            "THURSDAY",
+            "TUESDAY",
+            "WEDNESDAY"
+          ],
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "end_date",
+          "type": "date",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "mentor_id",
+          "type": "binary(16)",
+          "nullable": false,
+          "primary_key": true,
+          "foreign_key": {
+            "referenced_table": "mentors",
+            "referenced_column": "user_id",
+            "constraint_name": "FKlag766x6ybflh316ia6c84l7a"
+          }
+        },
+        {
+          "name": "slot",
+          "type": "enum",
+          "values": [
+            "SLOT_1",
+            "SLOT_2",
+            "SLOT_3",
+            "SLOT_4",
+            "SLOT_5"
+          ],
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "created_date",
+          "type": "datetime(6)",
+          "nullable": true
+        },
+        {
+          "name": "reason",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "values": [
+            "APPROVED",
+            "CANCELLED",
+            "DRAFT",
+            "PENDING",
+            "REJECTED"
+          ],
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "table_name": "teaching_materials",
+      "columns": [
+        {
+          "name": "id",
+          "type": "int",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "file",
+          "type": "longblob",
+          "nullable": true
+        },
+        {
+          "name": "file_type",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "upload_date",
+          "type": "datetime(6)",
+          "nullable": true
+        },
+        {
+          "name": "course_id",
+          "type": "binary(16)",
+          "nullable": true,
+          "foreign_key": {
+            "referenced_table": "courses",
+            "referenced_column": "id",
+            "constraint_name": "FK2av3xlekg5atxll4wievlboao"
+          }
+        }
+      ]
+    }
+  ]
+}

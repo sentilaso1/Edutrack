@@ -20,6 +20,5 @@ public interface UserService {
         Staff getStaffByUserId(String userId);
         Page<User> searchUsers(String email, String fullName, Boolean isLocked, Boolean isActive, Pageable pageable);
         UserStatsDTO getUserStatistics();
-        UserStats getSummaryStats();
         LoginStats getLoginStats();
 }

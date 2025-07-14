@@ -28,9 +28,6 @@ public class Property {
         @Temporal(TemporalType.TIMESTAMP)
         private Date updatedDate;
 
-        @Version
-        private Long version;
-
         public Property() {
                 this.id = UUID.randomUUID();
                 this.createdDate = new Date();
@@ -82,13 +79,5 @@ public class Property {
 
         public void setUpdatedDate(Date updatedDate) {
                 this.updatedDate = updatedDate;
-        }
-
-        public Long getVersion() {
-                return version;
-        }
-
-        public void setVersion(Long version) {
-                this.version = version;
         }
 }
