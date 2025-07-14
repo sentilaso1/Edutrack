@@ -211,10 +211,6 @@ public class UserServiceImpl implements UserService {
                 return new UserStatsDTO(total, active, locked);
         }
 
-        public UserStats getSummaryStats() {
-                return new UserStats(150, 120, 30);
-        }
-
         public LoginStats getLoginStats() {
                 return new LoginStats(23, 150, 430);
         }
