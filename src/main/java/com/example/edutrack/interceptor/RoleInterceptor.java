@@ -15,7 +15,12 @@ public class RoleInterceptor implements HandlerInterceptor {
             throws Exception {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("loggedInUser") == null) {
+        if (session == null) {
+            response.sendRedirect("/unauthorized");
+            return false;
+        }
+
+        if(session.getAttribute("loggedInUser") == null && session.getAttribute("loggedInAdmin") == null){
             response.sendRedirect("/unauthorized");
             return false;
         }
@@ -35,6 +40,14 @@ public class RoleInterceptor implements HandlerInterceptor {
             return false;
         }
         if (path.startsWith("/mentor") && !"mentor".equals(role)) {
+            response.sendRedirect("/forbidden");
+            return false;
+        }
+        if (path.startsWith("/manager") && !"manager".equals(role)) {
+            response.sendRedirect("/forbidden");
+            return false;
+        }
+        if (path.startsWith("/admin") && !"admin".equals(role)) {
             response.sendRedirect("/forbidden");
             return false;
         }

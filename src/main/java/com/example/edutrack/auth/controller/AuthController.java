@@ -56,7 +56,7 @@ public class AuthController {
         return "auth/login";
     }
 
-    @GetMapping("/admin/login")
+    @GetMapping("/login/admin")
     public String showLoginAdminForm(HttpServletRequest request, Model model) {
         String adminFromCookie;
         Cookie[] cookies = request.getCookies();
@@ -172,7 +172,6 @@ public class AuthController {
                     session.setAttribute("role", "mentor");
                     return "redirect:/mentor";
                 }
-                return "redirect:/admin/login";
             }
         }
         model.addAttribute("error", "Invalid email or password");
@@ -180,7 +179,7 @@ public class AuthController {
         return "auth/login";
     }
 
-    @PostMapping("/admin/login")
+    @PostMapping("/login/admin")
     public String loginAdmin(@RequestParam String email,
                         @RequestParam String password,
                         @RequestParam(required = false) String rememberMe,
@@ -204,7 +203,13 @@ public class AuthController {
                     cookie.setPath("/");
                     response.addCookie(cookie);
                 }
-                return "redirect:/admin/home";
+                String role = user.getRole().name().toLowerCase();
+                session.setAttribute("role", role);
+                if("admin".equals(role)){
+                    return "redirect:/admin";
+                }else if("manager".equals(role)){
+                    return "redirect:/manager";
+                }
             }
         }
         model.addAttribute("error", "Invalid email or password");
