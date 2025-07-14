@@ -37,28 +37,31 @@
                     <a th:href="@{/}" class="navbar-link title-sm" data-nav-link>Home</a>
                 </li>
 
-                <li class="navbar-item">
+                <li class="navbar-item" th:if="${session.loggedInUser == null or !isMentor}">
                     <a th:href="@{/courses-only}" class="navbar-link title-sm" data-nav-link>Courses</a>
                 </li>
 
-                <li class="navbar-item">
+                <li class="navbar-item" th:if="${session.loggedInUser == null or !isMentor}">
                     <a th:href="@{/mentors}" class="navbar-link title-sm" data-nav-link>Mentors</a>
                 </li>
 
-                <!-- Dashboard: hiện nếu đã login -->
                 <li class="navbar-item" th:if="${session.loggedInUser != null}">
-                    <a th:href="@{/dashboard}" class="navbar-link title-sm" data-nav-link>Dashboard</a>
+                    <a th:href="${isMentor ? '/mentor' : '/dashboard'}"
+                       class="navbar-link title-sm" data-nav-link>Dashboard</a>
                 </li>
 
-                <!-- Bookmark: chỉ hiện nếu đã login -->
-                <li class="navbar-item" th:if="${session.loggedInUser != null}">
+                <li class="navbar-item" th:if="${session.loggedInUser != null and !isMentor}">
                     <a th:href="@{/bookmark/list}" class="navbar-link title-sm" data-nav-link>Bookmark</a>
                 </li>
 
+                <li class="navbar-item" th:if="${session.loggedInUser != null and isMentor}">
+                    <a th:href="@{/mentor/cv/create}" class="navbar-link title-sm" data-nav-link>My CV</a>
+                </li>
 
+                <li class="navbar-item" th:if="${session.loggedInUser != null and isMentor}">
+                    <a th:href="@{/mentor/your-review}" class="navbar-link title-sm" data-nav-link>Reviews</a>
+                </li>
             </ul>
-
-
         </nav>
 
         <div style="display: flex; gap: 10px; align-items: center;">
