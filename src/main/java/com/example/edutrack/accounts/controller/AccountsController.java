@@ -26,6 +26,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class AccountsController {
@@ -51,8 +52,10 @@ public class AccountsController {
                 this.mentorRepository = mentorRepository;
         }
 
-        @GetMapping("/profile/{id}")
-        public String viewProfile(@PathVariable String id, Model model) throws IOException {
+        @GetMapping("/profile")
+        public String viewProfile(Model model, HttpSession session) throws IOException {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                String id = loggedInUser.getId().toString();
                 User user = userService.getUserById(id);
                 model.addAttribute("user", user);
                 Mentor mentor = mentorService.getMentorById(id);
