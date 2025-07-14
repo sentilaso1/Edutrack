@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.*;
 
 @Controller(value = "mentor")
@@ -391,6 +392,18 @@ public class MentorController {
         model.addAttribute("activeStatus", status.toUpperCase());
         model.addAttribute("slots", Slot.values());
         model.addAttribute("days", Day.values());
+
+        Map<Integer, String> monthOptions = new LinkedHashMap<>();
+        LocalDate now = LocalDate.now();
+
+        for (int i = 0; i <= 4; i++) {
+            LocalDate target = now.plusMonths(i);
+            String label = target.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH) + " " + target.getYear();
+            monthOptions.put(i, label); // key: 0→4, value: "July 2025", "August 2025", ...
+        }
+
+        model.addAttribute("monthOptions", monthOptions);
+
 
         return "/mentor/mentor-working-date";
     }
