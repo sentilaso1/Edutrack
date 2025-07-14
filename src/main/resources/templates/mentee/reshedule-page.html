@@ -154,7 +154,8 @@
                         <div class="reason-section">
                             <label for="reason"><i class="fas fa-comment-alt"></i> Reason for Reschedule</label>
                             <textarea id="reason" name="reason"
-                                      placeholder="Please provide a reason for rescheduling this session..." th:text="${enrollmentSchedule.rescheduleReason}" th:disabled="${enrollmentSchedule.rescheduleReason == null || enrollmentSchedule.rescheduleReason.isEmpty() ? 'disabled' : '' }"></textarea>
+                                      placeholder="Please provide a reason for rescheduling this session..." th:text="${enrollmentSchedule.rescheduleReason}" th:disabled="${enrollmentSchedule.rescheduleReason != null and !enrollmentSchedule.rescheduleReason.isEmpty()}"
+                            ></textarea>
                             <span id="reason-error" class="error-message"></span>
                         </div>
 
