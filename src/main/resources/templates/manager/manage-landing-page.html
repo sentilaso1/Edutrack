@@ -105,18 +105,7 @@
 <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
 
 <!-- Sidebar -->
-<div class="w-64 bg-gray-800 text-white h-screen fixed">
-    <div class="p-4 text-2xl font-bold">EduTrack Admin</div>
-    <nav class="mt-4">
-        <a th:href="@{/manager/dashboard}" class="block py-2 px-4 hover:bg-gray-700">Dashboard</a>
-        <a th:href="@{/manager/course-dashboard}" class="block py-2 px-4 hover:bg-gray-700">Courses</a>
-        <a th:href="@{/manager/landing-page}" class="block py-2 px-4 hover:bg-gray-700">Mentee Home Page</a>
-        <a th:href="@{/manager/mentees}" class="block py-2 px-4 hover:bg-gray-700">Mentees</a>
-        <a th:href="@{/manager/mentors}" class="block py-2 px-4 hover:bg-gray-700">Mentors</a>
-        <a th:href="@{/manager/payments}" class="block py-2 px-4 hover:bg-gray-700">Payments</a>
-    </nav>
-</div>
-
+<th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
 
 <!-- Main Content -->
 <div class="ml-64 flex-1 p-6 animate-fade-in">
