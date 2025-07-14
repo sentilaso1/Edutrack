@@ -112,6 +112,7 @@
     </style>
 
     <script>
+        let chatHistory = [];
         const thinkingQuotes = [
             "Sharpening the strategy",
             "Schemes are being refined",
@@ -175,14 +176,20 @@
 
             const chatlog = document.getElementById("chatlog");
 
+            // Add user message to UI
             const userMessage = document.createElement("div");
             userMessage.className = "chat-message user-message";
             userMessage.textContent = message;
             chatlog.appendChild(userMessage);
-
-            inputField.value = "";
             chatlog.scrollTop = chatlog.scrollHeight;
 
+            // Store user message to history
+            chatHistory.push(message);
+
+            // Clear input
+            inputField.value = "";
+
+            // Show "thinking..." message
             const thinkingMessage = document.createElement("div");
             thinkingMessage.className = "chat-message bot-message";
             chatlog.appendChild(thinkingMessage);
@@ -190,7 +197,6 @@
 
             let currentQuote = getRandomQuote();
             thinkingMessage.innerHTML = `<span class="fade">${currentQuote}</span><span class="dot-typing"></span>`;
-            chatlog.scrollTop = chatlog.scrollHeight;
 
             const quoteInterval = setInterval(() => {
                 currentQuote = getRandomQuote();
@@ -209,12 +215,21 @@
                 const res = await fetch("http://localhost:8000/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message, history: [] })
+                    body: JSON.stringify({
+                        message,
+                        history: chatHistory
+                    })
                 });
 
                 const data = await res.json();
                 clearInterval(quoteInterval);
-                thinkingMessage.innerHTML = data.reply.replace(/\n/g, "<br>");
+
+                thinkingMessage.innerHTML = data.reply
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                    .replace(/\n/g, "<br>");
+
+                // Save bot reply to history
+                chatHistory.push(data.reply);
             } catch (err) {
                 clearInterval(quoteInterval);
                 thinkingMessage.textContent = "Error: Unable to get reply.";
@@ -222,6 +237,7 @@
 
             chatlog.scrollTop = chatlog.scrollHeight;
         }
+
 
         function getRandomQuote() {
             const index = Math.floor(Math.random() * thinkingQuotes.length);
