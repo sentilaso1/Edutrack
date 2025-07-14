@@ -152,8 +152,10 @@
                             <div class="month-select-container" th:if="${startDate == null || endDate == null}">
                                 <label for="monthOption">Choose Month:</label>
                                 <select name="monthOption" id="monthOption">
-                                    <option value="current">This month</option>
-                                    <option value="next">Next month</option>
+                                    <option th:each="entry : ${monthOptions}"
+                                            th:value="${entry.key}"
+                                            th:text="${entry.value}">
+                                    </option>
                                 </select>
                             </div>
                             <div th:if="${startDate != null || endDate != null}">

@@ -46,7 +46,7 @@ public interface EnrollmentScheduleService {
     boolean submitRescheduleRequest(int scheduleId, Slot newSlot, LocalDate newDate,
                                     String reason, UUID menteeId);
 
-    ScheduleDTO getScheduleDTO(Long scheduleId, UUID menteeId);
+    ScheduleDTO getScheduleDTO(Integer scheduleId, UUID menteeId);
 
     List<ScheduleDTO> getOccupiedSlotsForWeek(UUID menteeId, LocalDate weekStart, LocalDate weekEnd);
 
@@ -79,4 +79,7 @@ public interface EnrollmentScheduleService {
     int countClassesThisWeek(Mentor mentor);
 
     List<UpcomingScheduleDTO> getUpcomingSchedules(Mentor mentor, int limit);
+
+    @Transactional
+    void processExpiredRequests();
 }

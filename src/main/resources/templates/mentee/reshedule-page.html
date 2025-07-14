@@ -88,7 +88,7 @@
 
                 <div class="new-schedule-section">
                     <h3><i class="fas fa-calendar-plus"></i> Select New Schedule</h3>
-
+                    <h1 style="color: maroon" th:text="${errorMessage}"></h1>
                     <form id="rescheduleForm" method="post" th:action="@{/schedules/reschedule-request}" novalidate>
                         <input type="hidden" name="scheduleId" th:value="${currentSchedule.id}"/>
                         <input type="hidden" id="selectedSlot" name="newSlot" value=""/>
@@ -154,7 +154,8 @@
                         <div class="reason-section">
                             <label for="reason"><i class="fas fa-comment-alt"></i> Reason for Reschedule</label>
                             <textarea id="reason" name="reason"
-                                      placeholder="Please provide a reason for rescheduling this session..."></textarea>
+                                      placeholder="Please provide a reason for rescheduling this session..." th:text="${enrollmentSchedule.rescheduleReason}" th:disabled="${enrollmentSchedule.rescheduleReason != null and !enrollmentSchedule.rescheduleReason.isEmpty()}"
+                            ></textarea>
                             <span id="reason-error" class="error-message"></span>
                         </div>
 

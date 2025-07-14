@@ -5,6 +5,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.service.MentorService;
+import com.example.edutrack.common.service.implementations.EmailService;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
@@ -45,6 +46,7 @@ public class MentorController {
     private final CourseMentorRepository courseMentorRepository;
     private final EnrollmentScheduleService enrollmentScheduleService;
     private final MentorRepository mentorRepository;
+    private final EmailService emailService;
 
     public MentorController(MentorService mentorService,
                             CourseMentorServiceImpl courseMentorServiceImpl,
@@ -53,7 +55,7 @@ public class MentorController {
                             CourseRepository courseRepository,
                             CourseMentorService courseMentorService,
                             CourseMentorRepository courseMentorRepository,
-                            EnrollmentScheduleService enrollmentScheduleService, MentorRepository mentorRepository) {
+                            EnrollmentScheduleService enrollmentScheduleService, MentorRepository mentorRepository, EmailService emailService) {
         this.mentorService = mentorService;
         this.mentorRepository = mentorRepository;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
@@ -63,6 +65,7 @@ public class MentorController {
         this.courseMentorService = courseMentorService;
         this.courseMentorRepository = courseMentorRepository;
         this.enrollmentScheduleService = enrollmentScheduleService;
+        this.emailService = emailService;
     }
 
     private UUID getSessionMentor(HttpSession session) {
@@ -282,6 +285,38 @@ public class MentorController {
         return "redirect:/mentor/requests";
     }
 
+    @PostMapping("/mentor/reschedule-request")
+    public String mentorRescheduleRequest(@RequestParam String reason, @RequestParam int eid){
+        if(reason == null || reason.trim().isEmpty()){
+            return "redirect:/mentor/schedule/" + eid +"?error=Please enter reason";
+        }
+        EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(eid);
+        enrollmentSchedule.setRescheduleReason("MENTOR: " + reason);
+        enrollmentScheduleService.save(enrollmentSchedule);
+        //send email to notify mentee
+        String menteeEmail = enrollmentSchedule.getEnrollment().getMentee().getEmail();
+        String mentorName = enrollmentSchedule.getEnrollment().getCourseMentor().getMentor().getFullName();
+        String menteeName = enrollmentSchedule.getEnrollment().getMentee().getFullName();
+        String skillName = enrollmentSchedule.getEnrollment().getCourseMentor().getCourse().getName();
+        String scheduleDate = enrollmentSchedule.getDate().toString();
+        String link = "http://localhost:6969/schedules/reschedule?scheduleId=" + eid;
+
+        String subject = "RESCHEDULE REQUESTS: From Mentor " + mentorName;
+
+        String body = "Hello " + menteeName + ",\n\n"
+                      + "Mentor " + mentorName
+                      + " who teaches skill \"" + skillName + "\" "
+                      + "would like to change the schedule on " + scheduleDate + " to another date.\n"
+                      + "Reason: " + reason + "\n\n"
+                      + "Please click the link below to choose a new schedule:\n"
+                      + link + "\n\n"
+                      + "Best regards,\n"
+                      + "EduTrack";
+        emailService.sendSimpleMail(menteeEmail, subject, body);
+
+        return "redirect:/mentor/schedule/" + eid + "?success=true";
+    }
+
     @PostMapping("/mentor/requests/reject")
     public String handleRejectRequest(
             @RequestParam("scheduleId") int scheduleId,
@@ -300,5 +335,17 @@ public class MentorController {
         enrollmentScheduleService.rejectRescheduleRequest(scheduleId, reason.trim());
         redirectAttributes.addFlashAttribute("successMessage", "Request rejected successfully.");
         return "redirect:/mentor/requests";
+    }
+
+    @GetMapping("/mentor/your-review")
+    public String showMentorReview(Model model, HttpSession session) {
+        if (session == null) {
+            return "redirect:/login";
+        }
+        Mentor currentMentor = (Mentor) session.getAttribute("loggedInUser");
+        UUID id = currentMentor.getId();
+        List<Feedback> feedbacks = feedbackRepository.findByCourseMentor_Mentor_IdAndStatus(id, Feedback.Status.ACTIVE);
+        model.addAttribute("feedbacks", feedbacks);
+        return "mentor/mentor-review";
     }
 }

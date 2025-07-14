@@ -1,0 +1,78 @@
+import random
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import streamlit as st
+from dotenv import load_dotenv
+from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+
+from runeterra.agent import ask, create_history
+from runeterra.config import Config
+from runeterra.models import create_llm
+from runeterra.tools import get_available_tools, with_sql_cursor
+
+load_dotenv()
+
+LOADING_MESSAGES = [
+    "Loading..."
+]
+
+@st.cache_resource(show_spinner=False)
+def get_model() -> BaseChatModel:
+    llm = create_llm(Config.MODEL)
+    llm = llm.bind_tools(get_available_tools())
+    return llm
+
+def load_css(css_file):
+    with open(css_file) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+st.set_page_config(
+    page_title="App",
+    page_icon="🤖",
+    layout="centered",
+    initial_sidebar_state="collapsed",
+)
+
+load_css("assets/style.css")
+
+st.header("App")
+st.subheader("Talk to your database")
+
+with st.sidebar:
+    st.write("# Database information")
+
+    with with_sql_cursor() as cursor:
+        cursor.execute("SHOW TABLES;")
+        tables = [row[0] for row in cursor.fetchall()]
+        st.write("**Tables:**")
+        for table in tables:
+            cursor.execute(f"SELECT COUNT(*) FROM `{table}`;")
+            count = cursor.fetchone()[0]
+            st.write(f"- {table} ({count} rows)")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = create_history()
+
+for message in st.session_state.messages:
+    if type(message) is SystemMessage:
+        continue
+    is_user = type(message) is HumanMessage
+    avatar = "🐧" if is_user else "🤖"
+    with st.chat_message("user" if is_user else "ai", avatar=avatar):
+        st.markdown(message.content)
+
+if prompt := st.chat_input("Type your message..."):
+    with st.chat_message("user", avatar="🐧"):
+        st.session_state.messages.append(HumanMessage(prompt))
+        st.markdown(prompt)
+
+    with st.chat_message("assistant", avatar="🤖"):
+        message_placeholder = st.empty()
+        message_placeholder.status(random.choice(LOADING_MESSAGES), state="running")
+
+        response = ask(prompt, st.session_state.messages, get_model())
+        message_placeholder.markdown(response)
+        st.session_state.messages.append(AIMessage(response))
