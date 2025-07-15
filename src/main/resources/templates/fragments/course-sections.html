@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="courseSections(availableCoursePage, registeredCoursePage, pageNumber, registeredPageNumber, cvStatus, userId)">
+    <div id="available-courses-list" th:attr="data-page=${pageNumber}" th:if="${cvStatus == 'new' || cvStatus == 'rejected'}">
+        <h2>Available Courses</h2>
+        <div th:if="${availableCoursePage != null && !availableCoursePage.isEmpty()}">
+            <div th:each="course : ${availableCoursePage.content}" class="course-card" th:attr="data-course-id=${course.id}">
+                <div class="course-title" th:text="${course.name}">Course Name</div>
+                <div class="course-description" th:text="${course.description}"></div>
+                <div class="course-meta">
+                    <span th:text="'Created date: ' + ${#dates.format(course.createdDate, 'dd/MM/yyyy')}"></span>
+                </div>
+                <button class="add-btn" type="button" th:attr="data-course-id=${course.id}">+</button>
+            </div>
+        </div>
+        <div>
+            <p id="no-available-courses-msg" th:if="${availableCoursePage == null || availableCoursePage.isEmpty()}">
+                No available courses.
+            </p>
+        </div>
+        <!-- Pagination controls -->
+        <div class="pagination" data-section="available" th:if="${availableCoursePage.totalPages > 1}">
+            <a class="page-link" th:href="@{/mentor/cv/course-sections(page=${pageNumber - 1}, registeredPage=${registeredPageNumber}, userId=${userId})}"
+               th:if="${!availableCoursePage.first}" th:attr="data-page=${pageNumber - 1}">Previous</a>
+            <span class="page-current" th:text="${pageNumber}"></span>
+            <a class="page-link" th:href="@{/mentor/cv/course-sections(page=${pageNumber + 1}, registeredPage=${registeredPageNumber}, userId=${userId})}"
+               th:if="${!availableCoursePage.last}" th:attr="data-page=${pageNumber + 1}">Next</a>
+        </div>
+    </div>
+    <div id="registered-courses-list" th:attr="data-page=${registeredPageNumber}">
+        <h2 style="margin-top:32px;">Your Registered Courses</h2>
+        <div th:if="${registeredCoursePage != null && !registeredCoursePage.isEmpty()}">
+            <div th:each="cm : ${registeredCoursePage.content}" class="course-card"
+                 th:attr="data-course-id=${cm.course.id}, data-description=${cm.description}">
+                <div class="course-title" th:text="${cm.course.name}"></div>
+                <div class="course-description" th:text="${cm.course.description}"></div>
+                <div>
+                    <div class="mentor-card-desc-header">Teaching Description:</div>
+                    <div th:if="${cvStatus == 'new' or cvStatus == 'rejected'}">
+                        <div class="form-group dynamic-inputs">
+                            <textarea class="course-desc" required
+                                      placeholder="Describe how you will teach this course"
+                                      th:text="${cm.description}"></textarea>
+                        </div>
+                    </div>
+                    <div th:if="${cvStatus != 'new' and cvStatus != 'rejected'}" class="mentor-card-desc" th:text="${cm.description}"></div>
+                </div>
+                <div class="course-meta">
+                    <span th:text="'Created date: ' + ${#dates.format(cm.course.createdDate, 'dd/MM/yyyy')}"></span>
+                </div>
+                <button class="remove-btn" th:if="${cvStatus == 'new' || cvStatus == 'rejected'}" type="button"
+                        style="background:#fa6262; color: #fff; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; position: absolute; top: 13px; right: 13px; transition: background 0.15s, transform 0.14s; cursor: pointer;">
+                    -
+                </button>
+            </div>
+        </div>
+        <div>
+            <p id="no-registered-courses-msg" th:if="${registeredCoursePage == null || registeredCoursePage.isEmpty()}">
+                You haven't registered any course.
+            </p>
+        </div>
+        <!-- Pagination controls -->
+        <div class="pagination" data-section="registered" th:if="${registeredCoursePage.totalPages > 1}">
+            <a class="page-link" th:href="@{/mentor/cv/course-sections(page=${pageNumber}, registeredPage=${registeredPageNumber - 1}, userId=${userId})}"
+               th:if="${!registeredCoursePage.first}" th:attr="data-page=${registeredPageNumber - 1}">Previous</a>
+            <span class="page-current" th:text="${registeredPageNumber}"></span>
+            <a class="page-link" th:href="@{/mentor/cv/course-sections(page=${pageNumber}, registeredPage=${registeredPageNumber + 1}, userId=${userId})}"
+               th:if="${!registeredCoursePage.last}" th:attr="data-page=${registeredPageNumber + 1}">Next</a>
+        </div>
+    </div>
+</th:block>
+</html>
