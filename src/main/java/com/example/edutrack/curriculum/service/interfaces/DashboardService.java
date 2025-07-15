@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.curriculum.dto.SkillProgressDTO;
 import com.example.edutrack.curriculum.dto.TrackerDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,8 @@ public interface DashboardService {
     boolean isAllCoursesCompleted(UUID menteeId);
 
     Optional<Boolean> hasCompletedCourse(CourseMentor courseMentor, Mentee mentee);
+
+    Optional<Boolean> hasCompletedCourse(Enrollment enrollment);
 
     TrackerDTO convertToTrackerDto(UUID menteeI);
 

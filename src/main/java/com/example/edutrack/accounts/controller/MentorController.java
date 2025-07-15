@@ -305,22 +305,6 @@ public class MentorController {
             enrollmentService.save(enrollment);
             enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
 
-            menteeWallet.setOnHold(menteeWallet.getOnHold() - enrollment.getTransaction().getAbsoluteAmount());
-            mentorWallet.setBalance(mentorWallet.getBalance() + enrollment.getTransaction().getAbsoluteAmount());
-            walletService.save(menteeWallet);
-            walletService.save(mentorWalletOpt.get());
-
-            Transaction transaction = new Transaction(
-                    enrollment.getTransaction().getAbsoluteAmount(),
-                    "Registration for Course " + enrollment.getCourseMentor().getCourse().getName() + " by " + enrollment.getCourseMentor().getMentor().getFullName(),
-                    mentorWallet
-            );
-            transaction.setStatus(Transaction.TransactionStatus.COMPLETED);
-            transactionService.save(transaction);
-
-            enrollment.getTransaction().setStatus(Transaction.TransactionStatus.COMPLETED);
-            transactionService.save(enrollment.getTransaction());
-
             return "redirect:/mentor/censor-class?status=APPROVED&approve=" + eid;
         }
         if (action.equals("view")) {

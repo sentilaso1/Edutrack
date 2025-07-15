@@ -561,8 +561,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     public Page<EnrollmentSchedule> findScheduleByEnrollmentWithFilters(Long enrollmentId, String attendanceStatus, String slot, Pageable pageable) {
         Specification<EnrollmentSchedule> spec = EnrollmentScheduleSpecification.byEnrollment(enrollmentId)
                 .and(EnrollmentScheduleSpecification.withAttendanceStatus(attendanceStatus))
-                .and(EnrollmentScheduleSpecification.withSlot(slot))
-                .and(EnrollmentScheduleSpecification.withinLast7Days());
+                .and(EnrollmentScheduleSpecification.withSlot(slot));
 
         return enrollmentScheduleRepository.findAll(spec, pageable);
     }

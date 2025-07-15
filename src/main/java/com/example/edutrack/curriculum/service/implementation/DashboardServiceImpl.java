@@ -118,9 +118,14 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
         boolean allPresent = schedules.stream()
-                .allMatch(s -> s.getAttendance() == EnrollmentSchedule.Attendance.PRESENT);
+                .allMatch(s -> s.getAttendance() == EnrollmentSchedule.Attendance.PRESENT && !s.getReport());
 
         return Optional.of(allPresent);
+    }
+
+    @Override
+    public Optional<Boolean> hasCompletedCourse(Enrollment enrollment) {
+        return this.hasCompletedCourse(enrollment.getCourseMentor(), enrollment.getMentee());
     }
 
     @Override

@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class EnrollmentScheduleRepositoryImpl implements EnrollmentScheduleRepos
     private final MenteeRepository menteeRepository;
     private final CourseMentorRepository courseMentorRepository;
 
+    @Autowired
     public EnrollmentScheduleRepositoryImpl(EntityManager entityManager,
                                             MenteeRepository menteeRepository,
                                             CourseMentorRepository courseMentorRepository) {
@@ -41,7 +43,6 @@ public class EnrollmentScheduleRepositoryImpl implements EnrollmentScheduleRepos
             FROM enrollments e
             JOIN enrollment_schedule es ON e.id = es.enrollment_id
             JOIN course_mentor cm ON cm.id = e.course_mentor_id
-            WHERE es.date BETWEEN NOW() - INTERVAL 7 DAY AND NOW()
         """;
 
         String countQuery = """
@@ -49,14 +50,13 @@ public class EnrollmentScheduleRepositoryImpl implements EnrollmentScheduleRepos
             FROM enrollments e
             JOIN enrollment_schedule es ON e.id = es.enrollment_id
             JOIN course_mentor cm ON cm.id = e.course_mentor_id
-            WHERE es.date BETWEEN NOW() - INTERVAL 7 DAY AND NOW()
         """;
 
         Map<String, Object> params = new HashMap<>();
 
         if (menteeId != null && !menteeId.isBlank()) {
-            baseQuery += " AND BIN_TO_UUID(e.mentee_id) = :menteeId";
-            countQuery += " AND BIN_TO_UUID(e.mentee_id) = :menteeId";
+            baseQuery += " WHERE BIN_TO_UUID(e.mentee_id) = :menteeId";
+            countQuery += " WHERE BIN_TO_UUID(e.mentee_id) = :menteeId";
             params.put("menteeId", menteeId);
         }
 
@@ -90,7 +90,11 @@ public class EnrollmentScheduleRepositoryImpl implements EnrollmentScheduleRepos
             Optional<Mentee> menteeOpt = menteeRepository.findById(UUID.fromString(menteeIdStr));
             CourseMentor courseMentor = courseMentorRepository.findById(UUID.fromString(courseMentorIdStr));
 
-            return menteeOpt.map(mentee -> new EnrollmentAttendanceDTO(id, mentee, courseMentor)).orElse(null);
+            return menteeOpt.map(mentee -> new EnrollmentAttendanceDTO(
+                    id,
+                    mentee,
+                    courseMentor
+            )).orElse(null);
         }).filter(Objects::nonNull).toList();
 
         long total = ((Number) count.getSingleResult()).longValue();
