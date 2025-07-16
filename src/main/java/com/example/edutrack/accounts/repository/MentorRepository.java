@@ -1,6 +1,7 @@
 package com.example.edutrack.accounts.repository;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.profiles.model.CV;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +52,7 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
 
     @Query("SELECT COUNT(DISTINCT e.courseMentor.mentor.id) FROM Enrollment e WHERE e.mentee.id = :menteeId")
     int countMentorsByMenteeId(@Param("menteeId") UUID menteeId);
+
     Optional<Mentor> findByEmail(String email);
 
 /*    @Query("SELECT m FROM Mentor m WHERE " +
@@ -64,11 +66,11 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
                                     @Param("isAvailable") Boolean isAvailable,
                     Pageable pageable);*/
 
-        @Query("SELECT COUNT(m) FROM Mentor m WHERE m.createdDate >= :startDate")
-        Long getNewMentorCountFromDate(@Param("startDate") LocalDateTime startDate);
+    @Query("SELECT COUNT(m) FROM Mentor m WHERE m.createdDate >= :startDate")
+    Long getNewMentorCountFromDate(@Param("startDate") LocalDateTime startDate);
 
-        @Query("SELECT AVG(m.rating) FROM Mentor m WHERE m.rating IS NOT NULL")
-        Double getAverageRating();
+    @Query("SELECT AVG(m.rating) FROM Mentor m WHERE m.rating IS NOT NULL")
+    Double getAverageRating();
 
 
     @Query("""
@@ -87,5 +89,14 @@ public interface MentorRepository extends JpaRepository<Mentor, UUID> {
             @Param("isAvailable") Boolean isAvailable,
             @Param("status") String status,
             Pageable pageable
+    );
+
+    @Query("SELECT m FROM Mentor m JOIN CV cv ON m.id = cv.id " +
+            "JOIN CVCourse cvc ON cvc.cv = cv " +
+            "WHERE cvc.course = :course AND cv.status IN :statuses")
+
+    List<Mentor> findMentorsByCourseAndCVStatusIn(
+            @Param("course") Course course,
+            @Param("statuses") List<String> statuses
     );
 }

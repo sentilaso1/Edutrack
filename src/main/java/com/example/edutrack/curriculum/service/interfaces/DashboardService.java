@@ -40,6 +40,7 @@ public interface DashboardService {
             int month,
             int year,
             UUID courseId,
+            UUID mentorId,
             String status,
             Pageable pageable
     );

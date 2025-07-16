@@ -572,6 +572,11 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     }
 
     @Override
+    public List<EnrollmentSchedule> getCalendarSchedules(UUID menteeId, UUID courseId, UUID mentorId) {
+        return enrollmentScheduleRepository.findCalendarSchedules(menteeId, courseId, mentorId);
+    }
+
+    @Override
     @Transactional
     public void processExpiredRequests() {
         LocalDate today = LocalDate.now();

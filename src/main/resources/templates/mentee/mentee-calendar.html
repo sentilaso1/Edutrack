@@ -72,20 +72,29 @@
                                 <option value="" th:selected="${selectedCourseId == null}">All Courses</option>
                                 <option th:each="course : ${courses}"
                                         th:value="${course.id}"
-                                        th:text="${course.course.name}"
+                                        th:text="${course.name}"
                                         th:selected="${course.id == selectedCourseId}">
+                                </option>
+                            </select>
+
+                            <select name="mentorId" onchange="this.form.submit()">
+                                <option value="">All Mentors</option>
+                                <option th:each="mentor : ${mentorList}"
+                                        th:value="${mentor.id}"
+                                        th:text="${mentor.fullName}"
+                                        th:selected="${selectedMentorId != null and mentor.id.equals(selectedMentorId)}">
                                 </option>
                             </select>
                         </form>
                     </div>
 
                     <div class="week-nav">
-                        <a th:href="@{/schedules(weekOffset=${weekOffset - 1}, courseId=${selectedCourseId})}"
+                        <a th:href="@{/schedules(weekOffset=${weekOffset - 1}, courseId=${selectedCourseId}, mentorId=${selectedMentorId})}"
                            class="week-button">← Previous Week</a>
                         <span class="week-label">
                             Week of <span th:text="${#temporals.format(mondayOfWeek, 'MMM dd')}"></span>
                         </span>
-                        <a th:href="@{/schedules(weekOffset=${weekOffset + 1}, courseId=${selectedCourseId})}"
+                        <a th:href="@{/schedules(weekOffset=${weekOffset + 1}, courseId=${selectedCourseId}, mentorId=${selectedMentorId})}"
                            class="week-button">Next Week →</a>
                     </div>
 

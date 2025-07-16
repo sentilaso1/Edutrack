@@ -146,7 +146,7 @@
                                                 Mentor Name
                                             </span>
                                     <div class="flex gap-2">
-                                        <a th:href="@{/manager/mentor/detail/{id}(id=${mentor.id})}"
+                                        <a th:href="@{/admin/cv/detail/{id}(id=${mentor.id})}"
                                            class="btn-action btn-primary text-xs">
                                             👁️ Details
                                         </a>
@@ -232,7 +232,7 @@
                 <!-- Page Numbers -->
                 <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                     th:classappend="${i == currentPage} ? 'active'">
-                    <a th:href="@{/manager/view(
+                    <a th:href="@{/manager/course-dashboard(
                             search=${search},
                             mentorSearch=${mentorSearch},
                             open=${selectedOpen},

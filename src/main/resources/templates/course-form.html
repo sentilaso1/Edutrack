@@ -403,16 +403,7 @@
 </head>
 <body class="bg-gray-100">
 <!-- Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">EduTrack Admin</div>
-    <nav class="mt-4">
-        <a th:href="@{/manager/dashboard}" class="hover:bg-gray-700">📊 Dashboard</a>
-        <a th:href="@{/manager/course-dashboard}" class="active">📚 Courses</a>
-        <a th:href="@{/manager/mentees}" class="hover:bg-gray-700">👥 Mentees</a>
-        <a th:href="@{/manager/mentors}" class="hover:bg-gray-700">🧑‍🏫 Mentors</a>
-        <a th:href="@{/manager/payments}" class="hover:bg-gray-700">💳 Payments</a>
-    </nav>
-</div>
+<th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -434,7 +425,7 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Success!</h3>
                 <p class="text-sm text-gray-600 mb-6" th:text="${successMessage}"></p>
                 <div class="flex gap-3 justify-center">
-                    <a th:href="@{/manager/view}" class="btn-primary">📋 View Courses</a>
+                    <a th:href="@{/manager/course-dashboard}" class="btn-primary">📋 View Courses</a>
                     <a th:href="@{/manager/courses/create}" class="btn-secondary">➕ Create Another</a>
                 </div>
             </div>
@@ -495,18 +486,6 @@
                     <span th:if="${#fields.hasErrors('tagTexts')}" th:errors="*{tagTexts}" class="error-message"></span>
                     <div id="hiddenInput"></div>
                 </div>
-
-                <!-- Files -->
-                <div class="form-group">
-                    <label for="files">
-                        Teaching Materials
-                        <span class="tooltip" title="Select teaching materials (PDF, DOC, PPT) - multiple files allowed">❓</span>
-                    </label>
-                    <input type="file" id="files" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx"
-                           th:class="${#fields.hasErrors('files')} ? 'form-input error' : 'form-input'" />
-                    <span th:if="${#fields.hasErrors('files')}" th:errors="*{files}" class="error-message"></span>
-                    <ul id="filePreview" class="file-preview"></ul>
-                </div>
             </div>
 
             <!-- Buttons -->
@@ -517,7 +496,7 @@
                 <button type="reset" class="btn-danger">
                     🗑️ Clear Form
                 </button>
-                <a href="/manager/view" class="btn-secondary">
+                <a href="/manager/course-dashboard" class="btn-secondary">
                     ← Back to Courses
                 </a>
             </div>
@@ -526,26 +505,15 @@
 </div>
 
 <script>
+
     const tags = [];
-
-    const serverTags = /*[[${courseForm.tagTexts}]]*/ [];
-    if (serverTags && serverTags.length > 0) {
-        serverTags.forEach(tagText => {
-            tags.push({value: tagText, color: randomColor()});
-        });
-        renderTags();
-    }
-
     const availableTags = [
         "JavaScript", "Java", "Python", "Spring", "React", "Angular", "HTML", "CSS", "Docker", "DevOps",
         "Machine Learning", "Data Science", "SQL", "NoSQL", "Kubernetes", "AWS", "Azure", "Git", "Agile"
     ];
 
     function randomColor() {
-        const colors = [
-            '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
-            '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
-        ];
+        const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'];
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
@@ -563,115 +531,110 @@
         tagInput.focus();
         closeAllLists();
     }
-
     function removeTag(index) {
         tags.splice(index, 1);
         renderTags();
     }
-
     function renderTags() {
         const tagContainer = document.getElementById("tagContainer");
-        tagContainer.innerHTML = "";
+        const hiddenInputContainer = document.getElementById("hiddenInput");
 
-        const hiddenInput = document.getElementById("hiddenInput");
-        hiddenInput.innerHTML = "";
+        tagContainer.innerHTML = "";
+        hiddenInputContainer.innerHTML = "";
 
         tags.forEach((tag, index) => {
             const tagElement = document.createElement("div");
             tagElement.className = "tag";
             tagElement.style.backgroundColor = tag.color;
-
-            const tagValue = document.createElement("span");
-            tagValue.textContent = tag.value;
+            tagElement.textContent = tag.value;
 
             const deleteBtn = document.createElement("button");
             deleteBtn.innerHTML = "×";
-            deleteBtn.onclick = () => removeTag(index);
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeTag(index);
+            };
 
-            tagElement.appendChild(tagValue);
             tagElement.appendChild(deleteBtn);
             tagContainer.appendChild(tagElement);
-
             const inputHidden = document.createElement('input');
             inputHidden.type = 'hidden';
             inputHidden.name = 'tagTexts';
             inputHidden.value = tag.value;
-            hiddenInput.appendChild(inputHidden);
+            hiddenInputContainer.appendChild(inputHidden);
         });
     }
-
-    // File preview
-    const filesInput = document.getElementById('files');
-    const filePreview = document.getElementById('filePreview');
-
-    filesInput.addEventListener('change', () => {
-        filePreview.innerHTML = '';
-        for (let i = 0; i < filesInput.files.length; i++) {
-            const li = document.createElement('li');
-            li.innerHTML = `📄 ${filesInput.files[i].name}`;
-            filePreview.appendChild(li);
-        }
-    });
-
-    // Form submission
-    document.getElementById('courseForm').addEventListener('submit', e => {
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.classList.add('loading');
-        submitBtn.innerHTML = '⏳ Creating...';
-    });
-
-    // Tag input events
-    document.getElementById("tagInput").addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            addTag();
-        }
-    });
-
-    // Form reset
-    document.getElementById('courseForm').addEventListener('reset', () => {
-        filePreview.innerHTML = '';
-        tags.length = 0;
-        renderTags();
-    });
-
-    // Autocomplete
-    const tagInput = document.getElementById("tagInput");
-    const autocompleteList = document.getElementById("autocomplete-list");
-
-    tagInput.addEventListener("input", function() {
-        closeAllLists();
-        const val = this.value.toLowerCase();
-        if (!val) return false;
-
-        const filteredTags = availableTags.filter(t =>
-            t.toLowerCase().startsWith(val) &&
-            !tags.some(existing => existing.value.toLowerCase() === t.toLowerCase())
-        );
-
-        if (filteredTags.length === 0) return false;
-
-        filteredTags.forEach(tag => {
-            const item = document.createElement("div");
-            item.textContent = tag;
-            item.addEventListener("click", function() {
-                tagInput.value = this.textContent;
-                addTag();
-            });
-            autocompleteList.appendChild(item);
-        });
-    });
 
     function closeAllLists() {
-        while (autocompleteList.firstChild) {
-            autocompleteList.removeChild(autocompleteList.firstChild);
+        const autocompleteList = document.getElementById("autocomplete-list");
+        if (autocompleteList) {
+            autocompleteList.innerHTML = "";
         }
     }
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('courseForm');
+        const tagInput = document.getElementById('tagInput');
+        const addTagBtn = document.querySelector('.add-btn');
+        const filesInput = document.getElementById('files');
+        const filePreview = document.getElementById('filePreview');
+        const autocompleteList = document.getElementById("autocomplete-list");
+        tagInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addTag();
+            }
+        });
+        addTagBtn.addEventListener('click', addTag);
+        form.addEventListener('submit', e => {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '⏳ Creating...';
+        });
 
-    document.addEventListener("click", function (e) {
-        if (e.target !== tagInput) {
+        form.addEventListener('reset', () => {
+            if(filePreview) filePreview.innerHTML = '';
+            tags.length = 0;
+            renderTags();
+        });
+
+        tagInput.addEventListener("input", function() {
             closeAllLists();
+            const val = this.value.toLowerCase();
+            if (!val) return;
+
+            const filteredTags = availableTags.filter(t =>
+                t.toLowerCase().startsWith(val) &&
+                !tags.some(existing => existing.value.toLowerCase() === t.toLowerCase())
+            );
+
+            if (filteredTags.length === 0) return;
+
+            filteredTags.forEach(tag => {
+                const item = document.createElement("div");
+                item.textContent = tag;
+                item.addEventListener("click", function() {
+                    tagInput.value = this.textContent;
+                    addTag();
+                });
+                autocompleteList.appendChild(item);
+            });
+        });
+
+        document.addEventListener("click", function (e) {
+            if (e.target !== tagInput) {
+                closeAllLists();
+            }
+        });
+
+        const serverTags = /*[[${courseForm.tagTexts}]]*/ null;
+        if (serverTags && serverTags.length > 0) {
+            serverTags.forEach(tagText => {
+                if (!tags.some(t => t.value === tagText)) {
+                    tags.push({value: tagText, color: randomColor()});
+                }
+            });
+            renderTags();
         }
     });
 </script>
