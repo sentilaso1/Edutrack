@@ -57,7 +57,7 @@ public class HomeControlller {
         User user = (User) session.getAttribute("loggedInUser");
 
         if (user == null) return handleGuestUser(model);
-        if (user instanceof Mentor) return "redirect:/mentor";
+        if (user instanceof Mentor) return handleGuestUser(model);
         if ("Manager".equals(user.getClass().getSimpleName())) return "redirect:/manager/dashboard";
 
         Mentee mentee = (Mentee) user;

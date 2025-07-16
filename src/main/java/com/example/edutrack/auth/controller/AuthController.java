@@ -208,7 +208,7 @@ public class AuthController {
                 if("admin".equals(role)){
                     return "redirect:/admin";
                 }else if("manager".equals(role)){
-                    return "redirect:/manager";
+                    return "redirect:/manager/dashboard";
                 }
             }
         }
