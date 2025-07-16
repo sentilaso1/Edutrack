@@ -1154,3 +1154,9 @@
     box-shadow: 0 0 10px rgba(240, 173, 78, 0.5);
     cursor: not-allowed;
 }
+.course-filter {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 320px;
+}

@@ -60,7 +60,7 @@
                 </div>
 
                 <!-- Goals -->
-                 <div class="overview-card">
+                <div class="overview-card">
                     <div class="card-header">
                         <h3 class="card-title">Goals</h3>
                     </div>
@@ -198,7 +198,8 @@
                                         <div class="calendar-icon"></div>
                                         <span th:text="'Latest Session: ' + ${#temporals.format(skill.lastSessionDate, 'M/d/yyyy')}">5/12/2025</span>
                                     </div>
-                                    <a th:href="@{/schedules(courseId=${skill.courseId})}" class="details-link">View Schedules</a>
+                                    <a th:href="@{/schedules(courseId=${skill.courseId})}" class="details-link">View
+                                        Schedules</a>
 
                                 </div>
                             </div>
@@ -460,6 +461,16 @@
                             </option>
                         </select>
 
+                        <label>Mentor:</label>
+                        <select name="mentorId">
+                            <option value="">All Mentors</option>
+                            <option th:each="mentor : ${mentorList}"
+                                    th:value="${mentor.id}"
+                                    th:text="${mentor.fullName}"
+                                    th:selected="${selectedMentorId != null and mentor.id.equals(selectedMentorId)}">
+                            </option>
+                        </select>
+
                         <button type="submit">Filter</button>
                     </form>
 
@@ -473,9 +484,12 @@
 
                         <!-- Attendance Records -->
                         <div class="attendance-card" th:each="schedule : ${schedules}">
-                            <div class="attendance-left" th:text="${#temporals.format(schedule.date, 'MM/dd')}">06/12</div>
+                            <div class="attendance-left" th:text="${#temporals.format(schedule.date, 'MM/dd')}">06/12
+                            </div>
                             <div class="attendance-right">
-                                <div class="session-title" th:text="${schedule.enrollment.courseMentor.course.name}">React</div>
+                                <div class="session-title" th:text="${schedule.enrollment.courseMentor.course.name}">
+                                    React
+                                </div>
                                 <div class="session-meta">
                                     <span th:text="${schedule.enrollment.courseMentor.mentor.fullName}">John Mentor</span>
                                     •
@@ -512,11 +526,13 @@
                                         </div>
 
                                         <div class="report-buttons">
-                                            <button type="submit" name="hasIssue" value="false" class="report-btn satisfactory">
+                                            <button type="submit" name="hasIssue" value="false"
+                                                    class="report-btn satisfactory">
                                                 <span class="btn-icon">👍</span>
                                                 Everything was good
                                             </button>
-                                            <button type="submit" name="hasIssue" value="true" class="report-btn issue" onclick="return confirm('Are you sure you want to report an issue with this session?')">
+                                            <button type="submit" name="hasIssue" value="true" class="report-btn issue"
+                                                    onclick="return confirm('Are you sure you want to report an issue with this session?')">
                                                 <span class="btn-icon">🚨</span>
                                                 Report an issue
                                             </button>
@@ -533,34 +549,34 @@
                             <!-- Previous button -->
                             <li th:if="${currentPage > 0}">
                                 <a th:href="@{/attendance(
-                    page=${currentPage - 1},
-                    month=${filterMonth},
-                    courseId=${selectedCourseId},
-                    status=${selectedStatus},
-                    activeTab='sessions'
-                )}" class="pagination-link">Prev</a>
+                                page=${currentPage - 1},
+                                month=${filterMonth},
+                                courseId=${selectedCourseId},
+                                status=${selectedStatus},
+                                mentorId=${selectedMentorId}, activeTab='sessions'
+                            )}" class="pagination-link">Prev</a>
                             </li>
 
                             <!-- Page numbers -->
                             <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
                                 <a th:href="@{/attendance(
-                    page=${i},
-                    month=${filterMonth},
-                    courseId=${selectedCourseId},
-                    status=${selectedStatus},
-                    activeTab='sessions'
+                                page=${i},
+                                month=${filterMonth},
+                                courseId=${selectedCourseId},
+                                status=${selectedStatus},
+                                mentorId=${selectedMentorId}, activeTab='sessions'
                 )}" th:text="${i + 1}" class="pagination-link"></a>
                             </li>
 
                             <!-- Next button -->
                             <li th:if="${currentPage < totalPages - 1}">
                                 <a th:href="@{/attendance(
-                    page=${currentPage + 1},
-                    month=${filterMonth},
-                    courseId=${selectedCourseId},
-                    status=${selectedStatus},
-                    activeTab='sessions'
+                                page=${currentPage + 1},
+                                month=${filterMonth},
+                                courseId=${selectedCourseId},
+                                status=${selectedStatus},
+                                mentorId=${selectedMentorId}, activeTab='sessions'
                 )}" class="pagination-link">Next</a>
                             </li>
                         </ul>
@@ -601,7 +617,8 @@
                             <div class="review-header">
                                 <strong th:text="${review.courseTitle}">Game Development with Unity</strong>
                                 <span>
-                                    <div class="mentor-avatar" th:text="${#strings.substring(review.mentorName,0,1)}">D</div>
+                                    <div class="mentor-avatar"
+                                         th:text="${#strings.substring(review.mentorName,0,1)}">D</div>
                                     <span th:text="${review.mentorName}">David Kim</span>
                                 </span>
                             </div>
