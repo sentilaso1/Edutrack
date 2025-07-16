@@ -113,7 +113,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             FROM EnrollmentSchedule es
             WHERE es.enrollment = :enrollment
             AND es.attendance = 'PRESENT'
-            AND es.report = true
+            AND es.report = false
             """)
     Double getPercentComplete(Enrollment enrollment);
 
