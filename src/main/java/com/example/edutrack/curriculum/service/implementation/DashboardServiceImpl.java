@@ -73,9 +73,8 @@ public class DashboardServiceImpl implements DashboardService {
 
         if (next == null) return "No upcoming session";
 
-        String formattedTime = nearest.format(DateTimeFormatter.ofPattern("EEEE, hh:mm a"));
+        String formattedTime = nearest.format(DateTimeFormatter.ofPattern("EEEE, hh:mm a", Locale.ENGLISH));
         String courseName = next.getEnrollment().getCourseMentor().getCourse().getName();
-
         return courseName + " - " + formattedTime;
     }
 
@@ -240,32 +239,29 @@ public class DashboardServiceImpl implements DashboardService {
             int month,
             int year,
             UUID courseId,
+            UUID mentorId,
             String status,
             Pageable pageable
     ) {
 
-        Page<EnrollmentSchedule> rawPage = enrollmentScheduleRepository
-                .findByMenteeAndMonthWithCourseFilter(menteeId, month, year, courseId, pageable);
-
-        List<EnrollmentSchedule> filteredList = new ArrayList<>();
-
-        for (EnrollmentSchedule schedule : rawPage.getContent()) {
-            boolean match = true;
-
-            if (status != null && !status.isBlank()) {
-                match = schedule.getAttendance().name().equalsIgnoreCase(status);
-            }
-
-            if (match) {
-                filteredList.add(schedule);
+        EnrollmentSchedule.Attendance statusEnum = null;
+        if (status != null && !status.isBlank()) {
+            try {
+                statusEnum = EnrollmentSchedule.Attendance.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
             }
         }
 
-        filteredList.sort(Comparator
-                .comparing(EnrollmentSchedule::getDate)
-                .thenComparing(s -> s.getSlot().getStartTime()));
-
-        return new PageImpl<>(filteredList, pageable, rawPage.getTotalElements());
+        return enrollmentScheduleRepository.findByMenteeAndMonthWithCourseFilter(
+                menteeId,
+                month,
+                year,
+                courseId,
+                mentorId,
+                statusEnum,
+                pageable
+        );
     }
 
 
