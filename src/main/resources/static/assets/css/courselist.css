@@ -522,7 +522,35 @@ body {
 .course .btn { margin-inline: auto; }
 
 
+/* Existing styles assumed to be in courselist.css */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
 
+.page-link {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #4CAF50; /* Match add-btn color */
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.page-link:hover {
+  background-color: #45a049;
+}
+
+.page-current {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #808080; /* Grey to indicate non-clickable */
+  color: white;
+  border-radius: 4px;
+}
 
 
 /*-----------------------------------*\
