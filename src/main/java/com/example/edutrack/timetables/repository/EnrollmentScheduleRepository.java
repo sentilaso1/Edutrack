@@ -101,20 +101,23 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     @Query("SELECT MAX(es.date) FROM EnrollmentSchedule es WHERE es.enrollment.id = :enrollmentId AND es.attendance = :status")
     LocalDate findLastPresentSessionDate(@Param("enrollmentId") Long enrollmentId, @Param("status") EnrollmentSchedule.Attendance status);
 
-    //Author: Nguyen Thanh Vinh
     @Query("""
-                SELECT s FROM EnrollmentSchedule s
-                WHERE s.enrollment.mentee.id = :menteeId
-                  AND MONTH(s.date) = :month
-                  AND YEAR(s.date) = :year
-                  AND (:courseId IS NULL OR s.enrollment.courseMentor.course.id = :courseId)
-                  AND s.available = true
-            """)
+    SELECT s FROM EnrollmentSchedule s
+    WHERE s.enrollment.mentee.id = :menteeId
+      AND MONTH(s.date) = :month
+      AND YEAR(s.date) = :year
+      AND (:courseId IS NULL OR s.enrollment.courseMentor.course.id = :courseId)
+      AND (:mentorId IS NULL OR s.enrollment.courseMentor.mentor.id = :mentorId)
+      AND (:statusEnum IS NULL OR s.attendance = :statusEnum)
+      AND s.available = true
+""")
     Page<EnrollmentSchedule> findByMenteeAndMonthWithCourseFilter(
             @Param("menteeId") UUID menteeId,
             @Param("month") int month,
             @Param("year") int year,
             @Param("courseId") UUID courseId,
+            @Param("mentorId") UUID mentorId,
+            @Param("statusEnum") EnrollmentSchedule.Attendance statusEnum,
             Pageable pageable
     );
 
@@ -190,4 +193,15 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     Long countByEnrollmentAndRescheduleStatusNot(Enrollment enrollment, EnrollmentSchedule.RescheduleStatus status);
     @Query("SELECT es FROM EnrollmentSchedule es WHERE es.enrollment.courseMentor.mentor.id = :mentorId AND es.rescheduleStatus = 'REQUESTED'")
     List<EnrollmentSchedule> findPendingRequestsForMentor(@Param("mentorId") UUID mentorId);
+
+    @Query("SELECT s FROM EnrollmentSchedule s WHERE s.enrollment.mentee.id = :menteeId " +
+            "AND (:courseId IS NULL OR s.enrollment.courseMentor.course.id = :courseId) " +
+            "AND (:mentorId IS NULL OR s.enrollment.courseMentor.mentor.id = :mentorId)")
+    List<EnrollmentSchedule> findCalendarSchedules(
+            @Param("menteeId") UUID menteeId,
+            @Param("courseId") UUID courseId,
+            @Param("mentorId") UUID mentorId
+    );
+
+    boolean existsByEnrollment_CourseMentor_Course_IdAndDateAfter(UUID courseId, LocalDate date);
 }

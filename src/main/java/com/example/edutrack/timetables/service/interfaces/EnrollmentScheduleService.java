@@ -80,6 +80,8 @@ public interface EnrollmentScheduleService {
 
     List<UpcomingScheduleDTO> getUpcomingSchedules(Mentor mentor, int limit);
 
+    List<EnrollmentSchedule> getCalendarSchedules(UUID menteeId, UUID courseId, UUID mentorId);
+
     @Transactional
     void processExpiredRequests();
 }
