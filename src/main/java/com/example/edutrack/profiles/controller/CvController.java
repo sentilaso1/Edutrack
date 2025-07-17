@@ -58,7 +58,7 @@ public class CvController {
         logger.info("CvController initialized");
     }
 
-    @GetMapping("/admin/cv/list/{page}")
+    @GetMapping("/manager/cv/list/{page}")
     public String listCVs(@ModelAttribute CVFilterForm params, Model model, @PathVariable int page) {
         logger.info("Entering listCVs: page={}, filter={}, sort={}, tags={}",
                 page, params.getFilter(), params.getSort(), params.getTags());
@@ -116,10 +116,10 @@ public class CvController {
         return "/cv/list-cv";
     }
 
-    @GetMapping("/admin/cv/list")
+    @GetMapping("/manager/cv/list")
     public String redirectToListCVs() {
-        logger.info("Redirecting to /admin/cv/list/1");
-        return "redirect:/admin/cv/list/1";
+        logger.info("Redirecting to /manager/cv/list/1");
+        return "redirect:/manager/cv/list/1";
     }
 
     @GetMapping("mentor/cv/create")
@@ -257,7 +257,7 @@ public class CvController {
         }
     }
 
-    @GetMapping("/admin/cv/detail/{id}")
+    @GetMapping("/manager/cv/detail/{id}")
     public String detailCV(@PathVariable("id") UUID id, Model model) {
         logger.info("Entering detailCV: id={}", id);
 
@@ -297,8 +297,8 @@ public class CvController {
             redirectAttributes.addFlashAttribute("error", "CV must be in 'Pending' status.");
         }
 
-        logger.info("Redirecting to /admin/cv/list/1");
-        return "redirect:/admin/cv/list/1";
+        logger.info("Redirecting to /manager/cv/list/1");
+        return "redirect:/manager/cv/list/1";
     }
 
     @PostMapping("/cv/reject/{id}")
@@ -313,8 +313,8 @@ public class CvController {
             redirectAttributes.addFlashAttribute("error", "CV must be in 'Pending' status.");
         }
 
-        logger.info("Redirecting to /admin/cv/list/1");
-        return "redirect:/admin/cv/list/1";
+        logger.info("Redirecting to /manager/cv/list/1");
+        return "redirect:/manager/cv/list/1";
     }
 
     @GetMapping("/mentor/cv/course-sections")
