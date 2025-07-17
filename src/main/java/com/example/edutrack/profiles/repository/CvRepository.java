@@ -56,4 +56,6 @@ public interface CvRepository extends JpaRepository<CV, UUID> {
     @Query("SELECT DISTINCT cv.skills FROM CV cv")
     List<String> findAllSkills();
 
+    @Query("SELECT c FROM CV c WHERE c.user.id = :mentorId AND c.status = 'approved'")
+    CV findByMentorId(UUID mentorId);
 }

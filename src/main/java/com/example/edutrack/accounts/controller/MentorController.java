@@ -7,6 +7,8 @@ import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseServiceImpl;
+import com.example.edutrack.profiles.model.CV;
+import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
@@ -54,6 +56,8 @@ public class MentorController {
     public CourseMentorRepository courseMentorRepository;
     @Autowired
     private CourseServiceImpl courseServiceImpl;
+    @Autowired
+    private CvServiceImpl cvServiceImpl;
 
     @Autowired
     public MentorController(EnrollmentScheduleService enrollmentScheduleService,
@@ -355,6 +359,10 @@ public class MentorController {
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
+        }
+        CV cv = cvServiceImpl.getCVByMentorId(mentor.getId());
+        if(cv == null){
+            return "redirect:/mentor/cv/create";
         }
         MentorAvailableTime.Status enumValue = MentorAvailableTime.Status.valueOf(status);
 
