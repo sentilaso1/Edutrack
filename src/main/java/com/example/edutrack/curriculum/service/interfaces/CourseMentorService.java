@@ -48,6 +48,9 @@ public interface CourseMentorService {
 
     List<CourseMentor> findByMentorId(UUID mentorId);
     Page<CourseMentor> findByMentorIdPaged(UUID mentorId, Pageable pageable);
+    boolean isCourseLocked(UUID courseId);
 
-    boolean existsByCourseIdAndStatus(UUID courseId, ApplicationStatus status);
+    void addCourseMentor(UUID userId, UUID courseId, String description);
+    void removeCourseMentor(UUID userId, UUID courseId);
+    void updateCourseMentorDescription(UUID userId, UUID courseId, String description);
 }

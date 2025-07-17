@@ -176,10 +176,13 @@ public class EnrollmentSchedule {
      * @return true if feedback can be submitted, false otherwise.
      */
     public boolean canSubmitFeedback() {
-        long days = ChronoUnit.DAYS.between(this.date, LocalDate.now());
+        LocalDate today = LocalDate.now();
+        LocalDate sessionDate = this.date;
+        LocalDate deadline = sessionDate.plusDays(7);
         return this.attendance != Attendance.NOT_YET
                 && this.report == null
-                && days >= 0 && days <= 7;
+                && !today.isBefore(sessionDate)
+                && !today.isAfter(deadline);
     }
 
     /**

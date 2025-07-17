@@ -561,8 +561,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     public Page<EnrollmentSchedule> findScheduleByEnrollmentWithFilters(Long enrollmentId, String attendanceStatus, String slot, Pageable pageable) {
         Specification<EnrollmentSchedule> spec = EnrollmentScheduleSpecification.byEnrollment(enrollmentId)
                 .and(EnrollmentScheduleSpecification.withAttendanceStatus(attendanceStatus))
-                .and(EnrollmentScheduleSpecification.withSlot(slot))
-                .and(EnrollmentScheduleSpecification.withinLast7Days());
+                .and(EnrollmentScheduleSpecification.withSlot(slot));
 
         return enrollmentScheduleRepository.findAll(spec, pageable);
     }
@@ -570,6 +569,11 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     @Override
     public Page<EnrollmentAttendanceDTO> findAllSchedulesToBeConfirmedFiltered(Pageable pageable, String menteeId, String mentorId) {
         return enrollmentScheduleRepository.findScheduleToBeConfirmedFiltered(pageable, menteeId, mentorId);
+    }
+
+    @Override
+    public List<EnrollmentSchedule> getCalendarSchedules(UUID menteeId, UUID courseId, UUID mentorId) {
+        return enrollmentScheduleRepository.findCalendarSchedules(menteeId, courseId, mentorId);
     }
 
     @Override

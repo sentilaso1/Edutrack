@@ -105,7 +105,7 @@ public class MenteeController {
             @RequestParam(name = "mentorId", required = false) UUID mentorId,
             @RequestParam(name = "month", required = false) String month,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "6") int size,
+            @RequestParam(name = "size", defaultValue = "8") int size,
             @RequestParam(name = "goalStatus", required = false) String goalStatus,
             @RequestParam(name = "editGoalId", required = false) UUID editGoalId,
             @RequestParam(name = "reviewKeyword", required = false) String reviewKeyword,
@@ -149,7 +149,7 @@ public class MenteeController {
         if ("sessions".equals(activeTab)) {
             LocalDate now = LocalDate.now();
             YearMonth currentMonth = YearMonth.from(now);
-            Pageable pageable = PageRequest.of(0, 5);
+            Pageable pageable = PageRequest.of(0, 8);
 
             Page<EnrollmentSchedule> schedulePage = dashboardService.getFilteredSchedules(
                     menteeId,
@@ -157,8 +157,11 @@ public class MenteeController {
                     currentMonth.getYear(),
                     null,
                     null,
+                    null,
                     pageable
             );
+            model.addAttribute("mentorList", enrollmentService.findMentorsByMentee(menteeId));
+            model.addAttribute("selectedMentorId", mentorId);
             model.addAttribute("schedules", schedulePage.getContent());
             model.addAttribute("currentPage", 0);
             model.addAttribute("totalPages", schedulePage.getTotalPages());
@@ -327,7 +330,8 @@ public class MenteeController {
             @RequestParam(required = false) UUID courseId,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) UUID mentorId,
+            @RequestParam(defaultValue = "8") int size,
             @RequestParam(name = "activeTab", required = false) String activeTab,
             Model model
     ) {
@@ -340,19 +344,21 @@ public class MenteeController {
                 ? YearMonth.parse(month)
                 : YearMonth.from(now);
 
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page, 8);
 
         Page<EnrollmentSchedule> schedulePage = dashboardService.getFilteredSchedules(
                 menteeId,
                 selectedMonth.getMonthValue(),
                 selectedMonth.getYear(),
                 courseId,
+                mentorId,
                 status,
                 pageable
         );
 
         List<Course> foundCourseMentor = enrollmentService.findCourseByMenteeIdAndEnrollmentStatus(menteeId);
-
+        model.addAttribute("mentorList", enrollmentService.findMentorsByMentee(menteeId));
+        model.addAttribute("selectedMentorId", mentorId);
         model.addAttribute("schedules", schedulePage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", schedulePage.getTotalPages());
@@ -369,6 +375,7 @@ public class MenteeController {
     public String showSchedulesPage(
             HttpSession session,
             @RequestParam(value = "courseId", required = false) UUID courseId,
+            @RequestParam(value = "mentorId", required = false) UUID mentorId,
             @RequestParam(value = "weekOffset", defaultValue = "0") int weekOffset,
             Model model
     ) {
@@ -392,13 +399,7 @@ public class MenteeController {
         System.out.println("Week end: " + end);
         System.out.println("WeekOffset: " + weekOffset);
 
-        List<EnrollmentSchedule> schedules;
-        if (courseId != null) {
-            schedules = enrollmentScheduleService.getEnrollmentSchedulesByCourseAndMentee(courseId, menteeId);
-        } else {
-            schedules = enrollmentScheduleService.getEnrollmentSchedulesByMentee(menteeId);
-        }
-
+        List<EnrollmentSchedule> schedules = enrollmentScheduleService.getCalendarSchedules(menteeId, courseId, mentorId);
         // DEBUG: Print raw schedules
         System.out.println("Raw schedules count: " + schedules.size());
         for (EnrollmentSchedule s : schedules) {
@@ -434,7 +435,6 @@ public class MenteeController {
         }
 
         Map<String, ScheduleDTO> reviewingSlotsMap = new HashMap<>();
-
         List<EnrollmentSchedule> reviewingSchedules;
         if (courseId != null) {
             reviewingSchedules = enrollmentScheduleService.getSlotsUnderReviewByCourse(menteeId, courseId, start, end);
@@ -454,12 +454,14 @@ public class MenteeController {
             }
         }
 
-        List<CourseMentor> courses = enrollmentService.getCourseMentorsByMentee(menteeId);
+        List<Course> courses = enrollmentService.findCourseByMenteeIdAndEnrollmentStatus(menteeId);
         int testCount = enrollmentScheduleService.countTestSlot(menteeId);
         LocalDate today = LocalDate.now();
         List<LocalDate> daysInWeek = IntStream.range(0, 7)
                 .mapToObj(mondayOfWeek::plusDays)
                 .toList();
+        model.addAttribute("mentorList", enrollmentService.findMentorsByMentee(menteeId));
+        model.addAttribute("selectedMentorId", mentorId);
         model.addAttribute("reviewingSlotsMap", reviewingSlotsMap);
         model.addAttribute("todayDate", today);
         model.addAttribute("daysInWeek", daysInWeek);

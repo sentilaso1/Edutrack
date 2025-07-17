@@ -288,11 +288,16 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     List<CourseMentor> findRandomCourseMentorsExcluding(@Param("excludedIds") List<UUID> excludedIds, Pageable pageable);
 
     Page<CourseMentor> findByMentorId(UUID mentorId, Pageable pageable);
-    boolean existsByCourseIdAndStatus(UUID courseId, ApplicationStatus status);
+
+    boolean existsByCourseId(UUID courseId);
 
     @Query("SELECT cm FROM CourseMentor cm WHERE cm.id = :courseMentorId")
     CourseMentor findById(UUID courseMentorId);
 
     List<CourseMentor> findByCourse_IdAndStatus(UUID courseId, ApplicationStatus status);
+
+    boolean existsByMentorIdAndCourseId(UUID userId, UUID courseId);
+
+    Optional<CourseMentor> findByMentorIdAndCourseId(UUID userId, UUID courseId);
 }
 

@@ -3,18 +3,19 @@
 <head>
     <title>Manage Course Prices</title>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}" />
     <style>
         body {
             font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Arial, sans-serif;
         }
         .mentor-section-bg {
-            background-image: url('/assets/images/course-bg.png');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
             min-height: 100vh;
-            padding: 120px 0 64px 0;
         }
         .mentor-price-card-list {
             display: grid;
@@ -196,56 +197,65 @@
             .mentor-card-right { align-items: flex-start; }
         }
     </style>
+    <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}"/>
 </head>
 <body>
-<th:block th:insert="~{fragments/mentor-header :: header}"></th:block>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+    <main>
+        <section class="mentor-section-bg">
+            <h2 style="
+                    text-align: center;
+                    font-size: 2.8rem;
+                    color: var(--oxford-blue);
+                    font-weight: 800;
+                    letter-spacing: 0.02em;
+                    margin-bottom: 6px;
+                    margin-top: 12px;
+                    font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Arial, sans-serif;
+                ">
+                Change your course price
+            </h2>
+            <!-- MESSAGE DIV (success or error from RedirectAttributes) -->
+            <div class="msg-container">
+                <div th:if="${success}" class="msg-success" th:text="${success}"></div>
+                <div th:if="${error}" class="msg-error" th:text="${error}"></div>
+            </div>
 
-<main>
-    <section class="mentor-section-bg">
-        <h2 style="
-                text-align: center;
-                font-size: 2.8rem;
-                color: var(--oxford-blue);
-                font-weight: 800;
-                letter-spacing: 0.02em;
-                margin-bottom: 6px;
-                margin-top: 12px;
-                font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Arial, sans-serif;
-            ">
-            Change your course price
-        </h2>
-        <!-- MESSAGE DIV (success or error from RedirectAttributes) -->
-        <div class="msg-container">
-            <div th:if="${success}" class="msg-success" th:text="${success}"></div>
-            <div th:if="${error}" class="msg-error" th:text="${error}"></div>
-        </div>
-
-        <form th:action="@{/mentor/price/save}" method="post" autocomplete="off">
-            <div class="mentor-price-card-list">
-                <div th:each="cm : ${courseMentors}" class="mentor-price-card" tabindex="0">
-                    <input type="hidden" name="courseId" th:value="${cm.course.id}" />
-                    <div class="mentor-card-header">
-                        <div class="mentor-card-title" th:text="${cm.course.name}">Course Name</div>
-                        <div class="mentor-card-right">
-                            <span class="current-price" th:text="${cm.price} + ' VND'">0.00</span>
-                            <span class="created-date" th:text="${#dates.format(cm.course.createdDate, 'yyyy-MM-dd')}">2023-11-05</span>
+            <form th:action="@{/mentor/price/save}" method="post" autocomplete="off">
+                <div class="mentor-price-card-list">
+                    <div th:each="cm : ${courseMentors}" class="mentor-price-card" tabindex="0">
+                        <input type="hidden" name="courseId" th:value="${cm.course.id}" />
+                        <div class="mentor-card-header">
+                            <div class="mentor-card-title" th:text="${cm.course.name}">Course Name</div>
+                            <div class="mentor-card-right">
+                                <span class="current-price" th:text="${cm.price} + ' VND'">0.00</span>
+                                <span class="created-date" th:text="${#dates.format(cm.course.createdDate, 'yyyy-MM-dd')}">2023-11-05</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="mentor-card-desc-header">Course Description:</div>
+                            <div class="mentor-card-desc" th:text="${cm.description}">Course Description</div>
+                        </div>
+                        <!-- Price edit area (hidden by default, shown when card is active) -->
+                        <div class="mentor-card-edit-area">
+                            <input class="mentor-card-edit-input" type="number" name="price"
+                                   step="0.01" min="0" placeholder="Enter new price"/>
                         </div>
                     </div>
-                    <div>
-                        <div class="mentor-card-desc-header">Course Description:</div>
-                        <div class="mentor-card-desc" th:text="${cm.description}">Course Description</div>
-                    </div>
-                    <!-- Price edit area (hidden by default, shown when card is active) -->
-                    <div class="mentor-card-edit-area">
-                        <input class="mentor-card-edit-input" type="number" name="price"
-                               step="0.01" min="0" placeholder="Enter new price"/>
-                    </div>
                 </div>
-            </div>
-            <button type="submit" class="save-all-btn">Save All</button>
-        </form>
-    </section>
-</main>
+                <button type="submit" class="save-all-btn">Save All</button>
+            </form>
+        </section>
+    </main>
+    </div>
+</div>
 
 <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 

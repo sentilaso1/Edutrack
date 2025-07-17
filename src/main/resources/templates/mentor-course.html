@@ -458,6 +458,9 @@
       align-items: center;
       gap: 0.1em;
     }
+    .review-rating-stars span{
+      display: flex !important;
+    }
     .review-rating-stars i.ri-star-fill,
     .review-rating-stars i.ri-star-half-fill {
       color: #fa6262;
@@ -976,6 +979,17 @@
 <script th:inline="javascript">
   document.addEventListener("DOMContentLoaded", function() {
     const monthSelect = document.getElementById("monthSelect");
+
+    const initialMonth = /*[[${selectedMonth}]]*/ 'current-month';
+    console.log("Initial month:", initialMonth); // Log initial month
+    const mentorId = /*[[${mentor.get().id}]]*/ 'mentor-id';
+    fetch(`/mentors/${mentorId}/schedule-table?month=${initialMonth}`)
+            .then(response => response.text())
+            .then(html => {
+              document.getElementById("scheduleTableContainer").innerHTML = html;
+            })
+            .catch(err => alert("Failed to load schedule for selected month!"));
+
     monthSelect.addEventListener("change", function() {
       const month = this.value;
       const mentorId = /*[[${mentor.get().id}]]*/ 'mentor-id';

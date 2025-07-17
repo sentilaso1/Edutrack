@@ -1,17 +1,19 @@
 package com.example.edutrack.curriculum.service.implementation;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
+import com.example.edutrack.accounts.repository.UserRepository;
 import com.example.edutrack.curriculum.model.*;
-import com.example.edutrack.curriculum.repository.ApplicantsRepository;
-import com.example.edutrack.curriculum.repository.CourseMentorRepository;
-import com.example.edutrack.curriculum.repository.FeedbackRepository;
-import com.example.edutrack.curriculum.repository.TagRepository;
+import com.example.edutrack.curriculum.repository.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.DashboardService;
+import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
+import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,17 +36,13 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     private final EnrollmentRepository enrollmentRepository;
     private final FeedbackRepository feedbackRepository;
     private final DashboardService dashboardService;
+    private final CVCourseRepository cvCourseRepository;
+    private final EnrollmentScheduleRepository enrollmentScheduleRepository;
+    private final UserRepository userRepository;
+    private final CourseRepository courseRepository;
 
     @Autowired
-    public CourseMentorServiceImpl(CourseMentorRepository courseMentorRepository,
-                                   ApplicantsRepository applicantsRepository,
-                                   MenteeRepository menteeRepository,
-                                   TagRepository tagRepository,
-                                   MentorRepository mentorRepository,
-                                   EnrollmentServiceImpl enrollmentServiceImpl,
-                                   EnrollmentRepository enrollmentRepository,
-                                   FeedbackRepository feedbackRepository,
-                                   DashboardService dashboardService) {
+    public CourseMentorServiceImpl(CourseMentorRepository courseMentorRepository, ApplicantsRepository applicantsRepository, MenteeRepository menteeRepository, TagRepository tagRepository, MentorRepository mentorRepository, EnrollmentServiceImpl enrollmentServiceImpl, EnrollmentRepository enrollmentRepository, FeedbackRepository feedbackRepository, DashboardService dashboardService, CVCourseRepository cvCourseRepository, EnrollmentScheduleRepository enrollmentScheduleRepository, UserRepository userRepository, CourseRepository courseRepository) {
         this.courseMentorRepository = courseMentorRepository;
         this.applicantsRepository = applicantsRepository;
         this.menteeRepository = menteeRepository;
@@ -53,7 +52,12 @@ public class CourseMentorServiceImpl implements CourseMentorService {
         this.enrollmentRepository = enrollmentRepository;
         this.feedbackRepository = feedbackRepository;
         this.dashboardService = dashboardService;
+        this.cvCourseRepository = cvCourseRepository;
+        this.enrollmentScheduleRepository = enrollmentScheduleRepository;
+        this.userRepository = userRepository;
+        this.courseRepository = courseRepository;
     }
+
 
     @Override
     public Page<CourseMentor> findAlByOrderByCreatedDateAsc(Pageable pageable) {
@@ -259,8 +263,47 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     }
 
     @Override
-    public boolean existsByCourseIdAndStatus(UUID courseId, ApplicationStatus status) {
-        return courseMentorRepository.existsByCourseIdAndStatus(courseId, status);
+    public boolean isCourseLocked(UUID courseId) {
+        boolean hasNonRejectedCVs = cvCourseRepository.existsByCourse_IdAndCv_StatusNot(courseId, CV.STATUS_REJECTED);
+        if (hasNonRejectedCVs) {
+            return true;
+        }
+        boolean hasActiveOrFutureSessions = enrollmentScheduleRepository
+                .existsByEnrollment_CourseMentor_Course_IdAndDateAfter(courseId, LocalDate.now().minusDays(1));
+        if (hasActiveOrFutureSessions) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public void addCourseMentor(UUID userId, UUID courseId, String description) {
+        Mentor mentor = mentorRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
+
+        if (courseMentorRepository.existsByMentorIdAndCourseId(userId, courseId)) {
+            return;
+        }
+
+        CourseMentor courseMentor = new CourseMentor();
+        courseMentor.setMentor(mentor);
+        courseMentor.setCourse(course);
+        courseMentor.setDescription(description);
+        courseMentorRepository.save(courseMentor);
+    }
+
+    public void removeCourseMentor(UUID userId, UUID courseId) {
+        CourseMentor courseMentor = courseMentorRepository.findByMentorIdAndCourseId(userId, courseId)
+                .orElseThrow(() -> new IllegalArgumentException("CourseMentor not found: userId=" + userId + ", courseId=" + courseId));
+        courseMentorRepository.delete(courseMentor);
+    }
+    public void updateCourseMentorDescription(UUID userId, UUID courseId, String description) {
+        CourseMentor courseMentor = courseMentorRepository.findByMentorIdAndCourseId(userId, courseId)
+                .orElseThrow(() -> new IllegalArgumentException("CourseMentor not found: userId=" + userId + ", courseId=" + courseId));
+        courseMentor.setDescription(description);
+        courseMentorRepository.save(courseMentor);
     }
 }
 

@@ -10,23 +10,13 @@
 </head>
 <body class="bg-gray-100">
 <!-- Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">EduTrack Admin</div>
-    <nav class="mt-4">
-        <a th:href="@{/manager/dashboard}" class="hover:bg-gray-700">📊 Dashboard</a>
-        <a th:href="@{/manager/course-dashboard}" class="active">📚 Courses</a>
-        <a th:href="@{/manager/mentees}" class="hover:bg-gray-700">👥 Mentees</a>
-        <a th:href="@{/manager/mentors}" class="hover:bg-gray-700">🧑‍🏫 Mentors</a>
-        <a th:href="@{/manager/payments}" class="hover:bg-gray-700">💳 Payments</a>
-    </nav>
-</div>
-
+<th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
 <!-- Main Content -->
 <div class="main-content">
     <!-- Page Header -->
     <div class="page-header">
         <h1>Edit Course</h1>
-        <p>Update course information, materials, and settings</p>
+        <p>Update course information and settings</p>
     </div>
 
     <!-- Success Modal -->
@@ -41,7 +31,7 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Success!</h3>
                 <p class="text-sm text-gray-600 mb-6" th:text="${successMessage}"></p>
                 <div class="flex gap-3 justify-center">
-                    <a th:href="@{/manager/view}" class="btn-primary">📋 View Courses</a>
+                    <a th:href="@{/manager/course-dashboard}" class="btn-primary">📋 View Courses</a>
                     <a th:href="@{/manager/courses/edit/{id}(id=${courseId})}" class="btn-secondary">✏️ Continue Editing</a>
                 </div>
             </div>
@@ -103,33 +93,6 @@
                     <div id="hiddenInput"></div>
                 </div>
 
-                <!-- Current Materials -->
-                <div class="form-group" th:if="${materials != null and !materials.isEmpty()}">
-                    <label>Current Teaching Materials</label>
-                    <ul class="file-list">
-                        <li th:each="material : ${materials}">
-                            <div class="file-name" th:text="${material.name}">File name</div>
-                            <div class="file-actions">
-                                <a th:href="@{'/manager/materials/download/' + ${material.id}}">📥 Download</a>
-                                <a th:href="@{'/manager/materials/delete/' + ${material.id}}" class="delete"
-                                   onclick="return confirm('Are you sure you want to delete this material?')">🗑️ Delete</a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Upload New Materials -->
-                <div class="form-group">
-                    <label for="files">
-                        Upload New Materials
-                        <span class="tooltip" title="Select new teaching materials (PDF, DOC, PPT) - multiple files allowed">❓</span>
-                    </label>
-                    <input type="file" id="files" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx"
-                           th:class="${#fields.hasErrors('files')} ? 'form-input error' : 'form-input'" />
-                    <span th:if="${#fields.hasErrors('files')}" th:errors="*{files}" class="error-message"></span>
-                    <span th:if="${fileError}" th:text="${fileError}" class="error-message"></span>
-                    <ul id="filePreview" class="file-preview"></ul>
-                </div>
             </div>
 
             <!-- Buttons -->
@@ -140,7 +103,7 @@
                 <button type="reset" class="btn-danger">
                     🗑️ Clear Form
                 </button>
-                <a href="/manager/view" class="btn-secondary">
+                <a href="/manager/course-dashboard" class="btn-secondary">
                     ← Back to Courses
                 </a>
             </div>
@@ -225,19 +188,6 @@
         });
     }
 
-    // File preview
-    const filesInput = document.getElementById('files');
-    const filePreview = document.getElementById('filePreview');
-
-    filesInput.addEventListener('change', () => {
-        filePreview.innerHTML = '';
-        for (let i = 0; i < filesInput.files.length; i++) {
-            const li = document.createElement('li');
-            li.innerHTML = `📄 ${filesInput.files[i].name}`;
-            filePreview.appendChild(li);
-        }
-    });
-
     // Form submission
     document.getElementById('courseForm').addEventListener('submit', e => {
         const submitBtn = document.getElementById('submitBtn');
@@ -256,7 +206,6 @@
 
     // Form reset
     document.getElementById('courseForm').addEventListener('reset', () => {
-        filePreview.innerHTML = '';
         tags.length = 0;
         if (initialTags && initialTags.length > 0) {
             initialTags.forEach(tagText => {

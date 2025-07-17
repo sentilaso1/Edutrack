@@ -6,6 +6,7 @@ import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.common.controller.EndpointRegistry;
 import com.example.edutrack.curriculum.model.LandingPageConfig;
 import com.example.edutrack.curriculum.model.MenteeLandingRole;
+import com.example.edutrack.curriculum.service.interfaces.DashboardService;
 import com.example.edutrack.curriculum.service.interfaces.LandingPageConfigService;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
@@ -14,6 +15,10 @@ import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleServ
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.accounts.service.interfaces.ManagerStatsService;
+import com.example.edutrack.transactions.model.Transaction;
+import com.example.edutrack.transactions.model.Wallet;
+import com.example.edutrack.transactions.service.TransactionService;
+import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +39,7 @@ import java.time.LocalDateTime;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import com.example.edutrack.accounts.dto.ManagerStatsDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +54,9 @@ public class ManagerController {
     private final EnrollmentScheduleService enrollmentScheduleService;
     private final ManagerStatsService managerStatsService;
     private final LandingPageConfigService landingPageConfigService;
+    private final WalletService walletService;
+    private final TransactionService transactionService;
+    private final DashboardService dashboardService;
     private final EndpointRegistry endpointRegistry;
 
     public static final int ENROLLMENT_PAGE_SIZE = 30;
@@ -59,7 +68,7 @@ public class ManagerController {
                              EnrollmentService enrollmentServiceImpl,
                              EnrollmentScheduleService enrollmentScheduleService,
                              ManagerStatsService managerStatsService,
-                             LandingPageConfigService landingPageConfigService, EndpointRegistry endpointRegistry) {
+                             LandingPageConfigService landingPageConfigService, WalletService walletService, TransactionService transactionService, DashboardService dashboardService, EndpointRegistry endpointRegistry) {
         this.mentorService = mentorService;
         this.menteeService = menteeService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
@@ -67,6 +76,9 @@ public class ManagerController {
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.managerStatsService = managerStatsService;
         this.landingPageConfigService = landingPageConfigService;
+        this.walletService = walletService;
+        this.transactionService = transactionService;
+        this.dashboardService = dashboardService;
         this.endpointRegistry = endpointRegistry;
     }
 
@@ -180,14 +192,60 @@ public class ManagerController {
                 eid, attendance, slot, pageable
         );
 
+        boolean canBeFinalized = dashboardService.hasCompletedCourse(enrollment).orElse(false) &&
+                enrollment.getTransaction().getStatus() == Transaction.TransactionStatus.PENDING;
+
         model.addAttribute("enrollment", enrollment);
         model.addAttribute("schedulePage", schedulePage);
         model.addAttribute("selectedAttendanceStatus", attendance);
         model.addAttribute("selectedSlot", slot);
         model.addAttribute("dateDirection", dateDirection);
         model.addAttribute("slotDirection", slotDirection);
+        model.addAttribute("canBeFinalized", canBeFinalized);
+        model.addAttribute("isFinalized", enrollment.getTransaction().getStatus() == Transaction.TransactionStatus.COMPLETED);
 
         return "manager/schedule-details";
+    }
+
+    @PostMapping("/manager/schedules/finalize/{eid}")
+    public String finalizeEnrollment(@PathVariable Long eid) {
+        Enrollment enrollment = enrollmentService.findById(eid);
+        if (enrollment == null) {
+            return "redirect:/manager/schedules?error=enrollment_not_found";
+        }
+
+        Optional<Boolean> hasCompleted = dashboardService.hasCompletedCourse(enrollment);
+        if (hasCompleted.isEmpty() || !hasCompleted.get()) {
+            return "redirect:/manager/schedules/view/" + eid + "?error=not_completed";
+        }
+
+        Optional<Wallet> menteeWalletOpt = walletService.findByUser(enrollment.getMentee());
+        Optional<Wallet> mentorWalletOpt = walletService.findByUser(enrollment.getCourseMentor().getMentor());
+
+        if (menteeWalletOpt.isEmpty() || mentorWalletOpt.isEmpty()) {
+            return "redirect:/manager/schedules/view/" + eid + "?error=missing_wallet";
+        }
+
+        Wallet menteeWallet = menteeWalletOpt.get();
+        Wallet mentorWallet = mentorWalletOpt.get();
+
+        menteeWallet.setOnHold(menteeWallet.getOnHold() - enrollment.getTransaction().getAbsoluteAmount());
+        mentorWallet.setBalance(mentorWallet.getBalance() + enrollment.getTransaction().getAbsoluteAmount());
+        walletService.save(menteeWallet);
+        walletService.save(mentorWalletOpt.get());
+
+        Transaction transaction = new Transaction(
+                enrollment.getTransaction().getAbsoluteAmount(),
+                "Registration for Course " + enrollment.getCourseMentor().getCourse().getName() + " by " + enrollment.getCourseMentor().getMentor().getFullName(),
+                mentorWallet
+        );
+        transaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+        transactionService.save(transaction);
+
+        enrollment.getTransaction().setStatus(Transaction.TransactionStatus.COMPLETED);
+        transactionService.save(enrollment.getTransaction());
+
+        return "redirect:/manager/schedules/view/" + eid + "?finalize=true";
     }
 
     private LocalDateTime getStartDateByPeriod(String period) {

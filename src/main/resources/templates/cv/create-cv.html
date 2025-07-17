@@ -6,7 +6,7 @@
     <title>Create CV - EduTrack</title>
     <link rel="stylesheet" th:href="@{/css/master.css}"/>
     <link rel="stylesheet" th:href="@{/css/colors.css}"/>
-    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -263,14 +263,13 @@
             .button-center-wrapper { flex-direction: column; gap: 9px; }
         }
     </style>
-
     <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
-    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
-
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}"/>
+    <!-- Add jQuery for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <th:block th:insert="~{fragments/header :: header}"></th:block>
@@ -288,7 +287,7 @@
                                 <div th:if="${cvStatus == 'approved'}" class="alert-info">
                                     Your CV is approved and can no longer be edited.
                                 </div>
-                                <div th:if="${cvStatus == 'pending'}" class="alert-info">
+                                <div th:if="${cvStatus == 'pending' || cvStatus == 'aiapproved'}" class="alert-info">
                                     Your CV is being evaluated by the manager
                                 </div>
                                 <div th:if="${cvStatus == 'rejected'}" class="alert-info">
@@ -357,72 +356,9 @@
                                     <input type="hidden" name="selectedCourses" id="selectedCoursesInput"/>
                                 </form>
                             </div>
-                            <!-- RIGHT: Registered Courses -->
-                            <div class="courses-section">
-                                <!-- Available Courses (hide if CV approved) -->
-                                <!-- Available Courses Section -->
-                                <div th:if="${cvStatus == 'new' || cvStatus == 'rejected'}">
-                                    <h2>Available Courses</h2>
-                                    <div id="available-courses-list">
-                                        <div th:if="${availableCoursePage != null && !availableCoursePage.isEmpty()}">
-                                            <div th:each="course : ${availableCoursePage.content}" class="course-card" th:attr="data-course-id=${course.id}">
-                                                <div class="course-title" th:text="${course.name}">Course Name</div>
-                                                <div class="course-description" th:text="${course.description}"></div>
-                                                <div class="course-meta">
-                                                    <span th:text="'Created date: ' + ${#dates.format(course.createdDate, 'dd/MM/yyyy')}"></span>
-                                                </div>
-                                                <button class="add-btn" type="button" th:attr="data-course-id=${course.id}">+</button>
-                                            </div>
-                                            <!-- Pagination controls (move outside if needed) -->
-                                        </div>
-                                        <div>
-                                            <p id="no-available-courses-msg"
-                                               th:if="${availableCoursePage == null || availableCoursePage.isEmpty()}">
-                                                You haven't registered any course.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Registered Courses Section -->
-                                <h2 style="margin-top:32px;">Your Registered Courses</h2>
-                                <div id="registered-courses-list">
-                                    <div th:if="${registeredCoursePage != null && !registeredCoursePage.isEmpty()}">
-                                        <div th:each="cm : ${registeredCoursePage.content}" class="course-card"
-                                             th:attr="data-course-id=${cm.course.id}, data-description=${cm.description}">
-                                            <div class="course-title" th:text="${cm.course.name}"></div>
-                                            <div class="course-description" th:text="${cm.course.description}"></div>
-                                            <div>
-                                                <div class="mentor-card-desc-header">Teaching Description:</div>
-                                                <div th:if="${cvStatus == 'new' or cvStatus == 'rejected'}">
-                                                    <div class="form-group dynamic-inputs">
-                                                <textarea class="course-desc" required
-                                                          placeholder="Describe how you will teach this course"
-                                                          th:text="${cm.description}">
-                                                </textarea>
-                                                    </div>
-                                                </div>
-                                                <div th:if="${cvStatus != 'new' and cvStatus != 'rejected'}" class="mentor-card-desc" th:text="${cm.description}"></div>
-                                            </div>
-                                            <div class="course-meta">
-                                                <span th:text="'Created date: ' + ${#dates.format(cm.course.createdDate, 'dd/MM/yyyy')}"></span>
-                                            </div>
-                                            <!-- Remove button (if not approved) -->
-                                            <button class="remove-btn"
-                                                    th:if="${cvStatus == 'new' || cvStatus == 'rejected'}"
-                                                    type="button"
-                                                    style="background:#fa6262; color: #fff; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; position: absolute; top: 13px; right: 13px; transition: background 0.15s, transform 0.14s; cursor: pointer;">
-                                                -
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p id="no-registered-courses-msg"
-                                           th:if="${registeredCoursePage == null || registeredCoursePage.isEmpty()}">
-                                            You haven't registered any course.
-                                        </p>
-                                    </div>
-                                </div>
+                            <!-- RIGHT: Courses Section -->
+                            <div class="courses-section" id="courses-section">
+                                <th:block th:replace="~{fragments/course-sections :: courseSections(availableCoursePage=${availableCoursePage}, registeredCoursePage=${registeredCoursePage}, pageNumber=${pageNumber}, registeredPageNumber=${registeredPageNumber}, cvStatus=${cvStatus}, userId=${userId})}"></th:block>
                             </div>
                         </div>
                         <div class="button-center-wrapper">
@@ -430,140 +366,186 @@
                                 Please select at least one course to create your CV.
                             </div>
                             <button type="submit" class="create-btn" form="cvForm"
-                                    th:if="${cvStatus != 'approved'}">Create CV</button>
+                                    th:if="${cvStatus == 'new' || cvStatus == 'rejected'}">Create CV</button>
                         </div>
                     </div>
                 </section>
             </article>
         </main>
     </div>
-
 </div>
-
-
-
 <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
-
-<!--
-- custom js link
--->
 <!-- Custom JS -->
 <script th:src="@{/assets/js/courlist.js}"></script>
-
 <!-- Ionicons -->
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Build selectedCourses map from DOM (registered courses)
+        // Build selectedCourses map from DOM and backend
         const selectedCourses = new Map();
-        document.querySelectorAll('#registered-courses-list .course-card').forEach(card => {
-            const courseId = card.getAttribute('data-course-id');
-            let description = card.getAttribute('data-description') || '';
-            selectedCourses.set(courseId, { description });
-        });
+        function initializeSelectedCourses() {
+            selectedCourses.clear();
+            document.querySelectorAll('#registered-courses-list .course-card').forEach(card => {
+                const courseId = card.getAttribute('data-course-id');
+                let description = card.getAttribute('data-description') || '';
+                selectedCourses.set(courseId, { description });
+            });
+        }
+        initializeSelectedCourses();
 
         // Elements
-        const availableList = document.getElementById('available-courses-list');
-        const registeredList = document.getElementById('registered-courses-list');
+        const coursesSection = document.getElementById('courses-section');
         const warning = document.getElementById('courseWarning');
         const selectedCoursesInput = document.getElementById('selectedCoursesInput');
         const cvForm = document.getElementById('cvForm');
 
-        function updateRegisteredCoursesMsg() {
-            const msg = document.getElementById('no-registered-courses-msg');
-            if (registeredList.querySelector('.course-card')) {
-                msg && (msg.style.display = 'none');
-            } else {
-                msg && (msg.style.display = '');
+        function updateCoursesSection(page, registeredPage) {
+            const userId = document.querySelector('input[name="userId"]').value;
+            if (!userId) {
+                console.error('User ID is missing');
+                alert('User ID is missing. Please refresh the page and try again.');
+                return;
             }
-        }
-
-        function updateAvailableCoursesMsg() {
-            const msg = document.getElementById('no-available-courses-msg');
-            if (availableList.querySelector('.course-card')) {
-                msg && (msg.style.display = 'none');
-            } else {
-                msg && (msg.style.display = '');
-            }
-        }
-
-        // Add course to registered section
-        availableList.addEventListener('click', function(e) {
-            if (e.target.classList.contains('add-btn')) {
-                const card = e.target.closest('.course-card');
-                const courseId = card.getAttribute('data-course-id');
-                // Get description from Map or attribute
-                let description = selectedCourses.has(courseId)
-                    ? selectedCourses.get(courseId).description
-                    : (card.getAttribute('data-description') || '');
-                selectedCourses.set(courseId, { description });
-
-                // Move card to Registered section
-                registeredList.appendChild(card);
-                // Change button to Remove
-                e.target.textContent = '-';
-                e.target.classList.add('remove-btn');
-                e.target.classList.remove('add-btn');
-                e.target.style.background = '#fa6262';
-
-                // Add dynamic textarea for teaching description with value
-                if (!card.querySelector('.dynamic-inputs')) {
-                    const inputDiv = document.createElement('div');
-                    inputDiv.className = 'dynamic-inputs';
-                    inputDiv.innerHTML = `
-                    <div class="form-group">
-                        <label>Teaching Description</label>
-                        <textarea class="course-desc" placeholder="Describe how you will teach this course" required>${description}</textarea>
-                    </div>
-                `;
-                    card.appendChild(inputDiv);
-                } else {
-                    // If already exists (just in case), set value
-                    const descInput = card.querySelector('.course-desc');
-                    if (descInput) descInput.value = description;
-                }
-
-                // Update Map on input
-                const descInput = card.querySelector('.course-desc');
-                if (descInput) {
-                    descInput.value = description;
-                    descInput.addEventListener('input', function () {
-                        selectedCourses.set(courseId, { description: descInput.value.trim() });
+            $.ajax({
+                url: '/mentor/cv/course-sections',
+                method: 'GET',
+                data: {
+                    page: page || 1,
+                    registeredPage: registeredPage || 1,
+                    userId: userId
+                },
+                success: function(data) {
+                    console.log('AJAX response:', data);
+                    coursesSection.innerHTML = data;
+                    // Reinitialize selectedCourses with current page, but preserve existing descriptions
+                    document.querySelectorAll('#registered-courses-list .course-card').forEach(card => {
+                        const courseId = card.getAttribute('data-course-id');
+                        let description = card.getAttribute('data-description') || '';
+                        // Preserve existing description from selectedCourses if available
+                        if (selectedCourses.has(courseId)) {
+                            description = selectedCourses.get(courseId).description;
+                        }
+                        selectedCourses.set(courseId, { description });
+                        const descInput = card.querySelector('.course-desc');
+                        if (descInput) {
+                            descInput.value = description;
+                            descInput.addEventListener('input', function () {
+                                const newDescription = descInput.value.trim();
+                                selectedCourses.set(courseId, { description: newDescription });
+                                // Update description in backend
+                                $.ajax({
+                                    url: '/mentor/cv/course/update-description',
+                                    method: 'POST',
+                                    data: {
+                                        courseId: courseId,
+                                        userId: userId,
+                                        description: newDescription
+                                    },
+                                    success: function() {
+                                        console.log('Description updated for course:', courseId);
+                                    },
+                                    error: function(xhr) {
+                                        console.error('AJAX error updating description:', xhr.status, xhr.responseText);
+                                        alert('Failed to update description. Please try again.');
+                                    }
+                                });
+                            });
+                        }
                     });
+                },
+                error: function(xhr) {
+                    console.error('AJAX error:', xhr.status, xhr.responseText);
+                    let errorMessage = 'Failed to update courses section. Please try again.';
+                    if (xhr.status === 401) {
+                        errorMessage = 'Session expired. Please log in again.';
+                        window.location.href = '/login';
+                    } else if (xhr.status === 400) {
+                        errorMessage = 'Invalid request. Please check your input.';
+                    }
+                    alert(errorMessage);
                 }
+            });
+        }
 
-                updateRegisteredCoursesMsg();
-                updateAvailableCoursesMsg();
-            }
-        });
-
-        // Remove course from registered section
-        registeredList.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-btn')) {
+        // Handle add/remove buttons
+        coursesSection.addEventListener('click', function(e) {
+            if (e.target.classList.contains('add-btn') || e.target.classList.contains('remove-btn')) {
+                e.preventDefault();
                 const card = e.target.closest('.course-card');
                 const courseId = card.getAttribute('data-course-id');
-                // Remove from Map
-                selectedCourses.delete(courseId);
-                // Move card back to Available section
-                availableList.appendChild(card);
-                // Change button to Add
-                e.target.textContent = '+';
-                e.target.classList.remove('remove-btn');
-                e.target.classList.add('add-btn');
-                e.target.style.background = '#ff5722';
-                // Remove dynamic input
-                const dynamicInputs = card.querySelector('.dynamic-inputs');
-                if (dynamicInputs) dynamicInputs.remove();
-                updateRegisteredCoursesMsg();
-                updateAvailableCoursesMsg();
+                const isAdd = e.target.classList.contains('add-btn');
+                const availableCoursesList = document.querySelector('#available-courses-list');
+                const registeredCoursesList = document.querySelector('#registered-courses-list');
+                const currentPage = availableCoursesList ? parseInt(availableCoursesList.getAttribute('data-page')) || 1 : 1;
+                const currentRegisteredPage = registeredCoursesList ? parseInt(registeredCoursesList.getAttribute('data-page')) || 1 : 1;
+                const userId = document.querySelector('input[name="userId"]').value;
+
+                if (!userId) {
+                    console.error('User ID is missing');
+                    alert('User ID is missing. Please refresh the page and try again.');
+                    return;
+                }
+
+                // Call add or remove endpoint
+                const url = isAdd ? '/mentor/cv/course/add' : '/mentor/cv/course/remove';
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        courseId: courseId,
+                        userId: userId
+                    },
+                    success: function() {
+                        console.log(isAdd ? 'Course added:' : 'Course removed:', courseId);
+                        // Update selectedCourses map
+                        if (isAdd) {
+                            let description = selectedCourses.has(courseId) ? selectedCourses.get(courseId).description : '';
+                            selectedCourses.set(courseId, { description });
+                        } else {
+                            selectedCourses.delete(courseId);
+                        }
+                        // Refresh courses section
+                        updateCoursesSection(currentPage, currentRegisteredPage);
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX error for', url, ':', xhr.status, xhr.responseText);
+                        let errorMessage = isAdd ? 'Failed to add course.' : 'Failed to remove course.';
+                        if (xhr.status === 401) {
+                            errorMessage = 'Session expired. Please log in again.';
+                            window.location.href = '/login';
+                        } else if (xhr.status === 400) {
+                            errorMessage = xhr.responseText || 'Invalid request.';
+                        }
+                        alert(errorMessage);
+                    }
+                });
             }
         });
 
-        // On submit, validate and store selected course data
+        // Handle pagination clicks
+        coursesSection.addEventListener('click', function(e) {
+            if (e.target.classList.contains('page-link')) {
+                e.preventDefault();
+                const page = parseInt(e.target.getAttribute('data-page'));
+                const section = e.target.closest('.pagination').getAttribute('data-section');
+                const availableCoursesList = document.querySelector('#available-courses-list');
+                const registeredCoursesList = document.querySelector('#registered-courses-list');
+                const currentPage = availableCoursesList ? parseInt(availableCoursesList.getAttribute('data-page')) || 1 : 1;
+                const currentRegisteredPage = registeredCoursesList ? parseInt(registeredCoursesList.getAttribute('data-page')) || 1 : 1;
+
+                console.log('Pagination clicked:', { section, page, currentPage, currentRegisteredPage });
+                if (section === 'available') {
+                    updateCoursesSection(page, currentRegisteredPage);
+                } else {
+                    updateCoursesSection(currentPage, page);
+                }
+            }
+        });
+
+        // On submit, validate and store all selected course data
         cvForm.addEventListener('submit', function(event) {
             if (selectedCourses.size === 0) {
                 event.preventDefault();
@@ -572,30 +554,26 @@
                 return;
             }
             let isValid = true;
-            registeredList.querySelectorAll('.course-card').forEach(card => {
-                const courseId = card.getAttribute('data-course-id');
-                const descInput = card.querySelector('.course-desc');
-                if (!descInput || !descInput.value.trim()) {
+            selectedCourses.forEach((value, courseId) => {
+                if (!value.description.trim()) {
                     isValid = false;
-                    descInput && (descInput.style.borderColor = 'red');
-                } else {
-                    selectedCourses.set(courseId, { description: descInput.value.trim() });
-                    descInput.style.borderColor = '';
+                    // Highlight empty description fields on current page
+                    const descInput = document.querySelector(`#registered-courses-list .course-card[data-course-id="${courseId}"] .course-desc`);
+                    if (descInput) {
+                        descInput.style.borderColor = 'red';
+                    }
                 }
             });
             if (!isValid) {
                 event.preventDefault();
-                alert('Please fill in a teaching description for all selected courses.');
+                alert('Please fill in a teaching description for all registered courses.');
                 return;
             }
-            // Save to hidden input
+            // Save all selected courses to hidden input
             selectedCoursesInput.value = JSON.stringify(Object.fromEntries(selectedCourses));
             warning.style.display = 'none';
         });
-
     });
-
 </script>
-
 </body>
 </html>
