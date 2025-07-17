@@ -151,6 +151,10 @@ public class AuthController {
         Optional<User> userOpt = userService.findByEmail(email);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+            if(!user.getIsActive()){
+                model.addAttribute("error", "Account is locked");
+                return "auth/login";
+            }
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             if (encoder.matches(password, user.getPassword())) {
                 session.setAttribute("loggedInUser", user);
