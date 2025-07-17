@@ -283,8 +283,12 @@ public class ManagerController {
             return "redirect:/manager/mentor-working-date";
         }
         List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        List<MentorAvailableTime> mentorAvailableTimes = mentorAvailableTimeService.findAllMentorAvailableTimeByEndDate(mentor, endLocal);
 
-
+        model.addAttribute("editable", true);
+        if(!mentorAvailableTimes.isEmpty() && (mentorAvailableTimes.get(0).getStatus().name().equalsIgnoreCase("rejected")) || mentorAvailableTimes.get(0).getStatus().name().equalsIgnoreCase("approved")){
+            model.addAttribute("editable", false);
+        }
         boolean[][] slotDayMatrix = mentorAvailableTimeService.slotDayMatrix(setSlots);
         model.addAttribute("slotDayMatrix", slotDayMatrix);
         model.addAttribute("mentor", mentor.getId());
