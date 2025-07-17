@@ -41,7 +41,7 @@
                 </tbody>
             </table>
             <!-- Sau </table> -->
-            <div class="flex justify-end space-x-2 mt-4">
+            <div class="flex justify-end space-x-2 mt-4" th:if="${editable}">
                 <form th:action="@{/manager/mentor-working-date/approve}" method="post">
                     <input type="hidden" name="endDate" th:value="${endDate}">
                     <input type="hidden" name="mentor" th:value="${mentor}">
