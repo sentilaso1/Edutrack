@@ -523,4 +523,8 @@ public class CvServiceImpl implements CvService {
 
     public boolean isBatchRunning() { return batchRunning; }
     public LocalDateTime getLastBatchEnd() { return lastBatchEnd; }
+
+    public CV getCVByMentorId(UUID id) {
+        return cvRepository.findByMentorId(id);
+    }
 }
