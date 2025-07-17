@@ -43,4 +43,6 @@ public interface MentorAvailableTimeService {
             LocalDate startDate,
             LocalDate endDate
     );
+
+    List<MentorAvailableSlotDTO> findOnlyApprovedSlotsByEndDate(Mentor mentor, LocalDate endDate);
 }
