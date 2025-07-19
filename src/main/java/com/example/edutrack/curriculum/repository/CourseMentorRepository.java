@@ -299,5 +299,6 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     boolean existsByMentorIdAndCourseId(UUID userId, UUID courseId);
 
     Optional<CourseMentor> findByMentorIdAndCourseId(UUID userId, UUID courseId);
+    long countByMentorAndStatus(Mentor mentor, ApplicationStatus status);
 }
 

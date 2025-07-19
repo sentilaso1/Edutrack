@@ -6,14 +6,13 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MenteeServiceImpl;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
-import com.example.edutrack.curriculum.model.ApplicationStatus;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
+import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
 import com.example.edutrack.timetables.model.Slot;
@@ -34,7 +33,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.example.edutrack.curriculum.model.Course;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -60,9 +58,11 @@ CourseController {
     private final CourseMentorRepository courseMentorRepository;
     private final MenteeServiceImpl menteeService;
     private final MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository;
+    private final FeedbackService feedbackService;
 
     @Autowired
     public CourseController(CourseServiceImpl courseServiceImpl,
+                            FeedbackService feedbackService,
                             CourseTagServiceImpl courseTagServiceImpl,
                             MentorServiceImpl mentorServiceImpl,
                             TagServiceImpl tagServiceImpl,
@@ -88,6 +88,7 @@ CourseController {
         this.courseMentorRepository = courseMentorRepository;
         this.menteeService = menteeService;
         this.mentorAvailableTimeDetailsRepository = mentorAvailableTimeDetailsRepository;
+        this.feedbackService = feedbackService;
     }
 
     @GetMapping("/courses")
@@ -199,13 +200,23 @@ CourseController {
             throw new RuntimeException("Course mentor not found");
         }
         Course course = courseMentor.getCourse();
+        Mentor mentor = courseMentor.getMentor();
+
+        long courseCount = courseMentorService.countCoursesByMentor(mentor);
+        long reviewCount = feedbackService.countReviewsByMentor(mentor);
+        long studentCount = enrollmentService.countStudentsByMentor(mentor);
         List<Tag> tagList = tagServiceImpl.findTagsByCourseId(course.getId());
 
         List<CourseMentor> relatedCourse = courseMentorService.getRelatedCoursesByTags(course.getId(), null, 6);
         List<CourseCardDTO> relatedCourseToDTO = enrollmentService .mapToCourseCardDTOList(relatedCourse);
+        List<Feedback> feedbackList = feedbackService.getTopRecentFeedback(courseMentor);
+        model.addAttribute("feedbackList", feedbackList);
         model.addAttribute("relatedCourses", relatedCourseToDTO);
         model.addAttribute("course", courseMentor);
         model.addAttribute("tagList", tagList);
+        model.addAttribute("mentorCourseCount", courseCount);
+        model.addAttribute("mentorReviewCount", reviewCount);
+        model.addAttribute("mentorStudentCount", studentCount);
 
         model.addAttribute("courseMentor", courseMentor);
         return "/mentee/course_detail";

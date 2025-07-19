@@ -1,6 +1,7 @@
 package com.example.edutrack.curriculum.repository;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
 import org.springframework.data.domain.Page;
@@ -34,5 +35,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
     Optional<Feedback> findByMenteeIdAndCourseMentorId(UUID menteeId, UUID courseMentorId);
 
     List<Feedback> findByCourseMentor_Mentor_IdAndStatus(UUID mentorId, Feedback.Status status);
+    long countByCourseMentor_Mentor(Mentor mentor);
+    List<Feedback> findTop3ByCourseMentorOrderByCreatedDateDesc(CourseMentor courseMentor);
 
 }

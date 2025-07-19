@@ -150,4 +150,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
               AND es.attendance = 'NOT_YET'
             """)
     int countTeachingMentees(Mentor mentor);
+
+    long countByCourseMentor_MentorAndStatus(Mentor mentor, Enrollment.EnrollmentStatus status);
 }

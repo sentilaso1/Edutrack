@@ -13,6 +13,7 @@ import com.example.edutrack.curriculum.service.implementation.CourseTagServiceIm
 import com.example.edutrack.curriculum.service.implementation.TagServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
+import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
@@ -52,9 +53,11 @@ public class CourseControllerTest {
         CourseMentorRepository courseMentorRepository = Mockito.mock(CourseMentorRepository.class);
         MenteeServiceImpl menteeService = Mockito.mock(MenteeServiceImpl.class);
         mentorAvailableTimeDetailsRepository = Mockito.mock(MentorAvailableTimeDetailsRepository.class);
+        FeedbackService feedbackService = Mockito.mock(FeedbackService.class);
 
         controller = new CourseController(
                 courseServiceImpl,
+                feedbackService,
                 courseTagServiceImpl,
                 mentorServiceImpl,
                 tagServiceImpl,
