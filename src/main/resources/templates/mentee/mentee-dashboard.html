@@ -120,6 +120,17 @@
                             <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                         </a>
                     </div>
+                    <div class="dashboard-card" th:if="${havingPending}">
+                        <div class="card-header">
+                            <i class="fa fa-users card-icon"></i>
+                            <h3 class="card-title">View Pending Requested Class</h3>
+                        </div>
+                        <div class="stat-label">View your registered pending class</div>
+                        <a href="#" class="view-link" th:href="@{/mentee/pending}">
+                            View
+                            <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Recent Activity -->
@@ -342,6 +353,10 @@
                     <a th:href="@{/mentors}" class="btn btn-secondary btn-lg">
                         <i class="fa fa-users" style="margin-right: 8px;"></i>
                         Find Mentors
+                    </a>
+                    <a th:href="@{/mentee/pending}" class="btn btn-secondary btn-lg" style="background-color: #f59e0b;" th:if="${havingPending}">
+                        <i class="fa fa-users" style="margin-right: 8px;"></i>
+                        View Pending Requested Class
                     </a>
                 </div>
 

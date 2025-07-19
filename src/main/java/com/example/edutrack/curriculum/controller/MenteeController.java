@@ -1,5 +1,6 @@
 package com.example.edutrack.curriculum.controller;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.dto.*;
@@ -94,6 +95,9 @@ public class MenteeController {
         List<CourseCardDTO> recommendedCoursesToDTO = enrollmentService.mapToCourseCardDTOList(recommendedCourses);
         model.addAttribute("recommendedCourses", recommendedCoursesToDTO);
         model.addAttribute("isAllCompleted", dashboardService.isAllCoursesCompleted(menteeId));
+
+        List<Enrollment> enrollmentList = enrollmentService.findPendingEnrollmentsForMentee(menteeId);
+        model.addAttribute("havingPending", !enrollmentList.isEmpty());
         return "mentee/mentee-dashboard";
     }
 
@@ -651,5 +655,26 @@ public class MenteeController {
         model.addAttribute("enrollmentSchedule", enrollmentSchedule);
 
         return "mentee/reshedule-page";
+    }
+
+    @GetMapping("mentee/pending")
+    public String menteePending(HttpSession session, Model model){
+        UUID menteeId = getSessionMentee(session);
+        List<Enrollment> enrollmentList = enrollmentService.findPendingEnrollmentsForMentee(menteeId);
+        int totalSlot = enrollmentList.stream().mapToInt(enrollment -> enrollment.getTotalSlots()).sum();
+        double totalPrice = enrollmentList.stream().mapToDouble(enrollment -> enrollment.getCourseMentor().getPrice() * enrollment.getTotalSlots()).sum();
+        model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("totalSlot", totalSlot);
+        model.addAttribute("enrollmentList", enrollmentList);
+        return "mentee/pending-registration";
+    }
+
+    @GetMapping("mentee/pending/{id}")
+    public String menteePendingDetail(@PathVariable long id, Model model){
+        Enrollment enrollment = enrollmentService.findById(id);
+        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(enrollment.getScheduleSummary());
+        model.addAttribute("startTime", startTime);
+        model.addAttribute("enrollment", enrollment);
+        return "mentee/pending-detail";
     }
 }
