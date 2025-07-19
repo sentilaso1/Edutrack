@@ -95,4 +95,12 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    @Query("SELECT DISTINCT new com.example.edutrack.timetables.dto.MentorAvailableSlotDTO(mat.id.slot, mat.id.day) " +
+            "FROM MentorAvailableTime mat " +
+            "WHERE mat.mentor = :mentor " +
+            "AND mat.id.endDate = :endDate " +
+            "AND mat.status = :status")
+    List<MentorAvailableSlotDTO> findApprovedSlotsByEndDate(Mentor mentor, LocalDate endDate, MentorAvailableTime.Status status);
+
 }

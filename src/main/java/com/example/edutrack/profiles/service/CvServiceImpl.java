@@ -264,7 +264,6 @@ public class CvServiceImpl implements CvService {
 
         Set<UUID> newCourseIds = details.keySet();
 
-        // REMOVE any CourseMentor entries not in the new selection!
         List<CourseMentor> oldMentorCourses = courseMentorRepository.findByMentorId(mentorId);
         for (CourseMentor old : oldMentorCourses) {
             if (!newCourseIds.contains(old.getCourse().getId())) {
@@ -359,7 +358,6 @@ public class CvServiceImpl implements CvService {
 
     @Override
     public String generatePrompt(CV cv) {
-        // Handle null or empty fields to prevent malformed JSON or prompt issues
         String summary = cv.getSummary() != null ? cv.getSummary() : "";
         String experienceYears = cv.getExperienceYears() != null ? cv.getExperienceYears().toString() : "0";
         String skills = cv.getSkills() != null ? cv.getSkills() : "";
@@ -368,7 +366,6 @@ public class CvServiceImpl implements CvService {
         String certifications = cv.getCertifications() != null ? cv.getCertifications() : "";
         String languages = cv.getLanguages() != null ? cv.getLanguages() : "";
 
-        // Escape double quotes to prevent JSON injection or malformed strings
         summary = summary.replace("\"", "\\\"");
         skills = skills.replace("\"", "\\\"");
         education = education.replace("\"", "\\\"");

@@ -165,5 +165,10 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
         return  mentorAvailableTimeRepository.findByMentorIdAndStatusAndDateRange(mentorId, startDate, endDate);
     }
 
+    @Override
+    public List<MentorAvailableSlotDTO> findOnlyApprovedSlotsByEndDate(Mentor mentor, LocalDate endDate) {
+        return mentorAvailableTimeRepository.findApprovedSlotsByEndDate(mentor, endDate, MentorAvailableTime.Status.APPROVED);
+    }
+
 
 }
