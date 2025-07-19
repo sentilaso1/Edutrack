@@ -431,7 +431,7 @@
         .mentee-name {
             font-weight: 600;
             color: #121633;
-            font-size: 1.08rem;
+            font-size: 2.08rem;
         }
         .review-course-name {
             font-size: 1rem;
@@ -443,11 +443,15 @@
         }
         .review-rating-stars {
             margin-bottom: 0.1rem;
-            font-size: 1.33rem;
+            font-size: 1.83rem;
             color: #ffe234;
-            display: flex;
+            display: flex !important;
             align-items: center;
             gap: 0.1em;
+        }
+        .review-rating-stars span{
+            display: flex !important;
+
         }
         .review-rating-stars i.ri-star-fill,
         .review-rating-stars i.ri-star-half-fill {
@@ -463,7 +467,7 @@
         }
         .review-date {
             margin-left: auto;
-            font-size: 0.97rem;
+            font-size: 1.30rem;
             color: #999;
             display: flex;
             flex-direction: column;
@@ -473,8 +477,8 @@
             white-space: nowrap;
         }
         .review-card-content {
-            margin-top: 0.5rem;
-            font-size: 1.08rem;
+            margin-top: 0.1rem;
+            font-size: 1.38rem;
             color: #444;
             line-height: 1.6;
             padding: 0.3rem;
@@ -488,6 +492,11 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
+        }
+
+        .availability-container {
+            display: flex;
+            gap: 10px;
         }
 
         .flag-icon .flag-stroke {
@@ -516,7 +525,7 @@
             color: #1877f2;
             border-radius: 20px;
             padding: 4px 8px;
-            font-size: 0.8rem;
+            font-size: 1.2rem;
             font-weight: 500;
             display: inline-block;
         }
@@ -694,15 +703,17 @@
                         </div>
                     </div>
                     <span th:text="${courseMentor.mentor.totalSessions} + ' sessions Completed'">Total Sessions</span><br>
-                    <img th:if="${courseMentor.mentor != null and courseMentor.mentor.isAvailable}"
-                         th:src="@{/assets/images/dot-green.svg}" width="16" height="16" alt="Online" />
-                    <img th:if="${courseMentor.mentor != null and !courseMentor.mentor.isAvailable}"
-                         th:src="@{/assets/images/dot-red.svg}" width="16" height="16" alt="Offline" />
-                    <span class="span">
-                                                    <span th:text="${courseMentor.mentor != null ? (courseMentor.mentor.isAvailable ? 'Available' : 'Not Available') : 'No Mentor'}">
-                                                        Mentor Availability
-                                                    </span>
-                                                </span>
+                    <span class="availability-container">
+                        <img th:if="${courseMentor.mentor != null and courseMentor.mentor.isAvailable}"
+                             th:src="@{/assets/images/dot-green.svg}" width="16" height="16" alt="Online" />
+                        <img th:if="${courseMentor.mentor != null and !courseMentor.mentor.isAvailable}"
+                             th:src="@{/assets/images/dot-red.svg}" width="16" height="16" alt="Offline" />
+                        <span class="span">
+                            <span th:text="${courseMentor.mentor != null ? (courseMentor.mentor.isAvailable ? 'Available' : 'Not Available') : 'No Mentor'}">
+                                Mentor Availability
+                            </span>
+                        </span>
+                    </span>
                 </div>
                 <div class="review-card-content" th:text="${courseMentor.mentor.bio}">
                     Bio

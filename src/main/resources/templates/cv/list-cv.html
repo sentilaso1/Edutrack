@@ -227,7 +227,7 @@
                     <td th:text="${cv.user.fullName}"></td>
                     <td><span th:each="skill : ${cv.getSkillItems()}" th:text="${skill}" class="tag-item"></span></td>
                     <td><span th:each="edu : ${cv.getEducationItems()}" th:text="${edu}" class="tag-item"></span></td>
-                    <td><a th:href="@{/admin/cv/detail/{id}(id = ${cv.id})}">View More</a></td>
+                    <td><a th:href="@{/manager/cv/detail/{id}(id = ${cv.id})}">View More</a></td>
                 </tr>
                 </tbody>
             </table>
@@ -246,19 +246,19 @@
     const filterForm = document.getElementById("filter-form");
 
     document.getElementById('first-page').addEventListener('click', () => {
-        filterForm.action = '/admin/cv/list/1';
+        filterForm.action = '/manager/cv/list/1';
         filterForm.submit();
     });
     document.getElementById('previous-page').addEventListener('click', () => {
-        filterForm.action = '/admin/cv/list/' + [[${pageNumber - 1}]];
+        filterForm.action = '/manager/cv/list/' + [[${pageNumber - 1}]];
         filterForm.submit();
     });
     document.getElementById('next-page').addEventListener('click', () => {
-        filterForm.action = '/admin/cv/list/' + [[${pageNumber + 1}]];
+        filterForm.action = '/manager/cv/list/' + [[${pageNumber + 1}]];
         filterForm.submit();
     });
     document.getElementById('last-page').addEventListener('click', () => {
-        filterForm.action = '/admin/cv/list/' + [[${page.totalPages}]];
+        filterForm.action = '/manager/cv/list/' + [[${page.totalPages}]];
         filterForm.submit();
     });
 
