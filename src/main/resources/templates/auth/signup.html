@@ -233,12 +233,9 @@
         }
 
         if (isValid) {
-            // Simulate successful registration
-            alert('Sign Up Successfully');
 
             // Here you would typically send the form data to your server
-            const formData = new FormData(this);
-            console.log('Form data:', Object.fromEntries(formData));
+            document.getElementById('signupForm').submit();
         }
     });
 
