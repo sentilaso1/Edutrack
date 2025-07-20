@@ -58,6 +58,10 @@ body{
     color: hsl(240, 6%, 51%);
 }
 
+.nav-item:hover {
+    background-color: #fff6f7;
+}
+
 .main {
     flex: 1;
     padding: 2rem;
