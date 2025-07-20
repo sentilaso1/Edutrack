@@ -68,11 +68,15 @@
                 <div class="form-group">
                     <label for="description">
                         Description
-                        <span class="tooltip" title="Detailed course description (max 500 characters)">❓</span>
+                        <span class="tooltip" title="Detailed course description">❓</span>
                     </label>
+
                     <textarea id="description" th:field="*{description}"
                               th:class="${#fields.hasErrors('description')} ? 'form-textarea error' : 'form-textarea'"
-                              placeholder="Enter course description" maxlength="500" rows="4"></textarea>
+                              placeholder="Enter course description" rows="4"></textarea>
+
+                    <div id="description-counter" class="text-right text-sm text-gray-500 mt-1"></div>
+
                     <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
                 </div>
 
@@ -89,6 +93,9 @@
                         <div id="autocomplete-list" class="autocomplete-items"></div>
                         <button class="add-btn" type="button" onclick="addTag()">Add</button>
                     </div>
+
+                    <span id="tag-input-error" class="error-message"></span>
+
                     <span th:if="${#fields.hasErrors('tagTexts')}" th:errors="*{tagTexts}" class="error-message"></span>
                     <div id="hiddenInput"></div>
                 </div>
@@ -110,41 +117,58 @@
         </form>
     </div>
 </div>
-
 <script th:inline="javascript">
+
     const initialTags = /*[[${courseForm.tagTexts}]]*/ [];
 </script>
 <script>
+
+    const DESC_MAX_LENGTH = 255;
+    const TAG_MAX_LENGTH = 30;
+    const TAG_MIN_LENGTH = 2;
+
     const tags = [];
     const availableTags = [
         "JavaScript", "Java", "Python", "Spring", "React", "Angular", "HTML", "CSS", "Docker", "DevOps",
         "Machine Learning", "Data Science", "SQL", "NoSQL", "Kubernetes", "AWS", "Azure", "Git", "Agile"
     ];
 
-    // Initialize tags from server
-    if (initialTags && initialTags.length > 0) {
-        initialTags.forEach(tagText => {
-            tags.push({value: tagText, color: randomColor()});
-        });
-        renderTags();
-    }
+    const descriptionTextarea = document.getElementById('description');
+    const descriptionCounter = document.getElementById('description-counter');
 
+    function updateDescriptionCounter() {
+        const currentLength = descriptionTextarea.value.length;
+        descriptionCounter.textContent = `${currentLength} / ${DESC_MAX_LENGTH}`;
+        if (currentLength > DESC_MAX_LENGTH) {
+            descriptionCounter.classList.add('text-red-500', 'font-bold');
+        } else {
+            descriptionCounter.classList.remove('text-red-500', 'font-bold');
+        }
+    }
+    descriptionTextarea.addEventListener('input', updateDescriptionCounter);
+    updateDescriptionCounter();
     function randomColor() {
-        const colors = [
-            '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
-            '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
-        ];
+        const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'];
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
     function addTag() {
         const tagInput = document.getElementById("tagInput");
+        const tagErrorSpan = document.getElementById("tag-input-error");
         const tagValue = tagInput.value.trim();
+        tagErrorSpan.textContent = "";
+
         if (!tagValue) return;
-        if (tags.some(t => t.value.toLowerCase() === tagValue.toLowerCase())) {
-            alert("Tag already exists!");
+        if (tagValue.length < TAG_MIN_LENGTH || tagValue.length > TAG_MAX_LENGTH) {
+            tagErrorSpan.textContent = `Tag must be between ${TAG_MIN_LENGTH} and ${TAG_MAX_LENGTH} characters.`;
             return;
         }
+
+        if (tags.some(t => t.value.toLowerCase() === tagValue.toLowerCase())) {
+            tagErrorSpan.textContent = "Tag already exists!";
+            return;
+        }
+
         tags.push({value: tagValue, color: randomColor()});
         renderTags();
         tagInput.value = '';
@@ -159,24 +183,21 @@
 
     function renderTags() {
         const tagContainer = document.getElementById("tagContainer");
-        tagContainer.innerHTML = "";
+        const hiddenInputContainer = document.getElementById("hiddenInput");
 
-        const hiddenInput = document.getElementById("hiddenInput");
-        hiddenInput.innerHTML = "";
+        tagContainer.innerHTML = "";
+        hiddenInputContainer.innerHTML = "";
 
         tags.forEach((tag, index) => {
             const tagElement = document.createElement("div");
             tagElement.className = "tag";
             tagElement.style.backgroundColor = tag.color;
-
-            const tagValue = document.createElement("span");
-            tagValue.textContent = tag.value;
+            tagElement.textContent = tag.value;
 
             const deleteBtn = document.createElement("button");
             deleteBtn.innerHTML = "×";
             deleteBtn.onclick = () => removeTag(index);
 
-            tagElement.appendChild(tagValue);
             tagElement.appendChild(deleteBtn);
             tagContainer.appendChild(tagElement);
 
@@ -184,11 +205,19 @@
             inputHidden.type = 'hidden';
             inputHidden.name = 'tagTexts';
             inputHidden.value = tag.value;
-            hiddenInput.appendChild(inputHidden);
+            hiddenInputContainer.appendChild(inputHidden);
         });
     }
 
-    // Form submission
+    if (initialTags && initialTags.length > 0) {
+        initialTags.forEach(tagText => {
+            if (!tags.some(t => t.value === tagText)) {
+                tags.push({value: tagText, color: randomColor()});
+            }
+        });
+        renderTags();
+    }
+
     document.getElementById('courseForm').addEventListener('submit', e => {
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
@@ -196,7 +225,6 @@
         submitBtn.innerHTML = '⏳ Updating...';
     });
 
-    // Tag input events
     document.getElementById("tagInput").addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             event.preventDefault();
@@ -204,32 +232,31 @@
         }
     });
 
-    // Form reset
     document.getElementById('courseForm').addEventListener('reset', () => {
-        tags.length = 0;
+        tags.length = 0; // Clear current tags
         if (initialTags && initialTags.length > 0) {
             initialTags.forEach(tagText => {
-                tags.push({value: tagText, color: randomColor()});
+                tags.push({value: tagText, color: randomColor()}); // Restore original tags
             });
         }
         renderTags();
+        updateDescriptionCounter();
     });
 
-    // Autocomplete
     const tagInput = document.getElementById("tagInput");
     const autocompleteList = document.getElementById("autocomplete-list");
 
     tagInput.addEventListener("input", function() {
         closeAllLists();
         const val = this.value.toLowerCase();
-        if (!val) return false;
+        if (!val) return;
 
         const filteredTags = availableTags.filter(t =>
             t.toLowerCase().startsWith(val) &&
             !tags.some(existing => existing.value.toLowerCase() === t.toLowerCase())
         );
 
-        if (filteredTags.length === 0) return false;
+        if (filteredTags.length === 0) return;
 
         filteredTags.forEach(tag => {
             const item = document.createElement("div");
@@ -249,7 +276,7 @@
     }
 
     document.addEventListener("click", function (e) {
-        if (e.target !== tagInput) {
+        if (e.target !== tagInput && e.target.parentNode !== autocompleteList) {
             closeAllLists();
         }
     });

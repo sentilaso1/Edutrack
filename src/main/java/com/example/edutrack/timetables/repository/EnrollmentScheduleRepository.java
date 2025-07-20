@@ -62,39 +62,44 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
             @Param("endDate") LocalDate endDate
     );
 
-    // Author: Nguyen Thanh Vinh
-    @Query("""
-                SELECT COUNT(s) FROM EnrollmentSchedule s
-                WHERE s.enrollment.mentee.id = :menteeId AND s.attendance = :status
-            """)
-    int countAttendedSlotsByMenteeId(@Param("menteeId") UUID menteeId, @Param("status") EnrollmentSchedule.Attendance status);
+    @Query("SELECT count(es) > 0 FROM EnrollmentSchedule es " +
+            "WHERE es.enrollment.mentee.id = :menteeId AND es.report = true")
+    boolean hasPendingReports(@Param("menteeId") UUID menteeId);
 
     // Author: Nguyen Thanh Vinh
-    @Query("""
-                SELECT COUNT(s) FROM EnrollmentSchedule s
-                WHERE s.enrollment.mentee.id = :menteeId AND s.attendance != :status
-            """)
-    int countUnfinishedSlotsByMentee(@Param("menteeId") UUID menteeId, @Param("status") EnrollmentSchedule.Attendance status);
+    @Query("SELECT count(es) FROM EnrollmentSchedule es " +
+            "WHERE es.enrollment.mentee.id = :menteeId " +
+            "AND es.attendance = :attendance " +
+            "AND es.enrollment.status = :status " +
+            "AND es.report IS NOT NULL AND es.report = false")
+    int countAttendedSlotsByMenteeId(@Param("menteeId") UUID menteeId,
+                                     @Param("attendance") EnrollmentSchedule.Attendance attendance,
+                                     @Param("status") Enrollment.EnrollmentStatus status);
 
     // Author: Nguyen Thanh Vinh
-    @Query("""
-                SELECT COUNT(e)
-                FROM Enrollment e
-                WHERE e.mentee.id = :menteeId
-                AND e.status = 'ACCEPTED'
-                AND NOT EXISTS (
-                    SELECT es
-                    FROM EnrollmentSchedule es
-                    WHERE es.enrollment = e
-                    AND es.attendance <> 'PRESENT'
-                )
-            """)
-    int countCompletedCourseByMentee(@Param("menteeId") UUID menteeId);
+    @Query("SELECT count(es) FROM EnrollmentSchedule es " +
+            "WHERE es.enrollment.mentee.id = :menteeId " +
+            "AND es.enrollment.status = :status " +
+            "AND (es.attendance <> :presentStatus OR es.report IS NULL OR es.report = true)")
+    int countUnfinishedSlotsByMentee(@Param("menteeId") UUID menteeId,
+                                     @Param("presentStatus") EnrollmentSchedule.Attendance presentStatus,
+                                     @Param("status") Enrollment.EnrollmentStatus status);
+
+    // Author: Nguyen Thanh Vinh
+    @Query("SELECT count(e.id) FROM Enrollment e WHERE e.mentee.id = :menteeId AND e.status = :status " +
+            "AND NOT EXISTS (SELECT es FROM EnrollmentSchedule es WHERE es.enrollment.id = e.id " +
+            "AND (es.attendance <> com.example.edutrack.timetables.model.EnrollmentSchedule.Attendance.PRESENT OR es.report IS NULL OR es.report = true))")
+    int countCompletedCourseByMentee(@Param("menteeId") UUID menteeId, @Param("status") Enrollment.EnrollmentStatus status);
 
     // Author: Nguyen Thanh Vinh
     int countByEnrollment_Id(Long enrollmentId);
 
     // Author: Nguyen Thanh Vinh
+    @Query("SELECT count(es) FROM EnrollmentSchedule es " +
+            "WHERE es.enrollment.id = :enrollmentId " +
+            "AND es.attendance = :attendance " +
+            "AND es.report IS NOT NULL " +
+            "AND es.report = false")
     int countByEnrollment_IdAndAttendance(Long enrollmentId, EnrollmentSchedule.Attendance attendance);
 
     // Author: Nguyen Thanh Vinh
