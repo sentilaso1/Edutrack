@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import jakarta.servlet.http.HttpSession;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -48,11 +49,15 @@ public class AccountsControllerTest {
         @Mock
         private RedirectAttributes redirectAttributes;
 
+        @Mock
+        private HttpSession session;
+
         @InjectMocks
         private AccountsController controller;
 
         private String validId;
         private User mockUser;
+        private User loggedInUser;
         private Mentor mockMentor;
         private Mentee mockMentee;
 
@@ -70,18 +75,25 @@ public class AccountsControllerTest {
                 validId = UUID.randomUUID().toString();
                 mockUser = new User();
                 mockUser.setId(UUID.fromString(validId));
+
+                loggedInUser = new User();
+                loggedInUser.setId(UUID.fromString(validId));
+
                 mockMentor = new Mentor();
                 mockMentee = new Mentee();
+
+                // Setup session to return loggedInUser
+                when(session.getAttribute("loggedInUser")).thenReturn(loggedInUser);
         }
 
         // Test Case 5.1: Full name validation - null fullName
         @Test
         void testEditProfile_FullNameNull_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, null, VALID_EMAIL, VALID_PHONE,
+                                session, null, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error", "Full name is required");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
@@ -90,10 +102,10 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_FullNameEmpty_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, "", VALID_EMAIL, VALID_PHONE,
+                                session, "", VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error", "Full name is required");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
@@ -102,10 +114,10 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_FullNameWhitespace_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, "   ", VALID_EMAIL, VALID_PHONE,
+                                session, "   ", VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error", "Full name is required");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
@@ -114,11 +126,11 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_InvalidEmail_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, "invalid-email", VALID_PHONE,
+                                session, VALID_FULL_NAME, "invalid-email", VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Email không hợp lệ");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error", "Email is not valid");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -126,11 +138,11 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_NullEmail_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, null, VALID_PHONE,
+                                session, VALID_FULL_NAME, null, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Email không hợp lệ");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error", "Email is not valid");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -138,11 +150,12 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_InvalidPhoneShort_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, "012345",
+                                session, VALID_FULL_NAME, VALID_EMAIL, "012345",
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Phone number không hợp lệ");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error",
+                                "Phone number is not valid (must start with 0 and be 10 or 11 digits)");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -150,11 +163,12 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_InvalidPhoneLong_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, "012345678901",
+                                session, VALID_FULL_NAME, VALID_EMAIL, "012345678901",
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Phone number không hợp lệ");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error",
+                                "Phone number is not valid (must start with 0 and be 10 or 11 digits)");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -162,11 +176,12 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_InvalidPhoneNotStartWithZero_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, "1123456789",
+                                session, VALID_FULL_NAME, VALID_EMAIL, "1123456789",
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Phone number không hợp lệ");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error",
+                                "Phone number is not valid (must start with 0 and be 10 or 11 digits)");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -174,11 +189,12 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_NullPhone_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, null,
+                                session, VALID_FULL_NAME, VALID_EMAIL, null,
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Phone number không hợp lệ");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error",
+                                "Phone number is not valid (must start with 0 and be 10 or 11 digits)");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -186,12 +202,12 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_FutureBirthDate_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, "2030-01-01", VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error",
-                                "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng yyyy-MM-dd)");
+                                "Birth date is not valid (must be a past date in yyyy-MM-dd format)");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -199,12 +215,12 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_InvalidBirthDateFormat_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, "01/01/1990", VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error",
-                                "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng yyyy-MM-dd)");
+                                "Birth date is not valid (must be a past date in yyyy-MM-dd format)");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -212,12 +228,12 @@ public class AccountsControllerTest {
         @Test
         void testEditProfile_NullBirthDate_ReturnsRedirectWithError() throws IOException {
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, null, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error",
-                                "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng yyyy-MM-dd)");
+                                "Birth date is not valid (must be a past date in yyyy-MM-dd format)");
                 verifyNoInteractions(userService, mentorService, menteeService);
         }
 
@@ -228,7 +244,7 @@ public class AccountsControllerTest {
 
                 Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                         controller.editProfile(
-                                        validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                        session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                         VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS,
                                         redirectAttributes);
                 });
@@ -243,10 +259,10 @@ public class AccountsControllerTest {
                 when(mentorService.getMentorById(validId)).thenReturn(mockMentor);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, "", VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error", "Expertise is required");
                 verifyNoInteractions(userRepository, mentorRepository, menteeRepository);
         }
@@ -258,10 +274,10 @@ public class AccountsControllerTest {
                 when(mentorService.getMentorById(validId)).thenReturn(mockMentor);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, null, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error", "Expertise is required");
                 verifyNoInteractions(userRepository, mentorRepository, menteeRepository);
         }
@@ -273,10 +289,10 @@ public class AccountsControllerTest {
                 when(mentorService.getMentorById(validId)).thenReturn(mockMentor);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, "   ", VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
+                assertEquals("redirect:/profile#edit", result);
                 verify(redirectAttributes).addFlashAttribute("error", "Expertise is required");
                 verifyNoInteractions(userRepository, mentorRepository, menteeRepository);
         }
@@ -288,10 +304,10 @@ public class AccountsControllerTest {
                 when(mentorService.getMentorById(validId)).thenReturn(mockMentor);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, VALID_EXPERTISE, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
@@ -307,10 +323,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, "Jane Doe", "jane@email.com", "0987654321",
+                                session, "Jane Doe", "jane@email.com", "0987654321",
                                 "student bio", "1995-05-15", null, "Machine Learning", redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals("Jane Doe") &&
                                 user.getEmail().equals("jane@email.com") &&
                                 user.getPhone().equals("0987654321") &&
@@ -326,10 +342,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, null, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
@@ -345,10 +361,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, "01234567890",
+                                session, VALID_FULL_NAME, VALID_EMAIL, "01234567890",
                                 VALID_BIO, VALID_BIRTH_DATE, null, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals("01234567890") &&
@@ -364,10 +380,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 null, VALID_BIRTH_DATE, null, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
@@ -383,10 +399,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 "", VALID_BIRTH_DATE, null, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
@@ -402,10 +418,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 "  bio with spaces  ", VALID_BIRTH_DATE, null, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
@@ -421,10 +437,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, "2020-01-01", null, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
@@ -440,10 +456,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, "  " + VALID_FULL_NAME + "  ", VALID_EMAIL, VALID_PHONE,
+                                session, "  " + VALID_FULL_NAME + "  ", VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, null, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
@@ -458,11 +474,11 @@ public class AccountsControllerTest {
                 when(mentorService.getMentorById(validId)).thenReturn(mockMentor);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, "Ja", VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Expertise phải từ 3 đến 100 ký tự");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error", "Expertise must be between 3 and 100 characters");
                 verifyNoInteractions(userRepository, mentorRepository, menteeRepository);
         }
 
@@ -474,11 +490,11 @@ public class AccountsControllerTest {
                 when(mentorService.getMentorById(validId)).thenReturn(mockMentor);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, longExpertise, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Expertise phải từ 3 đến 100 ký tự");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error", "Expertise must be between 3 and 100 characters");
                 verifyNoInteractions(userRepository, mentorRepository, menteeRepository);
         }
 
@@ -490,11 +506,11 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, null, "AI", redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Interests phải từ 3 đến 100 ký tự");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error", "Interests must be between 3 and 100 characters");
                 verifyNoInteractions(userRepository, mentorRepository, menteeRepository);
         }
 
@@ -507,11 +523,11 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, null, longInterests, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId + "#edit", result);
-                verify(redirectAttributes).addFlashAttribute("error", "Interests phải từ 3 đến 100 ký tự");
+                assertEquals("redirect:/profile#edit", result);
+                verify(redirectAttributes).addFlashAttribute("error", "Interests must be between 3 and 100 characters");
                 verifyNoInteractions(userRepository, mentorRepository, menteeRepository);
         }
 
@@ -523,10 +539,10 @@ public class AccountsControllerTest {
                 when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, null, null, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
@@ -542,53 +558,14 @@ public class AccountsControllerTest {
                 when(mentorService.getMentorById(validId)).thenReturn(mockMentor);
 
                 String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
+                                session, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
                                 VALID_BIO, VALID_BIRTH_DATE, exactExpertise, VALID_INTERESTS, redirectAttributes);
 
-                assertEquals("redirect:/profile/" + validId, result);
+                assertEquals("redirect:/profile", result);
                 verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
                                 user.getEmail().equals(VALID_EMAIL) &&
                                 user.getPhone().equals(VALID_PHONE) &&
                                 user.getBio().equals(VALID_BIO)));
                 verify(mentorRepository).save(argThat(mentor -> mentor.getExpertise().equals(exactExpertise)));
-        }
-
-        // Test Case 5.32: Mentee with interests exactly 100 characters
-        @Test
-        void testEditProfile_MenteeWithInterestsExactly100Chars_Success() throws IOException {
-                String exactInterests = "a".repeat(100); // Exactly 100 characters
-                when(userService.getUserById(validId)).thenReturn(mockUser);
-                when(mentorService.getMentorById(validId)).thenReturn(null);
-                when(menteeService.getMenteeById(validId)).thenReturn(mockMentee);
-
-                String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
-                                VALID_BIO, VALID_BIRTH_DATE, null, exactInterests, redirectAttributes);
-
-                assertEquals("redirect:/profile/" + validId, result);
-                verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
-                                user.getEmail().equals(VALID_EMAIL) &&
-                                user.getPhone().equals(VALID_PHONE) &&
-                                user.getBio().equals(VALID_BIO)));
-                verify(menteeRepository).save(argThat(mentee -> mentee.getInterests().equals(exactInterests)));
-        }
-
-        // Test Case 5.33: Neither mentor nor mentee
-        @Test
-        void testEditProfile_NeitherMentorNorMentee_Success() throws IOException {
-                when(userService.getUserById(validId)).thenReturn(mockUser);
-                when(mentorService.getMentorById(validId)).thenReturn(null);
-                when(menteeService.getMenteeById(validId)).thenReturn(null);
-
-                String result = controller.editProfile(
-                                validId, VALID_FULL_NAME, VALID_EMAIL, VALID_PHONE,
-                                VALID_BIO, VALID_BIRTH_DATE, null, null, redirectAttributes);
-
-                assertEquals("redirect:/profile/" + validId, result);
-                verify(userRepository).save(argThat(user -> user.getFullName().equals(VALID_FULL_NAME) &&
-                                user.getEmail().equals(VALID_EMAIL) &&
-                                user.getPhone().equals(VALID_PHONE) &&
-                                user.getBio().equals(VALID_BIO)));
-                verifyNoInteractions(mentorRepository, menteeRepository);
         }
 }
