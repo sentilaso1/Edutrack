@@ -152,6 +152,9 @@ public class AuthController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if(!user.getIsActive()){
+                model.addAttribute("error", "Account is inactive");
+                return "auth/login";
+            }if(user.getIsLocked()){
                 model.addAttribute("error", "Account is locked");
                 return "auth/login";
             }
