@@ -462,15 +462,17 @@
                 <div class="form-group">
                     <label for="description">
                         Description
-                        <span class="tooltip" title="Detailed course description (max 500 characters)">❓</span>
+                        <span class="tooltip" title="Detailed course description">❓</span>
                     </label>
+
                     <textarea id="description" th:field="*{description}"
                               th:class="${#fields.hasErrors('description')} ? 'form-textarea error' : 'form-textarea'"
-                              placeholder="Enter course description" maxlength="500" rows="4"></textarea>
+                              placeholder="Enter course description" rows="4"></textarea>
+
+                    <div id="description-counter" class="text-right text-sm text-gray-500 mt-1"></div>
+
                     <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
                 </div>
-
-                <!-- Tags -->
                 <div class="form-group">
                     <label>
                         Skills / Content (Tags)
@@ -483,6 +485,9 @@
                         <div id="autocomplete-list" class="autocomplete-items"></div>
                         <button class="add-btn" type="button" onclick="addTag()">Add</button>
                     </div>
+
+                    <span id="tag-input-error" class="error-message"></span>
+
                     <span th:if="${#fields.hasErrors('tagTexts')}" th:errors="*{tagTexts}" class="error-message"></span>
                     <div id="hiddenInput"></div>
                 </div>
@@ -516,15 +521,29 @@
         const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'];
         return colors[Math.floor(Math.random() * colors.length)];
     }
+    const TAG_MAX_LENGTH = 30;
+    const TAG_MIN_LENGTH = 2;
 
     function addTag() {
         const tagInput = document.getElementById("tagInput");
+        const tagErrorSpan = document.getElementById("tag-input-error");
         const tagValue = tagInput.value.trim();
-        if (!tagValue) return;
-        if (tags.some(t => t.value.toLowerCase() === tagValue.toLowerCase())) {
-            alert("Tag already exists!");
+        tagErrorSpan.textContent = "";
+
+        if (!tagValue) {
             return;
         }
+
+        if (tagValue.length < TAG_MIN_LENGTH || tagValue.length > TAG_MAX_LENGTH) {
+            tagErrorSpan.textContent = `Tag must be between ${TAG_MIN_LENGTH} and ${TAG_MAX_LENGTH} characters.`;
+            return;
+        }
+
+        if (tags.some(t => t.value.toLowerCase() === tagValue.toLowerCase())) {
+            tagErrorSpan.textContent = "Tag already exists!";
+            return;
+        }
+
         tags.push({value: tagValue, color: randomColor()});
         renderTags();
         tagInput.value = '';
@@ -577,6 +596,9 @@
         const addTagBtn = document.querySelector('.add-btn');
         const filesInput = document.getElementById('files');
         const filePreview = document.getElementById('filePreview');
+        const descriptionTextarea = document.getElementById('description');
+        const descriptionCounter = document.getElementById('description-counter');
+        const maxLength = 255;
         const autocompleteList = document.getElementById("autocomplete-list");
         tagInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
@@ -591,7 +613,20 @@
             submitBtn.classList.add('loading');
             submitBtn.innerHTML = '⏳ Creating...';
         });
+        function updateCounter() {
+            const currentLength = descriptionTextarea.value.length;
+            descriptionCounter.textContent = `${currentLength} / ${maxLength}`;
 
+            // Optionally, change color if the user goes over the limit
+            if (currentLength > maxLength) {
+                descriptionCounter.classList.add('text-red-500', 'font-bold');
+            } else {
+                descriptionCounter.classList.remove('text-red-500', 'font-bold');
+            }
+        }
+
+        descriptionTextarea.addEventListener('input', updateCounter);
+        updateCounter();
         form.addEventListener('reset', () => {
             if(filePreview) filePreview.innerHTML = '';
             tags.length = 0;
