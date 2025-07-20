@@ -12,6 +12,7 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CVCourseRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
+import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.dto.CourseApplicationDetail;
@@ -50,6 +51,7 @@ public class CvServiceImpl implements CvService {
     private final MentorRepository mentorRepository;
     private final CourseMentorRepository courseMentorRepository;
     private final LLMService llmService;
+    private final CourseMentorService courseMentorService;
 
     @Autowired
     public CvServiceImpl(EntityManager entityManager,
@@ -59,7 +61,8 @@ public class CvServiceImpl implements CvService {
                          CVCourseRepository cvCourseRepository,
                          MentorRepository mentorRepository,
                          CourseMentorRepository courseMentorRepository,
-                         LLMService llmService) {
+                         LLMService llmService,
+                         CourseMentorService courseMentorService) {
         this.entityManager = entityManager;
         this.cvRepository = cvRepository;
         this.userRepository = userRepository;
@@ -68,6 +71,7 @@ public class CvServiceImpl implements CvService {
         this.mentorRepository = mentorRepository;
         this.courseMentorRepository = courseMentorRepository;
         this.llmService = llmService;
+        this.courseMentorService = courseMentorService;
     }
 
     @Override
@@ -223,17 +227,15 @@ public class CvServiceImpl implements CvService {
 
     @Override
     public void createCV(CVForm cvRequest, UUID mentorId) {
-        CV cv = validateEntitiesAndBuildCV(cvRequest, mentorId);
-        cvRequest.parseSelectedCourses();
+        logger.warn("Enter create CV method.");
+        CV cv = validateEntitiesAndBuildCV(cvRequest);
         validateAndApplyCourseDetails(cvRequest, cv, mentorId);
     }
 
-    public CV validateEntitiesAndBuildCV(CVForm cvRequest, UUID mentorId) {
+    public CV validateEntitiesAndBuildCV(CVForm cvRequest) {
+        logger.warn("Enter validateEntitiesAndBuildCV method.");
         User user = userRepository.findById(cvRequest.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Mentor mentor = mentorRepository.findById(mentorId)
-                .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
 
         CV cv = new CV(
                 cvRequest.getSummary(),
@@ -254,13 +256,17 @@ public class CvServiceImpl implements CvService {
     }
 
     public void validateAndApplyCourseDetails(CVForm cvRequest, CV cv, UUID mentorId) {
-        Map<UUID, CourseApplicationDetail> details = cvRequest.getCourseDetails();
+        logger.warn("Enter validateAndApplyCourseDetails method.");
+        List<CourseApplicationDetail> details = cvRequest.getCourseDetails();
         if (details == null || details.isEmpty()) return;
 
         Mentor mentor = mentorRepository.findById(mentorId)
                 .orElseThrow(() -> new IllegalArgumentException("Mentor not found"));
 
-        Set<UUID> newCourseIds = details.keySet();
+        Set<UUID> newCourseIds = details.stream()
+                .map(CourseApplicationDetail::getCourseId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
         List<CourseMentor> oldMentorCourses = courseMentorRepository.findByMentorId(mentorId);
         for (CourseMentor old : oldMentorCourses) {
@@ -269,46 +275,45 @@ public class CvServiceImpl implements CvService {
             }
         }
 
-        for (Map.Entry<UUID, CourseApplicationDetail> entry : details.entrySet()) {
-            UUID courseId = entry.getKey();
-            CourseApplicationDetail detail = entry.getValue();
+        List<CVCourse> oldCVCourses = cvCourseRepository.findByIdCvId(cv.getId());
+        cvCourseRepository.deleteAll(oldCVCourses);
 
-            if (detail.getDescription() == null || detail.getDescription().trim().isEmpty()) {
+        for (CourseApplicationDetail form : details) {
+            logger.warn("CourseApplication courseId: {}", form.getCourseId());
+            UUID courseId = form.getCourseId();
+            if (courseId == null){
+                logger.warn("Skipping course with null courseId");
+                continue;
+            }
+
+            String desc = form.getDescription();
+            if (desc == null || desc.trim().isEmpty()) {
                 throw new IllegalArgumentException("Missing description for course: " + courseId);
             }
+
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
-            handleCourseMentorLogic(cv, mentor, course, detail);
+            handleCourseMentorLogic(cv, mentor, course, form);
         }
     }
+
 
     public void handleCourseMentorLogic(CV cv, Mentor mentor, Course course, CourseApplicationDetail detail) {
+        logger.debug("Entering handleCourseMentorLogic for courseId={}", detail.getCourseId());
         cvCourseRepository.save(new CVCourse(cv, course));
+        logger.info("Course ID: {}, Description: {}", detail.getCourseId(), detail.getDescription());
+        Optional<CourseMentor> existing = courseMentorRepository.findByMentorAndCourse(mentor, course);
 
-        Optional<CourseMentor> existingOpt = courseMentorRepository.findByMentorAndCourse(mentor, course);
+        CourseMentor cm = existing.orElse(new CourseMentor());
+        cm.setMentor(mentor);
+        cm.setCourse(course);
+        cm.setDescription(detail.getDescription());
+        cm.setStatus(ApplicationStatus.PENDING);
 
-        CourseMentor cm;
-        if (existingOpt.isPresent()) {
-            cm = existingOpt.get();
-            if (cm.getStatus() != ApplicationStatus.REJECTED) {
-                return;
-            }
-            cm.setDescription(detail.getDescription());
-            cm.setStatus(ApplicationStatus.PENDING);
-            cm.setAppliedDate(LocalDateTime.now());
-        } else {
-            cm = new CourseMentor();
-            cm.setMentor(mentor);
-            cm.setCourse(course);
-            cm.setDescription(detail.getDescription());
-            cm.setStatus(ApplicationStatus.PENDING);
-            cm.setAppliedDate(LocalDateTime.now());
-        }
         courseMentorRepository.save(cm);
+
     }
-
-
 
     @Override
     public CV getCVById(UUID id) {
@@ -330,6 +335,17 @@ public class CvServiceImpl implements CvService {
             CV cv = optionalCv.get();
             cv.setStatus("approved");
             cvRepository.save(cv);
+            List<CourseMentor> courseMentor = courseMentorService.findByMentorId(id);
+
+            for (CourseMentor cm : courseMentor) {
+                cm.setStatus(ApplicationStatus.ACCEPTED);
+                courseMentorService.save(cm);
+            }
+
+            String aiResponse = aiProcessCV(cv);
+            if (aiResponse != null && !aiResponse.isEmpty()) {
+                aiFormatCV(cv, aiResponse);
+            }
             return true;
         }
         return false;
@@ -342,38 +358,60 @@ public class CvServiceImpl implements CvService {
             CV cv = optionalCv.get();
             cv.setStatus("rejected");
             cvRepository.save(cv);
+            List<CourseMentor> courseMentor = courseMentorService.findByMentorId(id);
+
+            for (CourseMentor cm : courseMentor) {
+                cm.setStatus(ApplicationStatus.REJECTED);
+                courseMentorService.save(cm);
+            }
             return true;
         }
+
         return false;
     }
 
     @Override
-    public void aiVerifyCV(CV cv) {
-        String prompt = generatePrompt(cv);
+    public String aiProcessCV(CV cv) {
+        String prompt = generateCombinedPromptForAI(cv);
         String aiResponse = llmService.callModel(prompt);
-        processAIResponse(cv, aiResponse);
+        processCombinedAIResponse(cv, aiResponse);
+        return aiResponse;
     }
 
     @Override
-    public String generatePrompt(CV cv) {
-        String summary = cv.getSummary() != null ? cv.getSummary() : "";
-        String experienceYears = cv.getExperienceYears() != null ? cv.getExperienceYears().toString() : "0";
+    public void aiVerifyCV(CV cv, String aiResponse) {
+        processVerificationFromResponse(cv, aiResponse);
+    }
+
+    @Override
+    public void aiFormatCV(CV cv, String aiResponse) {
+        processFormattingFromResponse(cv, aiResponse);
+    }
+
+    @Override
+    public String generateCombinedPromptForAI(CV cv) {
+        // Common field extraction and escaping
         String skills = cv.getSkills() != null ? cv.getSkills() : "";
         String education = cv.getEducation() != null ? cv.getEducation() : "";
-        String experience = cv.getExperience() != null ? cv.getExperience() : "";
         String certifications = cv.getCertifications() != null ? cv.getCertifications() : "";
+        String experience = cv.getExperience() != null ? cv.getExperience() : "";
         String languages = cv.getLanguages() != null ? cv.getLanguages() : "";
+        String summary = cv.getSummary() != null ? cv.getSummary() : "";
+        String experienceYears = cv.getExperienceYears() != null ? cv.getExperienceYears().toString() : "0";
 
-        summary = summary.replace("\"", "\\\"");
+        // Escape quotes for all fields
         skills = skills.replace("\"", "\\\"");
         education = education.replace("\"", "\\\"");
-        experience = experience.replace("\"", "\\\"");
         certifications = certifications.replace("\"", "\\\"");
+        experience = experience.replace("\"", "\\\"");
         languages = languages.replace("\"", "\\\"");
-
+        summary = summary.replace("\"", "\\\"");
 
         return """
-        You are an AI assistant responsible for validating CVs submitted to a mentoring platform. Your goal is to verify:
+        You are an AI assistant responsible for both validating and formatting CV data. You must perform two tasks simultaneously:
+        
+        TASK 1 - VALIDATION:
+        Verify the CV for:
         1. Skills and Certifications:
             - Skills must be specific, clearly defined, and industry-relevant (e.g., "Java, Python, AWS" rather than "coding" or "expert").
             - Certifications must be genuine and issued by reputable institutions or recognized platforms (e.g., AWS Certified Developer, Coursera certifications).
@@ -381,73 +419,129 @@ public class CvServiceImpl implements CvService {
             - Check for logical coherence across the summary, experience, education, certifications, and languages (e.g., the experience aligns with age and skills).
             - Flag inconsistencies such as improbable experience durations, unrealistic skills compared to stated experience, or incomplete/vague information.
             - Languages should be plausible and pertinent to mentoring.
-
-        Validation Guidelines:
-        - Treat empty or excessively vague fields as potential red flags unless clearly supported elsewhere in the CV.
-        - Verify credibility, realism, and clarity explicitly.
+        
+        TASK 2 - FORMATTING:
+        Format all CV data fields with these rules:
+        1. Header and Section Recognition:
+            - Identify and REMOVE common section headers/labels such as:
+              • "Technical Skills:", "Soft Skills:", "Programming Languages:", "Core Competencies:"
+              • "Education Background:", "Academic Qualifications:", "Degrees:"
+              • "Certifications Earned:", "Professional Certifications:", "Licenses:"
+              • "Work Experience:", "Professional Experience:", "Employment History:"
+              • "Languages Spoken:", "Language Proficiency:", "Foreign Languages:"
+            - Remove organizational markers like:
+              • Bullet points (•, *, -, →, ►)
+              • Numbering (1., 2., a), b), i., ii.)
+              • Indentation markers
+              • Category dividers or subsection labels
+            - Preserve only the actual content items (skill names, degree titles, company names, etc.)
+        
+        2. Separator Recognition and Normalization:
+            - Identify all types of separators used in the input (commas, dashes, line breaks, multiple spaces, tabs, etc.)
+            - Convert all separators to semicolons (;)
+            - Preserve the actual skill/item names while standardizing the separation
+        
+        3. Data Cleaning:
+            - Remove excessive whitespace while preserving item names EXACTLY as written
+            - Handle mixed separator patterns (e.g., "Python - Java, SQL")
+            - Eliminate empty entries caused by multiple consecutive separators
+            - NEVER change spelling, capitalization, or wording - preserve ALL text exactly as provided
+            - Remove only organizational/header text, not actual content
+        
+        4. Output Consistency:
+            - Each item should be separated by exactly one semicolon
+            - No leading or trailing semicolons
+            - No spaces around semicolons unless part of the item name
+            - Preserve multi-word items exactly (e.g., "Spring Boot", "Machine Learning")
+            - CRITICAL: Never modify, correct, or change any text content - only remove headers and change separators
+        
+        Formatting Guidelines:
+        - Treat any non-alphanumeric characters (except spaces within item names) as potential separators
+        - Recognize line breaks, multiple spaces, tabs as separators
+        - Handle mixed patterns intelligently (commas AND dashes AND line breaks)
+        - Empty or whitespace-only inputs should return empty strings
+        - ABSOLUTELY CRITICAL: You are ONLY a formatter for the data fields - do NOT change any text content, spelling, or wording
+        - Even if text appears misspelled (e.g., "Puthon" instead of "Python"), preserve it exactly as written
+        - Your job is to: 1) Remove headers/organizational text, 2) Identify separators and replace them with semicolons
         
         Response requirements:
-        - You MUST reply ONLY with valid JSON (no markdown, no code block, no natural language, no explanation, no commentary, no  tags, no backticks). Return ONLY the following structure:
+        - You MUST reply ONLY with valid JSON (no markdown, no code block, no natural language, no explanation, no commentary, no tags, no backticks).
         - Provide responses strictly in valid JSON format:
           {
-            "is-approve": "true" or "false",
-            "reason": "A concise explanation (1-2 sentences) of why the CV was approved or rejected."
+            "validation": {
+              "is-approve": "true" or "false",
+              "reason": "A concise explanation (1-2 sentences) of why the CV was approved or rejected."
+            },
+            "formatted": {
+              "skills": "formatted_skills_string",
+              "education": "formatted_education_string", 
+              "certifications": "formatted_certifications_string",
+              "experience": "formatted_experience_string",
+              "languages": "formatted_languages_string"
+            }
           }
         - Ensure "is-approve" is a string ("true" or "false"), not a boolean.
         - Ensure "reason" is a non-empty string.
+        - Ensure all formatted fields are strings with semicolon-separated values or empty strings.
         - Do not include any explanation, markdown, code block, or extra fields. Output must be pure JSON only.
-        - Escape special characters in the reason to ensure valid JSON.
+        - Escape special characters to ensure valid JSON.
         - Do NOT add any extra text, explanation, or formatting. Do NOT wrap in backticks or code blocks.
-
+        
         CV data:
         {
           "summary": "%s",
           "years of experience": "%s",
           "skills": "%s",
-          "educations": "%s",
+          "education": "%s",
           "experience": "%s",
           "certifications": "%s",
-          "languages": "%s",
+          "languages": "%s"
         }
-
-        Example valid responses:
+        
+        Example valid response:
         {
-          "is-approve": "true",
-          "reason": "Skills (Java, Python) and AWS Certified Developer certification are relevant and verifiable."
+          "validation": {
+            "is-approve": "true",
+            "reason": "Skills are specific and relevant, certifications are from recognized institutions."
+          },
+          "formatted": {
+            "skills": "Java;Python;AWS;Spring Boot",
+            "education": "Bachelor of Computer Science;Master of Data Science",
+            "certifications": "AWS Certified Developer;Google Cloud Professional",
+            "experience": "Senior Developer at TechCorp;Junior Analyst at DataFirm",
+            "languages": "English;Vietnamese;French"
+          }
         }
-        {
-          "is-approve": "false",
-          "reason": "Skills are vague ('expert') and certification ('Supreme Certificate') is not recognized."
-        }
+        
         Respond ONLY with raw JSON, no markdown, no explanation, no code block.
         """.formatted(summary, experienceYears, skills, education, experience, certifications, languages);
     }
 
     @Override
-    public void processAIResponse(CV cv, String aiJson) {
+    public void processCombinedAIResponse(CV cv, String aiJson) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             if (aiJson == null || aiJson.trim().isEmpty()) {
-                logger.warn("AI response is null or empty");
+                logger.warn("AI response is null or empty for combined processing");
                 return;
             }
 
             JsonNode root = mapper.readTree(aiJson);
             JsonNode choices = root.path("choices");
             if (!choices.isArray() || choices.isEmpty()) {
-                logger.error("Invalid or empty choices array: {}", aiJson);
+                logger.error("Invalid or empty choices array for combined processing: {}", aiJson);
                 return;
             }
 
             JsonNode message = choices.get(0).path("message");
             if (message.isMissingNode()) {
-                logger.error("Missing message field: {}", aiJson);
+                logger.error("Missing message field for combined processing: {}", aiJson);
                 return;
             }
 
             JsonNode contentNode = message.path("content");
             if (contentNode.isMissingNode() || !contentNode.isTextual()) {
-                logger.error("Missing or invalid content field: {}", aiJson);
+                logger.error("Missing or invalid content field for combined processing: {}", aiJson);
                 return;
             }
 
@@ -455,42 +549,183 @@ public class CvServiceImpl implements CvService {
             if (contentJson.startsWith("```")) {
                 contentJson = contentJson.replaceAll("^```(json)?", "").replaceAll("```$", "").trim();
             }
-            JsonNode decision = mapper.readTree(contentJson);
 
-            JsonNode approveNode = decision.get("is-approve");
-            JsonNode reasonNode = decision.get("reason");
-            if (approveNode == null || reasonNode == null || !approveNode.isTextual() || !reasonNode.isTextual()) {
-                logger.error("Missing or invalid is-approve/reason fields: {}", contentJson);
+            JsonNode responseData = mapper.readTree(contentJson);
+
+            // Process validation results
+            JsonNode validationNode = responseData.path("validation");
+            if (!validationNode.isMissingNode()) {
+                processVerificationResponse(cv, validationNode, contentJson);
+            } else {
+                logger.warn("Missing validation data in combined AI response");
+            }
+
+            // Process formatting results
+            JsonNode formattedNode = responseData.path("formatted");
+            if (!formattedNode.isMissingNode()) {
+                processFormattingResponse(cv, formattedNode, contentJson);
+            } else {
+                logger.warn("Missing formatted data in combined AI response");
+            }
+
+            logger.debug("Combined AI response result: {}", aiJson);
+
+        } catch (JsonProcessingException e) {
+            logger.error("JSON parsing error for combined AI response: {}", aiJson, e);
+        } catch (Exception e) {
+            logger.error("Unexpected error processing combined AI response: {}", aiJson, e);
+            throw new RuntimeException("Combined AI processing error", e);
+        }
+    }
+
+    private void processVerificationFromResponse(CV cv, String aiJson) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            if (aiJson == null || aiJson.trim().isEmpty()) {
+                logger.warn("AI response is null or empty for verification");
                 return;
             }
 
-            boolean approved = approveNode.asText().equalsIgnoreCase("true");
-            String reason = reasonNode.asText();
-
-            if (!approved) {
-                Mentor mentor = mentorRepository.findById(cv.getId())
-                        .orElseThrow(() -> new IllegalArgumentException("Mentor not found for user"));
-
-                List<CourseMentor> mentorCourses = courseMentorRepository.findAllByMentor(mentor);
-                for (CourseMentor cm : mentorCourses) {
-                    cm.setStatus(ApplicationStatus.REJECTED);
-                    courseMentorRepository.save(cm);
-                }
-                logger.info("CV rejected for mentorId {}: {}", cv.getId(), reason);
-            } else {
-                logger.info("CV approved for mentorId {}: {}", cv.getId(), reason);
+            JsonNode root = mapper.readTree(aiJson);
+            JsonNode choices = root.path("choices");
+            if (!choices.isArray() || choices.isEmpty()) {
+                logger.error("Invalid or empty choices array for verification: {}", aiJson);
+                return;
             }
 
-            logger.debug("AI response result: {}", aiJson);
+            JsonNode message = choices.get(0).path("message");
+            if (message.isMissingNode()) {
+                logger.error("Missing message field for verification: {}", aiJson);
+                return;
+            }
 
-            cv.setStatus(approved ? "aiapproved" : "rejected");
-            cvRepository.save(cv);
+            JsonNode contentNode = message.path("content");
+            if (contentNode.isMissingNode() || !contentNode.isTextual()) {
+                logger.error("Missing or invalid content field for verification: {}", aiJson);
+                return;
+            }
+
+            String contentJson = contentNode.asText();
+            if (contentJson.startsWith("```")) {
+                contentJson = contentJson.replaceAll("^```(json)?", "").replaceAll("```$", "").trim();
+            }
+
+            JsonNode responseData = mapper.readTree(contentJson);
+
+            // Process ONLY validation results using existing method
+            JsonNode validationNode = responseData.path("validation");
+            if (!validationNode.isMissingNode()) {
+                processVerificationResponse(cv, validationNode, contentJson);
+                logger.info("Verification processed from existing AI response for CV {}", cv.getId());
+            } else {
+                logger.warn("Missing validation data in AI response for verification processing");
+            }
+
         } catch (JsonProcessingException e) {
-            logger.error("JSON parsing error for AI response: {}", aiJson, e);
+            logger.error("JSON parsing error for verification from response: {}", aiJson, e);
         } catch (Exception e) {
-            logger.error("Unexpected error processing AI response: {}", aiJson, e);
-            throw new RuntimeException("Repo error", e);
+            logger.error("Unexpected error processing verification from response: {}", aiJson, e);
+            throw new RuntimeException("Verification processing error", e);
         }
+    }
+
+    private void processVerificationResponse(CV cv, JsonNode responseData, String contentJson) {
+        JsonNode approveNode = responseData.get("is-approve");
+        JsonNode reasonNode = responseData.get("reason");
+
+        if (approveNode == null || reasonNode == null || !approveNode.isTextual() || !reasonNode.isTextual()) {
+            logger.error("Missing or invalid is-approve/reason fields: {}", contentJson);
+            return;
+        }
+
+        boolean approved = approveNode.asText().equalsIgnoreCase("true");
+        String reason = reasonNode.asText();
+
+        if (!approved) {
+            rejectCV(cv.getId());
+            logger.info("CV rejected for mentorId {}: {}", cv.getId(), reason);
+        } else {
+            logger.info("CV approved for mentorId {}: {}", cv.getId(), reason);
+        }
+
+        cv.setStatus(approved ? "aiapproved" : "rejected");
+        cvRepository.save(cv);
+    }
+
+    private void processFormattingFromResponse(CV cv, String aiJson) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            if (aiJson == null || aiJson.trim().isEmpty()) {
+                logger.warn("AI response is null or empty for formatting");
+                return;
+            }
+
+            JsonNode root = mapper.readTree(aiJson);
+            JsonNode choices = root.path("choices");
+            if (!choices.isArray() || choices.isEmpty()) {
+                logger.error("Invalid or empty choices array for formatting: {}", aiJson);
+                return;
+            }
+
+            JsonNode message = choices.get(0).path("message");
+            if (message.isMissingNode()) {
+                logger.error("Missing message field for formatting: {}", aiJson);
+                return;
+            }
+
+            JsonNode contentNode = message.path("content");
+            if (contentNode.isMissingNode() || !contentNode.isTextual()) {
+                logger.error("Missing or invalid content field for formatting: {}", aiJson);
+                return;
+            }
+
+            String contentJson = contentNode.asText();
+            if (contentJson.startsWith("```")) {
+                contentJson = contentJson.replaceAll("^```(json)?", "").replaceAll("```$", "").trim();
+            }
+
+            JsonNode responseData = mapper.readTree(contentJson);
+
+            // Process ONLY formatting results using existing method
+            JsonNode formattedNode = responseData.path("formatted");
+            if (!formattedNode.isMissingNode()) {
+                processFormattingResponse(cv, formattedNode, contentJson);
+                logger.info("Formatting processed from existing AI response for CV {}", cv.getId());
+            } else {
+                logger.warn("Missing formatted data in AI response for formatting processing");
+            }
+
+        } catch (JsonProcessingException e) {
+            logger.error("JSON parsing error for formatting from response: {}", aiJson, e);
+        } catch (Exception e) {
+            logger.error("Unexpected error processing formatting from response: {}", aiJson, e);
+            throw new RuntimeException("Formatting processing error", e);
+        }
+    }
+
+    private void processFormattingResponse(CV cv, JsonNode responseData, String contentJson) {
+        JsonNode skillsNode = responseData.get("skills");
+        JsonNode educationNode = responseData.get("education");
+        JsonNode certificationsNode = responseData.get("certifications");
+        JsonNode experienceNode = responseData.get("experience");
+        JsonNode languagesNode = responseData.get("languages");
+
+        if (skillsNode == null || educationNode == null || certificationsNode == null ||
+                experienceNode == null || languagesNode == null ||
+                !skillsNode.isTextual() || !educationNode.isTextual() || !certificationsNode.isTextual() ||
+                !experienceNode.isTextual() || !languagesNode.isTextual()) {
+            logger.error("Missing or invalid formatting fields: {}", contentJson);
+            return;
+        }
+
+        cv.setSkills(skillsNode.asText());
+        cv.setEducation(educationNode.asText());
+        cv.setCertifications(certificationsNode.asText());
+        cv.setExperience(experienceNode.asText());
+        cv.setLanguages(languagesNode.asText());
+
+        cvRepository.save(cv);
+        logger.info("CV formatting completed for mentorId {}", cv.getId());
     }
 
     private volatile boolean batchRunning = false;
@@ -509,7 +744,9 @@ public class CvServiceImpl implements CvService {
                 return;
             }
             for (CV cv : pendingCVs) {
-                aiVerifyCV(cv);
+                String aiResponse = aiProcessCV(cv);
+                aiVerifyCV(cv, aiResponse);
+                aiFormatCV(cv, aiResponse);
             }
         } finally {
             lastBatchEnd = LocalDateTime.now();

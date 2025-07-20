@@ -309,6 +309,11 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     public long countCoursesByMentor(Mentor mentor) {
         return courseMentorRepository.countByMentorAndStatus(mentor, ApplicationStatus.ACCEPTED);
     }
+
+    @Override
+    public void save(CourseMentor cm) {
+        courseMentorRepository.save(cm);
+    }
 }
 
 
