@@ -59,6 +59,10 @@ public class ScheduledJobServiceImpl implements ScheduledJobService {
         }
 
         public JobStats getJobSummary() {
-                return new JobStats(9, 8, 1);
+                JobStats stats = new JobStats();
+                stats.setTotal((int) jobRepo.count());
+                stats.setActiveCount(jobRepo.countByActive(true));
+                stats.setInactiveCount(jobRepo.countByActive(false));
+                return stats;
         }
 }
