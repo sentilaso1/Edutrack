@@ -80,7 +80,7 @@
                                  th:text="${s.available ? 'Available' : 'Unavailable'}">
                             </div>
                             <div style="font-weight: bold; color: #721c24" th:if="${!s.available}" th:text="${'Reschedule to: ' + s.requestedNewSlot.startTime + '-' + s.requestedNewSlot.endTime + ' ' + s.requestedNewDate}"></div>
-                            <a th:href="@{${s.available ? '/mentor/schedule/' + s.id : '#'}}">
+                            <a th:href="@{${s.available ? '/mentor/schedule/' + s.id : '/mentor/requests'}}">
                                 <p th:text="${s.enrollment.courseMentor.course.name}"></p>
                                 <p th:text="${s.enrollment.mentee.fullName}"></p>
                             </a>
