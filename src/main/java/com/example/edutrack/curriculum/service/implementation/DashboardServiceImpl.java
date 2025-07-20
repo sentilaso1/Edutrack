@@ -221,7 +221,7 @@ public class DashboardServiceImpl implements DashboardService {
             String mentorName = (mentor != null) ? mentor.getFullName() : "Unknown";
             UUID mentorUuid = (mentor != null) ? mentor.getId() : null;
 
-            SkillProgressDTO dto = new SkillProgressDTO(courseMentor.getId(),
+            SkillProgressDTO dto = new SkillProgressDTO(courseMentor.getCourse().getId(),courseMentor.getId(),
                     course.getName(), lastSession, completed, percentage, tags, total, mentorName, mentorUuid
             );
 

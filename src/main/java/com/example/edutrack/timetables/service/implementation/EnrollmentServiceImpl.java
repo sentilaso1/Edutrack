@@ -251,4 +251,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
         return false;
     }
+
+    @Override
+    public long countStudentsByMentor(Mentor mentor) {
+        return enrollmentRepository.countByCourseMentor_MentorAndStatus(mentor, Enrollment.EnrollmentStatus.APPROVED);
+    }
 }

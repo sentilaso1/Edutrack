@@ -2,7 +2,6 @@ package com.example.edutrack.curriculum.service.implementation;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.UserRepository;
@@ -304,6 +303,11 @@ public class CourseMentorServiceImpl implements CourseMentorService {
                 .orElseThrow(() -> new IllegalArgumentException("CourseMentor not found: userId=" + userId + ", courseId=" + courseId));
         courseMentor.setDescription(description);
         courseMentorRepository.save(courseMentor);
+    }
+
+    @Override
+    public long countCoursesByMentor(Mentor mentor) {
+        return courseMentorRepository.countByMentorAndStatus(mentor, ApplicationStatus.ACCEPTED);
     }
 }
 
