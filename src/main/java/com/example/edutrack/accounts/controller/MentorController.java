@@ -164,6 +164,19 @@ public class MentorController {
             return "redirect:/login";
         }
 
+        //auto reject toàn bộ lịch pending chứa slot <= today
+        List<Enrollment> filterEnrollment = enrollmentService.findByStatusAndMentor(Enrollment.EnrollmentStatus.PENDING, mentor.getId());
+        for(Enrollment enrollment : filterEnrollment) {
+            List<RequestedSchedule> requestedSchedules = enrollmentScheduleService.findStartLearningTime(enrollment.getScheduleSummary());
+            for(RequestedSchedule requestedSchedule : requestedSchedules) {
+                if (!requestedSchedule.getRequestedDate().isAfter(LocalDate.now())) {
+                    enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
+                    enrollmentService.save(enrollment);
+                    break;
+                }
+            }
+        }
+
         // Xây dựng sắp xếp
         Sort sortOption = switch (sort) {
             case "priceAsc" -> Sort.by("transaction.amount").ascending();
