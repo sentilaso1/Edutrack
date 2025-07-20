@@ -30,7 +30,7 @@
     <div id="registered-courses-list" th:attr="data-page=${registeredPageNumber}">
         <h2 style="margin-top:32px;">Your Registered Courses</h2>
         <div th:if="${registeredCoursePage != null && !registeredCoursePage.isEmpty()}">
-            <div th:each="cm : ${registeredCoursePage.content}" class="course-card"
+            <div th:each="cm, iterStat : ${registeredCoursePage.content}" class="course-card"
                  th:attr="data-course-id=${cm.course.id}, data-description=${cm.description}">
                 <div class="course-title" th:text="${cm.course.name}"></div>
                 <div class="course-description" th:text="${cm.course.description}"></div>
@@ -38,7 +38,13 @@
                     <div class="mentor-card-desc-header">Teaching Description:</div>
                     <div th:if="${cvStatus == 'new' or cvStatus == 'rejected'}">
                         <div class="form-group dynamic-inputs">
-                            <textarea class="course-desc" required
+                            <input type="hidden"
+                                   th:name="'courseDetails[' + ${iterStat.index} + '].courseId'"
+                                   th:value="${cm.course.id}" />
+
+                            <textarea class="course-desc"
+                                      required
+                                      th:name="'courseDetails[' + ${iterStat.index} + '].description'"
                                       placeholder="Describe how you will teach this course"
                                       th:text="${cm.description}"></textarea>
                         </div>

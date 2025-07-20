@@ -313,35 +313,35 @@
                                     <div class="form-group">
                                         <label for="skills">Skills & Tech Stacks</label>
                                         <textarea id="skills" name="skills" maxlength="1024" class="large-textarea" required
-                                                  th:text="${cv.skills}"
+                                                  th:utext="${cv.skills}"
                                                   placeholder="List your technical skills, programming languages, frameworks, tools..."
                                                   th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label for="education">Education</label>
                                         <textarea id="education" name="education" maxlength="1024" required
-                                                  th:text="${cv.education}"
+                                                  th:utext="${cv.education}"
                                                   placeholder="Degrees, institutions, graduation dates, relevant coursework..."
                                                   th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label for="certifications">Certifications</label>
                                         <textarea id="certifications" name="certifications" maxlength="1024" required
-                                                  th:text="${cv.certifications}"
+                                                  th:utext="${cv.certifications}"
                                                   placeholder="Professional certifications, licenses, achievements..."
                                                   th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label for="experience">Experience</label>
                                         <textarea id="experience" name="experience" maxlength="1024" class="large-textarea" required
-                                                  th:text="${cv.experience}"
+                                                  th:utext="${cv.experience}"
                                                   placeholder="List of experiences, your past workplaces, products..."
                                                   th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label for="languages">Languages</label>
                                         <textarea id="languages" name="languages" maxlength="1024" required
-                                                  th:text="${cv.languages}"
+                                                  th:utext="${cv.languages}"
                                                   placeholder="Languages spoken and proficiency levels..."
                                                   th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
                                     </div>
@@ -357,8 +357,10 @@
                                 </form>
                             </div>
                             <!-- RIGHT: Courses Section -->
+
                             <div class="courses-section" id="courses-section">
-                                <th:block th:replace="~{fragments/course-sections :: courseSections(availableCoursePage=${availableCoursePage}, registeredCoursePage=${registeredCoursePage}, pageNumber=${pageNumber}, registeredPageNumber=${registeredPageNumber}, cvStatus=${cvStatus}, userId=${userId})}"></th:block>
+
+                                    <div th:replace="~{fragments/course-sections :: courseSections(availableCoursePage=${availableCoursePage}, registeredCoursePage=${registeredCoursePage}, pageNumber=${pageNumber}, registeredPageNumber=${registeredPageNumber}, cvStatus=${cvStatus}, userId=${userId})}"></div>
                             </div>
                         </div>
                         <div class="button-center-wrapper">
@@ -391,7 +393,10 @@
             document.querySelectorAll('#registered-courses-list .course-card').forEach(card => {
                 const courseId = card.getAttribute('data-course-id');
                 let description = card.getAttribute('data-description') || '';
-                selectedCourses.set(courseId, { description });
+                selectedCourses.set(courseId, {
+                    courseId: courseId,
+                    description: description
+                });
             });
         }
         initializeSelectedCourses();
@@ -420,22 +425,25 @@
                 success: function(data) {
                     console.log('AJAX response:', data);
                     coursesSection.innerHTML = data;
-                    // Reinitialize selectedCourses with current page, but preserve existing descriptions
                     document.querySelectorAll('#registered-courses-list .course-card').forEach(card => {
                         const courseId = card.getAttribute('data-course-id');
                         let description = card.getAttribute('data-description') || '';
-                        // Preserve existing description from selectedCourses if available
                         if (selectedCourses.has(courseId)) {
                             description = selectedCourses.get(courseId).description;
                         }
-                        selectedCourses.set(courseId, { description });
+                        selectedCourses.set(courseId, {
+                            courseId: courseId,
+                            description: description
+                        });
                         const descInput = card.querySelector('.course-desc');
                         if (descInput) {
                             descInput.value = description;
                             descInput.addEventListener('input', function () {
                                 const newDescription = descInput.value.trim();
-                                selectedCourses.set(courseId, { description: newDescription });
-                                // Update description in backend
+                                selectedCourses.set(courseId, {
+                                    courseId: courseId,
+                                    description: newDescription
+                                });
                                 $.ajax({
                                     url: '/mentor/cv/course/update-description',
                                     method: 'POST',
@@ -503,7 +511,10 @@
                         // Update selectedCourses map
                         if (isAdd) {
                             let description = selectedCourses.has(courseId) ? selectedCourses.get(courseId).description : '';
-                            selectedCourses.set(courseId, { description });
+                            selectedCourses.set(courseId, {
+                                courseId: courseId,
+                                description: description
+                            });
                         } else {
                             selectedCourses.delete(courseId);
                         }
@@ -557,7 +568,6 @@
             selectedCourses.forEach((value, courseId) => {
                 if (!value.description.trim()) {
                     isValid = false;
-                    // Highlight empty description fields on current page
                     const descInput = document.querySelector(`#registered-courses-list .course-card[data-course-id="${courseId}"] .course-desc`);
                     if (descInput) {
                         descInput.style.borderColor = 'red';
@@ -569,7 +579,6 @@
                 alert('Please fill in a teaching description for all registered courses.');
                 return;
             }
-            // Save all selected courses to hidden input
             selectedCoursesInput.value = JSON.stringify(Object.fromEntries(selectedCourses));
             warning.style.display = 'none';
         });
