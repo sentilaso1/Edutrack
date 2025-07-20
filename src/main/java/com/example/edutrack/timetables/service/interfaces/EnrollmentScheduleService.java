@@ -84,4 +84,8 @@ public interface EnrollmentScheduleService {
 
     @Transactional
     void processExpiredRequests();
+
+    List<EnrollmentSchedule> findTop5UpcomingExam(LocalDate now, Mentor mentor);
+
+    List<EnrollmentSchedule> findSlotToday(Mentor mentor);
 }

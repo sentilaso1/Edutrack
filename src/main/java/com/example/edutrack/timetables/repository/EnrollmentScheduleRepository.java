@@ -2,8 +2,6 @@ package com.example.edutrack.timetables.repository;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.timetables.dto.EnrollmentAttendanceProjection;
 import com.example.edutrack.timetables.model.Day;
 import com.example.edutrack.timetables.model.Enrollment;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -209,4 +206,14 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     );
 
     boolean existsByEnrollment_CourseMentor_Course_IdAndDateAfter(UUID courseId, LocalDate date);
+
+    List<EnrollmentSchedule> findTop5ByIsTestTrueAndAvailableTrueAndDateAfterAndEnrollment_CourseMentor_MentorOrderByDateAsc(
+            LocalDate now,
+            Mentor mentor
+    );
+
+    List<EnrollmentSchedule> findByEnrollment_CourseMentor_MentorAndDateOrderBySlotAsc(
+            Mentor mentor,
+            LocalDate date
+    );
 }
