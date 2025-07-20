@@ -170,6 +170,11 @@
             top: 10px;
             right: 10px;
         }
+        .submit-review.inactive {
+            background-color: #6B7280;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
     </style>
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/reschedule-page-style.css}"/>
@@ -249,7 +254,8 @@
                 <textarea name="report" placeholder="Write your review here..."
                           style="width: 100%; height: 100px; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ccc;"
                           th:field="*{report}" th:value="${enrollmentSchedule.report}"></textarea>
-                <button class="submit-review">Submit Review</button>
+                <button class="submit-review" th:classappend="${!enrollmentSchedule.available ? 'inactive' : ''}"
+                        th:disabled="${!enrollmentSchedule.available}">Submit Review</button>
             </div>
         </form>
 
@@ -284,7 +290,14 @@
                         <textarea class="name" name="reason"></textarea>
                     </div>
                     <input type="hidden" name="eid" th:value="${enrollmentSchedule.id}">
-                    <div style="display: flex; justify-content: center"><button type="submit"  class="submit-review">Submit Request</button></div>
+                    <div style="display: flex; justify-content: center">
+                        <button type="submit"
+                                class="submit-review"
+                                th:classappend="${!enrollmentSchedule.available ? 'inactive' : ''}"
+                                th:disabled="${!enrollmentSchedule.available}">
+                            Submit Request
+                        </button>
+                    </div>
                 </form>
 
             </div>
