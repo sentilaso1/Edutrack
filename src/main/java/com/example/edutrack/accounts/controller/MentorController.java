@@ -1,6 +1,6 @@
 package com.example.edutrack.accounts.controller;
 
-import com.example.edutrack.accounts.service.MentorService;
+import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.accounts.dto.IncomeStatsDTO;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
@@ -8,13 +8,12 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseServiceImpl;
 import com.example.edutrack.profiles.model.CV;
-import com.example.edutrack.profiles.service.CvServiceImpl;
+import com.example.edutrack.profiles.service.implementations.CvServiceImpl;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.dto.UpcomingScheduleDTO;
 import com.example.edutrack.timetables.model.*;
-import com.example.edutrack.timetables.service.implementation.EnrollmentScheduleServiceImpl;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;

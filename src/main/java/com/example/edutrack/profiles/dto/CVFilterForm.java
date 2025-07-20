@@ -21,6 +21,10 @@ public class CVFilterForm implements Serializable {
     @Null
     private List<String> tags;
 
+    public CVFilterForm() {
+
+    }
+
     public CVFilterForm(String sort, String filter, List<String> tags) {
         this.sort = sort;
         this.filter = filter;
