@@ -442,7 +442,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="expertise-pills">
+                                        <div class="expertise-pills" th:if="${mentor.expertiseItem != null}">
                                             <span th:each="exp, stat : ${mentor.expertiseItem}"
                                                   th:if="${stat.index < 3}"
                                                   class="pill"
@@ -507,7 +507,7 @@
 
                     <!-- Page Numbers -->
                     <th:block th:each="i : ${#numbers.sequence(1, mentorPage.totalPages)}">
-                        <a th:href="@{/courses(
+                        <a th:href="@{/mentors(
                             page=${i},
                             size_page=${param.size_page},
                             expertise=${param.expertise},

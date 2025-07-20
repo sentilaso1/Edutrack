@@ -1,4 +1,4 @@
-package com.example.edutrack.profiles.service;
+package com.example.edutrack.profiles.service.implementations;
 
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
@@ -115,12 +115,10 @@ public class CvServiceImpl implements CvService {
             query.setParameter("skill" + i, "%" + skills.get(i) + "%");
         }
 
-        // For pagination
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
         List<CV> resultList = query.getResultList();
 
-        // Count query for total pages
         StringBuilder countSql = new StringBuilder("SELECT COUNT(*) FROM cv WHERE ");
         countSql.append(String.join(" OR ", clauses));
 
@@ -491,6 +489,7 @@ public class CvServiceImpl implements CvService {
             logger.error("JSON parsing error for AI response: {}", aiJson, e);
         } catch (Exception e) {
             logger.error("Unexpected error processing AI response: {}", aiJson, e);
+            throw new RuntimeException("Repo error", e);
         }
     }
 

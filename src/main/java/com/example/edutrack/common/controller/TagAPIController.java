@@ -4,8 +4,6 @@ import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.repository.TagRepository;
-import com.example.edutrack.curriculum.service.interfaces.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +37,6 @@ public class TagAPIController {
     ) {
         Mentee mentee = menteeRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mentee not found"));
-        // If interests already set or skipped, prevent resubmission
         if (mentee.getInterests() != null && !mentee.getInterests().isEmpty()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("User already selected interests or skipped.");
