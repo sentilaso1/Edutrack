@@ -2,6 +2,7 @@ package com.example.edutrack.profiles.service.interfaces;
 
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.profiles.dto.CVForm;
+import com.example.edutrack.profiles.service.implementations.CvServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.example.edutrack.profiles.model.CV;
@@ -30,10 +31,11 @@ public interface CvService {
     List<Course> getCoursesForCV(UUID cvId);
     boolean acceptCV(UUID id);
     boolean rejectCV(UUID id);
-
-    void aiVerifyCV(CV cv);
-    String generatePrompt(CV cv);
-    void processAIResponse(CV cv, String aiJson);
+    String aiProcessCV(CV cv);
+    String generateCombinedPromptForAI(CV cv);
+    void processCombinedAIResponse(CV cv, String aiJson);
+    void aiVerifyCV(CV cv, String aiResponse);
+    void aiFormatCV(CV cv, String aiResponse);
     void scheduleAIVerification();
     boolean isBatchRunning();
     LocalDateTime getLastBatchEnd();
