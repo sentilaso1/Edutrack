@@ -1,33 +1,16 @@
-<header th:fragment="header"
-        class="header"
-        data-header
-        xmlns:th="http://www.thymeleaf.org">
+<header th:fragment="header" class="header" data-header xmlns:th="http://www.thymeleaf.org">
     <div class="container">
         <a th:href="@{/}" class="logo">
-            <img
-                    th:src="@{/assets/images/logo.png}"
-                    width="150"
-                    height="auto"
-                    alt="Youdemi home"
-            />
+            <img th:src="@{/assets/images/logo.png}" width="150" height="auto" alt="Youdemi home" />
         </a>
 
         <nav class="navbar" data-navbar>
             <div class="navbar-top">
                 <a th:href="@{/}" class="logo">
-                    <img
-                            th:src="@{/assets/images/logo.svg}"
-                            width="145"
-                            height="27"
-                            alt="Youdemi home"
-                    />
+                    <img th:src="@{/assets/images/logo.svg}" width="145" height="27" alt="Youdemi home" />
                 </a>
 
-                <button
-                        class="nav-close-btn"
-                        aria-label="close menu"
-                        data-nav-toggler
-                >
+                <button class="nav-close-btn" aria-label="close menu" data-nav-toggler>
                     <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
                 </button>
             </div>
@@ -46,8 +29,8 @@
                 </li>
 
                 <li class="navbar-item" th:if="${session.loggedInUser != null}">
-                    <a th:href="${isMentor ? '/mentor' : '/dashboard'}"
-                       class="navbar-link title-sm" data-nav-link>Dashboard</a>
+                    <a th:href="${isMentor ? '/mentor' : '/dashboard'}" class="navbar-link title-sm"
+                        data-nav-link>Dashboard</a>
                 </li>
 
                 <li class="navbar-item" th:if="${session.loggedInUser != null and !isMentor}">
@@ -72,9 +55,14 @@
 
             <div th:if="${session.loggedInUser != null}" style="display: flex; align-items: center; gap: 12px;">
                 <th:block th:with="wallet = ${@walletService.findByUser(session.loggedInUser)}">
-                    <a th:if="${wallet.isPresent()}" th:href="@{/wallet}" style="" class="title-sm" th:text="${wallet.get().balanceFormatted} + ' VND'">0 VND</a>
+                    <a th:if="${wallet.isPresent()}" th:href="@{/wallet}" style="" class="title-sm"
+                        th:text="${wallet.get().balanceFormatted} + ' VND'">0 VND</a>
                 </th:block>
+
                 <a th:href="@{/logout}" class="btn btn-secondary">Logout</a>
+                <a th:href="@{/profile}" style="text-decoration: none;">
+                    <img id="top-avatar" th:src="@{/avatar}" alt="Avatar" class="top-avatar">
+                </a>
             </div>
         </div>
 
@@ -86,4 +74,22 @@
         <div class="overlay" data-overlay data-nav-toggler></div>
     </div>
     <script th:src="@{/assets/js/courlist.js}"></script>
+
+    <style>
+        .top-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e0e0e0;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .top-avatar:hover {
+            transform: scale(1.05);
+            border-color: #007bff;
+        }
+    </style>
 </header>
