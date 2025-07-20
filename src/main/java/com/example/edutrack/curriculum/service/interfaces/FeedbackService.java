@@ -1,6 +1,7 @@
 package com.example.edutrack.curriculum.service.interfaces;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.ReviewDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -21,4 +22,7 @@ public interface FeedbackService {
     List<Feedback> getAllFeedbacksByMentorId(UUID mentorId);
 
 
+    long countReviewsByMentor(Mentor mentor);
+
+    List<Feedback> getTopRecentFeedback(CourseMentor courseMentor);
 }

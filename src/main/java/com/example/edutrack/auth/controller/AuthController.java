@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Optional;
 
 @Controller
@@ -80,6 +81,17 @@ public class AuthController {
         return "auth/signup";
     }
 
+    private boolean isAtLeast20YearsOld(User user) {
+        Date birthDate = user.getBirthDate();
+        if (birthDate == null) return false;
+
+        LocalDate birthLocal = birthDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        return Period.between(birthLocal, LocalDate.now()).getYears() >= 20;
+    }
+
     @PostMapping("/signup")
     public String processSignup(@ModelAttribute("user") User user,
                                 @RequestParam("g-recaptcha-response") String recaptchaResponse,
@@ -100,6 +112,11 @@ public class AuthController {
 
         if (userService.isEmailExists(user.getEmail())) {
             model.addAttribute("error", "Email already exists");
+            return "auth/signup";
+        }
+
+        if("mentor".equals(role) && !isAtLeast20YearsOld(user)) {
+            model.addAttribute("error", "Mentor is at least 20 years old");
             return "auth/signup";
         }
 
@@ -152,6 +169,9 @@ public class AuthController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if(!user.getIsActive()){
+                model.addAttribute("error", "Account is inactive");
+                return "auth/login";
+            }if(user.getIsLocked()){
                 model.addAttribute("error", "Account is locked");
                 return "auth/login";
             }

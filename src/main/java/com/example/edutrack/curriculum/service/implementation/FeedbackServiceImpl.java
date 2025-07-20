@@ -1,31 +1,23 @@
 package com.example.edutrack.curriculum.service.implementation;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.common.service.interfaces.LLMService;
 import com.example.edutrack.curriculum.dto.ReviewDTO;
-import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
-import com.example.edutrack.profiles.model.CV;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
@@ -74,4 +66,13 @@ public class FeedbackServiceImpl implements FeedbackService {
         return feedbacks;
     }
 
+    @Override
+    public long countReviewsByMentor(Mentor mentor) {
+        return feedbackRepository.countByCourseMentor_Mentor(mentor);
+    }
+
+    @Override
+    public List<Feedback> getTopRecentFeedback(CourseMentor courseMentor) {
+        return feedbackRepository.findTop3ByCourseMentorOrderByCreatedDateDesc(courseMentor);
+    }
 }

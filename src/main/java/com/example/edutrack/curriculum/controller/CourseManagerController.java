@@ -117,8 +117,15 @@ public class CourseManagerController {
     }
 
     @GetMapping("/courses/toggle-open/{id}")
-    public String toggleOpen(@PathVariable UUID id) {
+    public String toggleOpen(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         Course course = courseService.findById(id);
+        if(course.getOpen()){
+            boolean isCourseLocked = courseMentorService.isCourseLocked(id);
+            if(isCourseLocked){
+                redirectAttributes.addFlashAttribute("errorMessage", "Cannot close this course because it has active sessions or pending applications.");
+                return "redirect:/manager/course-dashboard";
+            }
+        }
         if (course != null) {
             course.setOpen(!course.getOpen());
             courseService.save(course);
@@ -155,8 +162,6 @@ public class CourseManagerController {
 
     @GetMapping("/courses/edit/{id}")
     public String showEditForm(@PathVariable UUID id, Model model, RedirectAttributes redirectAttributes) {
-
-        // Check if course has assigned mentors
         boolean hasMentor = courseMentorService.isCourseLocked(id);
 
         if (hasMentor) {

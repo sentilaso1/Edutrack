@@ -25,7 +25,7 @@
                     <a th:href="@{/courses/register/{cid}(cid=${courseMentor.id})}" class="register-btn">
                         Enroll
                     </a>
-                    <p style="padding-top: 1em; padding-bottom: 1em"><strong>29,878</strong> already enrolled</p>
+                    <p style="padding-top: 1em; padding-bottom: 1em"><strong th:text="${mentorStudentCount}">0</strong> already enrolled</p>
                 </div>
 
             </div>
@@ -34,28 +34,7 @@
             </div>
         </div>
         <div style="padding: 0 2em 0;">
-            <div class="banner">
-                <div>
-                    <h3>5 course series</h3>
-                    <p>Get in-depth knowledge of a subject</p>
-                </div>
-                <div>
-                    <h3>4.9</h3>
-                    <p>(1.545 reviews)</p>
-                </div>
-                <div>
-                    <h3>Beginner level</h3>
-                    <p>Recommended experience</p>
-                </div>
-                <div>
-                    <h3>2 months</h3>
-                    <p>at 10 hours a week</p>
-                </div>
-                <div style="border: none">
-                    <h3>Flexible schedule</h3>
-                    <p>Learn at your own pace</p>
-                </div>
-            </div>
+
             <div class="navigate">
                 <ul>
                     <li><a th:href="@{#skill}">Subjects</a></li>
@@ -93,64 +72,49 @@
                          class="mentor-avatar">
                     <div class="mentor-info">
                         <h3 style="color: #7b7b8a;" th:text="${course.mentor.fullName}"></h3>
-                        <p th:text="${course.mentor.expertise}"></p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em">
-                            <a th:href="@{'/mentors/' + ${course.mentor.id}}" class="follow-btn">Detail</a>
-                            <a th:href="@{'/courses/schedule/' + ${course.id}}" class="follow-btn">Schedule</a>
+                        <div class="expertise-tags" th:if="${course.mentor.expertise != null and !course.mentor.expertise.isEmpty()}">
+                            <span class="expertise-tag"
+                                  th:each="expertise : ${#strings.listSplit(course.mentor.expertise, ';')}"
+                                  th:text="${#strings.trim(expertise)}">
+                            </span>
                         </div>
-
-
+                        <div style="display: flex; justify-content: center;">
+                            <a th:href="@{'/mentors/' + ${course.mentor.id}}" class="follow-btn">Detail</a>
+                        </div>
                     </div>
                     <div class="stats">
                         <div class="stat-item">
-                            <div class="stat-number">150</div>
+                            <div class="stat-number" th:text="${mentorCourseCount}">150</div>
                             <div class="stat-label">Number of Skill</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number">140</div>
+                            <div class="stat-number" th:text="${mentorStudentCount}">140</div>
                             <div class="stat-label">Learners</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number">45</div>
+                            <div class="stat-number" th:text="${mentorReviewCount}">45</div>
                             <div class="stat-label">Reviews</div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <h2 id="session3">Why people choose EduTrack for their career</h2>
+            <h2 id="session3">What People Say About This Course</h2>
             <div class="review">
-                <div class="card">
-                    <div class="title">
-                        <img th:src="@{#}" alt="avatar"/>
-                        <h3 class="name">Felipe M.</h3>
-                    </div>
-                    <div>
-                        "To be able to take courses at my own pace and rhythm has been an
-                        amazing experience. I can learn whenever it fits my schedule and
-                        mood."
-                    </div>
+
+                <div th:if="${#lists.isEmpty(feedbackList)}">
+                    <p>There are no reviews for this course yet.</p>
                 </div>
-                <div class="card">
+
+                <div class="card" th:each="feedback : ${feedbackList}">
                     <div class="title">
-                        <img th:src="@{#}" alt="avatar"/>
-                        <h3 class="name">Felipe M.</h3>
+                        <img th:src="@{/users/{id}/avatar(id=${feedback.mentee.id})}" alt="avatar"/>
+
+                        <h3 class="name" th:text="${feedback.isAnonymous} ? 'Anonymous Mentee' : ${feedback.mentee.fullName}"></h3>
                     </div>
                     <div>
-                        "To be able to take courses at my own pace and rhythm has been an
-                        amazing experience. I can learn whenever it fits my schedule and
-                        mood."
+                        <p th:text="'&quot;' + ${feedback.content} + '&quot;'"></p>
                     </div>
-                </div>
-                <div class="card">
-                    <div class="title">
-                        <img th:src="@{#}" alt="avatar"/>
-                        <h3 class="name">Felipe M.</h3>
-                    </div>
-                    <div>
-                        "To be able to take courses at my own pace and rhythm has been an
-                        amazing experience. I can learn whenever it fits my schedule and
-                        mood."
+                    <div style="margin-top: 10px; font-weight: bold; color: #f59e0b;" th:text="'⭐ ' + ${feedback.rating}">
                     </div>
                 </div>
             </div>

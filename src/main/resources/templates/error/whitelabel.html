@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Something Went Wrong - EduTrack</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --error-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            --surface: rgba(255, 255, 255, 0.95);
+            --surface-secondary: rgba(255, 255, 255, 0.85);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            --shadow-hover: 0 40px 80px rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .error-container {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 3.5rem;
+            max-width: 650px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .error-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: var(--secondary-gradient);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .error-container::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--primary-gradient);
+            border-radius: 26px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-container:hover::after {
+            opacity: 0.1;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(60px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .error-icon {
+            font-size: 6rem;
+            background: var(--error-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+            animation: pulse 2s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+        }
+
+        .error-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .error-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.7;
+            font-weight: 400;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            min-width: 220px;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border: 2px solid transparent;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .support-info {
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(227, 242, 253, 0.8) 0%, rgba(243, 229, 245, 0.8) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .support-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--secondary-gradient);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .support-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .support-text {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 8s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Debug section - hidden by default */
+        .debug-trigger {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .debug-trigger:hover {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+
+        .debug-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .debug-content {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .debug-title {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .debug-close {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .debug-info {
+            color: #ccc;
+        }
+
+        .debug-block {
+            margin-bottom: 1.5rem;
+        }
+
+        .debug-block-title {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .debug-block-content {
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #e0e0e0;
+        }
+
+        .konami-hint {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+            font-family: monospace;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 2.5rem 2rem;
+                margin: 1rem;
+                border-radius: 20px;
+            }
+
+            .error-title {
+                font-size: 2.5rem;
+            }
+
+            .error-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .btn {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .support-info {
+                padding: 1.5rem;
+            }
+
+            .debug-content {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="floating-particles" id="particles"></div>
+
+<button class="debug-trigger" onclick="showDebugHint()" title="Debug access">
+    <i class="fas fa-code" style="color: white; font-size: 0.8rem;"></i>
+</button>
+
+<div class="konami-hint" id="konamiHint">
+    Try: 1-2-3-4-5-6
+</div>
+
+<div class="error-container">
+    <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h2 th:text="'Error ' + ${statusCode} + ' - ' + ${statusText}">Error info</h2>
+
+    <h1 class="error-title">Whoops!</h1>
+    <p class="error-subtitle">
+        Something unexpected happened. Our team has been automatically notified and is working to fix this issue. Please try again in a moment.
+    </p>
+
+
+    <div class="error-actions">
+        <a th:href="@{/}" class="btn btn-primary">
+            <i class="fas fa-home"></i>
+            Back to Home
+        </a>
+
+        <button onclick="window.location.reload()" class="btn btn-secondary">
+            <i class="fas fa-redo-alt"></i>
+            Refresh Page
+        </button>
+    </div>
+
+    <div class="support-info">
+        <div class="support-title">
+            <i class="fas fa-life-ring"></i>
+            Need Assistance?
+        </div>
+        <div class="support-text">
+            If this problem continues, please reach out to our support team at
+            <strong>support@edutrack.com</strong> or call us at <strong>1-800-EDU-HELP</strong>
+        </div>
+    </div>
+</div>
+
+<div class="debug-section" id="debugSection">
+    <div class="debug-content">
+        <div class="debug-header">
+            <div class="debug-title">Debug Information</div>
+            <button class="debug-close" onclick="hideDebug()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="debug-info">
+            <div class="debug-block" th:if="${errorMessage}">
+                <div class="debug-block-title">Error Message:</div>
+                <div class="debug-block-content" th:text="${errorMessage}">Error message will be displayed here</div>
+            </div>
+
+            <div class="debug-block" th:if="${stackTrace}">
+                <div class="debug-block-title">Stack Trace:</div>
+                <div class="debug-block-content" th:text="${stackTrace}">Stack trace will be displayed here</div>
+            </div>
+
+            <div class="debug-block">
+                <div class="debug-block-title">Request Information:</div>
+                <div class="debug-block-content">
+                    Timestamp: <span id="debugTimestamp"></span>
+                    User Agent: <span id="debugUserAgent"></span>
+                    URL: <span id="debugUrl"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function createParticles() {
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (8 + Math.random() * 4) + 's';
+            container.appendChild(particle);
+        }
+    }
+
+    const debugCode = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6'];
+    let userInput = [];
+
+    function showDebug() {
+        document.getElementById('debugSection').style.display = 'flex';
+        document.getElementById('debugTimestamp').textContent = new Date().toISOString();
+        document.getElementById('debugUserAgent').textContent = navigator.userAgent;
+        document.getElementById('debugUrl').textContent = window.location.href;
+    }
+
+    function hideDebug() {
+        document.getElementById('debugSection').style.display = 'none';
+    }
+
+    function showDebugHint() {
+        const hint = document.getElementById('konamiHint');
+        hint.style.opacity = '1';
+        setTimeout(() => {
+            hint.style.opacity = '0';
+        }, 3000);
+    }
+
+    document.addEventListener('keydown', function(event) {
+        userInput.push(event.code);
+
+        if (userInput.length > 6) {
+            userInput.shift();
+        }
+
+        if (userInput.length === 6) {
+            const matches = userInput.every((key, index) => key === debugCode[index]);
+            if (matches) {
+                showDebug();
+                userInput = [];
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        createParticles();
+
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.height, rect.width);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255,255,255,0.5);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        left: ${x}px;
+                        top: ${y}px;
+                        width: ${size}px;
+                        height: ${size}px;
+                        pointer-events: none;
+                    `;
+
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                hideDebug();
+            }
+        });
+    });
+
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+            .btn {
+                position: relative;
+                overflow: hidden;
+            }
+        `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>
