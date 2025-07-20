@@ -32,7 +32,7 @@ public class MentorScheduleController {
                                  HttpSession session) {
 
         if (day == null || slot == null || day.isEmpty() || day.size() != slot.size()) {
-            return "redirect:/mentor/working-date?error=invalid-day-slot";
+            return "redirect:/mentor/working-date?error=Invalid day slot";
         }
         if (startDate == null || endDate == null) {
             LocalDate today = LocalDate.now();
@@ -41,17 +41,17 @@ public class MentorScheduleController {
             try {
                 monthOffset = Integer.parseInt(monthOption); // "0" → "4"
                 if (monthOffset < 0 || monthOffset > 4) {
-                    return "redirect:/mentor/working-date?error=invalid-month-selection";
+                    return "redirect:/mentor/working-date?error=Invalid month selection";
                 }
             } catch (NumberFormatException e) {
-                return "redirect:/mentor/working-date?error=invalid-month-selection";
+                return "redirect:/mentor/working-date?error=Invalid month selection";
             }
 
             LocalDate startOfMonth = today.plusMonths(monthOffset).withDayOfMonth(1);
             LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
 
             if (monthOffset == 0 && today.getDayOfMonth() > 15) {
-                return "redirect:/mentor/working-date?error=too-late-to-register";
+                return "redirect:/mentor/working-date?error=Too late to register month " + startOfMonth.getMonth() + " " + startOfMonth.getYear();
             }
 
             startDate = startOfMonth;
