@@ -54,11 +54,11 @@ public class DashboardServiceImpl implements DashboardService {
         if (schedules == null || schedules.isEmpty()) {
             return "No upcoming session";
         }
+
         EnrollmentSchedule next = null;
         LocalDateTime nearest = null;
 
         for (EnrollmentSchedule s : schedules) {
-            //Temporarily use structure date in EnrollmentSchedule is yyyy:mm:dd and slot is hh:mm:ss
             LocalDate date = s.getDate();
             LocalTime time = s.getSlot().getStartTime();
             LocalDateTime sessionTime = LocalDateTime.of(date, time);
@@ -71,13 +71,19 @@ public class DashboardServiceImpl implements DashboardService {
             }
         }
 
-        if (next == null) return "No upcoming session";
+        if (next == null) {
+            return "No upcoming session";
+        }
 
         String formattedTime = nearest.format(DateTimeFormatter.ofPattern("EEEE, hh:mm a", Locale.ENGLISH));
         String courseName = next.getEnrollment().getCourseMentor().getCourse().getName();
         return courseName + " - " + formattedTime;
     }
 
+    @Override
+    public boolean hasPendingReports(UUID menteeId) {
+        return enrollmentScheduleRepository.hasPendingReports(menteeId);
+    }
 
     @Override
     public int getTotalMentors(UUID menteeId) {
@@ -98,7 +104,7 @@ public class DashboardServiceImpl implements DashboardService {
         if (total == 0) return 0;
 
         int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(
-                menteeId, EnrollmentSchedule.Attendance.PRESENT);
+                menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED);
 
 
         completed = Math.min(completed, total);
@@ -117,7 +123,8 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
         boolean allPresent = schedules.stream()
-                .allMatch(s -> s.getAttendance() == EnrollmentSchedule.Attendance.PRESENT && !s.getReport());
+                .allMatch(s -> s.getAttendance() == EnrollmentSchedule.Attendance.PRESENT &&
+                        s.getReport() != null && s.getReport() == false);
 
         return Optional.of(allPresent);
     }
@@ -129,7 +136,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public boolean isAllCoursesCompleted(UUID menteeId) {
-        return enrollmentScheduleRepository.countUnfinishedSlotsByMentee(menteeId, EnrollmentSchedule.Attendance.PRESENT) == 0;
+        return enrollmentScheduleRepository.countUnfinishedSlotsByMentee(menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED) == 0;
     }
 
     @Override
@@ -139,7 +146,7 @@ public class DashboardServiceImpl implements DashboardService {
         int completedGoals = goalRepository.countCompletedGoalsByMenteeId(menteeId, Goal.Status.DONE);
         int totalGoals = goalRepository.findByMenteeIdOrderByTargetDateAsc(menteeId).size();
         String goalsCompleted = completedGoals + "/" + totalGoals;
-        int skillsCompleted = enrollmentScheduleRepository.countCompletedCourseByMentee(menteeId);
+        int skillsCompleted = enrollmentScheduleRepository.countCompletedCourseByMentee(menteeId, Enrollment.EnrollmentStatus.APPROVED);
 
         int percent = (totalGoals == 0) ? 0 : (completedGoals * 100) / totalGoals;
         return new TrackerDTO(learningProgres, goalsCompleted, totalTrackedSkills, skillsCompleted, percent);
