@@ -6,8 +6,6 @@ import com.example.edutrack.curriculum.model.FeedbackReport;
 import com.example.edutrack.curriculum.repository.FeedbackReportRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackReportService;
-import com.example.edutrack.profiles.model.CV;
-import com.example.edutrack.profiles.service.CvServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

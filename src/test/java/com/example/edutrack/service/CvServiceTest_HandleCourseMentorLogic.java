@@ -9,7 +9,7 @@ import com.example.edutrack.curriculum.repository.CVCourseRepository;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.profiles.dto.CourseApplicationDetail;
 import com.example.edutrack.profiles.model.CV;
-import com.example.edutrack.profiles.service.CvServiceImpl;
+import com.example.edutrack.profiles.service.implementations.CvServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -8,7 +8,7 @@ import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.UserRepository;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.model.CV;
-import com.example.edutrack.profiles.service.CvServiceImpl;
+import com.example.edutrack.profiles.service.implementations.CvServiceImpl;
 import com.example.edutrack.profiles.repository.CvRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;

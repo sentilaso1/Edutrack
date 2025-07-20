@@ -3,6 +3,7 @@ package com.example.edutrack.accounts.service.interfaces;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.User;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,4 +18,6 @@ public interface MenteeService {
     Optional<Mentee> findById(UUID id);
 
     Optional<Mentee> promoteToMentee(UUID userId);
+
+    Optional<Mentee> findByEmail(String email);
 }
