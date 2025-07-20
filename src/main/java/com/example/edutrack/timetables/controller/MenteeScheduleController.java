@@ -144,5 +144,4 @@ public class MenteeScheduleController {
 
         return "/checkout/checkout-info";
     }
-
 }

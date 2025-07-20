@@ -298,6 +298,19 @@ public class MentorController {
             for (Enrollment duplicatedEnrollment : duplicatedEnrollments) {
                 duplicatedEnrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
                 enrollmentService.save(enrollment);
+
+                menteeWalletOpt = walletService.findByUser(duplicatedEnrollment.getMentee());
+                if (menteeWalletOpt.isEmpty()) {
+                    menteeWalletOpt = Optional.of(walletService.save(duplicatedEnrollment.getMentee()));
+                }
+                menteeWallet = menteeWalletOpt.get();
+
+                menteeWallet.setOnHold(menteeWallet.getOnHold() - duplicatedEnrollment.getTransaction().getAbsoluteAmount());
+                menteeWallet.setBalance(menteeWallet.getBalance() + duplicatedEnrollment.getTransaction().getAbsoluteAmount());
+                walletService.save(menteeWallet);
+
+                duplicatedEnrollment.getTransaction().setStatus(Transaction.TransactionStatus.FAILED);
+                transactionService.save(duplicatedEnrollment.getTransaction());
             }
             return "redirect:/mentor/censor-class/" + eid + "/view?action=rejected_all";
         }

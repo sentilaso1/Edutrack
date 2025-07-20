@@ -122,7 +122,7 @@
                             <h3 class="card-title">View Pending Requested Class</h3>
                         </div>
                         <div class="stat-label">View your registered pending class</div>
-                        <a href="#" class="view-link" th:href="@{/mentee/pending}">
+                        <a href="#" class="view-link" th:href="@{/pending-enrollments}">
                             View
                             <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                         </a>
@@ -245,7 +245,7 @@
                         <i class="fa fa-users" style="margin-right: 8px;"></i>
                         Find Mentors
                     </a>
-                    <a th:href="@{/mentee/pending}" class="btn btn-secondary btn-lg" style="background-color: #f59e0b;" th:if="${havingPending}">
+                    <a th:href="@{/pending-enrollments}" class="btn btn-secondary btn-lg" style="background-color: #f59e0b;" th:if="${havingPending}">
                         <i class="fa fa-users" style="margin-right: 8px;"></i>
                         View Pending Requested Class
                     </a>
