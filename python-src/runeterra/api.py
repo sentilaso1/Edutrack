@@ -49,3 +49,7 @@ def chat_endpoint(req: ChatRequest):
         border_style=green_border_style,
     )
     return {"reply": reply}
+
+@app.get("/ping")
+def ping():
+    return {"status": "ok"}
