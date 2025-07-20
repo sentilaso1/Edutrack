@@ -7,6 +7,25 @@
     <link rel="stylesheet" th:href="@{/assets/css/calendar.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}">
+    <style>
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 16px;
+            margin: 5px 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .status-tag.available {
+            background-color: rgba(16, 185, 129, 0.56); /* Xanh lá */
+        }
+
+        .status-tag.unavailable {
+            background-color: rgba(245, 158, 11, 0.6); /* Vàng */
+        }
+    </style>
 </head>
 <body>
 <th:block th:insert="~{fragments/header :: header}"></th:block>
@@ -56,7 +75,12 @@
                         <div th:each="s : ${schedules}"
                              th:if="${s.slot == slot and s.date == currentDate}"
                              class="slot-card">
-                            <a th:href="@{/mentor/schedule/{eid}(eid=${s.id})}">
+                            <div class="status-tag"
+                                 th:classappend="${s.available ? 'available' : 'unavailable'}"
+                                 th:text="${s.available ? 'Available' : 'Unavailable'}">
+                            </div>
+                            <div style="font-weight: bold; color: #721c24" th:if="${!s.available}" th:text="${'Reschedule to: ' + s.requestedNewSlot.startTime + '-' + s.requestedNewSlot.endTime + ' ' + s.requestedNewDate}"></div>
+                            <a th:href="@{${s.available ? '/mentor/schedule/' + s.id : '#'}}">
                                 <p th:text="${s.enrollment.courseMentor.course.name}"></p>
                                 <p th:text="${s.enrollment.mentee.fullName}"></p>
                             </a>

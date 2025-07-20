@@ -3,6 +3,7 @@ package com.example.edutrack.timetables.controller;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.interfaces.MenteeService;
+import com.example.edutrack.common.service.implementations.EmailService;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
 
@@ -36,8 +37,9 @@ public class MenteeScheduleController {
     private final CourseMentorServiceImpl courseMentorService;
     private final WalletService walletService;
     private final TransactionService transactionService;
+    private final EmailService emailService;
 
-    public MenteeScheduleController(MenteeService menteeService, MentorAvailableTimeService mentorAvailableTimeService, EnrollmentService enrollmentService, EnrollmentScheduleService enrollmentScheduleService, CourseMentorServiceImpl courseMentorService, WalletService walletService, TransactionService transactionService) {
+    public MenteeScheduleController(MenteeService menteeService, MentorAvailableTimeService mentorAvailableTimeService, EnrollmentService enrollmentService, EnrollmentScheduleService enrollmentScheduleService, CourseMentorServiceImpl courseMentorService, WalletService walletService, TransactionService transactionService, EmailService emailService) {
         this.menteeService = menteeService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.enrollmentService = enrollmentService;
@@ -45,6 +47,7 @@ public class MenteeScheduleController {
         this.courseMentorService = courseMentorService;
         this.walletService = walletService;
         this.transactionService = transactionService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/courses/checkout/{cmid}")
@@ -115,10 +118,30 @@ public class MenteeScheduleController {
                 ""
         );
         enrollment.setTransaction(transaction);
-
         enrollmentService.save(enrollment);
 
         model.addAttribute("success", "Checkout Successful");
+        String emailBody = """
+        Dear %s,
+
+        Mentee: %s
+        Course: %s
+
+        Click link to view detail:
+        http://localhost:6969/mentor/censor-class/%d/view
+        """.formatted(
+                courseMentor.getMentor().getFullName(),
+                menteeOpt.get().getFullName(),
+                courseMentor.getCourse().getName(),
+                enrollment.getId()
+        );
+
+        emailService.sendSimpleMail(
+                "lephuonglinhnga1801@gmail.com",
+                "EduTrack: New Request Registration",
+                emailBody
+        );
+
         return "/checkout/checkout-info";
     }
 

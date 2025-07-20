@@ -231,6 +231,9 @@ public class MentorController {
         if (enrollmentSchedule == null) {
             return "redirect:/mentor/schedule?error=enrollmentNotFound";
         }
+        if(!enrollmentSchedule.isAvailable()){
+            return "redirect:/mentor/schedule/" + esid + "?error=unavailableslot";
+        }
 
         LocalDate currentDate = LocalDate.now();
         if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isBefore(currentDate)) {

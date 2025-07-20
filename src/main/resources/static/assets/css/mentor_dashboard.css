@@ -317,11 +317,5 @@ h2 {
     fill: currentColor;
 }
 
-.nav-item span {
-    border-radius: 50%;
-    background-color: #cf0013;
-    color: white;
-    padding: 0.2em;
-    margin-left: 1em;
-}
+
 
