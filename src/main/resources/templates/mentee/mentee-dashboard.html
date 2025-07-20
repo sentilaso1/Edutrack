@@ -48,36 +48,32 @@
                     <div class="dashboard-card">
                         <div class="card-header">
                             <i class="fa fa-clock-o card-icon"></i>
-                            <h3 class="card-title" th:text="${isAllCompleted} ? 'All Sessions Completed' : 'Upcoming Session'">Upcoming Session</h3>
+                            <h3 class="card-title"
+                                th:text="${sessionStatus == 'COMPLETED' ? 'All Sessions Completed' : (sessionStatus == 'UNDER_REVIEW' ? 'Pending Review' : 'Upcoming Session')}">
+                                Upcoming Session
+                            </h3>
                         </div>
 
-                        <!-- Styled and emphasized session info -->
-                        <div th:if="${isAllCompleted}">
+                        <div th:if="${sessionStatus == 'COMPLETED'}">
                             <div class="stat-label" style="font-weight: bold;">
-                                🎉 Congratulations! You’ve completed all sessions.
+                                🎉 <span th:text="${sessionMessage}"></span>
                             </div>
-                            <a href="#" th:href="@{/courses}" class="view-link">
-                                Find New Courses
-                                <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                            <a th:href="@{/courses}" class="view-link">
+                                Find New Courses <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                             </a>
                         </div>
 
-                        <div th:if="${!isAllCompleted}">
+                        <div th:unless="${sessionStatus == 'COMPLETED'}">
                             <div class="stat-label">
-                                <span>Next session: </span>
-                                <span style="font-weight: bold; font-style: italic;"
-                                      th:text="${nextSessionTime} ?: 'No upcoming session'">
-                            No upcoming session
-                        </span>
+                                <span th:if="${sessionStatus == 'UPCOMING'}">Next session: </span>
+                                <span style="font-weight: bold; font-style: italic;" th:text="${sessionMessage}">
+                                </span>
                             </div>
-
-                            <a href="#" class="view-link" th:href="@{/schedules}">
-                                View schedule
-                                <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                            <a th:href="@{/schedules}" class="view-link">
+                                View schedule <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                             </a>
                         </div>
                     </div>
-
                     <!-- Learning Progress -->
                     <div class="dashboard-card">
                         <div class="card-header">

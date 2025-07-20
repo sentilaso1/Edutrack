@@ -17,6 +17,8 @@ import java.util.UUID;
 public interface DashboardService {
     String getNextSessionTime(UUID menteeId);
 
+    boolean hasPendingReports(UUID menteeId);
+
     int getTotalMentors(UUID menteeId);
 
     int getLearningProgress(UUID menteeId);

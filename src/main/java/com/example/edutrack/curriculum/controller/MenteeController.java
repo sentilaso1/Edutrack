@@ -84,6 +84,10 @@ public class MenteeController {
         if (menteeId == null) {
             return "redirect:/404";
         }
+        boolean isAllCompleted = dashboardService.isAllCoursesCompleted(menteeId);
+        String nextSessionTime = dashboardService.getNextSessionTime(menteeId);
+        boolean hasPendingReports = dashboardService.hasPendingReports(menteeId);
+
         suggestionService.getSuggestedTags(SuggestionType.POPULAR, 5);
         List<Tag> allCourseTags = courseTagService.getAllTags();
         List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
@@ -95,7 +99,16 @@ public class MenteeController {
         List<CourseCardDTO> recommendedCoursesToDTO = enrollmentService.mapToCourseCardDTOList(recommendedCourses);
         model.addAttribute("recommendedCourses", recommendedCoursesToDTO);
         model.addAttribute("isAllCompleted", dashboardService.isAllCoursesCompleted(menteeId));
-
+        if (isAllCompleted) {
+            model.addAttribute("sessionStatus", "COMPLETED");
+            model.addAttribute("sessionMessage", "Congratulations! You’ve completed all sessions.");
+        } else if (nextSessionTime.equals("No upcoming session") && hasPendingReports) {
+            model.addAttribute("sessionStatus", "UNDER_REVIEW");
+            model.addAttribute("sessionMessage", "Still has slot attendance status under review");
+        } else {
+            model.addAttribute("sessionStatus", "UPCOMING");
+            model.addAttribute("sessionMessage", nextSessionTime);
+        }
         List<Enrollment> enrollmentList = enrollmentService.findPendingEnrollmentsForMentee(menteeId);
         model.addAttribute("havingPending", !enrollmentList.isEmpty());
         return "mentee/mentee-dashboard";
