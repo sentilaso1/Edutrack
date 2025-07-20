@@ -106,8 +106,8 @@ public class AccountsController {
         }
 
         // Function 5
-        @PostMapping("/profile/{id}/edit")
-        public String editProfile(@PathVariable String id,
+        @PostMapping("/profile/edit")
+        public String editProfile(HttpSession session,
                         @RequestParam String fullName,
                         @RequestParam String email,
                         @RequestParam String phone,
@@ -117,29 +117,32 @@ public class AccountsController {
                         @RequestParam(required = false) String interests,
                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes)
                         throws IOException {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                String id = loggedInUser.getId().toString();
                 // Validate fullName
                 if (fullName == null || fullName.trim().isEmpty()) {
                         redirectAttributes.addFlashAttribute("error", "Full name is required");
-                        return "redirect:/profile/" + id + "#edit";
+                        return "redirect:/profile" + "#edit";
                 }
 
                 // Validate email
                 if (!verifyEmail(email)) {
                         redirectAttributes.addFlashAttribute("error", "Email is not valid");
-                        return "redirect:/profile/" + id + "#edit";
+                        return "redirect:/profile"+ "#edit";
                 }
 
                 // Validate phone
                 if (!verifyPhone(phone)) {
-                        redirectAttributes.addFlashAttribute("error", "Phone number is not valid (must start with 0 and be 10 or 11 digits)");
-                        return "redirect:/profile/" + id + "#edit";
+                        redirectAttributes.addFlashAttribute("error",
+                                        "Phone number is not valid (must start with 0 and be 10 or 11 digits)");
+                        return "redirect:/profile" + "#edit";
                 }
 
                 // Validate birthDate
                 if (!verifyBirthDate(birthDate)) {
                         redirectAttributes.addFlashAttribute("error",
                                         "Birth date is not valid (must be a past date in yyyy-MM-dd format)");
-                        return "redirect:/profile/" + id + "#edit";
+                        return "redirect:/profile" + "#edit";
                 }
 
                 // Validate expertise for mentors
@@ -147,11 +150,12 @@ public class AccountsController {
                 if (mentor != null) {
                         if (expertise == null || expertise.trim().isEmpty()) {
                                 redirectAttributes.addFlashAttribute("error", "Expertise is required");
-                                return "redirect:/profile/" + id + "#edit";
+                                return "redirect:/profile" + "#edit";
                         }
                         if (expertise.trim().length() < 3 || expertise.trim().length() > 100) {
-                                redirectAttributes.addFlashAttribute("error", "Expertise must be between 3 and 100 characters");
-                                return "redirect:/profile/" + id + "#edit";
+                                redirectAttributes.addFlashAttribute("error",
+                                                "Expertise must be between 3 and 100 characters");
+                                return "redirect:/profile" + "#edit";
                         }
                 }
 
@@ -159,8 +163,9 @@ public class AccountsController {
                 Mentee mentee = menteeService.getMenteeById(id);
                 if (mentor == null && mentee != null) {
                         if (interests != null && (interests.trim().length() < 3 || interests.trim().length() > 100)) {
-                                redirectAttributes.addFlashAttribute("error", "Interests must be between 3 and 100 characters");
-                                return "redirect:/profile/" + id + "#edit";
+                                redirectAttributes.addFlashAttribute("error",
+                                                "Interests must be between 3 and 100 characters");
+                                return "redirect:/profile" + "#edit";
                         }
                 }
 
@@ -186,18 +191,23 @@ public class AccountsController {
                         menteeRepository.save(mentee);
                 }
 
-                return "redirect:/profile/" + id;
+                return "redirect:/profile";
         }
 
-        @PostMapping("/upload/{id}")
-        public String uploadAvatar(@PathVariable String id, @RequestParam("image") MultipartFile file)
+        @PostMapping("/avatar/upload/")
+        public String uploadAvatar(
+                        HttpSession session, @RequestParam("image") MultipartFile file)
                         throws IOException {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                String id = loggedInUser.getId().toString();
                 userService.updateAvatar(id, file);
-                return "redirect:/profile/" + id;
+                return "redirect:/profile";
         }
 
-        @GetMapping("/avatar/{id}")
-        public void getAvatar(@PathVariable String id, HttpServletResponse response) throws IOException {
+        @GetMapping("/avatar")
+        public void getAvatar(HttpSession session, HttpServletResponse response) throws IOException {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                String id = loggedInUser.getId().toString();
                 User user = userService.getUserById(id);
                 if (user != null && user.getAvatar() != null) {
                         response.setContentType("image/jpeg");
@@ -205,5 +215,4 @@ public class AccountsController {
                         response.getOutputStream().close();
                 }
         }
-
 }
