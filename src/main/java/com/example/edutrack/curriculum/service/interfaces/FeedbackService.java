@@ -25,4 +25,6 @@ public interface FeedbackService {
     long countReviewsByMentor(Mentor mentor);
 
     List<Feedback> getTopRecentFeedback(CourseMentor courseMentor);
+
+    List<Feedback> findAllByCourseMentor_Mentor_Id(UUID mentorId);
 }
