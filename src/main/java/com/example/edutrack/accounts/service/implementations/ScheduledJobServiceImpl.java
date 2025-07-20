@@ -65,4 +65,21 @@ public class ScheduledJobServiceImpl implements ScheduledJobService {
                 stats.setInactiveCount(jobRepo.countByActive(false));
                 return stats;
         }
+
+        @Override
+        public void createJob(ScheduledJobDTO dto) {
+                ScheduledJob job = new ScheduledJob();
+                BeanUtils.copyProperties(dto, job);
+                jobRepo.save(job);
+        }
+
+        public boolean isJobRunning(Long id) {
+                ScheduledJob job = jobRepo.findById(id).orElseThrow();
+                return job.isActive();
+        }
+
+        @Override
+        public void deleteJob(Long id) {
+                jobRepo.deleteById(id);
+        }
 }
