@@ -50,7 +50,6 @@ class CvControllerTest_HandleCVFormTest {
 
     @Test
     void shouldRedirectTo404_whenParseSelectedCoursesFails() {
-        doThrow(new RuntimeException("Parse error")).when(cvForm).parseSelectedCourses();
 
         String result = cvController.handleCVFormSubmission(cvForm, model, session);
 
@@ -60,7 +59,6 @@ class CvControllerTest_HandleCVFormTest {
 
     @Test
     void shouldRedirectToLogin_whenUserIsNotInSession() {
-        doNothing().when(cvForm).parseSelectedCourses();
         when(session.getAttribute("loggedInUser")).thenReturn(null);
 
         String result = cvController.handleCVFormSubmission(cvForm, model, session);
@@ -70,7 +68,6 @@ class CvControllerTest_HandleCVFormTest {
 
     @Test
     void shouldRedirectToMentor_whenCVCreationIsSuccessful() {
-        doNothing().when(cvForm).parseSelectedCourses();
         when(session.getAttribute("loggedInUser")).thenReturn(user);
 
         String result = cvController.handleCVFormSubmission(cvForm, model, session);
@@ -82,7 +79,6 @@ class CvControllerTest_HandleCVFormTest {
 
     @Test
     void shouldRedirectTo404_whenCVCreationFails() {
-        doNothing().when(cvForm).parseSelectedCourses();
         when(session.getAttribute("loggedInUser")).thenReturn(user);
         doThrow(new RuntimeException("DB error")).when(cvService).createCV(any(), any());
 
