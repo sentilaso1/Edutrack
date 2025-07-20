@@ -92,7 +92,7 @@ class LearningProgressCalculationTest {
         Enrollment enrollment = mock(Enrollment.class);
         when(enrollment.getTotalSlots()).thenReturn(5);
         when(enrollmentRepository.findAcceptedEnrollmentsByMenteeId(eq(menteeId), any())).thenReturn(List.of(enrollment));
-        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT)).thenReturn(0);
+        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED)).thenReturn(0);
         int result = dashboardService.getLearningProgress(menteeId);
         assertThat(result).isEqualTo(0);
     }
@@ -114,7 +114,7 @@ class LearningProgressCalculationTest {
         Enrollment enrollment = mock(Enrollment.class);
         when(enrollment.getTotalSlots()).thenReturn(10);
         when(enrollmentRepository.findAcceptedEnrollmentsByMenteeId(eq(menteeId), any())).thenReturn(List.of(enrollment));
-        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT)).thenReturn(10);
+        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED)).thenReturn(10);
         int result = dashboardService.getLearningProgress(menteeId);
         assertThat(result).isEqualTo(100);
     }
@@ -135,7 +135,7 @@ class LearningProgressCalculationTest {
         Enrollment enrollment = mock(Enrollment.class);
         when(enrollment.getTotalSlots()).thenReturn(10);
         when(enrollmentRepository.findAcceptedEnrollmentsByMenteeId(eq(menteeId), any())).thenReturn(List.of(enrollment));
-        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT)).thenReturn(5);
+        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED)).thenReturn(5);
         int result = dashboardService.getLearningProgress(menteeId);
         assertThat(result).isEqualTo(50);
     }
@@ -157,7 +157,7 @@ class LearningProgressCalculationTest {
         Enrollment enrollment = mock(Enrollment.class);
         when(enrollment.getTotalSlots()).thenReturn(9);
         when(enrollmentRepository.findAcceptedEnrollmentsByMenteeId(eq(menteeId), any())).thenReturn(List.of(enrollment));
-        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT)).thenReturn(5);
+        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED)).thenReturn(5);
         int result = dashboardService.getLearningProgress(menteeId);
         assertThat(result).isEqualTo(56); // 5/9 = 55.55% -> 56
     }
@@ -181,7 +181,7 @@ class LearningProgressCalculationTest {
         when(e1.getTotalSlots()).thenReturn(4);
         when(e2.getTotalSlots()).thenReturn(6);
         when(enrollmentRepository.findAcceptedEnrollmentsByMenteeId(eq(menteeId), any())).thenReturn(List.of(e1, e2));
-        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT)).thenReturn(6);
+        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED)).thenReturn(6);
         int result = dashboardService.getLearningProgress(menteeId);
         assertThat(result).isEqualTo(60);
     }
@@ -202,7 +202,7 @@ class LearningProgressCalculationTest {
         Enrollment enrollment = mock(Enrollment.class);
         when(enrollment.getTotalSlots()).thenReturn(5);
         when(enrollmentRepository.findAcceptedEnrollmentsByMenteeId(eq(menteeId), any())).thenReturn(List.of(enrollment));
-        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT)).thenReturn(10);
+        when(enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED)).thenReturn(10);
         int result = dashboardService.getLearningProgress(menteeId);
         assertThat(result).isEqualTo(100);
     }

@@ -267,6 +267,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             dto.setAttendance(schedule.getAttendance());
             dto.setStartTime(start.toString());
             dto.setEndTime(end.toString());
+            dto.setReport(schedule.getReport());
             dto.setStartHour(start.getHour());
             dto.setStartMinute(start.getMinute());
             dto.setTitle(schedule.getTitleSection());
@@ -380,6 +381,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         dto.setEndTime(end.toString());
         dto.setStartHour(start.getHour());
         dto.setTitle(schedule.getTitleSection());
+        dto.setReport(schedule.getReport());
         dto.setStartMinute(start.getMinute());
         dto.setAttendance(schedule.getAttendance());
         dto.setDurationInMinutes((int) ChronoUnit.MINUTES.between(start, end));

@@ -12,7 +12,7 @@ public class CourseFormDTO {
     @Size(min = 3, max = 100, message = "Course name should have at least from 3 to 100 characters")
     private String name;
 
-    @Size(max = 500, message = "Description can not exceed 500 characters")
+    @Size(max = 255, message = "Description can not exceed 255 characters")
     private String description;
 
     @NotEmpty(message = "Should have at lease 1 tag")

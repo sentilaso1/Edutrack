@@ -182,7 +182,9 @@
             </div>
         </div>
 
-        <button class="cancel-btn">Cancel All Slots</button>
+        <form th:action="@{/pending-enrollments/{id}/cancel(id=${enrollment.id})}" method="post">
+            <button type="submit" class="cancel-btn">Cancel All Slots</button>
+        </form>
     </div>
 
     <div class="stats">
