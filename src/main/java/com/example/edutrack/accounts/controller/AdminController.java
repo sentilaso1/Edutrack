@@ -312,20 +312,33 @@ public class AdminController {
         }
 
         @PostMapping("/jobs/{id}/toggle")
-        public String toggleJob(@PathVariable Long id, @RequestParam boolean active) {
-                scheduledJobService.toggleJob(id, active);
+        public String toggleJob(@PathVariable Long id, @RequestParam boolean active, RedirectAttributes redirectAttributes) {
+                try {
+                        scheduledJobService.toggleJob(id, active);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job status updated successfully.");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                }
                 return "redirect:/admin/jobs";
         }
 
         @PostMapping("/jobs/{id}/run")
-        public String runJobNow(@PathVariable Long id) {
-                scheduledJobService.runJobNow(id);
+        public String runJobNow(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+                try {
+                        scheduledJobService.runJobNow(id);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job is running now.");
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Job is not active");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Error running job");
+                }
                 return "redirect:/admin/jobs";
         }
 
         @PostMapping("/jobs/{id}/update")
-        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto) {
+        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto, RedirectAttributes redirectAttributes) {
                 scheduledJobService.updateJob(id, dto);
+                redirectAttributes.addFlashAttribute("successMessage", "Job updated successfully");
                 return "redirect:/admin/jobs";
         }
 }

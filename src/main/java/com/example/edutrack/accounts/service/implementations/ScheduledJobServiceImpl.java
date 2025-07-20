@@ -45,6 +45,9 @@ public class ScheduledJobServiceImpl implements ScheduledJobService {
         @Override
         public void runJobNow(Long id) {
                 ScheduledJob job = jobRepo.findById(id).orElseThrow();
+                if (!job.isActive()) {
+                        throw new IllegalStateException("Job is not active");
+                }
                 job.setLastRunTime(java.time.LocalDateTime.now());
                 jobRepo.save(job);
         }
