@@ -26,9 +26,10 @@ public class ScheduleDTO {
     private EnrollmentSchedule.RescheduleStatus rescheduleStatus;
     private LocalDate date;
     private EnrollmentSchedule.Attendance attendance;
+    private Boolean report;
     public ScheduleDTO() {}
 
-    public ScheduleDTO(int rescheduleCount, String title,Long id, String slot, String day, String courseName, String mentorName, String startTime, String endTime, UUID mentorId, int startHour, int startMinute, int durationInMinutes, int endHour, boolean available, boolean hasTest, boolean canReschedule, EnrollmentSchedule.RescheduleStatus rescheduleStatus, LocalDate date, EnrollmentSchedule.Attendance attendance) {
+    public ScheduleDTO(int rescheduleCount, String title,Long id, String slot, String day, String courseName, String mentorName, String startTime, String endTime, UUID mentorId, int startHour, int startMinute, int durationInMinutes, int endHour, boolean available, boolean hasTest, boolean canReschedule, EnrollmentSchedule.RescheduleStatus rescheduleStatus, LocalDate date, EnrollmentSchedule.Attendance attendance, Boolean report) {
         this.id = id;
         this.slot = slot;
         this.day = day;
@@ -49,6 +50,15 @@ public class ScheduleDTO {
         this.date = date;
         this.attendance = attendance;
         this.rescheduleCount = rescheduleCount;
+        this.report = report;
+    }
+
+    public Boolean getReport() {
+        return report;
+    }
+
+    public void setReport(Boolean report) {
+        this.report = report;
     }
 
     public int getRescheduleCount() {
