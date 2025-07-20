@@ -607,4 +607,15 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             }
         }
     }
+
+    @Override
+    public List<EnrollmentSchedule> findTop5UpcomingExam(LocalDate now, Mentor mentor) {
+        return enrollmentScheduleRepository.findTop5ByIsTestTrueAndAvailableTrueAndDateAfterAndEnrollment_CourseMentor_MentorOrderByDateAsc(now, mentor);
+    }
+
+    @Override
+    public List<EnrollmentSchedule> findSlotToday(Mentor mentor) {
+        LocalDate today = LocalDate.now();
+        return enrollmentScheduleRepository.findByEnrollment_CourseMentor_MentorAndDateOrderBySlotAsc(mentor, today);
+    }
 }
