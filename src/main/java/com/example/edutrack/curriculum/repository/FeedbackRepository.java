@@ -38,4 +38,6 @@ public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
     long countByCourseMentor_Mentor(Mentor mentor);
     List<Feedback> findTop3ByCourseMentorOrderByCreatedDateDesc(CourseMentor courseMentor);
 
+    List<Feedback> findByCourseMentor_Mentor_Id(UUID mentorId);
+
 }
