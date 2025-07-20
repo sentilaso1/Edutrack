@@ -3,8 +3,7 @@ package com.example.edutrack.curriculum.controller;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
-import com.example.edutrack.accounts.repository.MentorRepository;
-import com.example.edutrack.accounts.service.MentorService;
+import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.common.service.implementations.EmailService;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
@@ -14,7 +13,6 @@ import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.repository.FeedbackRepository;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
-import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import jakarta.servlet.http.HttpSession;
@@ -45,7 +43,6 @@ public class MentorController {
     private final CourseMentorService courseMentorService;
     private final CourseMentorRepository courseMentorRepository;
     private final EnrollmentScheduleService enrollmentScheduleService;
-    private final MentorRepository mentorRepository;
     private final EmailService emailService;
 
     public MentorController(MentorService mentorService,
@@ -55,9 +52,9 @@ public class MentorController {
                             CourseRepository courseRepository,
                             CourseMentorService courseMentorService,
                             CourseMentorRepository courseMentorRepository,
-                            EnrollmentScheduleService enrollmentScheduleService, MentorRepository mentorRepository, EmailService emailService) {
+                            EnrollmentScheduleService enrollmentScheduleService,
+                            EmailService emailService) {
         this.mentorService = mentorService;
-        this.mentorRepository = mentorRepository;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.feedbackRepository = feedbackRepository;
@@ -92,6 +89,11 @@ public class MentorController {
         if (page < 1) {
             return "redirect:/404";
         }
+
+        if (size_page < 1) {
+            size_page = 6;
+        }
+
         Sort sort;
         if ("newest".equalsIgnoreCase(order_by)) {
             sort = Sort.by(Sort.Direction.DESC, "createdDate");
@@ -114,6 +116,10 @@ public class MentorController {
         Page<Mentor> mentorPage = mentorService.searchMentorsWithApprovedCV(
                 name, expertise, rating, totalSessions, isAvailable, pageable
         );
+
+        if (mentorPage == null) {
+            return "redirect:/error";
+        }
 
         List<String> allSkills = mentorService.getAllMentorExpertiseFromApprovedCVs();
 

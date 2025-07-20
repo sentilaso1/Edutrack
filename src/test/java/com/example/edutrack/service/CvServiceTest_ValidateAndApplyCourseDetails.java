@@ -7,7 +7,7 @@ import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.profiles.dto.CVForm;
 import com.example.edutrack.profiles.dto.CourseApplicationDetail;
 import com.example.edutrack.profiles.model.CV;
-import com.example.edutrack.profiles.service.CvServiceImpl;
+import com.example.edutrack.profiles.service.implementations.CvServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

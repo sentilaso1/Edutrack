@@ -68,18 +68,34 @@ public class CvController {
             return "redirect:/404";
         }
 
+
+
         String filter = params.getFilter();
         String sort = params.getSort();
         List<String> tags = params.getTags();
-        List<String> uniqueSkills = cvService.getAllUniqueSkills();
+        List<String> uniqueSkills = Optional.ofNullable(cvService.getAllUniqueSkills())
+                .orElse(new ArrayList<>());
         boolean running = cvService.isBatchRunning();
         LocalDateTime lastEnd = cvService.getLastBatchEnd();
         long delaySeconds = 60;
-        long nextBatchMillis = running
-                ? -1
-                : lastEnd.plusSeconds(delaySeconds).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long nextBatchMillis = -1;
+        if (!running && lastEnd != null) {
+            nextBatchMillis = lastEnd.plusSeconds(delaySeconds)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant().toEpochMilli();
+        }
 
         logger.debug("Batch status: running={}, lastEnd={}, nextBatchMillis={}", running, lastEnd, nextBatchMillis);
+
+        if (tags != null && !tags.isEmpty() && !tags.contains("all")) {
+            for (String tag : tags) {
+                if (tag == null || tag.trim().isEmpty() || !uniqueSkills.contains(tag)) {
+                    logger.warn("Invalid tag: {}", tag);
+                    return "redirect:/error";
+                }
+            }
+        }
+
 
         if (tags == null || tags.isEmpty() || tags.contains("all")) {
             tags = uniqueSkills;
@@ -88,6 +104,10 @@ public class CvController {
 
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
         Page<CV> cvPage = cvService.queryCVs(filter, sort, tags, pageable);
+        if (cvPage == null) {
+            logger.error("cvService.queryCVs returned null");
+            return "redirect:/error";
+        }
         logger.info("Retrieved CV page: pageNumber={}, totalPages={}, totalElements={}",
                 page, cvPage.getTotalPages(), cvPage.getTotalElements());
 
@@ -107,7 +127,7 @@ public class CvController {
         }
         model.addAttribute("tags", tags);
 
-        if (cvPage.getTotalPages() > 0 && page > cvPage.getTotalPages()) {
+        if (cvPage.getTotalPages() == 0 && page > 1 || page > cvPage.getTotalPages()) {
             logger.warn("Page number {} exceeds total pages {}", page, cvPage.getTotalPages());
             return "redirect:/404";
         }
@@ -134,20 +154,29 @@ public class CvController {
             logger.warn("Invalid page number: {}", page);
             return "redirect:/404";
         }
-        User user = (User) session.getAttribute("loggedInUser");
-        if (user == null) {
-            logger.warn("No user found in session for /mentor/cv/create");
+        Object sessionUser = session.getAttribute("loggedInUser");
+        if (!(sessionUser instanceof User user)) {
+            logger.warn("Session user is not valid");
             return "redirect:/login";
         }
 
         UUID userId = user.getId();
+        if (userId == null) {
+            logger.error("User ID is null");
+            return "redirect:/error";
+        }
         logger.debug("Processing for userId={}", userId);
 
         Optional<CV> existingCv = cvRepository.findByUserId(userId);
         logger.debug("Existing CV found: {}", existingCv.isPresent());
 
         List<CourseMentor> registered = courseMentorService.findByMentorId(userId);
-        List<UUID> registeredCourseIds = registered.stream().map(cm -> cm.getCourse().getId()).toList();
+        List<UUID> registeredCourseIds = registered.stream()
+                .map(CourseMentor::getCourse)
+                .filter(Objects::nonNull)
+                .map(Course::getId)
+                .filter(Objects::nonNull)
+                .toList();
         logger.debug("Registered courses: count={}", registered.size());
 
         Pageable pageable = PageRequest.of(page - 1, size);
@@ -155,10 +184,20 @@ public class CvController {
 
         Page<Course> availableCoursePage = courseService.findAllExcludingIds(registeredCourseIds, pageable);
         Page<CourseMentor> registeredCoursePage = courseMentorService.findByMentorIdPaged(userId, registeredPageable);
+        if (availableCoursePage == null || registeredCoursePage == null) {
+            logger.error("Course pages could not be retrieved");
+            return "redirect:/error";
+        }
+
         logger.info("Available courses: page={}, totalPages={}, totalElements={}",
                 page, availableCoursePage.getTotalPages(), availableCoursePage.getTotalElements());
         logger.info("Registered courses: page={}, totalPages={}, totalElements={}",
                 registeredPage, registeredCoursePage.getTotalPages(), registeredCoursePage.getTotalElements());
+
+        if (page > availableCoursePage.getTotalPages() && availableCoursePage.getTotalPages() > 0) {
+            logger.warn("Page {} exceeds availableCoursePage total pages", page);
+            return "redirect:/404";
+        }
 
         model.addAttribute("cv", new CVForm());
         model.addAttribute("availableCoursePage", availableCoursePage);
@@ -194,13 +233,17 @@ public class CvController {
             return "redirect:/404";
         }
 
-        User user = (User) session.getAttribute("loggedInUser");
-        if (user == null) {
-            logger.warn("No user found in session for CV submission");
+        Object sessionUser = session.getAttribute("loggedInUser");
+        if (!(sessionUser instanceof User user)) {
+            logger.warn("Invalid or missing session user during CV submission");
             return "redirect:/login";
         }
 
         UUID userId = user.getId();
+        if (userId == null) {
+            logger.error("User ID is null in CV submission");
+            return "redirect:/error";
+        }
         logger.debug("Submitting CV for userId={}", userId);
 
         try {

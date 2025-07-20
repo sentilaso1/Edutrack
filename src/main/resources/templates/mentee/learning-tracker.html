@@ -198,8 +198,7 @@
                                         <div class="calendar-icon"></div>
                                         <span th:text="'Latest Session: ' + ${#temporals.format(skill.lastSessionDate, 'M/d/yyyy')}">5/12/2025</span>
                                     </div>
-                                    <a th:href="@{/schedules(courseId=${skill.courseId})}" class="details-link">View
-                                        Schedules</a>
+                                    <a th:href="@{/schedules(courseId=${skill.courseId}, mentorId=${skill.mentorId})}" class="details-link">View Schedules</a>
 
                                 </div>
                             </div>

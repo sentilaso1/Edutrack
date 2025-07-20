@@ -64,4 +64,6 @@ public interface EnrollmentService {
     int countPendingClassRequests(Mentor mentor);
 
     int countTeachingMentees(Mentor mentor);
+
+    long countStudentsByMentor(Mentor mentor);
 }

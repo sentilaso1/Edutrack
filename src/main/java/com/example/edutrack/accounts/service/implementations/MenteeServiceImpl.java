@@ -60,4 +60,9 @@ public class MenteeServiceImpl implements MenteeService {
         mentee.setId(user.getId());
         return Optional.ofNullable(entityManager.merge(mentee));
     }
+
+    @Override
+    public Optional<Mentee> findByEmail(String email) {
+        return menteeRepository.findByEmail(email);
+    }
 }
