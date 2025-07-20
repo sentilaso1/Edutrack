@@ -465,11 +465,13 @@
     <div class="error-icon">
         <i class="fas fa-exclamation-triangle"></i>
     </div>
+    <h2 th:text="'Error ' + ${statusCode} + ' - ' + ${statusText}">Error info</h2>
 
     <h1 class="error-title">Whoops!</h1>
     <p class="error-subtitle">
         Something unexpected happened. Our team has been automatically notified and is working to fix this issue. Please try again in a moment.
     </p>
+
 
     <div class="error-actions">
         <a th:href="@{/}" class="btn btn-primary">
