@@ -1160,3 +1160,72 @@
     gap: 1rem;
     max-width: 320px;
 }
+
+.schedule-event.pending-review {
+    background-color: #fef9c3;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+}
+
+.schedule-event.pending-review .event-subtitle {
+    color: #92400e;
+}
+
+.event-status-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 14px;
+    color: #f59e0b;
+}
+.legend-container {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.legend-container h4 {
+    margin: 0 0 0.8rem 0;
+    color: #4a5568;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-items {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-dot.attended {
+    background-color: #28a745;
+}
+
+.legend-dot.absent {
+    background-color: #dc3545;
+}
+
+.legend-dot.pending-review {
+    background-color: #f59e0b;
+}
