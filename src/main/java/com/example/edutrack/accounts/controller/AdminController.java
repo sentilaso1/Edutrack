@@ -51,7 +51,7 @@ public class AdminController {
                         @RequestParam(required = false) Boolean isLocked,
                         @RequestParam(required = false) Boolean isActive,
                         @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(defaultValue = "5") int size) {
+                        @RequestParam(defaultValue = "10") int size) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<User> userPage = userService.searchUsers(email, fullName, isLocked, isActive, pageable);
                 List<UserWithRoleDTO> userDtos = new ArrayList<>();
@@ -155,7 +155,8 @@ public class AdminController {
                 try {
                         User user = userService.getUserById(id);
                         if (user == null) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Can not find user with ID: " + id);
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Can not find user with ID: " + id);
                                 return "redirect:/admin/users";
                         }
                         user.setIsActive(!user.getIsActive()); // Toggle active state
@@ -216,11 +217,17 @@ public class AdminController {
                 return "redirect:/admin/users";
         }
 
+        @GetMapping("/users/export-log")
+        public void exportUser(HttpServletResponse response) throws IOException {
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=\"users.csv\"");
+                userService.exportToCsv(response.getWriter());
+        }
+
         @GetMapping("/dashboard")
         public String showDashboard(Model model) {
                 model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
                 model.addAttribute("userStats", userService.getUserStatistics());
-                model.addAttribute("loginStats", userService.getLoginStats());
                 model.addAttribute("jobStats", scheduledJobService.getJobSummary());
                 return "accounts/html/index.html";
         }
