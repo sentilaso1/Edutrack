@@ -12,12 +12,14 @@ import com.example.edutrack.accounts.dto.JobStats;
 import org.springframework.beans.BeanUtils;
 
 @Service
-public class ScheduledJobServiceImpl implements ScheduledJobService{
-        @Autowired private ScheduledJobRepository jobRepo;
+public class ScheduledJobServiceImpl implements ScheduledJobService {
+        @Autowired
+        private ScheduledJobRepository jobRepo;
 
         @Override
         public Page<ScheduledJobDTO> getJobs(String search, Pageable pageable) {
-                Page<ScheduledJob> page = jobRepo.findByNameContainingIgnoreCase(search == null ? "" : search, pageable);
+                Page<ScheduledJob> page = jobRepo.findByNameContainingIgnoreCase(search == null ? "" : search,
+                                pageable);
                 return page.map(this::mapToDTO);
         }
 
@@ -52,8 +54,8 @@ public class ScheduledJobServiceImpl implements ScheduledJobService{
                 BeanUtils.copyProperties(job, dto);
                 return dto;
         }
-        
+
         public JobStats getJobSummary() {
-                return new JobStats(20, 18, 2);
+                return new JobStats(9, 8, 1);
         }
 }

@@ -137,12 +137,11 @@ public class MenteeScheduleController {
         );
 
         emailService.sendSimpleMail(
-                "lephuonglinhnga1801@gmail.com",
+                user.getEmail(),
                 "EduTrack: New Request Registration",
                 emailBody
         );
 
         return "/checkout/checkout-info";
     }
-
 }

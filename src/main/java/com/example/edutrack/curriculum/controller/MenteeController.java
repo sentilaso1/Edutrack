@@ -13,6 +13,10 @@ import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
+import com.example.edutrack.transactions.model.Transaction;
+import com.example.edutrack.transactions.model.Wallet;
+import com.example.edutrack.transactions.service.TransactionService;
+import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -44,8 +48,10 @@ public class MenteeController {
     private final FeedbackService feedbackService;
     private final SuggestionService suggestionService;
     private final MentorAvailableTimeService mentorAvailableTimeService;
+    private final WalletService walletService;
+    private final TransactionService transactionService;
 
-    public MenteeController(MentorAvailableTimeService mentorAvailableTimeService,FeedbackService feedbackService, DashboardService dashboardService, GoalService goalService, CourseMentorService courseMentorService, EnrollmentService enrollmentService, MenteeRepository menteeRepository, EnrollmentScheduleService enrollmentScheduleService, HomeControlller homeControlller, CourseTagService courseTagService, SuggestionService suggestionService) {
+    public MenteeController(MentorAvailableTimeService mentorAvailableTimeService, FeedbackService feedbackService, DashboardService dashboardService, GoalService goalService, CourseMentorService courseMentorService, EnrollmentService enrollmentService, MenteeRepository menteeRepository, EnrollmentScheduleService enrollmentScheduleService, HomeControlller homeControlller, CourseTagService courseTagService, SuggestionService suggestionService, WalletService walletService, TransactionService transactionService) {
         this.dashboardService = dashboardService;
         this.courseMentorService = courseMentorService;
         this.enrollmentService = enrollmentService;
@@ -57,6 +63,8 @@ public class MenteeController {
         this.feedbackService = feedbackService;
         this.suggestionService = suggestionService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
+        this.walletService = walletService;
+        this.transactionService = transactionService;
     }
 
     private UUID getSessionMentee(HttpSession session) {
@@ -84,6 +92,10 @@ public class MenteeController {
         if (menteeId == null) {
             return "redirect:/404";
         }
+        boolean isAllCompleted = dashboardService.isAllCoursesCompleted(menteeId);
+        String nextSessionTime = dashboardService.getNextSessionTime(menteeId);
+        boolean hasPendingReports = dashboardService.hasPendingReports(menteeId);
+
         suggestionService.getSuggestedTags(SuggestionType.POPULAR, 5);
         List<Tag> allCourseTags = courseTagService.getAllTags();
         List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
@@ -95,7 +107,16 @@ public class MenteeController {
         List<CourseCardDTO> recommendedCoursesToDTO = enrollmentService.mapToCourseCardDTOList(recommendedCourses);
         model.addAttribute("recommendedCourses", recommendedCoursesToDTO);
         model.addAttribute("isAllCompleted", dashboardService.isAllCoursesCompleted(menteeId));
-
+        if (isAllCompleted) {
+            model.addAttribute("sessionStatus", "COMPLETED");
+            model.addAttribute("sessionMessage", "Congratulations! You’ve completed all sessions.");
+        } else if (nextSessionTime.equals("No upcoming session") && hasPendingReports) {
+            model.addAttribute("sessionStatus", "UNDER_REVIEW");
+            model.addAttribute("sessionMessage", "Still has slot attendance status under review");
+        } else {
+            model.addAttribute("sessionStatus", "UPCOMING");
+            model.addAttribute("sessionMessage", nextSessionTime);
+        }
         List<Enrollment> enrollmentList = enrollmentService.findPendingEnrollmentsForMentee(menteeId);
         model.addAttribute("havingPending", !enrollmentList.isEmpty());
         return "mentee/mentee-dashboard";
@@ -657,7 +678,7 @@ public class MenteeController {
         return "mentee/reshedule-page";
     }
 
-    @GetMapping("mentee/pending")
+    @GetMapping("/pending-enrollments")
     public String menteePending(HttpSession session, Model model){
         UUID menteeId = getSessionMentee(session);
         List<Enrollment> enrollmentList = enrollmentService.findPendingEnrollmentsForMentee(menteeId);
@@ -669,12 +690,43 @@ public class MenteeController {
         return "mentee/pending-registration";
     }
 
-    @GetMapping("mentee/pending/{id}")
+    @GetMapping("/pending-enrollments/{id}")
     public String menteePendingDetail(@PathVariable long id, Model model){
         Enrollment enrollment = enrollmentService.findById(id);
         List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(enrollment.getScheduleSummary());
         model.addAttribute("startTime", startTime);
         model.addAttribute("enrollment", enrollment);
         return "mentee/pending-detail";
+    }
+
+    @PostMapping("/pending-enrollments/{id}/cancel")
+    public String cancelPendingEnrollment(@PathVariable Long id, Model model) {
+        Enrollment enrollment = enrollmentService.findById(id);
+
+        if (enrollment == null) {
+            return "redirect:/mentee/pending-enrollments?error=not-found";
+        }
+
+        if (enrollment.getStatus() != Enrollment.EnrollmentStatus.PENDING) {
+            return "redirect:/mentee/pending-enrollments/{id}?error=invalid-status";
+        }
+
+        Optional<Wallet> menteeWalletOpt = walletService.findById(enrollment.getMentee().getId());
+        if (menteeWalletOpt.isEmpty()) {
+            return "redirect:/mentee/pending-enrollments/" + id + "?error=wallet-not-found";
+        }
+        Wallet menteeWallet = menteeWalletOpt.get();
+
+        menteeWallet.setOnHold(menteeWallet.getOnHold() - enrollment.getTransaction().getAbsoluteAmount());
+        menteeWallet.setBalance(menteeWallet.getBalance() + enrollment.getTransaction().getAbsoluteAmount());
+        walletService.save(menteeWallet);
+
+        enrollment.setStatus(Enrollment.EnrollmentStatus.CANCELLED);
+        enrollmentService.save(enrollment);
+
+        enrollment.getTransaction().setStatus(Transaction.TransactionStatus.FAILED);
+        transactionService.save(enrollment.getTransaction());
+
+        return "redirect:/pending-enrollments?success=cancellation";
     }
 }

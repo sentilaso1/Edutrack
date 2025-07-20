@@ -110,6 +110,11 @@ public class MentorController {
         LocalDate weekEnd = weekStart.plusDays(6);
 
         List<EnrollmentSchedule> schedules = enrollmentScheduleService.findByMentorAndDateBetween(mentor, weekStart, weekEnd);
+        List<EnrollmentSchedule> upcomingExam = enrollmentScheduleService.findTop5UpcomingExam(LocalDate.now(), mentor);
+        List<EnrollmentSchedule> slotToday = enrollmentScheduleService.findSlotToday(mentor);
+
+        model.addAttribute("upcomingExams", upcomingExam);
+        model.addAttribute("slotToday", slotToday);
 
         for (EnrollmentSchedule schedule : schedules) {
             System.out.println("Course: " + schedule.getEnrollment().getCourseMentor().getCourse().getName());
@@ -159,6 +164,19 @@ public class MentorController {
             return "redirect:/login";
         }
 
+        //auto reject toàn bộ lịch pending chứa slot <= today
+        List<Enrollment> filterEnrollment = enrollmentService.findByStatusAndMentor(Enrollment.EnrollmentStatus.PENDING, mentor.getId());
+        for(Enrollment enrollment : filterEnrollment) {
+            List<RequestedSchedule> requestedSchedules = enrollmentScheduleService.findStartLearningTime(enrollment.getScheduleSummary());
+            for(RequestedSchedule requestedSchedule : requestedSchedules) {
+                if (!requestedSchedule.getRequestedDate().isAfter(LocalDate.now())) {
+                    enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
+                    enrollmentService.save(enrollment);
+                    break;
+                }
+            }
+        }
+
         // Xây dựng sắp xếp
         Sort sortOption = switch (sort) {
             case "priceAsc" -> Sort.by("transaction.amount").ascending();
@@ -205,6 +223,7 @@ public class MentorController {
             return "redirect:/mentor/schedule?error=notMentor";
         }
         model.addAttribute("enrollmentSchedule", enrollmentSchedule);
+        model.addAttribute("isValidDay", enrollmentSchedule.getDate().isAfter(LocalDate.now()));
         return "mentor/mentee-review";
     }
 
@@ -229,15 +248,19 @@ public class MentorController {
 
         EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(esid);
         if (enrollmentSchedule == null) {
-            return "redirect:/mentor/schedule?error=enrollmentNotFound";
+            return "redirect:/mentor/schedule?error=Enrollment Not Found";
         }
         if(!enrollmentSchedule.isAvailable()){
-            return "redirect:/mentor/schedule/" + esid + "?error=unavailableslot";
+            return "redirect:/mentor/schedule/" + esid + "?error=Unavailable slot";
         }
 
         LocalDate currentDate = LocalDate.now();
         if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isBefore(currentDate)) {
-            return "redirect:/mentor/schedule/" + esid + "?error=toolatetochange";
+            return "redirect:/mentor/schedule/" + esid + "?error=Too late to save";
+        }
+
+        if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isAfter(currentDate)) {
+            return "redirect:/mentor/schedule/" + esid + "?error=Too soon to save";
         }
 
         // Update relevant fields only
@@ -248,7 +271,7 @@ public class MentorController {
         enrollmentSchedule.setReport(enrollmentScheduleFromForm.getReport());
 
         enrollmentScheduleService.save(enrollmentSchedule);
-        return "redirect:/mentor/schedule/" + enrollmentSchedule.getId();
+        return "redirect:/mentor/schedule/" + enrollmentSchedule.getId() + "?save=Save successfully";
     }
 
 
@@ -298,6 +321,19 @@ public class MentorController {
             for (Enrollment duplicatedEnrollment : duplicatedEnrollments) {
                 duplicatedEnrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
                 enrollmentService.save(enrollment);
+
+                menteeWalletOpt = walletService.findByUser(duplicatedEnrollment.getMentee());
+                if (menteeWalletOpt.isEmpty()) {
+                    menteeWalletOpt = Optional.of(walletService.save(duplicatedEnrollment.getMentee()));
+                }
+                menteeWallet = menteeWalletOpt.get();
+
+                menteeWallet.setOnHold(menteeWallet.getOnHold() - duplicatedEnrollment.getTransaction().getAbsoluteAmount());
+                menteeWallet.setBalance(menteeWallet.getBalance() + duplicatedEnrollment.getTransaction().getAbsoluteAmount());
+                walletService.save(menteeWallet);
+
+                duplicatedEnrollment.getTransaction().setStatus(Transaction.TransactionStatus.FAILED);
+                transactionService.save(duplicatedEnrollment.getTransaction());
             }
             return "redirect:/mentor/censor-class/" + eid + "/view?action=rejected_all";
         }
