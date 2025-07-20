@@ -95,9 +95,9 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 1em;">
             <div class="graph">
                 <h3>Upcoming Exam</h3>
-                <div class="project-item">
-                    <div class="project-tag">Yoast Esoc</div>
-                    <div class="project-title">Redesign Kripton Mobile App</div>
+                <a th:href="@{/mentor/schedule/{esid}(esid=${item.id})}" class="project-item" th:each="item : ${upcomingExams}" th:if="${upcomingExams != null}">
+                    <div class="project-tag" th:text="${item.enrollment.courseMentor.course.name}">Yoast Esoc</div>
+                    <div class="project-title" th:text="'Mentee: ' + ${item.enrollment.mentee.fullName}">Redesign Kripton Mobile App</div>
                     <div class="project-meta">
                         <svg class="calendar-icon icon" viewBox="0 0 24 24">
                             <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
@@ -111,70 +111,27 @@
                             </svg>
                         </div>
                         <div class="deadline-info">
-                            <div class="deadline-label">Deadline</div>
-                            <div class="deadline-date">Tuesday, Sep 29th 2020</div>
+                            <div class="deadline-label">Date</div>
+                            <div class="deadline-date" th:text="${item.date.dayOfWeek + ', ' + item.date.month + ' ' + item.date.dayOfMonth + ' ' + item.date.year}">Tuesday, Sep 29th 2020</div>
                         </div>
                     </div>
                     <div class="menu-dots">⋮</div>
-                </div>
-                <div class="project-item">
-                    <div class="project-tag">Yoast Esoc</div>
-                    <div class="project-title">Redesign Kripton Mobile App</div>
-                    <div class="project-meta">
-                        <svg class="calendar-icon icon" viewBox="0 0 24 24">
-                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                        </svg>
-                        <span class="created-date">Created on Sep 8th, 2020</span>
-                    </div>
-                    <div class="deadline-section">
-                        <div class="deadline-icon">
-                            <svg class="lightning-icon" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                            </svg>
-                        </div>
-                        <div class="deadline-info">
-                            <div class="deadline-label">Deadline</div>
-                            <div class="deadline-date">Tuesday, Sep 29th 2020</div>
-                        </div>
-                    </div>
-                    <div class="menu-dots">⋮</div>
+                </a>
+                <div th:if="${upcomingExams == null || upcomingExams.isEmpty()}">
+                    No upcoming exam
                 </div>
             </div>
             <div class="timeline">
                 <h3>Timeline Today</h3>
 
-                <div class="timeline-item timeline-green">
+                <a th:href="@{/mentor/schedule/{esid}(esid=${slot.id})}" class="timeline-item timeline-green" th:each="slot :${slotToday}" th:if="${slotToday != null && !slotToday.isEmpty()}">
                     <div class="timeline-badge"></div>
-                    <div class="timeline-content">
-                        <p><small>10 minutes ago</small></p>
-                        <p><strong>Youtube, a video-sharing website</strong>, goes live <span>$500</span></p>
+                    <div class="timeline-content" >
+                        <p><small th:text="${slot.slot.startTime + '-' + slot.slot.endTime}">10 minutes ago</small></p>
+                        <p><strong th:text="${slot.enrollment.courseMentor.course.name}">Youtube, a video-sharing website</strong><span th:text="${slot.enrollment.mentee.fullName}">$500</span></p>
                     </div>
-                </div>
-
-                <div class="timeline-item timeline-blue">
-                    <div class="timeline-badge"></div>
-                    <div class="timeline-content">
-                        <p><small>20 minutes ago</small></p>
-                        <p><strong>New order placed</strong> <a href="#">#XF-2356</a></p>
-                        <p>Quisque a consequat ante Sit amet magna at volutapt...</p>
-                    </div>
-                </div>
-
-                <div class="timeline-item timeline-orange">
-                    <div class="timeline-badge"></div>
-                    <div class="timeline-content">
-                        <p><small>30 minutes ago</small></p>
-                        <p><strong>John just buy your product</strong> <span>Sell $250</span></p>
-                    </div>
-                </div>
-
-                <div class="timeline-item timeline-lightgreen">
-                    <div class="timeline-badge"></div>
-                    <div class="timeline-content">
-                        <p><small>15 minutes ago</small></p>
-                        <p>Meeting with new client scheduled</p>
-                    </div>
-                </div>
+                </a>
+                <div th:if="${slotToday == null || slotToday.isEmpty()}">No slot today</div>
             </div>
         </div>
 

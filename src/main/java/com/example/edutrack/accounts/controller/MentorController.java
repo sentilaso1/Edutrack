@@ -110,6 +110,11 @@ public class MentorController {
         LocalDate weekEnd = weekStart.plusDays(6);
 
         List<EnrollmentSchedule> schedules = enrollmentScheduleService.findByMentorAndDateBetween(mentor, weekStart, weekEnd);
+        List<EnrollmentSchedule> upcomingExam = enrollmentScheduleService.findTop5UpcomingExam(LocalDate.now(), mentor);
+        List<EnrollmentSchedule> slotToday = enrollmentScheduleService.findSlotToday(mentor);
+
+        model.addAttribute("upcomingExams", upcomingExam);
+        model.addAttribute("slotToday", slotToday);
 
         for (EnrollmentSchedule schedule : schedules) {
             System.out.println("Course: " + schedule.getEnrollment().getCourseMentor().getCourse().getName());
