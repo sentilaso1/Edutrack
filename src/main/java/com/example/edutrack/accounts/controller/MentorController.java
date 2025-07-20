@@ -205,6 +205,7 @@ public class MentorController {
             return "redirect:/mentor/schedule?error=notMentor";
         }
         model.addAttribute("enrollmentSchedule", enrollmentSchedule);
+        model.addAttribute("isValidDay", enrollmentSchedule.getDate().isAfter(LocalDate.now()));
         return "mentor/mentee-review";
     }
 
@@ -229,15 +230,19 @@ public class MentorController {
 
         EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(esid);
         if (enrollmentSchedule == null) {
-            return "redirect:/mentor/schedule?error=enrollmentNotFound";
+            return "redirect:/mentor/schedule?error=Enrollment Not Found";
         }
         if(!enrollmentSchedule.isAvailable()){
-            return "redirect:/mentor/schedule/" + esid + "?error=unavailableslot";
+            return "redirect:/mentor/schedule/" + esid + "?error=Unavailable slot";
         }
 
         LocalDate currentDate = LocalDate.now();
         if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isBefore(currentDate)) {
-            return "redirect:/mentor/schedule/" + esid + "?error=toolatetochange";
+            return "redirect:/mentor/schedule/" + esid + "?error=Too late to save";
+        }
+
+        if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isAfter(currentDate)) {
+            return "redirect:/mentor/schedule/" + esid + "?error=Too soon to save";
         }
 
         // Update relevant fields only
@@ -248,7 +253,7 @@ public class MentorController {
         enrollmentSchedule.setReport(enrollmentScheduleFromForm.getReport());
 
         enrollmentScheduleService.save(enrollmentSchedule);
-        return "redirect:/mentor/schedule/" + enrollmentSchedule.getId();
+        return "redirect:/mentor/schedule/" + enrollmentSchedule.getId() + "?save=Save successfully";
     }
 
 

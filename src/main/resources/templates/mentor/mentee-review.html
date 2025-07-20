@@ -191,7 +191,7 @@
                 <div style="display: flex"><strong>Date: </strong><span th:text="${' ' + enrollmentSchedule.date}"> 06/05/2025</span>
                 </div>
 
-                <form th:action="@{/mentor/schedule/mark-as-test-day}">
+                <form th:action="@{/mentor/schedule/mark-as-test-day}" th:if="${isValidDay}">
                     <input type="hidden" name="esid" th:value="${enrollmentSchedule.id}">
                     <button class="submit-review" style="margin-left: 1rem"
                             th:text="${!enrollmentSchedule.test ? '☆ Mark as Test Day' : '⭐ Remove Test Day' }">☆ Mark
@@ -199,7 +199,7 @@
                         Test Day
                     </button>
                 </form>
-                <button class="reschedule" onclick="openModal()" style="margin-left: 1rem">Reschedule
+                <button th:if="${isValidDay}" class="reschedule" onclick="openModal()" style="margin-left: 1rem">Reschedule
                 </button>
             </div>
         </div>
@@ -207,6 +207,10 @@
             style="margin-top: -1em; margin-bottom: 2em"></h3>
         <form th:action="@{/mentor/schedule/save}" th:object="${enrollmentSchedule}">
             <input type="hidden" name="esid" th:value="${enrollmentSchedule.id}">
+            <div class="graph" style="border-left: 5px solid #ff5462" th:if="${param.size() != 0}">
+                <h4 th:text="${param.error}"></h4>
+                <h4 style="color: #721c24; font-style: italic" th:text="${param.save}"></h4>
+            </div>
             <div class="graph">
                 <h3>Lesson Summary</h3>
                 <div class="field">
