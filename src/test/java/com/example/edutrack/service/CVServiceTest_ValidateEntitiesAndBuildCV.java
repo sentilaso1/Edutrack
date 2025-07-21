@@ -39,7 +39,7 @@ class CVServiceTest_ValidateEntitiesAndBuildCV {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> cvService.validateEntitiesAndBuildCV(form, UUID.randomUUID())
+                () -> cvService.validateEntitiesAndBuildCV(form)
         );
         assertEquals("User not found", ex.getMessage());
     }
@@ -57,7 +57,7 @@ class CVServiceTest_ValidateEntitiesAndBuildCV {
         when(mentorRepository.findById(mentorId)).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> cvService.validateEntitiesAndBuildCV(form, mentorId)
+                () -> cvService.validateEntitiesAndBuildCV(form)
         );
         assertEquals("Mentor not found", ex.getMessage());
     }
@@ -85,7 +85,7 @@ class CVServiceTest_ValidateEntitiesAndBuildCV {
 
         doAnswer(invocation -> invocation.getArgument(0)).when(cvRepository).save(any(CV.class));
 
-        CV cv = cvService.validateEntitiesAndBuildCV(form, mentorId);
+        CV cv = cvService.validateEntitiesAndBuildCV(form);
 
         verify(cvRepository).save(any(CV.class));
         assertEquals("summaryValue", cv.getSummary());
@@ -123,7 +123,7 @@ class CVServiceTest_ValidateEntitiesAndBuildCV {
 
         doAnswer(invocation -> invocation.getArgument(0)).when(cvRepository).save(any(CV.class));
 
-        CV cv = cvService.validateEntitiesAndBuildCV(form, mentorId);
+        CV cv = cvService.validateEntitiesAndBuildCV(form);
 
         verify(cvRepository).save(any(CV.class));
         assertNull(cv.getSummary());

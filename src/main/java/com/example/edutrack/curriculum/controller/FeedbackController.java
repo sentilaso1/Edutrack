@@ -1,7 +1,10 @@
 package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MenteeRepository;
+import com.example.edutrack.accounts.repository.MentorRepository;
+import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.curriculum.dto.FeedbackDTO;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.CourseMentorId;
@@ -31,18 +34,19 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
     private final MenteeRepository menteeRepository;
     private final CourseMentorRepository courseMentorRepository;
+    private final MentorService mentorService;
     private final CourseMentorService courseMentorService;
-    private final FeedbackRepository feedbackRepository;
 
     public FeedbackController(FeedbackService feedbackService,
                               MenteeRepository menteeRepository,
                               CourseMentorRepository courseMentorRepository,
-                              CourseMentorService courseMentorService, FeedbackRepository feedbackRepository) {
+                              CourseMentorService courseMentorService,
+                              MentorService mentorService) {
         this.feedbackService = feedbackService;
         this.menteeRepository = menteeRepository;
         this.courseMentorRepository = courseMentorRepository;
         this.courseMentorService = courseMentorService;
-        this.feedbackRepository = feedbackRepository;
+        this.mentorService = mentorService;
     }
 
     @GetMapping("/reviews")
@@ -90,11 +94,24 @@ public class FeedbackController {
                     mentee,
                     courseMentor
             );
+
+            List<Feedback> mentorFeedbacks = feedbackService.findAllByCourseMentor_Mentor_Id(request.getMentorId());
+
+            if (!mentorFeedbacks.isEmpty()) {
+                double averageRating = mentorFeedbacks.stream()
+                        .mapToDouble(Feedback::getRating)
+                        .average()
+                        .orElse(0.0);
+
+                Mentor mentor = courseMentor.getMentor();
+                mentor.setRating(averageRating);
+                mentorService.save(mentor);
+            }
+
             redirectAttributes.addFlashAttribute("success", "Your review was submitted successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Could not submit review: " + e.getMessage());
         }
-        // Redirect to mentor profile page
         return "redirect:/mentors/" + request.getMentorId();
     }
 

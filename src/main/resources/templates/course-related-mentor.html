@@ -610,8 +610,9 @@
         }
     </style>
 </head>
-<th:block th:insert="~{fragments/header :: header}"></th:block>
+
 <body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 <!-- Hero Section -->
 <main>
 
@@ -725,6 +726,8 @@
     </div>
 </section>
 
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
 <script src="https://unpkg.com/scrollreveal"></script>
 <script>
     // Initialize ScrollReveal animations
@@ -800,5 +803,5 @@
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
-<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
 </html>

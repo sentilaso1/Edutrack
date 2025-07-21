@@ -37,4 +37,5 @@ public interface MentorService {
     IncomeStatsDTO getIncomeStats(UUID mentorId);
     List<String> getAllMentorSkills();
     Optional<Mentor> findByEmail(String email);
+    void save(Mentor mentor);
 }
