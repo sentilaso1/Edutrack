@@ -1,6 +1,7 @@
 package com.example.edutrack.common.controller;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +20,7 @@ public class MentorModelAdvice {
 
     @ModelAttribute("numberOfPending")
     public Integer numberOfPending(HttpServletRequest request, HttpSession session) {
-        Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
+        User mentor = (User) session.getAttribute("loggedInUser");
         String path = request.getRequestURI();
 
         if (path.startsWith("/mentor")) {

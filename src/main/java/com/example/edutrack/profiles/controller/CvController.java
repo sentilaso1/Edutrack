@@ -3,6 +3,7 @@ package com.example.edutrack.profiles.controller;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MentorRepository;
+import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
@@ -10,10 +11,13 @@ import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
 import com.example.edutrack.profiles.dto.CVFilterForm;
 import com.example.edutrack.profiles.dto.CVForm;
+import com.example.edutrack.profiles.dto.CourseApplicationDetail;
 import com.example.edutrack.profiles.model.CV;
 import com.example.edutrack.profiles.repository.CvRepository;
 import com.example.edutrack.profiles.service.interfaces.CvService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +30,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -224,15 +229,6 @@ public class CvController {
     public String handleCVFormSubmission(@ModelAttribute("cv") CVForm request, Model model, HttpSession session) {
         logger.info("Entering handleCVFormSubmission");
 
-        try {
-            request.parseSelectedCourses();
-            logger.debug("Parsed selected courses successfully");
-        } catch (Exception e) {
-            logger.error("Failed to parse selected courses", e);
-            model.addAttribute("error", "Failed to read course details. Please try again.");
-            return "redirect:/404";
-        }
-
         Object sessionUser = session.getAttribute("loggedInUser");
         if (!(sessionUser instanceof User user)) {
             logger.warn("Invalid or missing session user during CV submission");
@@ -245,8 +241,18 @@ public class CvController {
             return "redirect:/error";
         }
         logger.debug("Submitting CV for userId={}", userId);
-
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
+
+            try {
+                Map<String, CourseApplicationDetail> parsedMap =
+                        objectMapper.readValue(request.getSelectedCourses(), new TypeReference<>() {});
+                request.setCourseDetails(new ArrayList<>(parsedMap.values()));
+            } catch (IOException e) {
+                logger.error("Failed to parse selectedCourses JSON", e);
+                model.addAttribute("error", "Invalid course details submitted.");
+                return "redirect:/error";
+            }
             cvService.createCV(request, userId);
             logger.info("CV created successfully for userId={}", userId);
             model.addAttribute("message", "CV created successfully!");

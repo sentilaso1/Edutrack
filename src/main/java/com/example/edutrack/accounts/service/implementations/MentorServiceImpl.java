@@ -284,4 +284,9 @@ public class MentorServiceImpl implements MentorService {
     public Optional<Mentor> findByEmail(String email){
         return mentorRepository.findByEmail(email);
     }
+
+    @Override
+    public void save(Mentor mentor) {
+        mentorRepository.save(mentor);
+    }
 }

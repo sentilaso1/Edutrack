@@ -253,12 +253,14 @@ CourseController {
         model.addAttribute("courseMentor", courseMentor);
         model.addAttribute("mentorAvailableTime", mentorAvailableTime);
 
+        List<Tag> tags = tagServiceImpl.findTagsByCourseId(courseMentor.getCourse().getId());
+        model.addAttribute("tagList", tags);
         LocalDate minDate = mentorAvailableTimeService.findMinStartDate(courseMentor.getMentor());
         if(minDate == null){
             return "redirect:/courses/" + courseMentor.getId() + "?error=Mentor Schedule haven't been registered yet";
         }
-        if(minDate.isBefore(LocalDate.now())){
-            minDate = LocalDate.now();
+        if(minDate.isBefore(LocalDate.now().plusDays(5))){
+            minDate = LocalDate.now().plusDays(5);
         }
         LocalDate maxDate = mentorAvailableTimeService.findMaxEndDate(courseMentor.getMentor());
         if(maxDate == null){

@@ -48,7 +48,7 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
     @Test
     void detailsIsEmpty_returnsEarly() {
         CVForm cvRequest = mock(CVForm.class);
-        when(cvRequest.getCourseDetails()).thenReturn(Collections.emptyMap());
+        when(cvRequest.getCourseDetails()).thenReturn(Collections.emptyList());
 
         assertDoesNotThrow(() ->
                 cvService.validateAndApplyCourseDetails(cvRequest, dummyCv, mentorId)
@@ -57,12 +57,11 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
 
     @Test
     void invalidPrice_null_throws() {
-        UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
         detail.setDescription("valid description");
 
-        Map<UUID, CourseApplicationDetail> details = new HashMap<>();
-        details.put(courseId, detail);
+        List<CourseApplicationDetail> details = new ArrayList<>();
+        details.add(detail);
 
         CVForm cvRequest = mock(CVForm.class);
         when(cvRequest.getCourseDetails()).thenReturn(details);
@@ -77,12 +76,11 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
 
     @Test
     void invalidPrice_zeroOrNegative_throws() {
-        UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
         detail.setDescription("valid description");
 
-        Map<UUID, CourseApplicationDetail> details = new HashMap<>();
-        details.put(courseId, detail);
+        List<CourseApplicationDetail> details = new ArrayList<>();
+        details.add(detail);
 
         CVForm cvRequest = mock(CVForm.class);
         when(cvRequest.getCourseDetails()).thenReturn(details);
@@ -97,12 +95,11 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
 
     @Test
     void invalidDescription_null_throws() {
-        UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
         detail.setDescription(null);
 
-        Map<UUID, CourseApplicationDetail> details = new HashMap<>();
-        details.put(courseId, detail);
+        List<CourseApplicationDetail> details = new ArrayList<>();
+        details.add(detail);
 
         CVForm cvRequest = mock(CVForm.class);
         when(cvRequest.getCourseDetails()).thenReturn(details);
@@ -117,12 +114,11 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
 
     @Test
     void invalidDescription_blank_throws() {
-        UUID courseId = UUID.randomUUID();
         CourseApplicationDetail detail = new CourseApplicationDetail();
         detail.setDescription("   ");
 
-        Map<UUID, CourseApplicationDetail> details = new HashMap<>();
-        details.put(courseId, detail);
+        List<CourseApplicationDetail> details = new ArrayList<>();
+        details.add(detail);
 
         CVForm cvRequest = mock(CVForm.class);
         when(cvRequest.getCourseDetails()).thenReturn(details);
@@ -141,8 +137,8 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
         CourseApplicationDetail detail = new CourseApplicationDetail();
         detail.setDescription("valid");
 
-        Map<UUID, CourseApplicationDetail> details = new HashMap<>();
-        details.put(courseId, detail);
+        List<CourseApplicationDetail> details = new ArrayList<>();
+        details.add(detail);
 
         CVForm cvRequest = mock(CVForm.class);
         when(cvRequest.getCourseDetails()).thenReturn(details);
@@ -162,8 +158,8 @@ class CvServiceTest_ValidateAndApplyCourseDetails {
         CourseApplicationDetail detail = new CourseApplicationDetail();
         detail.setDescription("OK");
 
-        Map<UUID, CourseApplicationDetail> details = new HashMap<>();
-        details.put(courseId, detail);
+        List<CourseApplicationDetail> details = new ArrayList<>();
+        details.add(detail);
 
         CVForm cvRequest = mock(CVForm.class);
         when(cvRequest.getCourseDetails()).thenReturn(details);

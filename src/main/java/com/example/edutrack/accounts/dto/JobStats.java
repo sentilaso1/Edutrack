@@ -2,16 +2,16 @@ package com.example.edutrack.accounts.dto;
 
 public class JobStats {
         private int total;
-        private int success;
-        private int failed;
+        private int activeCount;
+        private int inactiveCount;
 
         public JobStats() {
         }
 
-        public JobStats(int total, int success, int failed) {
+        public JobStats(int total, int activeCount, int inactiveCount) {
                 this.total = total;
-                this.success = success;
-                this.failed = failed;
+                this.activeCount = activeCount;
+                this.inactiveCount = inactiveCount;
         }
         
         public int getTotal() {
@@ -22,20 +22,20 @@ public class JobStats {
                 this.total = total;
         }
 
-        public int getSuccess() {
-                return success;
+        public int getActiveCount() {
+                return activeCount;
         }
 
-        public void setSuccess(int success) {
-                this.success = success;
+        public void setActiveCount(int activeCount) {
+                this.activeCount = activeCount;
         }
 
-        public int getFailed() {
-                return failed;
+        public int getInactiveCount() {
+                return inactiveCount;
         }
 
-        public void setFailed(int failed) {
-                this.failed = failed;
+        public void setInactiveCount(int inactiveCount) {
+                this.inactiveCount = inactiveCount;
         }
         
 }

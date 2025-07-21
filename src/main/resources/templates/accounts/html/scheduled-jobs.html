@@ -21,21 +21,28 @@
         </div>
         <div class="ml-64 flex-1 p-6">
                 <h1 class="text-2xl font-bold mb-6">Scheduled Jobs Management</h1>
-                
-                <!-- Filter -->
-                <form method="get" class="mb-4 flex gap-2">
-                        <input type="text" name="search" th:value="${search}" placeholder="Search jobs..."
-                                class="border p-2 rounded w-1/3">
-                        <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Search</button>
-                </form>
-                
+
+                <!-- Filter and Add Button -->
+                <div class="mb-4 flex justify-between items-center">
+                        <form method="get" class="flex gap-2">
+                                <input type="text" name="search" th:value="${search}" placeholder="Search jobs..."
+                                        class="border p-2 rounded w-96">
+                                <button
+                                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Search</button>
+                        </form>
+                        <button onclick="openAddJobModal()"
+                                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                Add Job
+                        </button>
+                </div>
+
                 <!-- Job Table -->
                 <div class="bg-white shadow rounded p-4">
                         <table class="min-w-full text-sm">
                                 <thead>
                                         <tr class="bg-gray-100">
                                                 <th class="text-left px-3 py-2">Name</th>
-                                                <th class="text-left px-3 py-2">Cron</th>
+                                                <th class="text-left px-3 py-2">Time</th>
                                                 <th class="text-left px-3 py-2">Description</th>
                                                 <th class="text-left px-3 py-2">Status</th>
                                                 <th class="text-left px-3 py-2">Last Run</th>
@@ -53,32 +60,168 @@
                                                 </td>
                                                 <td class="px-3 py-2" th:text="${job.lastRunTime}"></td>
                                                 <td class="px-3 py-2 space-x-2">
-                                                        <form th:action="@{'/admin/jobs/' + ${job.id} + '/run'}" method="post"
-                                                                class="inline">
-                                                                <button class="bg-green-500 text-white px-2 py-1 rounded text-xs">Run
+                                                        <form th:action="@{'/admin/jobs/' + ${job.id} + '/run'}"
+                                                                method="post" class="inline">
+                                                                <button
+                                                                        class="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">Run
                                                                         Now</button>
                                                         </form>
-                                                        <form th:action="@{'/admin/jobs/' + ${job.id} + '/toggle'}" method="post"
-                                                                class="inline">
-                                                                <input type="hidden" name="active" th:value="${!job.active}" />
-                                                                <button class="bg-yellow-500 text-white px-2 py-1 rounded text-xs"
+                                                        <form th:action="@{'/admin/jobs/' + ${job.id} + '/toggle'}"
+                                                                method="post" class="inline">
+                                                                <input type="hidden" name="active"
+                                                                        th:value="${!job.active}" />
+                                                                <button class="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600"
                                                                         th:text="${job.active} ? 'Disable' : 'Enable'"></button>
                                                         </form>
-                                                        <form th:action="@{'/admin/jobs/' + ${job.id} + '/update'}" method="post"
-                                                                class="inline">
+                                                        <form th:action="@{'/admin/jobs/' + ${job.id} + '/update'}"
+                                                                method="post" class="inline">
                                                                 <input type="text" name="cronExpression"
                                                                         th:value="${job.cronExpression}"
                                                                         class="border p-1 text-xs w-32" />
                                                                 <button
-                                                                        class="bg-blue-500 text-white px-2 py-1 rounded text-xs">Update</button>
+                                                                        class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Update</button>
                                                         </form>
+                                                        <button th:data-job-id="${job.id}"
+                                                                th:data-job-name="${job.name}"
+                                                                onclick="confirmDeleteJob(this.dataset.jobId, this.dataset.jobName)"
+                                                                class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Delete</button>
                                                 </td>
                                         </tr>
                                 </tbody>
                         </table>
                 </div>
         </div>
-        
+
+        <!-- Add Job Modal -->
+        <div id="addJobModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                        <h2 class="text-xl font-bold mb-4">Add New Job</h2>
+
+                        <form action="/admin/jobs/add" method="post" id="addJobForm">
+                                <div class="mb-4">
+                                        <label for="jobName" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Job Name <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" id="jobName" name="name" required
+                                                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Enter job name">
+                                </div>
+
+                                <div class="mb-4">
+                                        <label for="cronExpression"
+                                                class="block text-sm font-medium text-gray-700 mb-2">
+                                                Time Expression <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" id="cronExpression" name="cronExpression" required
+                                                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="0 0 * * * *">
+                                        <small class="text-gray-500">Example: 0 0 * * * * (every hour)</small>
+                                </div>
+
+                                <div class="mb-4">
+                                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Description
+                                        </label>
+                                        <textarea id="description" name="description" rows="3"
+                                                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Enter job description"></textarea>
+                                </div>
+
+                                <div class="mb-6">
+                                        <label class="flex items-center">
+                                                <input type="checkbox" id="active" name="active" value="true" checked
+                                                        class="mr-2">
+                                                <span class="text-sm text-gray-700">Active</span>
+                                        </label>
+                                </div>
+
+                                <div class="flex justify-end space-x-3">
+                                        <button type="button" onclick="closeAddJobModal()"
+                                                class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
+                                                Cancel
+                                        </button>
+                                        <button type="submit"
+                                                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                                Add Job
+                                        </button>
+                                </div>
+                        </form>
+                </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script th:inline="javascript">
+                // Modal functions
+                function openAddJobModal() {
+                        document.getElementById('addJobModal').classList.remove('hidden');
+                }
+
+                function closeAddJobModal() {
+                        document.getElementById('addJobModal').classList.add('hidden');
+                        document.getElementById('addJobForm').reset();
+                }
+
+                // Delete job confirmation
+                function confirmDeleteJob(jobId, jobName) {
+                        Swal.fire({
+                                title: 'Xác nhận xóa',
+                                text: `Bạn có chắc chắn muốn xóa job "${jobName}"?`,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#d33',
+                                cancelButtonColor: '#3085d6',
+                                confirmButtonText: 'Xóa',
+                                cancelButtonText: 'Hủy'
+                        }).then((result) => {
+                                if (result.isConfirmed) {
+                                        // Create and submit delete form
+                                        const form = document.createElement('form');
+                                        form.method = 'POST';
+                                        form.action = `/admin/jobs/${jobId}/delete`;
+                                        document.body.appendChild(form);
+                                        form.submit();
+                                }
+                        });
+                }
+
+                // Close modal when clicking outside
+                document.getElementById('addJobModal').addEventListener('click', function (e) {
+                        if (e.target === this) {
+                                closeAddJobModal();
+                        }
+                });
+
+                // Close modal with Escape key
+                document.addEventListener('keydown', function (e) {
+                        if (e.key === 'Escape') {
+                                closeAddJobModal();
+                        }
+                });
+
+                // Display success message
+                const successMessage = /*[[${successMessage}]]*/ null;
+                if (successMessage) {
+                        Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công',
+                                text: successMessage,
+                                timer: 3000,
+                                showConfirmButton: false
+                        });
+                }
+
+                // Display error message
+                const errorMessage = /*[[${errorMessage}]]*/ null;
+                if (errorMessage) {
+                        Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: errorMessage,
+                                timer: 3000,
+                                showConfirmButton: false
+                        });
+                }
+        </script>
 </body>
 
 </html>

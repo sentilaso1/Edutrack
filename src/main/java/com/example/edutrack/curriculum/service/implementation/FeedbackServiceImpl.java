@@ -75,4 +75,9 @@ public class FeedbackServiceImpl implements FeedbackService {
     public List<Feedback> getTopRecentFeedback(CourseMentor courseMentor) {
         return feedbackRepository.findTop3ByCourseMentorOrderByCreatedDateDesc(courseMentor);
     }
+
+    @Override
+    public List<Feedback> findAllByCourseMentor_Mentor_Id(UUID mentorId){
+        return feedbackRepository.findByCourseMentor_Mentor_Id(mentorId);
+    }
 }

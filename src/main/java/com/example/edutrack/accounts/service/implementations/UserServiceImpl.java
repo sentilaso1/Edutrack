@@ -10,14 +10,15 @@ import com.example.edutrack.accounts.repository.UserRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.service.interfaces.UserService;
-import com.example.edutrack.accounts.dto.UserStats;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import com.example.edutrack.accounts.dto.LoginStats;
 import java.util.UUID;
 import java.util.Date;
-
+import java.util.List;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.Writer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -211,7 +212,17 @@ public class UserServiceImpl implements UserService {
                 return new UserStatsDTO(total, active, locked);
         }
 
-        public LoginStats getLoginStats() {
-                return new LoginStats(23, 150, 430);
+        public void exportToCsv(Writer writer) {
+                List<User> users = userRepository.findAll();
+                try (BufferedWriter bw = new BufferedWriter(writer)) {
+                        bw.write("ID,Email,Full Name,Is Active,Is Locked\n");
+                        for (User user : users) {
+                                bw.write(String.format("%s,%s,%s,%b,%b\n",
+                                                user.getId(), user.getEmail(), user.getFullName(),
+                                                user.getIsActive(), user.getIsLocked()));
+                        }
+                } catch (IOException e) {
+                        throw new RuntimeException("Failed to export users to CSV", e);
+                }
         }
 }
