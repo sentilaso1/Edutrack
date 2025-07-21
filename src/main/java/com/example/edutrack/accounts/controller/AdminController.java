@@ -312,20 +312,107 @@ public class AdminController {
         }
 
         @PostMapping("/jobs/{id}/toggle")
-        public String toggleJob(@PathVariable Long id, @RequestParam boolean active) {
-                scheduledJobService.toggleJob(id, active);
+        public String toggleJob(@PathVariable Long id, @RequestParam boolean active, RedirectAttributes redirectAttributes) {
+                try {
+                        scheduledJobService.toggleJob(id, active);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job status updated successfully.");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                }
                 return "redirect:/admin/jobs";
         }
 
         @PostMapping("/jobs/{id}/run")
-        public String runJobNow(@PathVariable Long id) {
-                scheduledJobService.runJobNow(id);
+        public String runJobNow(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+                try {
+                        scheduledJobService.runJobNow(id);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job is running now.");
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Job is not active");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Error running job");
+                }
                 return "redirect:/admin/jobs";
         }
 
         @PostMapping("/jobs/{id}/update")
-        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto) {
+        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto,
+                        RedirectAttributes redirectAttributes) {
                 scheduledJobService.updateJob(id, dto);
+                redirectAttributes.addFlashAttribute("successMessage", "Job updated successfully");
+                return "redirect:/admin/jobs";
+        }
+        
+        @PostMapping("/jobs/add")
+        public String addJob(@ModelAttribute ScheduledJobDTO dto, RedirectAttributes redirectAttributes) {
+                try {
+                        // Validate required fields
+                        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job name is required");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        if (dto.getCronExpression() == null || dto.getCronExpression().trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Time is required");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        // Create new job
+                        scheduledJobService.createJob(dto);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job created successfully");
+
+                } catch (IllegalArgumentException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Invalid job data: " + e.getMessage());
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("already exists")) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Job with this name already exists");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Error creating job: " + e.getMessage());
+                        }
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "System error when creating job");
+                }
+
+                return "redirect:/admin/jobs";
+        }
+
+        @PostMapping("/jobs/{id}/delete")
+        public String deleteJob(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+                try {
+                        // Check if job exists
+                        ScheduledJobDTO job = scheduledJobService.getJob(id);
+                        if (job == null) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job not found");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        if (scheduledJobService.isJobRunning(id)) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Cannot delete job while it's active. Please wait for it to complete.");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        // Delete the job
+                        scheduledJobService.deleteJob(id);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job deleted successfully");
+
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete job: " + e.getMessage());
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("not found")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job not found");
+                        } else if (e.getMessage().contains("running")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete running job");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Error deleting job: " + e.getMessage());
+                        }
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "System error when deleting job");
+                }
+
                 return "redirect:/admin/jobs";
         }
 }
