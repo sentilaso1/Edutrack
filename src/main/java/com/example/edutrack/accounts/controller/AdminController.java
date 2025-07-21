@@ -303,11 +303,15 @@ public class AdminController {
                         Model model) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<ScheduledJobDTO> jobPage = scheduledJobService.getJobs(search, pageable);
-
+                int startPage = Math.max(0, page - 2);
+                int endPage = Math.min(jobPage.getTotalPages() - 1, page + 2);
                 model.addAttribute("jobs", jobPage.getContent());
                 model.addAttribute("currentPage", page);
                 model.addAttribute("totalPages", jobPage.getTotalPages());
                 model.addAttribute("search", search);
+                model.addAttribute("startPage", startPage);
+                model.addAttribute("endPage", endPage);
+                model.addAttribute("pageSize", size);
                 return "accounts/html/scheduled-jobs";
         }
 

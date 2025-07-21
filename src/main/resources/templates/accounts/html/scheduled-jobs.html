@@ -14,7 +14,7 @@
                 <nav class="mt-4">
                         <a href="/admin/dashboard" class="block py-2 px-4 hover:bg-gray-700">Dashboard</a>
                         <a href="/admin/users" class="block py-2 px-4 hover:bg-gray-700">User Management</a>
-                        <a href="/admin/system-settings" class="block py-2 px-4 hover:bg-gray-700 ">System
+                        <a href="/admin/jobs" class="block py-2 px-4 hover:bg-gray-700 ">System
                                 Settings</a>
                         <a href="/admin/jobs" class="block py-2 px-4 bg-gray-700 text-white">ScheduledJobs</a>
                 </nav>
@@ -90,6 +90,44 @@
                                 </tbody>
                         </table>
                 </div>
+                <!-- Pagination -->
+                <div class="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="text-sm text-gray-500">
+                                Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span>
+                        </div>
+                
+                        <div class="flex flex-wrap gap-1">
+                                <!-- Prev -->
+                                <a th:if="${currentPage > 0}" th:href="@{/admin/jobs(page=${currentPage - 1}, size=${pageSize})}"
+                                        class="px-3 py-1 border border-gray-300 rounded-md bg-white hover:bg-gray-100 text-sm text-gray-700">
+                                        &laquo; Prev
+                                </a>
+                
+                                <!-- Page numbers -->
+                                <a th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                                        th:href="@{/admin/jobs(page=${i}, size=${pageSize})}" th:text="${i + 1}"
+                                        th:class="'px-3 py-1 rounded-md text-sm font-medium ' + (${i} == ${currentPage} ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100')">
+                                </a>
+                
+                                <!-- Next -->
+                                <a th:if="${currentPage < totalPages - 1}"
+                                        th:href="@{/admin/jobs(page=${currentPage + 1}, size=${pageSize})}"
+                                        class="px-3 py-1 border border-gray-300 rounded-md bg-white hover:bg-gray-100 text-sm text-gray-700">
+                                        Next &raquo;
+                                </a>
+                        </div>
+                </div>
+                
+                <!-- Rows per page -->
+                <form method="get" th:action="@{/admin/jobs}" class="mt-4 flex items-center space-x-2">
+                        <label for="size" class="text-sm text-gray-700">Rows per page:</label>
+                        <select name="size" id="size" class="border-gray-300 rounded text-sm px-2 py-1" onchange="this.form.submit()">
+                                <option th:value="5" th:selected="${pageSize == 5}">5</option>
+                                <option th:value="10" th:selected="${pageSize == 10}">10</option>
+                                <option th:value="20" th:selected="${pageSize == 20}">20</option>
+                        </select>
+                        <input type="hidden" name="page" th:value="${currentPage}">
+                </form>
         </div>
 
         <!-- Add Job Modal -->
@@ -148,6 +186,7 @@
                         </form>
                 </div>
         </div>
+                
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script th:inline="javascript">
