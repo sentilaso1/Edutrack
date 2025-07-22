@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Schedule - Blue Theme</title>
+    <title>EduTrack - Manager Schedules</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="flex">
@@ -12,87 +12,136 @@
     <h1 class="text-2xl font-bold mb-6">Pending Schedules to be Confirmed</h1>
 
     <div class="bg-white rounded-xl shadow-md p-6 h-full w-full">
-        <div class="overflow-x-auto h-full w-full">
-            <!-- Filter Form -->
-            <form method="get" action="/manager/schedules" class="flex items-center space-x-4 mb-6">
-                <!-- Mentor Filter -->
-                <select id="mentorFilter" name="mentorId"
-                        class="block w-48 px-3 py-2 bg-white border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                        onchange="this.form.submit()">
-                    <option value="">All Mentors</option>
-                    <option th:each="mentor : ${mentors}"
-                            th:value="${mentor.id}"
-                            th:text="${mentor.fullName}"
-                            th:selected="${mentor.id.toString() == selectedMentor}">
-                    </option>
-                </select>
+        <div class="overflow-x-auto h-full w-full" th:with="totalPages=${schedulePage.totalPages}, currentPage=${page}">
+            <!-- Combine filters and pagination into one form -->
+            <form method="get" id="filter-form" class="flex flex-col space-y-6" th:action="@{/manager/schedules}">
+                <div class="flex items-center space-x-4 mb-6">
+                    <!-- Mentor Filter -->
+                    <select id="mentorFilter" name="mentorId"
+                            class="block w-48 px-3 py-2 bg-white border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            th:value="${selectedMentor}">
+                        <option value="">All Mentors</option>
+                        <option th:each="mentor : ${mentors}"
+                                th:value="${mentor.id}"
+                                th:text="${mentor.fullName}"
+                                th:selected="${mentor.id.toString() == selectedMentor}">
+                        </option>
+                    </select>
 
-                <!-- Mentee Filter -->
-                <select id="menteeFilter" name="menteeId"
-                        class="block w-48 px-3 py-2 bg-white border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                        onchange="this.form.submit()">
-                    <option value="">All Mentees</option>
-                    <option th:each="mentee : ${mentees}"
-                            th:value="${mentee.id}"
-                            th:text="${mentee.fullName}"
-                            th:selected="${mentee.id.toString() == selectedMentee}">
-                    </option>
-                </select>
+                    <!-- Mentee Filter -->
+                    <select id="menteeFilter" name="menteeId"
+                            class="block w-48 px-3 py-2 bg-white border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            th:value="${selectedMentee}">
+                        <option value="">All Mentees</option>
+                        <option th:each="mentee : ${mentees}"
+                                th:value="${mentee.id}"
+                                th:text="${mentee.fullName}"
+                                th:selected="${mentee.id.toString() == selectedMentee}">
+                        </option>
+                    </select>
+                </div>
 
+                <!-- Table -->
+                <table class="min-w-full border border-blue-200 rounded-lg">
+                    <thead>
+                    <tr class="bg-blue-600 text-white text-sm text-left">
+                        <th class="px-4 py-2">Id</th>
+                        <th class="px-4 py-2">Mentor</th>
+                        <th class="px-4 py-2">Mentee</th>
+                        <th class="px-4 py-2">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody th:with="schedules = ${schedulePage}">
+                    <tr th:each="schedule : ${schedules}" class="text-sm border-b">
+                        <td class="px-4 py-3 text-gray-800" th:text="${schedule.id}"></td>
+                        <td class="px-4 py-3 text-gray-800" th:text="${schedule.courseMentor.mentor.fullName}"></td>
+                        <td class="px-4 py-3 text-gray-800" th:text="${schedule.mentee.fullName}"></td>
+                        <td class="px-4 py-3 text-gray-800">
+                            <a th:href="@{/manager/schedules/view/{id}(id=${schedule.id})}"
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination Bar -->
+                <div class="flex justify-center mt-6">
+                    <nav class="inline-flex items-center space-x-1" id="pagination-bar">
+
+                        <!-- Prev Button: only show if currentPage > 1 -->
+                        <button type="button" id="prev-page"
+                                class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                                th:if="${currentPage > 1}">
+                            ← Prev
+                        </button>
+
+                        <!-- Page Number Buttons -->
+                        <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                            <button type="button"
+                                    th:id="'page-' + ${i}"
+                                    th:text="${i}"
+                                    class="px-3 py-2 rounded"
+                                    th:classappend="${i == currentPage} ? ' bg-blue-600 text-white' : ' bg-gray-200 text-gray-700 hover:bg-gray-300 transition'">
+                            </button>
+                        </span>
+
+                        <!-- Next Button: only show if currentPage < totalPages -->
+                        <button type="button" id="next-page"
+                                class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                                th:if="${currentPage < totalPages}">
+                            Next →
+                        </button>
+                    </nav>
+                </div>
             </form>
-
-            <!-- Table -->
-            <table class="min-w-full border border-blue-200 rounded-lg">
-                <thead>
-                <tr class="bg-blue-600 text-white text-sm text-left">
-                    <th class="px-4 py-2">Id</th>
-                    <th class="px-4 py-2">Mentor</th>
-                    <th class="px-4 py-2">Mentee</th>
-                    <th class="px-4 py-2">Action</th>
-                </tr>
-                </thead>
-                <tbody th:with="schedules = ${schedulePage}">
-                <tr th:each="schedule : ${schedules}" class="text-sm border-b">
-                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.id}"></td>
-                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.courseMentor.mentor.fullName}"></td>
-                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.mentee.fullName}"></td>
-                    <td class="px-4 py-3 text-gray-800">
-                        <a th:href="@{/manager/schedules/view/{id}(id=${schedule.id})}"
-                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
-                            View
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-
-            <!-- Pagination Bar -->
-            <div class="flex justify-center mt-6"
-                 th:with="totalPages=${schedulePage.totalPages}, currentPage=${page}">
-                <nav class="inline-flex items-center space-x-1">
-                    <a th:if="${currentPage > 1}"
-                       th:href="@{'/manager/schedules/' + ${currentPage - 1} + '?menteeId=' + ${selectedMentee} + '&mentorId=' + ${selectedMentor}}"
-                       class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
-                        ← Prev
-                    </a>
-
-                    <span th:each="i : ${#numbers.sequence(1, totalPages)}">
-                        <a th:href="@{'/manager/schedules/' + ${i} + '?menteeId=' + ${selectedMentee} + '&mentorId=' + ${selectedMentor}}"
-                           th:text="${i}"
-                           th:class="'px-3 py-2 rounded ' +
-                                     (${i} == ${currentPage} ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 transition')">
-                        </a>
-                    </span>
-
-                    <a th:if="${currentPage < totalPages}"
-                       th:href="@{'/manager/schedules/' + ${currentPage + 1} + '?menteeId=' + ${selectedMentee} + '&mentorId=' + ${selectedMentor}}"
-                       class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
-                        Next →
-                    </a>
-                </nav>
-            </div>
         </div>
     </div>
 </div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const filterForm = document.getElementById('filter-form');
+    const currentPage = [[${page}]];
+    const totalPages = [[${schedulePage.totalPages}]];
+
+    document.getElementById('prev-page')?.addEventListener('click', () => {
+        if(currentPage > 1) {
+            filterForm.action = '/manager/schedules/' + (currentPage - 1);
+            filterForm.submit();
+        }
+    });
+
+    document.getElementById('next-page')?.addEventListener('click', () => {
+        if(currentPage < totalPages) {
+            filterForm.action = '/manager/schedules/' + (currentPage + 1);
+            filterForm.submit();
+        }
+    });
+
+    for(let i = 1; i <= totalPages; i++) {
+        const btn = document.getElementById('page-' + i);
+        if(btn) {
+            btn.addEventListener('click', () => {
+                if(i !== currentPage) {
+                    filterForm.action = '/manager/schedules/' + i;
+                    filterForm.submit();
+                }
+            });
+        }
+    }
+
+    document.getElementById('mentorFilter').addEventListener('change', () => {
+        filterForm.action = '/manager/schedules/1';
+        filterForm.submit();
+    });
+    document.getElementById('menteeFilter').addEventListener('change', () => {
+        filterForm.action = '/manager/schedules/1';
+        filterForm.submit();
+    });
+    /*]]>*/
+</script>
+
 </body>
 </html>
