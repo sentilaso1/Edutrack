@@ -132,6 +132,7 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     Long getActiveMentorCount();
 
     List<CourseMentor> findByMentorId(UUID mentorId);
+    List<CourseMentor> findByMentorIdAndStatus(UUID mentorId, ApplicationStatus status);
 
     Optional<CourseMentor> findByCourse_IdAndMentor_Id(UUID courseId, UUID mentorId);
 
