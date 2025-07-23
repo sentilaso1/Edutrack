@@ -247,7 +247,7 @@
                 </table>
                 <textarea name="report" placeholder="Write your review here..."
                           style="width: 100%; height: 100px; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ccc;"
-                          th:field="*{report}" th:value="${enrollmentSchedule.report}"></textarea>
+                          th:field="*{review}" th:value="${enrollmentSchedule.review}"></textarea>
                 <button class="submit-review" th:classappend="${!enrollmentSchedule.available ? 'inactive' : ''}"
                         th:disabled="${!enrollmentSchedule.available}">Submit Review</button>
             </div>
