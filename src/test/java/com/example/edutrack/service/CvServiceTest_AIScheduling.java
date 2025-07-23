@@ -97,7 +97,7 @@ class CvServiceTest_AIScheduling {
 
         CvServiceImpl spyService = Mockito.spy(cvService);
         doAnswer(inv -> {
-            spyService.processCombinedAIResponse(cv, """
+            spyService.aiVerifyCV(cv, """
                 {
                   "choices": [{
                     "message": {

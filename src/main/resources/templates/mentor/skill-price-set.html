@@ -24,7 +24,7 @@
             max-width: 1300px;
             margin: 0 auto;
             padding: 32px 16px;
-            align-items: start;
+            align-items: stretch;
         }
         @media (max-width: 900px) {
             .mentor-price-card-list {
@@ -46,7 +46,7 @@
             border-left: 8px solid var(--selective-yellow);
             position: relative;
             min-height: 190px;
-            margin: 0 auto;
+            max-width: 500px;
         }
         .mentor-price-card:hover, .mentor-price-card:focus-within {
             box-shadow: 0 8px 44px 0 var(--roman-silver_10);
@@ -71,6 +71,10 @@
             margin-bottom: 6px;
             max-width: 65%;
             word-break: break-word;
+        }
+        .empty-message {
+            text-align: center;
+            width: 100%;
         }
         .mentor-card-desc-header {
             font-size: 1.6rem;
@@ -102,6 +106,12 @@
             font-weight: 500;
             margin-bottom: 8px;
             line-height: 1.7;
+
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .mentor-card-edit-area {
             overflow: hidden;
@@ -222,14 +232,13 @@
                 ">
                 Change your course price
             </h2>
-            <!-- MESSAGE DIV (success or error from RedirectAttributes) -->
             <div class="msg-container">
                 <div th:if="${success}" class="msg-success" th:text="${success}"></div>
                 <div th:if="${error}" class="msg-error" th:text="${error}"></div>
             </div>
 
             <form th:action="@{/mentor/price/save}" method="post" autocomplete="off">
-                <div class="mentor-price-card-list">
+                <div class="mentor-price-card-list" th:if=" ${courseMentors.size() != 0}">
                     <div th:each="cm : ${courseMentors}" class="mentor-price-card" tabindex="0">
                         <input type="hidden" name="courseId" th:value="${cm.course.id}" />
                         <div class="mentor-card-header">
@@ -250,7 +259,12 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="save-all-btn">Save All</button>
+                <div th:if="${courseMentors.size() == 0}">
+                    <div class="empty-message">
+                        <p>You haven't registered any course</p>
+                    </div>
+                </div>
+                <button type="submit" th:if="${courseMentors.size() != 0}" class="save-all-btn">Save All</button>
             </form>
         </section>
     </main>

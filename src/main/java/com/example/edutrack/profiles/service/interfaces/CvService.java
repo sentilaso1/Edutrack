@@ -33,7 +33,7 @@ public interface CvService {
     boolean rejectCV(UUID id);
     String aiProcessCV(CV cv);
     String generateCombinedPromptForAI(CV cv);
-    void processCombinedAIResponse(CV cv, String aiJson);
+
     void aiVerifyCV(CV cv, String aiResponse);
     void aiFormatCV(CV cv, String aiResponse);
     void scheduleAIVerification();
