@@ -59,8 +59,6 @@ public class ManagerController {
     private final DashboardService dashboardService;
     private final EndpointRegistry endpointRegistry;
 
-    public static final int ENROLLMENT_PAGE_SIZE = 30;
-
     @Autowired
     public ManagerController(MentorService mentorService,
                              MenteeService menteeService,
@@ -146,9 +144,12 @@ public class ManagerController {
                                 @RequestParam(required = false) String menteeId,
                                 @RequestParam(required = false) String mentorId) {
 
-        if (page - 1 < 0) return "redirect:/404";
+        if (page - 1 < 0) {
+            return "redirect:/404";
+        }
 
-        Pageable pageable = PageRequest.of(page - 1, ENROLLMENT_PAGE_SIZE);
+        final int PAGE_SIZE = 30;
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
 
         model.addAttribute("mentors", enrollmentService.findAllUniqueMentors());
         model.addAttribute("mentees", enrollmentService.findAllUniqueMentees());
@@ -170,6 +171,7 @@ public class ManagerController {
                                       @RequestParam(required = false) String slot,
                                       @RequestParam(required = false) String dateDirection,
                                       @RequestParam(required = false) String slotDirection,
+                                      @RequestParam(required = false, defaultValue = "1") int page,
                                       Model model) {
         Enrollment enrollment;
         try {
@@ -178,7 +180,10 @@ public class ManagerController {
             return "redirect:/manager/schedules?error=enrollment_not_found";
         }
 
-        // Apply only one sorting priority
+        if (page < 1) {
+            page = 1;
+        }
+
         Sort sort = Sort.unsorted();
         if (dateDirection != null && !dateDirection.isEmpty()) {
             sort = Sort.by(Sort.Direction.fromString(dateDirection), "date");
@@ -186,7 +191,8 @@ public class ManagerController {
             sort = Sort.by(Sort.Direction.fromString(slotDirection), "slot");
         }
 
-        Pageable pageable = PageRequest.of(0, 10, sort);
+        final int PAGE_SIZE = 30;
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, sort);
 
         Page<EnrollmentSchedule> schedulePage = enrollmentScheduleService.findScheduleByEnrollmentWithFilters(
                 eid, attendance, slot, pageable
@@ -203,6 +209,7 @@ public class ManagerController {
         model.addAttribute("slotDirection", slotDirection);
         model.addAttribute("canBeFinalized", canBeFinalized);
         model.addAttribute("isFinalized", enrollment.getTransaction().getStatus() == Transaction.TransactionStatus.COMPLETED);
+        model.addAttribute("currentPage", page);
 
         return "manager/schedule-details";
     }
@@ -286,7 +293,7 @@ public class ManagerController {
         List<MentorAvailableTime> mentorAvailableTimes = mentorAvailableTimeService.findAllMentorAvailableTimeByEndDate(mentor, endLocal);
 
         model.addAttribute("editable", true);
-        if(!mentorAvailableTimes.isEmpty() && (mentorAvailableTimes.get(0).getStatus().name().equalsIgnoreCase("rejected")) || mentorAvailableTimes.get(0).getStatus().name().equalsIgnoreCase("approved")){
+        if (!mentorAvailableTimes.isEmpty() && (mentorAvailableTimes.get(0).getStatus().name().equalsIgnoreCase("rejected")) || mentorAvailableTimes.get(0).getStatus().name().equalsIgnoreCase("approved")) {
             model.addAttribute("editable", false);
         }
         boolean[][] slotDayMatrix = mentorAvailableTimeService.slotDayMatrix(setSlots);

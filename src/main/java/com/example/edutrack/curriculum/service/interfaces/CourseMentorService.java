@@ -55,4 +55,6 @@ public interface CourseMentorService {
     void updateCourseMentorDescription(UUID userId, UUID courseId, String description);
 
     long countCoursesByMentor(Mentor mentor);
+
+    void save(CourseMentor courseMentor);
 }

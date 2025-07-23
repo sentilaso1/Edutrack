@@ -50,7 +50,7 @@ class CvServiceTest_AIScheduling {
 
         spyService.scheduleAIVerification();
 
-        verify(spyService, never()).aiVerifyCV(any());
+        verify(spyService, never()).aiVerifyCV(any(), anyString());
         assertFalse(spyService.isBatchRunning());
         assertNotNull(spyService.getLastBatchEnd());
     }
@@ -64,11 +64,11 @@ class CvServiceTest_AIScheduling {
         when(cvRepository.findByStatus("pending")).thenReturn(pendingCVs);
         CvServiceImpl spyService = Mockito.spy(cvService);
 
-        doNothing().when(spyService).aiVerifyCV(any());
+        doNothing().when(spyService).aiVerifyCV(any(), anyString());
 
         spyService.scheduleAIVerification();
 
-        verify(spyService, times(2)).aiVerifyCV(any());
+        verify(spyService, times(2)).aiVerifyCV(any(), anyString());
         assertFalse(spyService.isBatchRunning());
         assertNotNull(spyService.getLastBatchEnd());
     }
@@ -80,7 +80,7 @@ class CvServiceTest_AIScheduling {
         when(cvRepository.findByStatus("pending")).thenReturn(List.of(cv));
         CvServiceImpl spyService = Mockito.spy(cvService);
 
-        doThrow(new RuntimeException("AI Error")).when(spyService).aiVerifyCV(any());
+        doThrow(new RuntimeException("AI Error")).when(spyService).aiVerifyCV(any(), anyString());
 
         // Act & Assert
         RuntimeException thrown = assertThrows(RuntimeException.class, spyService::scheduleAIVerification);
@@ -97,7 +97,7 @@ class CvServiceTest_AIScheduling {
 
         CvServiceImpl spyService = Mockito.spy(cvService);
         doAnswer(inv -> {
-            spyService.processAIResponse(cv, """
+            spyService.aiVerifyCV(cv, """
                 {
                   "choices": [{
                     "message": {
@@ -107,7 +107,7 @@ class CvServiceTest_AIScheduling {
                 }
             """);
             return null;
-        }).when(spyService).aiVerifyCV(any());
+        }).when(spyService).aiVerifyCV(any(), anyString());
 
         when(mentorRepository.findById(any())).thenThrow(new RuntimeException("Repo error"));
 

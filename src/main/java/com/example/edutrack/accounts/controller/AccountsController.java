@@ -109,10 +109,10 @@ public class AccountsController {
         @PostMapping("/profile/edit")
         public String editProfile(HttpSession session,
                         @RequestParam String fullName,
-                        @RequestParam String email,
                         @RequestParam String phone,
                         @RequestParam String bio,
                         @RequestParam String birthDate,
+                        @RequestParam String gender,
                         @RequestParam(required = false) String expertise,
                         @RequestParam(required = false) String interests,
                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes)
@@ -123,12 +123,6 @@ public class AccountsController {
                 if (fullName == null || fullName.trim().isEmpty()) {
                         redirectAttributes.addFlashAttribute("error", "Full name is required");
                         return "redirect:/profile" + "#edit";
-                }
-
-                // Validate email
-                if (!verifyEmail(email)) {
-                        redirectAttributes.addFlashAttribute("error", "Email is not valid");
-                        return "redirect:/profile"+ "#edit";
                 }
 
                 // Validate phone
@@ -160,7 +154,12 @@ public class AccountsController {
                 }
 
                 // Validate interests for mentees
-                Mentee mentee = menteeService.getMenteeById(id);
+                Mentee mentee = null;
+                try{
+                        mentee = menteeService.getMenteeById(id);
+                }catch (Exception e){
+                        mentee = null;
+                }
                 if (mentor == null && mentee != null) {
                         if (interests != null && (interests.trim().length() < 3 || interests.trim().length() > 100)) {
                                 redirectAttributes.addFlashAttribute("error",
@@ -177,9 +176,15 @@ public class AccountsController {
 
                 // Update user
                 user.setFullName(fullName.trim());
-                user.setEmail(email.trim());
                 user.setPhone(phone);
                 user.setBio(bio != null ? bio.trim() : null);
+                try {
+                        user.setBirthDate(new SimpleDateFormat("yyyy-MM-dd").parse(birthDate));
+                } catch (java.text.ParseException e) {
+                        redirectAttributes.addFlashAttribute("error", "Invalid birth date format.");
+                        return "redirect:/profile" + "#edit";
+                }
+                user.setGender(gender);
                 userRepository.save(user);
 
                 // Update mentor or mentee

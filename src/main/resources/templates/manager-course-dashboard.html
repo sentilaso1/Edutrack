@@ -146,7 +146,7 @@
                                                 Mentor Name
                                             </span>
                                     <div class="flex gap-2">
-                                        <a th:href="@{/admin/cv/detail/{id}(id=${mentor.id})}"
+                                        <a th:href="@{/manager/cv/detail/{id}(id=${mentor.id})}"
                                            class="btn-action btn-primary text-xs">
                                             👁️ Details
                                         </a>
@@ -183,8 +183,8 @@
                                class="btn-action btn-warning text-xs"
                                th:text="${course.open} ? '🔒 Close' : '🔓 Open'">Toggle</a>
 
-                            <a th:if="${(acceptedMentorMap[course.id] == null or #lists.isEmpty(acceptedMentorMap[course.id])) and pendingApplicantCount[course.id] > 0}"
-                               th:href="@{/admin/cv/list/1}"
+                            <a th:if="${pendingApplicantCount[course.id] > 0}"
+                               th:href="@{/manager/cv/list/1}"
                                class="btn-action btn-success text-xs">
                                 👥 View Applicants
                             </a>

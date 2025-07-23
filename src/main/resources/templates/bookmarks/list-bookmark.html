@@ -106,7 +106,7 @@
             max-width: fit-content;
         }
 
-        .btn.btn-secondary {
+        .apply-btn.btn-secondary {
             width: 100%;
             padding: 8px;
             font-size: 14px;
@@ -118,7 +118,7 @@
             cursor: pointer;
         }
 
-        .btn.btn-secondary:hover {
+        .apply-btn.btn-secondary:hover {
             background-color: #333;
         }
 
@@ -152,7 +152,8 @@
                         <div class="filter-price">
                             <h4 class="filter-subtitle">Sort by</h4>
                             <select name="sort" id="sort">
-                                <option value="date-desc" th:selected="${sort == null || sort.isEmpty() || sort == 'date-desc'}">Newest
+                                <option value="date-desc"
+                                        th:selected="${sort == null || sort.isEmpty() || sort == 'date-desc'}">Newest
                                 </option>
                                 <option value="date-asc" th:selected="${sort == 'date-asc'}">Oldest</option>
                             </select>
@@ -179,7 +180,7 @@
                             </ul>
                         </div>
 
-                        <button class="btn btn-secondary" type="submit">Apply</button>
+                        <button class="apply-btn btn-secondary" type="submit">Apply</button>
                     </form>
                 </aside>
 
@@ -197,14 +198,15 @@
                                         <button type="submit" class="delete-btn">Delete</button>
                                     </form>
                                 </div>
-                                <h3 th:text="${course.name}">Course Title</h3>
-                                <p th:text="${course.getOpen() ? 'Open' : 'Closed'}"></p>
-                                <p th:text="${course.description}">Course description</p>
+                                <a th:href="@{/courses/{id}/list(id=${bookmarkDTO.bookmark.course.id})}">
+                                    <h3 th:text="${course.name}">Course Title</h3>
+                                    <p th:text="${course.getOpen() ? 'Open' : 'Closed'}"></p>
+                                    <p th:text="${course.description}">Course description</p>
+                                </a>
                                 <div class="tag-list">
                                     <span th:each="tag : ${tags}" th:text="${tag.title}" class="tag-item"></span>
                                 </div>
                             </div>
-
                         </li>
                     </ul>
 

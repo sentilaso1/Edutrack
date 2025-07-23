@@ -267,6 +267,13 @@
             font-size: 1em;
         }
 
+        .no-tags-msg {
+            padding: 1rem;
+            color: #888;
+            font-style: italic;
+            text-align: center;
+        }
+
          .contact-button {
             position: fixed;
             bottom: 24px;
@@ -820,7 +827,17 @@
         function renderInterestTags() {
             const tagsDiv = document.getElementById('interest-tags');
             tagsDiv.innerHTML = '';
+
             if (!Array.isArray(allInterestTags)) return;
+
+            if (allInterestTags.length === 0) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'no-tags-msg';
+                msgDiv.textContent = 'No tags found.';
+                tagsDiv.appendChild(msgDiv);
+                return;
+            }
+
             allInterestTags.forEach(tag => {
                 const tagDiv = document.createElement('div');
                 tagDiv.className = 'tag' + (selectedInterestTagIds.has(tag.id) ? ' selected' : '');

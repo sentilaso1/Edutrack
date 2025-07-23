@@ -51,7 +51,7 @@ public class AdminController {
                         @RequestParam(required = false) Boolean isLocked,
                         @RequestParam(required = false) Boolean isActive,
                         @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(defaultValue = "5") int size) {
+                        @RequestParam(defaultValue = "10") int size) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<User> userPage = userService.searchUsers(email, fullName, isLocked, isActive, pageable);
                 List<UserWithRoleDTO> userDtos = new ArrayList<>();
@@ -155,7 +155,8 @@ public class AdminController {
                 try {
                         User user = userService.getUserById(id);
                         if (user == null) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Can not find user with ID: " + id);
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Can not find user with ID: " + id);
                                 return "redirect:/admin/users";
                         }
                         user.setIsActive(!user.getIsActive()); // Toggle active state
@@ -216,11 +217,17 @@ public class AdminController {
                 return "redirect:/admin/users";
         }
 
+        @GetMapping("/users/export-log")
+        public void exportUser(HttpServletResponse response) throws IOException {
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=\"users.csv\"");
+                userService.exportToCsv(response.getWriter());
+        }
+
         @GetMapping("/dashboard")
         public String showDashboard(Model model) {
                 model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
                 model.addAttribute("userStats", userService.getUserStatistics());
-                model.addAttribute("loginStats", userService.getLoginStats());
                 model.addAttribute("jobStats", scheduledJobService.getJobSummary());
                 return "accounts/html/index.html";
         }
@@ -296,29 +303,120 @@ public class AdminController {
                         Model model) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<ScheduledJobDTO> jobPage = scheduledJobService.getJobs(search, pageable);
-
+                int startPage = Math.max(0, page - 2);
+                int endPage = Math.min(jobPage.getTotalPages() - 1, page + 2);
                 model.addAttribute("jobs", jobPage.getContent());
                 model.addAttribute("currentPage", page);
                 model.addAttribute("totalPages", jobPage.getTotalPages());
                 model.addAttribute("search", search);
+                model.addAttribute("startPage", startPage);
+                model.addAttribute("endPage", endPage);
+                model.addAttribute("pageSize", size);
                 return "accounts/html/scheduled-jobs";
         }
 
         @PostMapping("/jobs/{id}/toggle")
-        public String toggleJob(@PathVariable Long id, @RequestParam boolean active) {
-                scheduledJobService.toggleJob(id, active);
+        public String toggleJob(@PathVariable Long id, @RequestParam boolean active, RedirectAttributes redirectAttributes) {
+                try {
+                        scheduledJobService.toggleJob(id, active);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job status updated successfully.");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                }
                 return "redirect:/admin/jobs";
         }
 
         @PostMapping("/jobs/{id}/run")
-        public String runJobNow(@PathVariable Long id) {
-                scheduledJobService.runJobNow(id);
+        public String runJobNow(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+                try {
+                        scheduledJobService.runJobNow(id);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job is running now.");
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Job is not active");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Error running job");
+                }
                 return "redirect:/admin/jobs";
         }
 
         @PostMapping("/jobs/{id}/update")
-        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto) {
+        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto,
+                        RedirectAttributes redirectAttributes) {
                 scheduledJobService.updateJob(id, dto);
+                redirectAttributes.addFlashAttribute("successMessage", "Job updated successfully");
+                return "redirect:/admin/jobs";
+        }
+        
+        @PostMapping("/jobs/add")
+        public String addJob(@ModelAttribute ScheduledJobDTO dto, RedirectAttributes redirectAttributes) {
+                try {
+                        // Validate required fields
+                        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job name is required");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        if (dto.getCronExpression() == null || dto.getCronExpression().trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Time is required");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        // Create new job
+                        scheduledJobService.createJob(dto);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job created successfully");
+
+                } catch (IllegalArgumentException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Invalid job data: " + e.getMessage());
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("already exists")) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Job with this name already exists");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Error creating job: " + e.getMessage());
+                        }
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "System error when creating job");
+                }
+
+                return "redirect:/admin/jobs";
+        }
+
+        @PostMapping("/jobs/{id}/delete")
+        public String deleteJob(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+                try {
+                        // Check if job exists
+                        ScheduledJobDTO job = scheduledJobService.getJob(id);
+                        if (job == null) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job not found");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        if (scheduledJobService.isJobRunning(id)) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Cannot delete job while it's active. Please wait for it to complete.");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        // Delete the job
+                        scheduledJobService.deleteJob(id);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job deleted successfully");
+
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete job: " + e.getMessage());
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("not found")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job not found");
+                        } else if (e.getMessage().contains("running")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete running job");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Error deleting job: " + e.getMessage());
+                        }
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "System error when deleting job");
+                }
+
                 return "redirect:/admin/jobs";
         }
 }

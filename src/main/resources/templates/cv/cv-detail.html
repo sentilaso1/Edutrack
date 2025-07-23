@@ -19,6 +19,7 @@
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            overflow-x: hidden; /* Prevent container overflow */
         }
         .back-link {
             display: inline-block;
@@ -43,11 +44,14 @@
             display: grid;
             grid-template-columns: 1fr 400px;
             gap: 34px;
+            overflow: hidden; /* Prevent grid overflow */
         }
         .cv-section {
             display: flex;
             flex-direction: column;
             gap: 20px;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent section overflow */
         }
         .cv-card {
             background: #fff;
@@ -56,17 +60,21 @@
             padding: 26px 24px 18px 24px;
             margin-bottom: 0;
             border: 1px solid var(--border-light);
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent card overflow */
         }
         .profile-section {
             display: flex;
             gap: 28px;
             align-items: flex-start;
+            min-width: 0; /* Allow flex items to shrink */
         }
         .avatar-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             min-width: 96px;
+            flex-shrink: 0; /* Prevent avatar from shrinking */
         }
         .avatar {
             width: 80px;
@@ -99,17 +107,23 @@
         }
         .profile-info {
             flex: 1;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent profile info overflow */
         }
         .status-section {
             text-align: right;
             min-width: 120px;
+            max-width: 120px; /* Prevent expansion */
             display: flex;
             flex-direction: column;
             gap: 8px;
+            flex-shrink: 0; /* Prevent status section from shrinking */
         }
         .created-date {
             font-size: 13px;
             color: var(--text-muted);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         .status-badge {
             border-radius: 14px;
@@ -118,6 +132,8 @@
             font-weight: 600;
             display: inline-block;
             text-align: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         .bg-approved {
             background: var(--color-success);
@@ -133,6 +149,8 @@
         }
         .info-item {
             margin-bottom: 9px;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent info item overflow */
         }
         .info-label {
             font-weight: 600;
@@ -143,6 +161,12 @@
             color: var(--text-primary);
             font-size: 16px;
             margin-top: 2px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
+            max-width: 100%;
+            overflow: hidden;
         }
         .section-card {
             background: #fff;
@@ -151,6 +175,8 @@
             box-shadow: 0 1.5px 8px rgba(255, 124, 150, 0.07);
             margin-bottom: 0;
             border: 1px solid var(--border-light);
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent section card overflow */
         }
         .section-title {
             font-size: 16px;
@@ -163,6 +189,20 @@
         .section-content {
             max-height: 130px;
             overflow-y: auto;
+            overflow-x: hidden; /* Prevent horizontal scroll in sections */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
+        }
+        .section-content pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            font-family: inherit;
+            margin: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll in pre tags */
         }
         .tag-item {
             background-color: rgba(255, 128, 134, 0.1);
@@ -175,6 +215,10 @@
             display: inline-block;
             margin-right: 5px;
             margin-bottom: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            max-width: 100%;
         }
         .list-item {
             color: var(--text-secondary);
@@ -182,6 +226,9 @@
             margin-bottom: 8px;
             padding-left: 16px;
             position: relative;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
         }
         .list-item:before {
             content: '•';
@@ -195,6 +242,8 @@
             border-radius: 7px;
             padding: 13px 18px;
             margin: 12px 0 10px 0;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent portfolio section overflow */
         }
         .portfolio-label {
             font-size: 15px;
@@ -206,7 +255,11 @@
             color: var(--color-primary);
             text-decoration: none;
             font-size: 14px;
-            word-break: break-all;
+            word-break: break-all; /* Force breaking of URLs */
+            overflow-wrap: break-word;
+            display: block;
+            max-width: 100%;
+            overflow: hidden; /* Hide any overflow */
         }
         .portfolio-url:hover {
             text-decoration: underline;
@@ -216,6 +269,7 @@
             gap: 16px;
             justify-content: flex-end;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
         .btn {
             padding: 10px 32px;
@@ -226,6 +280,7 @@
             text-decoration: none;
             border: none;
             transition: all 0.25s;
+            white-space: nowrap;
         }
         .btn-primary {
             background: var(--color-primary);
@@ -249,6 +304,9 @@
             box-shadow: 0 2px 8px rgba(255, 124, 150, 0.09);
             border: 1px solid var(--border-light);
             height: fit-content;
+            max-width: 400px; /* Fixed width for right column */
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent courses section overflow */
         }
         .section-header {
             font-size: 19px;
@@ -265,17 +323,49 @@
             box-shadow: 0 1px 4px rgba(255,124,150,0.04);
             padding: 15px 14px 13px 14px;
             margin-bottom: 15px;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent course card overflow */
         }
         .course-title {
             font-size: 18px;
             font-weight: 600;
             color: var(--text-primary);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
         }
         .course-description {
             font-size: 16px;
             color: var(--text-secondary);
             margin-bottom: 8px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
         }
+
+        /* Alert styles for consistent text handling */
+        .alert-error, .alert-warning {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
+        }
+
+        /* Additional overflow prevention */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Ensure all text content respects container boundaries */
+        .cv-section *,
+        .courses-section * {
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
         @media (max-width: 1000px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -284,6 +374,7 @@
             .courses-section {
                 margin-top: 34px;
                 padding: 21px 8px;
+                max-width: none; /* Remove fixed width on mobile */
             }
         }
         @media (max-width: 600px) {
@@ -303,6 +394,7 @@
             .status-section {
                 text-align: center;
                 margin-top: 10px;
+                max-width: none; /* Remove fixed width on mobile */
             }
             .action-buttons {
                 flex-direction: column;
@@ -354,7 +446,7 @@
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Birth Date</div>
-                                <div class="info-value" th:text="${cv.user.birthDate}"></div>
+                                <div class="info-value" th:text="${#dates.format(cv.user.birthDate, 'dd/MM/yyyy')}"></div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Bio</div>
@@ -382,41 +474,41 @@
                     <div class="section-title">Summary</div>
                     <div class="section-content">
                         <div class="info-value"
-                             th:utext="${#strings.replace(cv.summary, '\n', '<br/>')}"></div>
+                             th:utext="${cv.summary}"></div>
                     </div>
                 </div>
                 <div class="section-card">
                     <div class="section-title">Professional Experience</div>
                     <div class="section-content">
                         <div class="info-value"
-                             th:utext="${#strings.replace(cv.experience, '|', '<br><br>')}"></div>
+                             th:utext="${cv.experience}"></div>
                     </div>
                 </div>
                 <div class="section-card">
                     <div class="section-title">Skills</div>
                     <div class="section-content">
-                        <span th:each="skill : ${cv.skillItems}" th:text="${skill}" class="tag-item"></span>
+                        <pre th:utext="${cv.skills}"></pre>
                     </div>
                 </div>
                 <div class="section-card">
                     <div class="section-title">Education</div>
                     <div class="section-content">
                         <div class="info-value"
-                             th:utext="${#strings.replace(cv.education, '\n', '<br/>')}"></div>
+                             th:utext="${cv.education}"></div>
                     </div>
                 </div>
                 <div class="section-card">
                     <div class="section-title">Certifications</div>
                     <div class="section-content">
                         <div class="info-value"
-                             th:utext="${#strings.replace(cv.certifications, '\n', '<br/>')}"></div>
+                             th:utext="${cv.certifications}"></div>
                     </div>
                 </div>
                 <div class="section-card">
                     <div class="section-title">Languages</div>
                     <div class="section-content">
                         <div class="info-value"
-                             th:utext="${#strings.replace(cv.languages, '\n', '<br/>')}"></div>
+                             th:utext="${cv.languages}"></div>
                     </div>
                 </div>
                 <div class="portfolio-section">

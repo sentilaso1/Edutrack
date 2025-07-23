@@ -12,12 +12,14 @@ import com.example.edutrack.accounts.dto.JobStats;
 import org.springframework.beans.BeanUtils;
 
 @Service
-public class ScheduledJobServiceImpl implements ScheduledJobService{
-        @Autowired private ScheduledJobRepository jobRepo;
+public class ScheduledJobServiceImpl implements ScheduledJobService {
+        @Autowired
+        private ScheduledJobRepository jobRepo;
 
         @Override
         public Page<ScheduledJobDTO> getJobs(String search, Pageable pageable) {
-                Page<ScheduledJob> page = jobRepo.findByNameContainingIgnoreCase(search == null ? "" : search, pageable);
+                Page<ScheduledJob> page = jobRepo.findByNameContainingIgnoreCase(search == null ? "" : search,
+                                pageable);
                 return page.map(this::mapToDTO);
         }
 
@@ -43,6 +45,9 @@ public class ScheduledJobServiceImpl implements ScheduledJobService{
         @Override
         public void runJobNow(Long id) {
                 ScheduledJob job = jobRepo.findById(id).orElseThrow();
+                if (!job.isActive()) {
+                        throw new IllegalStateException("Job is not active");
+                }
                 job.setLastRunTime(java.time.LocalDateTime.now());
                 jobRepo.save(job);
         }
@@ -52,8 +57,29 @@ public class ScheduledJobServiceImpl implements ScheduledJobService{
                 BeanUtils.copyProperties(job, dto);
                 return dto;
         }
-        
+
         public JobStats getJobSummary() {
-                return new JobStats(20, 18, 2);
+                JobStats stats = new JobStats();
+                stats.setTotal((int) jobRepo.count());
+                stats.setActiveCount(jobRepo.countByActive(true));
+                stats.setInactiveCount(jobRepo.countByActive(false));
+                return stats;
+        }
+
+        @Override
+        public void createJob(ScheduledJobDTO dto) {
+                ScheduledJob job = new ScheduledJob();
+                BeanUtils.copyProperties(dto, job);
+                jobRepo.save(job);
+        }
+
+        public boolean isJobRunning(Long id) {
+                ScheduledJob job = jobRepo.findById(id).orElseThrow();
+                return job.isActive();
+        }
+
+        @Override
+        public void deleteJob(Long id) {
+                jobRepo.deleteById(id);
         }
 }

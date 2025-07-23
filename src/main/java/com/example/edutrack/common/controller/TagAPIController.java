@@ -43,7 +43,6 @@ public class TagAPIController {
         }
 
         if (request.isSkipped()) {
-            // Mark as skipped by setting interests to an empty string
             mentee.setInterests(" ");
         } else {
             List<Integer> tagIds = request.getTags();
@@ -51,7 +50,6 @@ public class TagAPIController {
                 return ResponseEntity.badRequest().body("No tags selected.");
             }
 
-            // Validate tag IDs exist
             List<Tag> tags = tagRepository.findAllById(tagIds);
             if (tags.size() != tagIds.size()) {
                 return ResponseEntity.badRequest().body("One or more tags not found.");
@@ -61,7 +59,6 @@ public class TagAPIController {
                     .map(Tag::getTitle)
                     .toList();
 
-            // Save as comma-separated IDs
             String interestStr = tagsTitle.stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(","));

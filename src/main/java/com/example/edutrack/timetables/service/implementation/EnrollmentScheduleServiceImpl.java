@@ -408,7 +408,12 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
     @Override
     public List<EnrollmentSchedule> getSlotsUnderReviewByCourse(UUID menteeId, UUID courseMentorId, LocalDate startDate, LocalDate endDate) {
-        return enrollmentScheduleRepository.findReviewingSlotsByCourse(menteeId, courseMentorId, startDate, endDate);
+        return enrollmentScheduleRepository.findReviewingSlotsByCourse(menteeId, courseMentorId,startDate, endDate);
+    }
+
+    @Override
+    public List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate) {
+        return enrollmentScheduleRepository.findAllPendingRequestsInDateRange(startDate, endDate);
     }
 
     @Override
@@ -617,5 +622,10 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     public List<EnrollmentSchedule> findSlotToday(Mentor mentor) {
         LocalDate today = LocalDate.now();
         return enrollmentScheduleRepository.findByEnrollment_CourseMentor_MentorAndDateOrderBySlotAsc(mentor, today);
+    }
+
+    @Override
+    public Optional<EnrollmentSchedule> findFirstScheduleForEnrollment(Enrollment enrollment) {
+        return enrollmentScheduleRepository.findFirstByEnrollmentOrderByDateAsc(enrollment);
     }
 }
