@@ -540,21 +540,37 @@ public class MenteeController {
             Slot slot = Slot.valueOf(newSlot);
             LocalDate date = LocalDate.parse(newDate);
             LocalDate today = LocalDate.now();
+            LocalDate tomorrow = today.plusDays(1);
 
-            if (date.isBefore(today)) {
+            if (!date.isAfter(today)) { // Không cho reschedule về hôm nay hoặc trước đó
                 redirectAttributes.addFlashAttribute("errorMessage",
-                        "Cannot reschedule to a past date. Please select a future date.");
+                        "Cannot reschedule to today or past dates. Please select a future date (from tomorrow onwards).");
                 return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
             }
 
             UUID mentorId = currentSchedule.getMentorId();
+
+            List<MentorAvailableTimeDetails> availableSlots = mentorAvailableTimeService
+                    .getAvailableSlotsForMentor(mentorId, date, date);
+
+            boolean isSlotAvailableInMentorSchedule = availableSlots.stream()
+                    .anyMatch(availableSlot -> availableSlot.getDate().equals(date) &&
+                            availableSlot.getSlot().equals(slot) &&
+                            availableSlot.getMentee() == null);
+
+            if (!isSlotAvailableInMentorSchedule) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "The selected time slot is not available in mentor's schedule. Please choose another slot.");
+                return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+            }
+
             Optional<LocalDate> earliestStartDateOpt = mentorAvailableTimeService.findEarliestStartDateByMentorId(mentorId);
-            LocalDate mentorStartDate = earliestStartDateOpt.orElse(today);
+            LocalDate mentorStartDate = earliestStartDateOpt.orElse(tomorrow);
 
             Optional<EnrollmentSchedule> firstScheduleOpt = enrollmentScheduleService.findFirstScheduleForEnrollment(schedule.getEnrollment());
-            LocalDate enrollmentStartDate = firstScheduleOpt.map(EnrollmentSchedule::getDate).orElse(today);
+            LocalDate enrollmentStartDate = firstScheduleOpt.map(EnrollmentSchedule::getDate).orElse(tomorrow);
             Slot enrollmentStartSlot = firstScheduleOpt.map(EnrollmentSchedule::getSlot).orElse(null);
-            LocalDate lockDate = today.isAfter(enrollmentStartDate) ? today : enrollmentStartDate;
+            LocalDate lockDate = tomorrow.isAfter(enrollmentStartDate) ? tomorrow : enrollmentStartDate;
 
             if (date.isBefore(lockDate)) {
                 redirectAttributes.addFlashAttribute("errorMessage",
@@ -568,19 +584,6 @@ public class MenteeController {
                             "Cannot reschedule to this time slot. Please select a later time slot.");
                     return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
                 }
-            }
-
-            List<MentorAvailableTimeDetails> mentorOccupiedSlots = mentorAvailableTimeService
-                    .findByMentorIdAndStatusAndDateRange(mentorId, date, date);
-
-            boolean mentorOccupied = mentorOccupiedSlots.stream()
-                    .anyMatch(mentorSlot -> mentorSlot.getDate().equals(date) &&
-                            mentorSlot.getSlot().equals(slot));
-
-            if (mentorOccupied) {
-                redirectAttributes.addFlashAttribute("errorMessage",
-                        "Mentor is not available at the selected time. Please choose another slot.");
-                return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
             }
 
             List<EnrollmentSchedule> pendingRequests = enrollmentScheduleService.getAllPendingSlotsInDateRange(date, date);
@@ -669,6 +672,7 @@ public class MenteeController {
 
         LocalDate mondayOfWeek = LocalDate.now().plusWeeks(weekOffset).with(DayOfWeek.MONDAY);
         LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
         List<LocalDate> daysInWeek = IntStream.range(0, 7)
                 .mapToObj(mondayOfWeek::plusDays)
                 .toList();
@@ -676,15 +680,34 @@ public class MenteeController {
         Map<LocalDate, Set<Slot>> occupiedMap = new HashMap<>();
         Set<String> occupiedSlotKeys = new HashSet<>();
 
-        Set<String> myReviewingKeys = new HashSet<>();
-        Set<String> otherMenteesReviewingKeys = new HashSet<>();
+        UUID mentorId = currentSchedule.getMentorId();
+        List<MentorAvailableTimeDetails> mentorAvailableSlots = mentorAvailableTimeService
+                .getAvailableSlotsForMentor(mentorId, mondayOfWeek, mondayOfWeek.plusDays(6));
+
+        Set<String> availableSlotKeys = new HashSet<>();
+        for (MentorAvailableTimeDetails availableSlot : mentorAvailableSlots) {
+            String slotKey = availableSlot.getSlot().name() + "_" + availableSlot.getDate().toString();
+            availableSlotKeys.add(slotKey);
+        }
+
+        for (LocalDate day : daysInWeek) {
+            if (day.isAfter(today)) {
+                for (Slot slot : Slot.values()) {
+                    String slotKey = slot.name() + "_" + day.toString();
+                    if (!availableSlotKeys.contains(slotKey)) {
+                        occupiedSlotKeys.add(slotKey);
+                        occupiedMap.computeIfAbsent(day, k -> new HashSet<>()).add(slot);
+                    }
+                }
+            }
+        }
 
         List<ScheduleDTO> occupiedSlots = enrollmentScheduleService.getOccupiedSlotsForWeek(
                 menteeId, mondayOfWeek, mondayOfWeek.plusDays(6)
         );
 
         for (ScheduleDTO dto : occupiedSlots) {
-            if (!dto.getDate().isBefore(today)) {
+            if (!dto.getDate().isBefore(tomorrow)) { // Chỉ xét từ ngày mai trở đi
                 occupiedMap.computeIfAbsent(dto.getDate(), k -> new HashSet<>())
                         .add(Slot.valueOf(dto.getSlot()));
                 String slotKey = dto.getSlot() + "_" + dto.getDate().toString();
@@ -692,13 +715,12 @@ public class MenteeController {
             }
         }
 
-        UUID mentorId = currentSchedule.getMentorId();
         Optional<LocalDate> earliestStartDateOpt = mentorAvailableTimeService.findEarliestStartDateByMentorId(mentorId);
         LocalDate mentorStartDate = earliestStartDateOpt.orElse(today);
         Optional<EnrollmentSchedule> firstScheduleOpt = enrollmentScheduleService.findFirstScheduleForEnrollment(enrollmentSchedule.getEnrollment());
-        LocalDate enrollmentStartDate = firstScheduleOpt.map(EnrollmentSchedule::getDate).orElse(today);
+        LocalDate enrollmentStartDate = firstScheduleOpt.map(EnrollmentSchedule::getDate).orElse(tomorrow);
         Slot enrollmentStartSlot = firstScheduleOpt.map(EnrollmentSchedule::getSlot).orElse(null);
-        LocalDate lockDate = today.isAfter(enrollmentStartDate) ? today : enrollmentStartDate;
+        LocalDate lockDate = tomorrow.isAfter(enrollmentStartDate) ? tomorrow : enrollmentStartDate;
 
         for (LocalDate day : daysInWeek) {
             if (day.isBefore(lockDate)) {
@@ -719,6 +741,8 @@ public class MenteeController {
             }
         }
 
+        Set<String> myReviewingKeys = new HashSet<>();
+        Set<String> otherMenteesReviewingKeys = new HashSet<>();
         List<EnrollmentSchedule> allSystemReviewingSlots = enrollmentScheduleService.getAllPendingSlotsInDateRange(
                 mondayOfWeek, mondayOfWeek.plusDays(6)
         );
@@ -736,22 +760,6 @@ public class MenteeController {
                 occupiedSlotKeys.add(slotKey);
                 occupiedMap.computeIfAbsent(reviewing.getRequestedNewDate(), k -> new HashSet<>())
                         .add(reviewing.getRequestedNewSlot());
-            }
-        }
-
-        List<MentorAvailableTimeDetails> mentorOccupiedSlots = mentorAvailableTimeService
-                .findByMentorIdAndStatusAndDateRange(mentorId, mondayOfWeek, mondayOfWeek.plusDays(6));
-
-        for (MentorAvailableTimeDetails mentorSlot : mentorOccupiedSlots) {
-            LocalDate slotDate = mentorSlot.getDate();
-            if (slotDate.isAfter(today.minusDays(1)) &&
-                    !slotDate.isBefore(mondayOfWeek) &&
-                    !slotDate.isAfter(mondayOfWeek.plusDays(6))) {
-
-                Slot slot = mentorSlot.getSlot();
-                String slotKey = slot.name() + "_" + slotDate.toString();
-                occupiedSlotKeys.add(slotKey);
-                occupiedMap.computeIfAbsent(slotDate, k -> new HashSet<>()).add(slot);
             }
         }
 
@@ -794,6 +802,7 @@ public class MenteeController {
 
         return "mentee/reshedule-page";
     }
+
     @GetMapping("/pending-enrollments")
     public String menteePending(HttpSession session, Model model){
         UUID menteeId = getSessionMentee(session);
