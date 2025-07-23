@@ -176,4 +176,9 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
         return mentorAvailableTimeRepository.findEarliestStartDateByMentorId(mentorId);
     }
 
+    @Override
+    public List<MentorAvailableTimeDetails> getAvailableSlotsForMentor(UUID mentorId, LocalDate startDate, LocalDate endDate) {
+        return mentorAvailableTimeDetailsRepository.findByMentorIdAndMenteeIsNullAndDateBetween(mentorId, startDate, endDate);
+    }
+
 }

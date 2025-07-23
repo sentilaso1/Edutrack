@@ -48,4 +48,6 @@ public interface MentorAvailableTimeService {
     List<MentorAvailableSlotDTO> findOnlyApprovedSlotsByEndDate(Mentor mentor, LocalDate endDate);
 
     Optional<LocalDate> findEarliestStartDateByMentorId(UUID mentorId);
+
+    List<MentorAvailableTimeDetails> getAvailableSlotsForMentor(UUID mentorId, LocalDate startDate, LocalDate endDate);
 }
