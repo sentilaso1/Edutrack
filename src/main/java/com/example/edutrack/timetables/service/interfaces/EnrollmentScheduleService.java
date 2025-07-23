@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -88,4 +89,6 @@ public interface EnrollmentScheduleService {
     List<EnrollmentSchedule> findTop5UpcomingExam(LocalDate now, Mentor mentor);
 
     List<EnrollmentSchedule> findSlotToday(Mentor mentor);
+
+    Optional<EnrollmentSchedule> findFirstScheduleForEnrollment(Enrollment enrollment);
 }
