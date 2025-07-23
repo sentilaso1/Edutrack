@@ -90,7 +90,7 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
     @Query("SELECT mat FROM MentorAvailableTimeDetails mat WHERE mat.mentor.id = :mentorId " +
             "AND mat.date <= :endDate " +
             "AND mat.date >= :startDate " +
-            "AND mat.mentee IS NULL")
+            "AND mat.mentee IS NOT NULL")
     List<MentorAvailableTimeDetails> findByMentorIdAndStatusAndDateRange(
             @Param("mentorId") UUID mentorId,
             @Param("startDate") LocalDate startDate,
