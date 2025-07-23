@@ -672,12 +672,16 @@
                         <div style="display: flex; gap: 0.5rem; width: 100%">
                             <span class="review-date" style="margin-left: 0.3rem">expert in</span>
                             <div class="expertise-pills">
-                                            <span th:each="exp, stat : ${courseMentor.mentor.expertiseItem}"
-                                                  th:if="${stat.index < 3}"
-                                                  class="pill"
-                                                  th:text="${exp}">
-                                                Expertise
-                                            </span>
+                                <span th:if="${#lists.isEmpty(courseMentor.mentor.expertiseItem)}"
+                                      class="pill pill-gray">
+                                    None
+                                </span>
+                                <span th:each="exp, stat : ${courseMentor.mentor.expertiseItem}"
+                                    th:if="${stat.index < 3}"
+                                    class="pill"
+                                    th:text="${exp}">
+                                    Expertise
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -716,7 +720,8 @@
                         </span>
                     </span>
                 </div>
-                <div class="review-card-content" th:text="${courseMentor.mentor.bio}">
+                <div class="review-card-content"
+                     th:text="${#strings.isEmpty(courseMentor.mentor.bio) ? 'No bio available' : courseMentor.mentor.bio}">
                     Bio
                 </div>
             </div>
