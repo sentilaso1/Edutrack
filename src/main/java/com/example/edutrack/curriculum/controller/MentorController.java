@@ -5,6 +5,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.common.service.implementations.EmailService;
+import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
@@ -223,7 +224,7 @@ public class MentorController {
         if (user == null) {
             return "redirect:/login";
         }
-        List<CourseMentor> courseMentors = courseMentorRepository.findByMentorId(user.getId());
+        List<CourseMentor> courseMentors = courseMentorRepository.findByMentorIdAndStatus(user.getId(), ApplicationStatus.ACCEPTED);
         model.addAttribute("courseMentors", courseMentors);
         return "mentor/skill-price-set";
     }
