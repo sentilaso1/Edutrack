@@ -331,6 +331,7 @@ public class CvServiceImpl implements CvService {
     @Override
     public boolean acceptCV(UUID id) {
         Optional<CV> optionalCv = cvRepository.findById(id);
+        logger.warn("Optional CV: {}", optionalCv);
         if (optionalCv.isPresent()) {
             CV cv = optionalCv.get();
             cv.setStatus("approved");
@@ -373,9 +374,7 @@ public class CvServiceImpl implements CvService {
     @Override
     public String aiProcessCV(CV cv) {
         String prompt = generateCombinedPromptForAI(cv);
-        String aiResponse = llmService.callModel(prompt);
-        processCombinedAIResponse(cv, aiResponse);
-        return aiResponse;
+        return llmService.callModel(prompt);
     }
 
     @Override
@@ -517,67 +516,6 @@ public class CvServiceImpl implements CvService {
         """.formatted(summary, experienceYears, skills, education, experience, certifications, languages);
     }
 
-    @Override
-    public void processCombinedAIResponse(CV cv, String aiJson) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            if (aiJson == null || aiJson.trim().isEmpty()) {
-                logger.warn("AI response is null or empty for combined processing");
-                return;
-            }
-
-            JsonNode root = mapper.readTree(aiJson);
-            JsonNode choices = root.path("choices");
-            if (!choices.isArray() || choices.isEmpty()) {
-                logger.error("Invalid or empty choices array for combined processing: {}", aiJson);
-                return;
-            }
-
-            JsonNode message = choices.get(0).path("message");
-            if (message.isMissingNode()) {
-                logger.error("Missing message field for combined processing: {}", aiJson);
-                return;
-            }
-
-            JsonNode contentNode = message.path("content");
-            if (contentNode.isMissingNode() || !contentNode.isTextual()) {
-                logger.error("Missing or invalid content field for combined processing: {}", aiJson);
-                return;
-            }
-
-            String contentJson = contentNode.asText();
-            if (contentJson.startsWith("```")) {
-                contentJson = contentJson.replaceAll("^```(json)?", "").replaceAll("```$", "").trim();
-            }
-
-            JsonNode responseData = mapper.readTree(contentJson);
-
-            // Process validation results
-            JsonNode validationNode = responseData.path("validation");
-            if (!validationNode.isMissingNode()) {
-                processVerificationResponse(cv, validationNode, contentJson);
-            } else {
-                logger.warn("Missing validation data in combined AI response");
-            }
-
-            // Process formatting results
-            JsonNode formattedNode = responseData.path("formatted");
-            if (!formattedNode.isMissingNode()) {
-                processFormattingResponse(cv, formattedNode, contentJson);
-            } else {
-                logger.warn("Missing formatted data in combined AI response");
-            }
-
-            logger.debug("Combined AI response result: {}", aiJson);
-
-        } catch (JsonProcessingException e) {
-            logger.error("JSON parsing error for combined AI response: {}", aiJson, e);
-        } catch (Exception e) {
-            logger.error("Unexpected error processing combined AI response: {}", aiJson, e);
-            throw new RuntimeException("Combined AI processing error", e);
-        }
-    }
-
     private void processVerificationFromResponse(CV cv, String aiJson) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -612,7 +550,6 @@ public class CvServiceImpl implements CvService {
 
             JsonNode responseData = mapper.readTree(contentJson);
 
-            // Process ONLY validation results using existing method
             JsonNode validationNode = responseData.path("validation");
             if (!validationNode.isMissingNode()) {
                 processVerificationResponse(cv, validationNode, contentJson);
@@ -686,7 +623,6 @@ public class CvServiceImpl implements CvService {
 
             JsonNode responseData = mapper.readTree(contentJson);
 
-            // Process ONLY formatting results using existing method
             JsonNode formattedNode = responseData.path("formatted");
             if (!formattedNode.isMissingNode()) {
                 processFormattingResponse(cv, formattedNode, contentJson);

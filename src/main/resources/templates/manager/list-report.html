@@ -1,304 +1,354 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>EduTrack - CV Approval List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack - Feedback Reports List</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" th:href="@{/css/master.css}"/>
     <link rel="stylesheet" th:href="@{/css/colors.css}"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background: linear-gradient(to right, #e6f7f9, #ffeef0);
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        h1 {
-            font-size: 32px;
-            color: #2C3E50;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 30px;
-        }
-
         .filter-section {
-            background-color: #fafafa;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
         }
 
-        .filter-section h4 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #2C3E50;
-        }
-
-        .filter-section form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        label {
+        .tag-item {
+            display: inline-block;
+            background-color: rgba(255, 128, 134, 0.1);
+            color: rgba(255, 100, 110, 1);
+            padding: 0.25rem 0.625rem;
+            border-radius: 1.25rem;
+            font-size: 0.75rem;
             font-weight: 600;
+            border: 1px solid rgba(255, 128, 134, 0.3);
+            margin-right: 0.3125rem;
+            margin-bottom: 0.3125rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: white;
+        }
+
+        .bg-reviewed {
+            background-color: #10b981;
+        }
+
+        .bg-hidden {
+            background-color: #6b7280;
+        }
+
+        .bg-aireviewed {
+            background-color: #06b6d4;
+        }
+
+        .bg-pending {
+            background-color: #f59e0b;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pagination-btn {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            background-color: #2563eb;
+        }
+
+        .pagination-btn.disabled {
+            display: none;
         }
 
         .filter-text {
             font-weight: normal;
+            margin-bottom: 0.5rem;
         }
 
-        select, input[type="checkbox"] {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+        .timer-section {
+            background-color: #f3f4f6;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
         }
-
-        .filter-section button {
-            background-color: rgba(255, 128, 134, 0.99);
-            color: white;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .filter-section button:hover {
-            background-color: rgba(255, 100, 110, 0.99);
-        }
-
-        .cv-table {
-            background-color: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background-color: #fff7f7;
-            color: #444;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-
-        .tag-item {
-            background-color: rgba(255, 128, 134, 0.1);
-            color: rgba(255, 100, 110, 1);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            border: 1px solid rgba(255, 128, 134, 0.3);
-            display: inline-block;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-
-        .bg-reviewed {
-            color: #fff;
-            background-color: rgba(56, 203, 137, 0.8);
-
-            padding: 4px 10px;
-            font-weight: bold;
-        }
-
-        .bg-hidden {
-            color: #fff;
-            background-color: #cccccc;
-            padding: 4px 10px;
-            font-weight: bold;
-        }
-
-        .bg-aireviewed {
-            color: #fff;
-            background-color: #b3e5fc;
-            padding: 4px 10px;
-            font-weight: bold;
-        }
-
-        .bg-pending {
-            color: #fff;
-            background-color: #ffe082;
-            padding: 4px 10px;
-            font-weight: bold;
-        }
-
-        .pagination {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .pagination button {
-            background-color: rgba(255, 128, 134, 0.99);
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .pagination button.disabled {
-            display: none;
-        }
-
     </style>
 </head>
-<body>
-<div class="container">
-    <h1>Feedback Reports List</h1>
-    <div class="grid-layout">
-        <div class="filter-section">
-            <h4>Filter Reports</h4>
-            <div id="report-batch-timer">
-                <span th:if="${reportBatchRunning}">AI moderation is in progress...</span>
-                <span th:unless="${reportBatchRunning}">
-                    Next AI moderation in <span id="report-timer"></span>
-                </span>
-            </div>
-            <form id="filter-form" th:action="@{/admin/reports/list/1}" method="get">
-                <label for="sort">Sorting Order:</label>
-                <select name="sort" id="sort">
-                    <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Date descending</option>
-                    <option value="date-asc" th:selected="${sort == 'date-asc'}">Date ascending</option>
-                </select>
-                <label>Status Filter:</label>
-                <label class="filter-text"><input type="radio" name="status" value="PENDING" th:checked="${status != null && status == 'PENDING'}"> Pending</label>
-                <label class="filter-text"><input type="radio" name="status" value="AIAPPROVED" th:checked="${status != null && status == 'AIAPPROVED'}"> AI Approved</label>
-                <label class="filter-text"><input type="radio" name="status" value="REVIEWED" th:checked="${status != null && status == 'REVIEWED'}"> Reviewed</label>
-                <label class="filter-text"><input type="radio" name="status" value="HIDDEN" th:checked="${status != null && status == 'HIDDEN'}"> Hidden</label>
-                <label class="filter-text"><input type="radio" name="status" value="" th:checked="${status == null or status == ''}"> All</label>
 
-                <label>Categories Filter:</label>
-                    <label class="filter-text"><input type="radio" name="category" value="SPAM" th:checked="${category != null and category == 'SPAM'}"> Spam</label>
-                    <label class="filter-text"><input type="radio" name="category" value="OFFENSIVE" th:checked="${category != null and category == 'OFFENSIVE'}"> Offensive</label>
-                    <label class="filter-text"><input type="radio" name="category" value="HARASSMENT" th:checked="${category != null and category == 'HARASSMENT'}"> Harassment</label>
-                    <label class="filter-text"><input type="radio" name="category" value="MISINFORMATION" th:checked="${category != null and category == 'MISINFORMATION'}"> Misinformation</label>
-                    <label class="filter-text"><input type="radio" name="category" value="OTHER" th:checked="${category != null and category == 'OTHER'}"> Other</label>
-                    <label class="filter-text"><input type="radio" name="category" value="" th:checked="${category != null and category == ''}"> All</label>
-            </form>
+<body class="bg-gray-100">
+<th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
+
+<div class="ml-64 flex-1 p-6">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">
+        <i class="fas fa-exclamation-triangle mr-2"></i>Feedback Reports List
+    </h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <!-- Filter Section -->
+        <div class="lg:col-span-1">
+            <div class="filter-section animate-fade-in">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-filter mr-2"></i>Filter Reports
+                </h4>
+
+                <!-- Timer Section -->
+                <div class="timer-section">
+                    <div id="report-batch-timer">
+                            <span th:if="${reportBatchRunning}" class="text-blue-600 font-medium">
+                                <i class="fas fa-spinner fa-spin mr-1"></i>AI moderation is in progress...
+                            </span>
+                        <span th:unless="${reportBatchRunning}" class="text-gray-600">
+                                <i class="fas fa-clock mr-1"></i>Next AI moderation in <span id="report-timer" class="font-medium"></span>
+                            </span>
+                    </div>
+                </div>
+
+                <form id="filter-form" th:action="@{/manager/reports/list/1}" method="get" class="space-y-4">
+                    <div>
+                        <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">Sorting Order:</label>
+                        <select name="sort" id="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Date descending</option>
+                            <option value="date-asc" th:selected="${sort == 'date-asc'}">Date ascending</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status Filter:</label>
+                        <div class="space-y-2">
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="status" value="PENDING" th:checked="${status != null && status == 'PENDING'}" class="mr-2">
+                                Pending
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="status" value="AIAPPROVED" th:checked="${status != null && status == 'AIAPPROVED'}" class="mr-2">
+                                AI Approved
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="status" value="REVIEWED" th:checked="${status != null && status == 'REVIEWED'}" class="mr-2">
+                                Reviewed
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="status" value="HIDDEN" th:checked="${status != null && status == 'HIDDEN'}" class="mr-2">
+                                Hidden
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="status" value="" th:checked="${status == null or status == ''}" class="mr-2">
+                                All
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Categories Filter:</label>
+                        <div class="space-y-2">
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="category" value="SPAM" th:checked="${category != null and category == 'SPAM'}" class="mr-2">
+                                Spam
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="category" value="OFFENSIVE" th:checked="${category != null and category == 'OFFENSIVE'}" class="mr-2">
+                                Offensive
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="category" value="HARASSMENT" th:checked="${category != null and category == 'HARASSMENT'}" class="mr-2">
+                                Harassment
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="category" value="MISINFORMATION" th:checked="${category != null and category == 'MISINFORMATION'}" class="mr-2">
+                                Misinformation
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="category" value="OTHER" th:checked="${category != null and category == 'OTHER'}" class="mr-2">
+                                Other
+                            </label>
+                            <label class="filter-text flex items-center">
+                                <input type="radio" name="category" value="" th:checked="${category != null and category == ''}" class="mr-2">
+                                All
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="cv-table">
-            <table>
-                <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Category</th>
-                    <th>Created Date</th>
-                    <th>Reporter</th>
-                    <th>Reason</th>
-                    <th>Feedback Content</th>
-                    <th style="width: 15%;">Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="r : ${page.content}">
-                    <td th:text="${r.status.name()}" th:classappend="|
-                    ${r.status.name() == 'PENDING'     ? 'bg-pending'
-                    : r.status.name() == 'REVIEWED'    ? 'bg-reviewed'
-                    : r.status.name() == 'AIREVIEWED'  ? 'bg-aireviewed'
-                    : r.status.name() == 'HIDDEN'      ? 'bg-hidden'
-                    : ''}|
-                "></td>
-                    <td th:text="${r.category.name()}"></td>
-                    <td th:text="${#temporals.format(r.createdDate, 'yyyy-MM-dd')}"></td>
-                    <td th:text="${r.reporter.fullName}"></td>
-                    <td th:text="${r.reason}" style="max-width: 250px; word-break: break-word;"></td>
-                    <td style="max-width: 600px; word-break: break-word;">
-                        <span style="font-weight: bold;" th:text="'Current feedback status: ' + ${r.feedback.status.name()}"></span>
-                        <br>
-                        <span th:text="(${r.feedback.isAnonymous} ? 'Anonymous Mentee' : ${r.feedback.mentee.fullName}) + ' says:'"></span>
-                        <br>
-                        <span th:text="${#strings.abbreviate(r.feedback.content, 500)}"></span>
-                    </td>
-                    <td>
-                        <div th:if="${r.status.name() == 'PENDING' || r.status.name() == 'AIREVIEWED'}">
-                            <a th:href="@{|/admin/reports/review-action/${r.id}?action=hide|}">Hide Feedback</a>
-                            <br>
-                            <a th:href="@{|/admin/reports/review-action/${r.id}?action=active|}">Keep Active</a>
-                        </div>
-                        <div th:unless="${r.status.name() == 'PENDING' || r.status.name() == 'AIREVIEWED'}">
-                            <span style="color: green;">Reviewed</span>
-                        </div>
-                        <br/>
-                        <a th:href="@{|/admin/reports/delete/${r.id}|}"
-                           th:onclick="'return confirm(\'Are you sure you want to delete this report?\');'">
-                            Delete
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="pagination">
-                <button id="first-page" th:classappend="${(pageNumber > 1) ? '' : 'disabled'}">First</button>
-                <button id="previous-page" th:classappend="${(page.hasPrevious()) ? '' : 'disabled'}">Previous</button>
-                <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
-                <button id="next-page" th:classappend="${(page.hasNext()) ? '' : 'disabled'}">Next</button>
-                <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? '' : 'disabled'}">Last</button>
+
+        <!-- Reports Table -->
+        <div class="lg:col-span-4">
+            <div class="bg-white rounded-lg border border-gray-300 animate-fade-in">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-list mr-2"></i>Reports Overview
+                    </h5>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Status</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Category</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Created Date</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Reporter</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/12">Reason</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-4/12">Feedback Content</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="r : ${page.content}" class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                        <span th:text="${r.status.name()}"
+                                              th:classappend="|status-badge ${r.status.name() == 'PENDING' ? 'bg-pending'
+                                              : r.status.name() == 'REVIEWED' ? 'bg-reviewed'
+                                              : r.status.name() == 'AIREVIEWED' ? 'bg-aireviewed'
+                                              : r.status.name() == 'HIDDEN' ? 'bg-hidden' : ''}|">
+                                        </span>
+                            </td>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${r.category.name()}"></td>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${#temporals.format(r.createdDate, 'yyyy-MM-dd')}"></td>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${r.reporter.fullName}"></td>
+                            <td class="px-3 py-4 text-sm text-gray-900 w-2/12 break-words" th:text="${r.reason}"></td>
+                            <td class="px-3 py-4 text-sm text-gray-900 w-4/12 break-words">
+                                <div class="mb-2">
+                                    <span class="font-semibold" th:text="'Current feedback status: ' + ${r.feedback.status.name()}"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <span th:text="(${r.feedback.isAnonymous} ? 'Anonymous Mentee' : ${r.feedback.mentee.fullName}) + ' says:'"></span>
+                                </div>
+                                <div>
+                                    <span th:text="${#strings.abbreviate(r.feedback.content, 200)}"></span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div th:if="${r.status.name() == 'PENDING' || r.status.name() == 'AIREVIEWED'}" class="space-y-2">
+                                    <a th:href="@{|/manager/reports/review-action/${r.id}?action=hide|}"
+                                       class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition">
+                                        <i class="fas fa-eye-slash mr-1"></i>Hide Feedback
+                                    </a>
+                                    <br>
+                                    <a th:href="@{|/manager/reports/review-action/${r.id}?action=active|}"
+                                       class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition">
+                                        <i class="fas fa-check mr-1"></i>Keep Active
+                                    </a>
+                                </div>
+                                <div th:unless="${r.status.name() == 'PENDING' || r.status.name() == 'AIREVIEWED'}">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-check-circle mr-1"></i>Reviewed
+                                            </span>
+                                </div>
+                                <div class="mt-2">
+                                    <a th:href="@{|/manager/reports/delete/${r.id}|}"
+                                       th:onclick="'return confirm(\'Are you sure you want to delete this report?\');'"
+                                       class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition">
+                                        <i class="fas fa-trash mr-1"></i>Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${page.content.isEmpty()}" class="text-center">
+                            <td colspan="7" class="px-6 py-8 text-gray-500 text-sm italic">
+                                <i class="fas fa-inbox fa-lg mr-2 text-gray-400"></i>
+                                No feedback reports found.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    <div class="flex items-center justify-center space-x-2">
+                        <button id="first-page"
+                                th:classappend="${(pageNumber > 1) ? 'pagination-btn' : 'pagination-btn disabled'}"
+                                class="pagination-btn">
+                            <i class="fas fa-angle-double-left mr-1"></i>First
+                        </button>
+                        <button id="previous-page"
+                                th:classappend="${(page.hasPrevious()) ? 'pagination-btn' : 'pagination-btn disabled'}"
+                                class="pagination-btn">
+                            <i class="fas fa-angle-left mr-1"></i>Previous
+                        </button>
+                        <span class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md"
+                              th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+                        <button id="next-page"
+                                th:classappend="${(page.hasNext()) ? 'pagination-btn' : 'pagination-btn disabled'}"
+                                class="pagination-btn">
+                            Next<i class="fas fa-angle-right ml-1"></i>
+                        </button>
+                        <button id="last-page"
+                                th:classappend="${(pageNumber < page.totalPages) ? 'pagination-btn' : 'pagination-btn disabled'}"
+                                class="pagination-btn">
+                            Last<i class="fas fa-angle-double-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 <script th:inline="javascript">
     const filterForm = document.getElementById("filter-form");
+
     document.getElementById('sort').addEventListener('change', function () {
-        filterForm.action = '/admin/reports/list/1';
+        filterForm.action = '/manager/reports/list/1';
         filterForm.submit();
     });
+
     Array.from(document.querySelectorAll('input[name="status"], input[name="category"]')).forEach(function (el) {
         el.addEventListener('change', function () {
-            filterForm.action = '/admin/reports/list/1';
+            filterForm.action = '/manager/reports/list/1';
             filterForm.submit();
         });
     });
 
     document.getElementById('first-page').addEventListener('click', () => {
-        filterForm.action = '/admin/reports/list/1';
+        filterForm.action = '/manager/reports/list/1';
         filterForm.submit();
     });
+
     document.getElementById('previous-page').addEventListener('click', () => {
-        filterForm.action = '/admin/reports/list/' + [[${pageNumber - 1}]];
+        filterForm.action = '/manager/reports/list/' + [[${pageNumber - 1}]];
         filterForm.submit();
     });
+
     document.getElementById('next-page').addEventListener('click', () => {
-        filterForm.action = '/admin/reports/list/' + [[${pageNumber + 1}]];
+        filterForm.action = '/manager/reports/list/' + [[${pageNumber + 1}]];
         filterForm.submit();
     });
+
     document.getElementById('last-page').addEventListener('click', () => {
-        filterForm.action = '/admin/reports/list/' + [[${page.totalPages}]];
+        filterForm.action = '/manager/reports/list/' + [[${page.totalPages}]];
         filterForm.submit();
     });
 
@@ -322,7 +372,6 @@
     }
 
     setInterval(pollBatchStatus, 10000);
-
     pollBatchStatus();
 
     const reportBatchRunning = [[${reportBatchRunning}]];
@@ -336,7 +385,7 @@
     }
 
     function updateCountdown() {
-        if (reportBatchRunning || nextReportBatchMillis < 0) return; // do not count down
+        if (reportBatchRunning || nextReportBatchMillis < 0) return;
         const now = Date.now();
         let secondsToNextBatch = Math.floor((nextReportBatchMillis - now) / 1000);
         if (secondsToNextBatch < 0) secondsToNextBatch = 0;
@@ -354,6 +403,5 @@
     }
     /*]]>*/
 </script>
-
 </body>
 </html>
