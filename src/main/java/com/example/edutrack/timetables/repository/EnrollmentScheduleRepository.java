@@ -219,4 +219,6 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
     );
 
     Optional<EnrollmentSchedule> findFirstByEnrollmentOrderByDateAsc(Enrollment enrollment);
+    @Query("SELECT es FROM EnrollmentSchedule es WHERE es.rescheduleStatus = 'REQUESTED' AND es.requestedNewDate BETWEEN :startDate AND :endDate")
+    List<EnrollmentSchedule> findAllPendingRequestsInDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

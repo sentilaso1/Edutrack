@@ -502,7 +502,6 @@ public class MenteeController {
         model.addAttribute("testCount", testCount);
         return "mentee/mentee-calendar";
     }
-
     @PostMapping("/schedules/reschedule-request")
     public String submitRescheduleRequest(
             @RequestParam("scheduleId") int scheduleId,
@@ -512,22 +511,110 @@ public class MenteeController {
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
+        enrollmentScheduleService.processExpiredRequests();
+
         UUID menteeId = getSessionMentee(session);
         if (menteeId == null) {
             return "redirect:/";
         }
+
         EnrollmentSchedule schedule = enrollmentScheduleService.findById(scheduleId);
-        if ( (reason == null || reason.trim().isEmpty()) && (schedule.getRescheduleReason() == null || schedule.getRescheduleReason().trim().isEmpty())) {
+        ScheduleDTO currentSchedule = enrollmentScheduleService.getScheduleDTO(scheduleId, menteeId);
+        if (currentSchedule == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Schedule not found or access denied.");
+            return "redirect:/schedules";
+        }
+
+        if ((reason == null || reason.trim().isEmpty()) &&
+                (schedule.getRescheduleReason() == null || schedule.getRescheduleReason().trim().isEmpty())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Reason for rescheduling cannot be empty.");
             String redirectUrl = "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
             return redirectUrl;
         }
+
         if(schedule.getRescheduleReason() != null && !schedule.getRescheduleReason().trim().isEmpty()){
             reason = schedule.getRescheduleReason();
         }
+
         try {
             Slot slot = Slot.valueOf(newSlot);
             LocalDate date = LocalDate.parse(newDate);
+            LocalDate today = LocalDate.now();
+
+            if (date.isBefore(today)) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Cannot reschedule to a past date. Please select a future date.");
+                return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+            }
+
+            UUID mentorId = currentSchedule.getMentorId();
+            Optional<LocalDate> earliestStartDateOpt = mentorAvailableTimeService.findEarliestStartDateByMentorId(mentorId);
+            LocalDate mentorStartDate = earliestStartDateOpt.orElse(today);
+
+            Optional<EnrollmentSchedule> firstScheduleOpt = enrollmentScheduleService.findFirstScheduleForEnrollment(schedule.getEnrollment());
+            LocalDate enrollmentStartDate = firstScheduleOpt.map(EnrollmentSchedule::getDate).orElse(today);
+            Slot enrollmentStartSlot = firstScheduleOpt.map(EnrollmentSchedule::getSlot).orElse(null);
+            LocalDate lockDate = today.isAfter(enrollmentStartDate) ? today : enrollmentStartDate;
+
+            if (date.isBefore(lockDate)) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Cannot reschedule to this date. Please select a valid future date.");
+                return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+            }
+
+            if (date.isEqual(lockDate) && enrollmentStartSlot != null) {
+                if (slot.ordinal() < enrollmentStartSlot.ordinal()) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Cannot reschedule to this time slot. Please select a later time slot.");
+                    return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+                }
+            }
+
+            List<MentorAvailableTimeDetails> mentorOccupiedSlots = mentorAvailableTimeService
+                    .findByMentorIdAndStatusAndDateRange(mentorId, date, date);
+
+            boolean mentorOccupied = mentorOccupiedSlots.stream()
+                    .anyMatch(mentorSlot -> mentorSlot.getDate().equals(date) &&
+                            mentorSlot.getSlot().equals(slot));
+
+            if (mentorOccupied) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Mentor is not available at the selected time. Please choose another slot.");
+                return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+            }
+
+            List<EnrollmentSchedule> pendingRequests = enrollmentScheduleService.getAllPendingSlotsInDateRange(date, date);
+            boolean slotHasPendingRequest = pendingRequests.stream()
+                    .anyMatch(pending -> pending.getRequestedNewDate() != null &&
+                            pending.getRequestedNewDate().equals(date) &&
+                            pending.getRequestedNewSlot().equals(slot));
+
+            if (slotHasPendingRequest) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "This time slot is currently under review by another request. Please choose another slot.");
+                return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+            }
+
+            List<Enrollment> menteePendingEnrollments = enrollmentService
+                    .findPendingEnrollmentsForMentee(menteeId);
+
+            for (Enrollment enrollment : menteePendingEnrollments) {
+                if (enrollment.getScheduleSummary() != null && !enrollment.getScheduleSummary().isEmpty()) {
+                    List<RequestedSchedule> requestedSchedules = enrollmentScheduleService
+                            .findStartLearningTime(enrollment.getScheduleSummary());
+
+                    boolean conflictWithPendingEnrollment = requestedSchedules.stream()
+                            .anyMatch(requestedSchedule -> requestedSchedule.getRequestedDate().equals(date) &&
+                                    requestedSchedule.getSlot().equals(slot));
+
+                    if (conflictWithPendingEnrollment) {
+                        redirectAttributes.addFlashAttribute("errorMessage",
+                                "This time slot conflicts with your pending enrollment. Please choose another slot.");
+                        return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
+                    }
+                }
+            }
+
             if (!enrollmentScheduleService.isSlotAvailable(menteeId, slot, date, scheduleId)) {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "The selected time slot is no longer available. Please choose another slot.");
@@ -552,12 +639,11 @@ public class MenteeController {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Invalid slot selection. Please try again.");
             return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
-
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An unexpected error occurred. Please try again.");
+            return "redirect:/schedules/reschedule?scheduleId=" + scheduleId;
         }
-//        catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("errorMessage",
-//                    "An unexpected error occurred. Please try again.");
-//        }
 
         return "redirect:/schedules";
     }
@@ -589,7 +675,9 @@ public class MenteeController {
 
         Map<LocalDate, Set<Slot>> occupiedMap = new HashMap<>();
         Set<String> occupiedSlotKeys = new HashSet<>();
-        Set<String> reviewingSlotKeys = new HashSet<>();
+
+        Set<String> myReviewingKeys = new HashSet<>();
+        Set<String> otherMenteesReviewingKeys = new HashSet<>();
 
         List<ScheduleDTO> occupiedSlots = enrollmentScheduleService.getOccupiedSlotsForWeek(
                 menteeId, mondayOfWeek, mondayOfWeek.plusDays(6)
@@ -630,15 +718,24 @@ public class MenteeController {
                 }
             }
         }
-        List<EnrollmentSchedule> reviewingSlots = enrollmentScheduleService.getSlotsUnderReview(
-                menteeId, mondayOfWeek, mondayOfWeek.plusDays(6)
+
+        List<EnrollmentSchedule> allSystemReviewingSlots = enrollmentScheduleService.getAllPendingSlotsInDateRange(
+                mondayOfWeek, mondayOfWeek.plusDays(6)
         );
 
-        for (EnrollmentSchedule dto : reviewingSlots) {
-            if (!dto.getDate().isBefore(today)) {
-                String slotKey = dto.getRequestedNewSlot() + "_" +
-                        dto.getRequestedNewDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                reviewingSlotKeys.add(slotKey);
+        for (EnrollmentSchedule reviewing : allSystemReviewingSlots) {
+            if (reviewing.getRequestedNewDate() != null) {
+                String slotKey = reviewing.getRequestedNewSlot().name() + "_" +
+                        reviewing.getRequestedNewDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                if (reviewing.getEnrollment().getMentee().getId().equals(menteeId)) {
+                    myReviewingKeys.add(slotKey);
+                } else {
+                    otherMenteesReviewingKeys.add(slotKey);
+                }
+
+                occupiedSlotKeys.add(slotKey);
+                occupiedMap.computeIfAbsent(reviewing.getRequestedNewDate(), k -> new HashSet<>())
+                        .add(reviewing.getRequestedNewSlot());
             }
         }
 
@@ -682,7 +779,10 @@ public class MenteeController {
 
         model.addAttribute("occupiedMap", occupiedMap);
         model.addAttribute("occupiedSlotKeys", occupiedSlotKeys);
-        model.addAttribute("reviewingSlotKeys", reviewingSlotKeys);
+
+        model.addAttribute("myReviewingKeys", myReviewingKeys);
+        model.addAttribute("otherMenteesReviewingKeys", otherMenteesReviewingKeys);
+
         model.addAttribute("currentSchedule", currentSchedule);
         model.addAttribute("slots", Slot.values());
         model.addAttribute("daysInWeek", daysInWeek);
