@@ -647,7 +647,6 @@ public class MenteeController {
 
         return "redirect:/schedules";
     }
-
     @GetMapping("/schedules/reschedule")
     public String showRescheduleForm(
             @RequestParam("scheduleId") Integer scheduleId,
@@ -676,8 +675,28 @@ public class MenteeController {
         Map<LocalDate, Set<Slot>> occupiedMap = new HashMap<>();
         Set<String> occupiedSlotKeys = new HashSet<>();
 
-        Set<String> myReviewingKeys = new HashSet<>();
-        Set<String> otherMenteesReviewingKeys = new HashSet<>();
+        // Lấy tất cả slots có sẵn của mentor (mentee_id = null)
+        UUID mentorId = currentSchedule.getMentorId();
+        List<MentorAvailableTimeDetails> mentorAvailableSlots = mentorAvailableTimeService
+                .getAvailableSlotsForMentor(mentorId, mondayOfWeek, mondayOfWeek.plusDays(6));
+
+        // Tạo set các slot keys có sẵn từ mentor
+        Set<String> availableSlotKeys = new HashSet<>();
+        for (MentorAvailableTimeDetails availableSlot : mentorAvailableSlots) {
+            String slotKey = availableSlot.getSlot().name() + "_" + availableSlot.getDate().toString();
+            availableSlotKeys.add(slotKey);
+        }
+
+        // Đánh dấu tất cả slots KHÔNG có trong available slots là occupied
+        for (LocalDate day : daysInWeek) {
+            for (Slot slot : Slot.values()) {
+                String slotKey = slot.name() + "_" + day.toString();
+                if (!availableSlotKeys.contains(slotKey)) {
+                    occupiedSlotKeys.add(slotKey);
+                    occupiedMap.computeIfAbsent(day, k -> new HashSet<>()).add(slot);
+                }
+            }
+        }
 
         List<ScheduleDTO> occupiedSlots = enrollmentScheduleService.getOccupiedSlotsForWeek(
                 menteeId, mondayOfWeek, mondayOfWeek.plusDays(6)
@@ -692,7 +711,6 @@ public class MenteeController {
             }
         }
 
-        UUID mentorId = currentSchedule.getMentorId();
         Optional<LocalDate> earliestStartDateOpt = mentorAvailableTimeService.findEarliestStartDateByMentorId(mentorId);
         LocalDate mentorStartDate = earliestStartDateOpt.orElse(today);
         Optional<EnrollmentSchedule> firstScheduleOpt = enrollmentScheduleService.findFirstScheduleForEnrollment(enrollmentSchedule.getEnrollment());
@@ -719,6 +737,8 @@ public class MenteeController {
             }
         }
 
+        Set<String> myReviewingKeys = new HashSet<>();
+        Set<String> otherMenteesReviewingKeys = new HashSet<>();
         List<EnrollmentSchedule> allSystemReviewingSlots = enrollmentScheduleService.getAllPendingSlotsInDateRange(
                 mondayOfWeek, mondayOfWeek.plusDays(6)
         );
@@ -736,22 +756,6 @@ public class MenteeController {
                 occupiedSlotKeys.add(slotKey);
                 occupiedMap.computeIfAbsent(reviewing.getRequestedNewDate(), k -> new HashSet<>())
                         .add(reviewing.getRequestedNewSlot());
-            }
-        }
-
-        List<MentorAvailableTimeDetails> mentorOccupiedSlots = mentorAvailableTimeService
-                .findByMentorIdAndStatusAndDateRange(mentorId, mondayOfWeek, mondayOfWeek.plusDays(6));
-
-        for (MentorAvailableTimeDetails mentorSlot : mentorOccupiedSlots) {
-            LocalDate slotDate = mentorSlot.getDate();
-            if (slotDate.isAfter(today.minusDays(1)) &&
-                    !slotDate.isBefore(mondayOfWeek) &&
-                    !slotDate.isAfter(mondayOfWeek.plusDays(6))) {
-
-                Slot slot = mentorSlot.getSlot();
-                String slotKey = slot.name() + "_" + slotDate.toString();
-                occupiedSlotKeys.add(slotKey);
-                occupiedMap.computeIfAbsent(slotDate, k -> new HashSet<>()).add(slot);
             }
         }
 
@@ -794,6 +798,7 @@ public class MenteeController {
 
         return "mentee/reshedule-page";
     }
+
     @GetMapping("/pending-enrollments")
     public String menteePending(HttpSession session, Model model){
         UUID menteeId = getSessionMentee(session);
