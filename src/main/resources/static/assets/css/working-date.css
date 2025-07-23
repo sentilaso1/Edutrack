@@ -9,7 +9,7 @@ body {
 }
 
 .todo-header {
-    background: #ff4d30;
+    background: rgba(253, 99, 99, 0.91);;
     color: #fff;
     padding: 20px;
     border-radius: 12px;
@@ -31,7 +31,7 @@ body {
 
 .add-btn {
     background: #fff;
-    color: #ff4d30;
+    color: hsl(357deg 100% 75% / 99%);
     border: none;
     font-size: 24px;
     border-radius: 50%;
@@ -56,11 +56,11 @@ body {
 }
 
 .designer {
-    color: #ff7f50;
+    color: hsl(357deg 100% 75% / 99%);
 }
 
 .engineer {
-    color: #dc3545;
+    color: hsla(358, 100%, 69%, 0.99);
 }
 
 .marketing {
@@ -89,7 +89,7 @@ table {
 }
 
 thead th {
-    background-color: #ff4d30;
+    background-color: hsla(358, 100%, 69%, 0.99);
     color: white;
     padding: 12px;
     font-size: 0.8em;
@@ -113,14 +113,14 @@ tbody td {
 }
 
 .slot-button:hover {
-    background-color: #ffe0b2;
-    border-color: #f7b267;
+    background-color: rgba(253, 151, 156, 0.2);
+    border-color: hsla(358, 100%, 81%, 0.99);
 }
 
 .slot-button.active {
-    background-color: #f7b267;
+    background-color: rgba(248, 78, 78, 0.35);
     color: white;
-    border-color: #f2994a;
+    border-color: #f84e4e;
 }
 
 .time-cell {
@@ -135,7 +135,7 @@ tbody td {
     font-size: 1rem;
     font-weight: bold;
     color: white;
-    background-color: #ff4d30;
+    background-color: #f84e4e;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -143,7 +143,7 @@ tbody td {
 }
 
 .submit-button:hover {
-    background-color: #f2994a;
+    background-color: rgba(248, 78, 78, 0.66);
 }
 
 /* Scrollbar gọn */
