@@ -408,7 +408,12 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
 
     @Override
     public List<EnrollmentSchedule> getSlotsUnderReviewByCourse(UUID menteeId, UUID courseMentorId, LocalDate startDate, LocalDate endDate) {
-        return enrollmentScheduleRepository.findReviewingSlotsByCourse(menteeId, courseMentorId, startDate, endDate);
+        return enrollmentScheduleRepository.findReviewingSlotsByCourse(menteeId, courseMentorId,startDate, endDate);
+    }
+
+    @Override
+    public List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate) {
+        return enrollmentScheduleRepository.findAllPendingRequestsInDateRange(startDate, endDate);
     }
 
     @Override

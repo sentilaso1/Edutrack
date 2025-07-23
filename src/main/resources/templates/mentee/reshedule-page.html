@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <title>Request Reschedule - Youdemi</title>
-    <meta name="title" content="Youdemi"/>
-    <meta name="description" content="Request to reschedule your learning session"/>
-
+    <!-- Meta tags và links giữ nguyên -->
     <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
@@ -17,28 +15,42 @@
     <link rel="stylesheet" th:href="@{/assets/css/reschedule-page-style.css}"/>
 
     <style>
-        .slot-cell-request.reviewing {
-            background-color: #FFF3CD !important;
-            border-color: #F0AD4E !important;
-            color: #856404 !important;
-            position: relative;
+
+        .slot-cell-request.reviewing-self {
+            background-color: #cce5ff !important;
             cursor: not-allowed;
+            position: relative;
         }
 
-        .slot-cell-request.reviewing::after {
-            content: "Mentor is reviewing";
+        .slot-cell-request.reviewing-self::after {
+            content: "Your Pending Request";
+            font-family: sans-serif;
+            color: #004085;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 10px;
             font-weight: bold;
-            text-align: center;
             white-space: nowrap;
         }
 
-        .slot-cell-request.reviewing:hover {
-            background-color: #FFF3CD !important;
+        .slot-cell-request.reviewing-other {
+            background-color: #e9ecef !important;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .slot-cell-request.reviewing-other::after {
+            content: "Slot Held";
+            font-family: sans-serif;
+            font-weight: 900;
+            color: #495057;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
         }
 
         .reason-section textarea.error {
@@ -62,7 +74,7 @@
             <div class="schedule-request-container">
                 <h2 class="section-title">Request Schedule Change</h2>
 
-                <!-- Current Schedule Info -->
+                <!-- Current Schedule Info giữ nguyên -->
                 <div class="current-schedule-info">
                     <h3><i class="fas fa-calendar-alt"></i> Current Schedule</h3>
                     <div class="current-info-grid">
@@ -127,23 +139,21 @@
                                              th:data-day-name="${#temporals.format(day, 'EEEE')}"
                                              th:data-start-time="${slot.startTime}"
                                              th:data-end-time="${slot.endTime}"
-                                             th:data-occupied="${#sets.contains(occupiedSlotKeys, slotKey)}"
-                                             th:data-reviewing="${#sets.contains(reviewingSlotKeys, slotKey)}"
-                                             th:classappend="${day.equals(todayDate)} ? ' today-border' : ''"
-                                             th:class="${'slot-cell-request' +
-                                                          (day.equals(todayDate) ? ' today-border' : '') +
-                                                          (#sets.contains(occupiedSlotKeys, slotKey) ? ' occupied' : '') +
-                                                          (#sets.contains(reviewingSlotKeys, slotKey) ? ' reviewing' : '')}"
+
+                                             th:classappend="
+                                    ${day.equals(todayDate) ? ' today-border' : ''} +
+                                    ${#sets.contains(occupiedSlotKeys, slotKey) ? ' occupied' : ''} +
+                                    ${#sets.contains(myReviewingKeys, slotKey) ? ' reviewing-self' : ''} +
+                                    ${#sets.contains(otherMenteesReviewingKeys, slotKey) ? ' reviewing-other' : ''}
+                                 "
                                              onclick="selectSlot(this)">
-                                              <span th:if="${#sets.contains(reviewingSlotKeys, slotKey)}"
-                                                    style="display: none;"
-                                                    th:text="'DEBUG: ' + ${slotKey}"></span>
                                         </div>
                                     </th:block>
                                 </th:block>
                             </th:block>
                         </div>
 
+                        <!-- Selection info và form fields giữ nguyên -->
                         <div id="selectionInfo" class="selection-info">
                             <h4><i class="fas fa-check-circle"></i> Selected Schedule</h4>
                             <p><strong>Day:</strong> <span id="selectedDayName"></span></p>
@@ -154,13 +164,13 @@
                         <div class="reason-section">
                             <label for="reason"><i class="fas fa-comment-alt"></i> Reason for Reschedule</label>
                             <textarea id="reason" name="reason"
-                                      placeholder="Please provide a reason for rescheduling this session..." th:text="${enrollmentSchedule.rescheduleReason}" th:disabled="${enrollmentSchedule.rescheduleReason != null and !enrollmentSchedule.rescheduleReason.isEmpty()}"
-                            ></textarea>
+                                      placeholder="Please provide a reason for rescheduling this session..."
+                                      th:text="${enrollmentSchedule.rescheduleReason}"
+                                      th:disabled="${enrollmentSchedule.rescheduleReason != null and !enrollmentSchedule.rescheduleReason.isEmpty()}">
+                            </textarea>
                             <span id="reason-error" class="error-message"></span>
                         </div>
 
-
-                        <!-- Action Buttons -->
                         <div class="action-buttons">
                             <button type="submit" id="submitBtn" class="btn-submit-request" disabled>
                                 <i class="fas fa-paper-plane"></i> Submit Request
@@ -182,10 +192,10 @@
     let selectedSlotElement = null;
 
     function selectSlot(element) {
-        const isOccupied = element.getAttribute('data-occupied') === 'true';
-        const isReviewing = element.getAttribute('data-reviewing') === 'true';
-
-        if (isOccupied || isReviewing || element.classList.contains('occupied') || element.classList.contains('reviewing')) {
+        // Kiểm tra tất cả các trạng thái không thể chọn
+        if (element.classList.contains('occupied') ||
+            element.classList.contains('reviewing-self') ||
+            element.classList.contains('reviewing-other')) {
             return;
         }
 
@@ -205,13 +215,11 @@
         document.getElementById('selectedSlot').value = slot;
         document.getElementById('selectedDate').value = date;
 
-        // Update selection info
         document.getElementById('selectedDayName').textContent = dayName;
         document.getElementById('selectedDateFormatted').textContent = formatDate(date);
         document.getElementById('selectedTimeRange').textContent = startTime + ' - ' + endTime;
 
         document.getElementById('selectionInfo').classList.add('show');
-
         document.getElementById('submitBtn').disabled = false;
     }
 
