@@ -154,7 +154,7 @@ public class MentorController {
         LocalDate endLocal = selectedMonth.withDayOfMonth(selectedMonth.lengthOfMonth());
 
         Mentor mentor = mentorService.getMentorById(id).get();
-        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findOnlyApprovedSlotsByEndDate(mentor, endLocal);
         boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
 
         List<Map<String, String>> selectableMonths = new ArrayList<>();
@@ -255,7 +255,7 @@ public class MentorController {
 
         Mentor mentor = mentorService.getMentorById(id).get();
 
-        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findOnlyApprovedSlotsByEndDate(mentor, endLocal);
         boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
 
         for (MentorAvailableSlotDTO dto : setSlots) {

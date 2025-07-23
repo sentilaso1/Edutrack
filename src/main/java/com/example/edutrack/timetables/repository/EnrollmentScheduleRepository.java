@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -216,4 +217,8 @@ public interface EnrollmentScheduleRepository extends JpaRepository<EnrollmentSc
             Mentor mentor,
             LocalDate date
     );
+
+    Optional<EnrollmentSchedule> findFirstByEnrollmentOrderByDateAsc(Enrollment enrollment);
+    @Query("SELECT es FROM EnrollmentSchedule es WHERE es.rescheduleStatus = 'REQUESTED' AND es.requestedNewDate BETWEEN :startDate AND :endDate")
+    List<EnrollmentSchedule> findAllPendingRequestsInDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }
