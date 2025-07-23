@@ -78,6 +78,16 @@ public class EnrollmentSchedule {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    public String getReview() {
+        return review;
+    }
+
+    public void setReview(String review) {
+        this.review = review;
+    }
+
+    @Column(name = "review", columnDefinition = "TEXT")
+    private String review;
 
     /** The current status of any reschedule request for this session. */
     @Enumerated(EnumType.STRING)
