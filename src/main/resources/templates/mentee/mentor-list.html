@@ -442,7 +442,12 @@
                                             </div>
                                         </div>
 
-                                        <div class="expertise-pills" th:if="${mentor.expertiseItem != null}">
+                                        <div class="expertise-pills">
+                                            <span th:if="${#lists.isEmpty(mentor.expertiseItem)}"
+                                                  class="pill pill-gray">
+                                                None
+                                            </span>
+
                                             <span th:each="exp, stat : ${mentor.expertiseItem}"
                                                   th:if="${stat.index < 3}"
                                                   class="pill"

@@ -455,7 +455,7 @@
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Bio</div>
-                                <div class="info-value" th:text="${cv.user.bio}"></div>
+                                <div class="info-value" th:utext="${#strings.isEmpty(cv.user.bio) ? 'No bio available' : cv.user.bio}"></div>
                             </div>
                             <!-- Summary moved below as a card -->
                         </div>
