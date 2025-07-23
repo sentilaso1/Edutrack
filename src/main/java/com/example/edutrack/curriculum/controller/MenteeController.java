@@ -707,7 +707,7 @@ public class MenteeController {
         );
 
         for (ScheduleDTO dto : occupiedSlots) {
-            if (!dto.getDate().isBefore(tomorrow)) { // Chỉ xét từ ngày mai trở đi
+            if (!dto.getDate().isBefore(tomorrow)) {
                 occupiedMap.computeIfAbsent(dto.getDate(), k -> new HashSet<>())
                         .add(Slot.valueOf(dto.getSlot()));
                 String slotKey = dto.getSlot() + "_" + dto.getDate().toString();
@@ -720,7 +720,8 @@ public class MenteeController {
         Optional<EnrollmentSchedule> firstScheduleOpt = enrollmentScheduleService.findFirstScheduleForEnrollment(enrollmentSchedule.getEnrollment());
         LocalDate enrollmentStartDate = firstScheduleOpt.map(EnrollmentSchedule::getDate).orElse(tomorrow);
         Slot enrollmentStartSlot = firstScheduleOpt.map(EnrollmentSchedule::getSlot).orElse(null);
-        LocalDate lockDate = tomorrow.isAfter(enrollmentStartDate) ? tomorrow : enrollmentStartDate;
+        LocalDate minAllowedDate = mentorStartDate.isBefore(enrollmentStartDate) ? mentorStartDate : enrollmentStartDate;
+        LocalDate lockDate = minAllowedDate.isAfter(today) ? minAllowedDate : tomorrow;
 
         for (LocalDate day : daysInWeek) {
             if (day.isBefore(lockDate)) {
@@ -728,15 +729,6 @@ public class MenteeController {
                     String slotKey = slot.name() + "_" + day.toString();
                     occupiedSlotKeys.add(slotKey);
                     occupiedMap.computeIfAbsent(day, k -> new HashSet<>()).add(slot);
-                }
-            }
-            else if (day.isEqual(lockDate) && enrollmentStartSlot != null) {
-                for (Slot slot : Slot.values()) {
-                    if (slot.ordinal() < enrollmentStartSlot.ordinal()) {
-                        String slotKey = slot.name() + "_" + day.toString();
-                        occupiedSlotKeys.add(slotKey);
-                        occupiedMap.computeIfAbsent(day, k -> new HashSet<>()).add(slot);
-                    }
                 }
             }
         }
