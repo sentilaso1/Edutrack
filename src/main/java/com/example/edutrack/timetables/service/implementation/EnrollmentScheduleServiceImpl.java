@@ -618,4 +618,9 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         LocalDate today = LocalDate.now();
         return enrollmentScheduleRepository.findByEnrollment_CourseMentor_MentorAndDateOrderBySlotAsc(mentor, today);
     }
+
+    @Override
+    public Optional<EnrollmentSchedule> findFirstScheduleForEnrollment(Enrollment enrollment) {
+        return enrollmentScheduleRepository.findFirstByEnrollmentOrderByDateAsc(enrollment);
+    }
 }
