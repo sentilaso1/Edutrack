@@ -12,6 +12,11 @@
             background: linear-gradient(to right, #e6f7f9, #ffeef0);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        textarea{
+            font-style: inherit;
+            font-family: inherit;
+            color: black;
+        }
         .container {
             max-width: 1200px;
             margin: 50px auto;
@@ -450,7 +455,7 @@
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Bio</div>
-                                <div class="info-value" th:text="${cv.user.bio}"></div>
+                                <div class="info-value" th:utext="${#strings.isEmpty(cv.user.bio) ? 'No bio available' : cv.user.bio}"></div>
                             </div>
                             <!-- Summary moved below as a card -->
                         </div>

@@ -12,6 +12,7 @@ import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
+import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import org.springframework.data.domain.Page;
@@ -30,13 +31,15 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final CourseMentorRepository courseMentorRepository;
     private final EnrollmentScheduleRepository enrollmentScheduleRepository;
     private final EnrollmentScheduleService enrollmentScheduleService;
+    private final MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository;
 
 
-    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository, CourseMentorRepository courseMentorRepository, EnrollmentScheduleRepository enrollmentScheduleRepository, EnrollmentScheduleService enrollmentScheduleService) {
+    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository, CourseMentorRepository courseMentorRepository, EnrollmentScheduleRepository enrollmentScheduleRepository, EnrollmentScheduleService enrollmentScheduleService, MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository) {
         this.enrollmentRepository = enrollmentRepository;
         this.courseMentorRepository = courseMentorRepository;
         this.enrollmentScheduleRepository = enrollmentScheduleRepository;
         this.enrollmentScheduleService = enrollmentScheduleService;
+        this.mentorAvailableTimeDetailsRepository = mentorAvailableTimeDetailsRepository;
     }
 
     @Override
@@ -255,5 +258,34 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public long countStudentsByMentor(Mentor mentor) {
         return enrollmentRepository.countByCourseMentor_MentorAndStatus(mentor, Enrollment.EnrollmentStatus.APPROVED);
+    }
+
+    @Override
+    public Boolean isHavingPendingInSlot(Mentee mentee, Slot slot, LocalDate date) {
+        List<Enrollment> enrollmentList = findPendingEnrollmentsForMentee(mentee.getId());
+        if(enrollmentList.isEmpty()){
+            return false;
+        }
+        for (Enrollment enrollment : enrollmentList) {
+            String pair = date + "," + slot;
+            if(enrollment.getScheduleSummary().contains(pair)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Boolean isValidRequest(Mentee mentee, Mentor mentor, Slot slot, LocalDate date){
+        return mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, date) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, date, mentee) && !isHavingPendingInSlot(mentee, slot, date);
+    }
+
+    @Override
+    public Boolean isValidRequests(Mentee mentee, Mentor mentor, List<Slot> slots, List<LocalDate> date){
+        for(int i = 0; i < slots.size(); i++){
+            if(!isValidRequest(mentee, mentor, slots.get(i), date.get(i))){
+                return false;
+            }
+        }
+        return true;
     }
 }

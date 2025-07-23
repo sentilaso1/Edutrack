@@ -14,6 +14,7 @@ import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import com.example.edutrack.timetables.model.Day;
+import com.example.edutrack.timetables.model.Enrollment;
 import com.example.edutrack.timetables.model.MentorAvailableTime;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
@@ -327,7 +328,7 @@ CourseController {
             for (int j = 0; j < dayCount; j++) {
                 Slot slot = Slot.values()[i];
                 LocalDate slotDate = dateList.get(j);
-                if(mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, slotDate) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, slotDate, mentee)){
+                if(mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, slotDate) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, slotDate, mentee) && !enrollmentService.isHavingPendingInSlot(mentee, slot, slotDate)){
                     availableSlotMatrix[i][j] = enrollmentService.getNumberOfPendingSlot(mentor, slotDate, slot);
                 }else{
                     availableSlotMatrix[i][j] = -1;
