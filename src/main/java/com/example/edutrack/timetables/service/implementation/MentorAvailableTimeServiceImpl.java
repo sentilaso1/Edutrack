@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -170,5 +171,9 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
         return mentorAvailableTimeRepository.findApprovedSlotsByEndDate(mentor, endDate, MentorAvailableTime.Status.APPROVED);
     }
 
+    @Override
+    public Optional<LocalDate> findEarliestStartDateByMentorId(UUID mentorId) {
+        return mentorAvailableTimeRepository.findEarliestStartDateByMentorId(mentorId);
+    }
 
 }

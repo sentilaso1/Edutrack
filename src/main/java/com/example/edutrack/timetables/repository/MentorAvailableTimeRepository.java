@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -103,4 +104,6 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
             "AND mat.status = :status")
     List<MentorAvailableSlotDTO> findApprovedSlotsByEndDate(Mentor mentor, LocalDate endDate, MentorAvailableTime.Status status);
 
+    @Query("SELECT MIN(mat.id.startDate) FROM MentorAvailableTime mat WHERE mat.mentor.id = :mentorId")
+    Optional<LocalDate> findEarliestStartDateByMentorId(@Param("mentorId") UUID mentorId);
 }

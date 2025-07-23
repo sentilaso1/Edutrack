@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorMessage", ex.getMessage());
         model.addAttribute("stackTrace", sw.toString());
 
-        return "/error/whitelabel";
+        return "/error/404";
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
