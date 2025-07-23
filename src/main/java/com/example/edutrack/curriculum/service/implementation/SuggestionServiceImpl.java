@@ -33,8 +33,13 @@ public class SuggestionServiceImpl implements SuggestionService {
         this.courseTagService = courseTagService;
     }
 
+
     @Override
     public List<CourseMentor> getSuggestedCourses(SuggestionType type, UUID menteeId, int limit) {
+        if (type == null) {
+            return List.of();
+        }
+
         return switch (type) {
             case POPULAR -> enrollmentService.getPopularCoursesForGuest(limit);
             case LATEST -> courseMentorService.findLatestCourse(limit);
@@ -54,9 +59,12 @@ public class SuggestionServiceImpl implements SuggestionService {
         };
     }
 
-
     @Override
     public List<Mentor> getSuggestedMentors(SuggestionType type, UUID menteeId, int limit) {
+        if (type == null) {
+            return mentorService.getTopMentorsByRatingOrSessions(limit);
+        }
+
         return switch (type) {
             case TOP_RATED, POPULAR -> mentorService.getTopMentorsByRatingOrSessions(limit);
             case INTEREST_BASED -> mentorService.findMentorsByMenteeInterest(menteeId, limit);
@@ -66,6 +74,10 @@ public class SuggestionServiceImpl implements SuggestionService {
 
     @Override
     public List<TagEnrollmentCountDTO> getSuggestedTags(SuggestionType type, int limit) {
+        if (type == null) {
+            return courseTagService.getTopTags(limit);
+        }
+
         return switch (type) {
             case POPULAR, TRENDING -> courseTagService.getTopTags(limit);
             default -> List.of();
