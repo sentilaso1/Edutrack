@@ -341,6 +341,13 @@ public class CvController {
         if (cvService.acceptCV(id)) {
             logger.info("CV accepted successfully: id={}", id);
             redirectAttributes.addFlashAttribute("success", "CV accepted successfully.");
+
+            List<CourseMentor> courseMentors = courseMentorRepository.findByMentorId(id);
+            for (CourseMentor courseMentor : courseMentors) {
+                courseMentor.setStatus(ApplicationStatus.ACCEPTED);
+                courseMentorRepository.save(courseMentor);
+                logger.debug("Updated CourseMentor status to ACCEPTED for courseId={}", courseMentor.getCourse().getId());
+            }
         } else {
             logger.warn("Failed to accept CV: id={}, must be in 'Pending' status", id);
             redirectAttributes.addFlashAttribute("error", "CV must be in 'Pending' status.");
