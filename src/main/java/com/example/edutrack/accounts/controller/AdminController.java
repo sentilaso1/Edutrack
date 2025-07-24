@@ -270,8 +270,22 @@ public class AdminController {
         }
 
         @PostMapping("/system-settings/update")
-        public String updateSystemSettings(@RequestParam String key, @RequestParam String value) {
-                systemConfigService.updateValue(key, value);
+        public String updateSystemSettings(@RequestParam String key, @RequestParam String value,
+                        RedirectAttributes redirectAttributes) {
+                systemConfigService.updateValue(key, value);                
+                if (key.equals("app.email")) {
+                        redirectAttributes.addAttribute("success",
+                                        "You must change config(username and password) in properties file to take effect.");
+                        return "redirect:/admin/system-settings";
+                } else if (key.equals("smtp.host")) {
+                        redirectAttributes.addAttribute("success",
+                                        "You must sure smtp server is config with the port and username password to take effect.");
+                        return "redirect:/admin/system-settings";
+                } else if (key.equals("smtp.port")) {
+                        redirectAttributes.addAttribute("success",
+                                        "You must sure smtp server is config with this open port to take effect.");
+                        return "redirect:/admin/system-settings";
+                }
                 return "redirect:/admin/system-settings?success=Configuration updated successfully";
         }
 
