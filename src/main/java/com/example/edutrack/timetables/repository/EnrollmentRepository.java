@@ -152,4 +152,14 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     int countTeachingMentees(Mentor mentor);
 
     long countByCourseMentor_MentorAndStatus(Mentor mentor, Enrollment.EnrollmentStatus status);
+    @Query("SELECT e FROM Enrollment e WHERE " +
+            "e.mentee.id = :menteeId AND e.status = com.example.edutrack.timetables.model.Enrollment$EnrollmentStatus.APPROVED AND " +
+            "(:keyword IS NULL OR LOWER(e.courseMentor.course.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:mentorId IS NULL OR e.courseMentor.mentor.id = :mentorId)")
+    List<Enrollment> findWithFilters(
+            @Param("menteeId") UUID menteeId,
+            @Param("keyword") String keyword,
+            @Param("mentorId") UUID mentorId
+    );
+
 }

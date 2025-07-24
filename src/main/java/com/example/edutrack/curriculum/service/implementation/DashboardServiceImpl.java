@@ -169,58 +169,35 @@ public class DashboardServiceImpl implements DashboardService {
     // Hàm F2
     @Override
     public List<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId) {
-        List<Enrollment> menteeEnrollment = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+        List<Enrollment> menteeEnrollment = enrollmentRepository.findWithFilters(menteeId, keyword, mentorId);
+
         List<SkillProgressDTO> skillProgressList = new ArrayList<>();
 
-        DateTimeFormatter fullDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
-
         for (Enrollment e : menteeEnrollment) {
+
+            if (selectedMonth != null) {
+                Optional<EnrollmentSchedule> firstSchedule = enrollmentScheduleRepository.findFirstByEnrollmentOrderByDateAsc(e);
+                if (firstSchedule.isPresent()) {
+                    LocalDate startDate = firstSchedule.get().getDate();
+                    if (!YearMonth.from(startDate).equals(selectedMonth)) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+            }
+
             CourseMentor courseMentor = e.getCourseMentor();
             Course course = courseMentor.getCourse();
             Mentor mentor = courseMentor.getMentor();
 
-            // --- Keyword filter ---
-            if (keyword != null && !keyword.isBlank()) {
-                if (!course.getName().toLowerCase().contains(keyword.toLowerCase())) {
-                    continue;
-                }
-            }
-
-            // --- Mentor filter ---
-            if (mentorId != null && mentor != null && !mentor.getId().equals(mentorId)) {
-                continue;
-            }
-
-            // --- Month filter ---
-            try {
-                String rawStartTime = e.getStartTime().trim();
-                LocalDateTime parsedStart;
-
-                if (rawStartTime.matches("^\\d{1,2}:\\d{2}$")) {
-                    // Time-only format (e.g., "12:00") → use today's date
-                    parsedStart = LocalDateTime.of(LocalDate.now(), LocalTime.parse(rawStartTime));
-                } else {
-                    // Full datetime string
-                    parsedStart = LocalDateTime.parse(rawStartTime, fullDateTimeFormatter);
-                }
-
-                if (selectedMonth != null && !YearMonth.from(parsedStart).equals(selectedMonth)) {
-                    continue;
-                }
-
-            } catch (Exception ex) {
-                continue;
-            }
-
             Long enrollmentId = e.getId();
-            UUID courseId = course.getId();
-
             int total = enrollmentScheduleRepository.countTotalSlot(enrollmentId);
             int completed = enrollmentScheduleRepository.countByEnrollment_IdAndAttendance(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
             int percentage = (total == 0) ? 0 : (int) Math.round((completed * 100.0) / total);
 
             LocalDate lastSession = enrollmentScheduleRepository.findLastPresentSessionDate(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
-            List<String> tags = tagRepository.findByCourseId(courseId)
+            List<String> tags = tagRepository.findByCourseId(course.getId())
                     .stream()
                     .map(Tag::getTitle)
                     .collect(Collectors.toList());
@@ -228,7 +205,7 @@ public class DashboardServiceImpl implements DashboardService {
             String mentorName = (mentor != null) ? mentor.getFullName() : "Unknown";
             UUID mentorUuid = (mentor != null) ? mentor.getId() : null;
 
-            SkillProgressDTO dto = new SkillProgressDTO(courseMentor.getCourse().getId(),courseMentor.getId(),
+            SkillProgressDTO dto = new SkillProgressDTO(course.getId(), courseMentor.getId(),
                     course.getName(), lastSession, completed, percentage, tags, total, mentorName, mentorUuid
             );
 
@@ -237,8 +214,6 @@ public class DashboardServiceImpl implements DashboardService {
 
         return skillProgressList;
     }
-
-
 
     @Override
     public Page<EnrollmentSchedule> getFilteredSchedules(
