@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.common.controller.EndpointRegistry;
+import com.example.edutrack.common.service.implementations.EmailService;
 import com.example.edutrack.curriculum.model.LandingPageConfig;
 import com.example.edutrack.curriculum.model.MenteeLandingRole;
 import com.example.edutrack.curriculum.service.interfaces.DashboardService;
@@ -15,10 +16,14 @@ import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleServ
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.accounts.service.interfaces.ManagerStatsService;
+import com.example.edutrack.transactions.model.BankingQR;
 import com.example.edutrack.transactions.model.Transaction;
 import com.example.edutrack.transactions.model.Wallet;
+import com.example.edutrack.transactions.model.Withdrawal;
+import com.example.edutrack.transactions.service.BankingQrService;
 import com.example.edutrack.transactions.service.TransactionService;
 import com.example.edutrack.transactions.service.WalletService;
+import com.example.edutrack.transactions.service.WithdrawalService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +43,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.example.edutrack.accounts.dto.ManagerStatsDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,6 +63,9 @@ public class ManagerController {
     private final TransactionService transactionService;
     private final DashboardService dashboardService;
     private final EndpointRegistry endpointRegistry;
+    private final WithdrawalService withdrawalService;
+    private final BankingQrService bankingQrService;
+    private final EmailService emailService;
 
     @Autowired
     public ManagerController(MentorService mentorService,
@@ -66,7 +74,7 @@ public class ManagerController {
                              EnrollmentService enrollmentServiceImpl,
                              EnrollmentScheduleService enrollmentScheduleService,
                              ManagerStatsService managerStatsService,
-                             LandingPageConfigService landingPageConfigService, WalletService walletService, TransactionService transactionService, DashboardService dashboardService, EndpointRegistry endpointRegistry) {
+                             LandingPageConfigService landingPageConfigService, WalletService walletService, TransactionService transactionService, DashboardService dashboardService, EndpointRegistry endpointRegistry, WithdrawalService withdrawalService, BankingQrService bankingQrService, EmailService emailService) {
         this.mentorService = mentorService;
         this.menteeService = menteeService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
@@ -78,6 +86,9 @@ public class ManagerController {
         this.transactionService = transactionService;
         this.dashboardService = dashboardService;
         this.endpointRegistry = endpointRegistry;
+        this.withdrawalService = withdrawalService;
+        this.bankingQrService = bankingQrService;
+        this.emailService = emailService;
     }
 
     @GetMapping("/manager/dashboard")
@@ -544,5 +555,108 @@ public class ManagerController {
             }
         }
         return null;
+    }
+
+    @GetMapping("/manager/withdrawals")
+    public String listWithdrawals(Model model) {
+
+        List<Withdrawal> withdrawals = withdrawalService.findAll();
+
+        withdrawals.sort((w1, w2) -> w2.getCreatedDate().compareTo(w1.getCreatedDate()));
+
+        Map<UUID, String> bankingQrImageMap = withdrawals.stream()
+                .map(w -> w.getWallet().getUser())
+                .distinct()
+                .map(user -> {
+                    Optional<BankingQR> qrOpt = bankingQrService.findByUser(user);
+                    if (qrOpt.isPresent() && qrOpt.get().getQrImage() != null) {
+                        String base64Img = Base64.getEncoder().encodeToString(qrOpt.get().getQrImage());
+                        return Map.entry(user.getId(), base64Img);
+                    } else {
+                        return Map.<UUID, String>entry(user.getId(), null);
+                    }
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        model.addAttribute("withdrawals", withdrawals);
+        model.addAttribute("bankingQrImageMap", bankingQrImageMap);
+
+        return "manager/withdraw-requests";
+    }
+
+
+    @PostMapping("/manager/withdrawals/{id}/resolve")
+    public String resolveWithdrawal(
+            @PathVariable("id") UUID id,
+            @RequestParam("action") String action,
+            @RequestParam(value = "response", required = false) String response,
+            RedirectAttributes redirectAttributes) {
+
+        var optWithdrawal = withdrawalService.findById(id);
+
+        if (optWithdrawal.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Withdrawal request not found");
+            return "redirect:/manager/withdrawals";
+        }
+
+        Withdrawal withdrawal = optWithdrawal.get();
+
+        if (!withdrawal.getStatus().equals(Withdrawal.Status.PENDING)) {
+            redirectAttributes.addFlashAttribute("error", "Withdrawal request already processed");
+            return "redirect:/manager/withdrawals";
+        }
+
+        Wallet wallet = withdrawal.getWallet();
+        var user = wallet.getUser();
+
+        switch (action.toLowerCase()) {
+            case "approve":
+                withdrawal.setStatus(Withdrawal.Status.APPROVED);
+                wallet.setOnHold(wallet.getOnHold() - withdrawal.getAmount());
+                break;
+
+            case "reject":
+                withdrawal.setStatus(Withdrawal.Status.REJECTED);
+                wallet.setBalance(wallet.getBalance() + withdrawal.getAmount());
+                wallet.setOnHold(wallet.getOnHold() - withdrawal.getAmount());
+                walletService.save(wallet);
+                break;
+
+            default:
+                redirectAttributes.addFlashAttribute("error", "Invalid action");
+                return "redirect:/manager/withdrawals";
+        }
+
+        if (response != null && !response.isBlank()) {
+            withdrawal.setResponse(response.trim());
+        }
+
+        withdrawalService.save(withdrawal);
+
+        String formattedDate = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")
+                .format(withdrawal.getCreatedDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime());
+
+        String emailBody = """
+        Dear %s,
+
+        Your withdrawal request of %s VND created on %s has been %s.
+
+        Thank you,
+        EduTrack Team
+        """.formatted(
+                user.getFullName(),
+                String.format("%,d", withdrawal.getAmount()),
+                formattedDate,
+                withdrawal.getStatus().name().toLowerCase()
+        );
+
+        emailService.sendSimpleMail(
+                user.getEmail(),
+                "EduTrack: Withdrawal Request " + withdrawal.getStatus().name(),
+                emailBody
+        );
+
+        redirectAttributes.addFlashAttribute("success", "Withdrawal request " + action + "d successfully");
+        return "redirect:/manager/withdrawals";
     }
 }

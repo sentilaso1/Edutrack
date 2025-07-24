@@ -1,21 +1,27 @@
 <div class="sidebar" th:fragment="aside">
-    <div class="nav-item"><a href="/mentor"><i class="fas fa-home" aria-hidden="true"></i> Dashboard</a></div>
+    <a th:href="@{/mentor}" class="nav-item"><i class="fas fa-home" aria-hidden="true"></i> Dashboard</a>
 
-    <div class="nav-item"><a href="/mentor/cv/create"><i class="fas fa-file-alt" aria-hidden="true"></i> My CV</a></div>
+    <a th:href="@{/mentor/cv/create}" class="nav-item"><i class="fas fa-file-alt" aria-hidden="true"></i> My CV</a>
 
-    <div class="nav-item"><a href="/mentor/schedule"><i class="fas fa-calendar-week" aria-hidden="true"></i> Weekly Schedule</a></div>
+    <a th:href="@{/mentor/schedule}" class="nav-item"><i class="fas fa-calendar-week" aria-hidden="true"></i> Weekly Schedule</a>
 
-    <div class="nav-item"><a href="/mentor/price"><i class="fas fa-money-bill" aria-hidden="true"></i> Pricing</a></div>
+    <a th:href="@{/mentor/price}" class="nav-item"><i class="fas fa-money-bill" aria-hidden="true"></i> Pricing</a>
 
-    <div class="nav-item"><a href="/mentor/requests"><i class="fas fa-calendar-check" aria-hidden="true"></i> Reschedule Request</a></div>
+    <a th:href="@{/mentor/requests}" class="nav-item"><i class="fas fa-calendar-check" aria-hidden="true"></i> Reschedule Request</a>
 
-    <div class="nav-item"><a href="/mentor/classes"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> My Classes</a></div>
+    <a th:href="@{/mentor/classes}" class="nav-item"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> My Classes</a>
 
-    <div class="nav-item"><a style="display: inline-flex; align-items: center;" href="/mentor/censor-class?status=PENDING"><i class="fas fa-tasks" aria-hidden="true" style="margin-right: 5px;"></i><span style="margin-right: 5px;">Class Request</span> <span style="background-color: #b52935; width: 1.5em; aspect-ratio: 1/1; border-radius: 50%; text-align: center; color: white" th:text="${numberOfPending}"></span> </a></div>
+    <a href="/mentor/censor-class?status=PENDING" class="nav-item">
+        <div style="display: inline-flex; align-items: center;">
+            <i class="fas fa-tasks" aria-hidden="true" style="margin-right: 5px;"></i>
+            <span style="margin-right: 5px;">Class Request</span>
+            <span style="background-color: #b52935; width: 1.5em; aspect-ratio: 1/1; border-radius: 50%; text-align: center; color: white" th:text="${numberOfPending}"></span>
+        </div>
+    </a>
 
-    <div class="nav-item"><a href="/mentor/working-date"><i class="fas fa-briefcase" aria-hidden="true"></i> My Working Schedule</a></div>
+    <a th:href="@{/mentor/working-date}" class="nav-item"><i class="fas fa-briefcase" aria-hidden="true"></i> My Working Schedule</a>
 
-    <div class="nav-item"><a href="/mentor/your-review"><i class="fas fa-comment" aria-hidden="true"></i> Reviews</a></div>
+    <a th:href="@{/mentor/your-review}" class="nav-item"><i class="fas fa-comment" aria-hidden="true"></i> Reviews</a>
 
-    <div class="nav-item"><a href="/profile"><i class="fas fa-user-circle"></i> Profile</a></div>
+    <a th:href="@{/profile}" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>
 </div>

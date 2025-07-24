@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>EduTrack - Withdrawal Requests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .overlay-bg {
+            background: rgba(0,0,0,0.6);
+        }
+    </style>
+</head>
+<body>
+<th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
+
+<div class="ml-64 min-h-screen p-10">
+    <h1 class="text-2xl font-bold mb-6">Withdrawal Requests</h1>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full border border-blue-200 rounded-lg">
+                <thead>
+                <tr class="bg-blue-600 text-white text-sm text-left">
+                    <th class="px-4 py-2">User</th>
+                    <th class="px-4 py-2">Amount</th>
+                    <th class="px-4 py-2">Status</th>
+                    <th class="px-4 py-2">Created Date</th>
+                    <th class="px-4 py-2">Updated Date</th>
+                    <th class="px-4 py-2">Banking QR</th>
+                    <th class="px-4 py-2">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="withdrawal : ${withdrawals}" class="text-sm border-b">
+                    <td class="px-4 py-3 text-gray-800" th:text="${withdrawal.wallet.user.fullName}">User Name</td>
+                    <td class="px-4 py-3 text-gray-800"
+                        th:text="${T(java.lang.String).format('%,d', withdrawal.amount)}">Amount</td>
+                    <td class="px-4 py-3 text-gray-800" th:text="${withdrawal.status}">Status</td>
+                    <td class="px-4 py-3 text-gray-800"
+                        th:text="${#dates.format(withdrawal.createdDate, 'dd MMM yyyy HH:mm')}">Created Date</td>
+                    <td class="px-4 py-3 text-gray-800"
+                        th:text="${#dates.format(withdrawal.updatedDate, 'dd MMM yyyy HH:mm')}">Updated Date</td>
+                    <td class="px-4 py-3 text-gray-800">
+                        <img th:if="${bankingQrImageMap[withdrawal.wallet.user.id] != null}"
+                             th:src="'data:image/png;base64,' + ${bankingQrImageMap[withdrawal.wallet.user.id]}"
+                             alt="Banking QR"
+                             class="w-20 h-20 object-contain rounded border cursor-pointer qr-thumb"
+                             th:attr="data-qr='data:image/png;base64,' + ${bankingQrImageMap[withdrawal.wallet.user.id]}"/>
+                        <span th:if="${bankingQrImageMap[withdrawal.wallet.user.id] == null}" class="text-gray-400">No QR</span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-800 flex flex-col gap-1">
+                        <div th:if="${withdrawal.status != null and withdrawal.status.name() == 'PENDING'}">
+                            <form th:action="@{/manager/withdrawals/{id}/resolve(id=${withdrawal.id})}" method="post">
+                                <input type="hidden" name="action" value="approve"/>
+                                <button type="submit"
+                                        class="w-full inline-flex justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition">
+                                    Approve
+                                </button>
+                            </form>
+                            <form th:action="@{/manager/withdrawals/{id}/resolve(id=${withdrawal.id})}" method="post">
+                                <input type="hidden" name="action" value="reject"/>
+                                <button type="submit"
+                                        class="w-full inline-flex justify-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition">
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+                        <div th:unless="${withdrawal.status != null and withdrawal.status.name() == 'PENDING'}">
+                            <span class="text-gray-400 italic">Resolved</span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay for QR image preview -->
+<div id="qrOverlay" class="fixed inset-0 z-50 flex items-center justify-center overlay-bg hidden">
+    <div class="relative bg-white rounded-xl shadow-lg p-6 max-w-full max-h-full flex flex-col items-center">
+        <button id="closeOverlay"
+                class="absolute top-2 right-2 px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-600 transition text-lg font-bold"
+                aria-label="Close">
+            &times;
+        </button>
+        <img id="qrOverlayImg" src="" alt="Enlarged QR"
+             style="max-width:90vw; max-height:80vh; object-fit:contain;"/>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const overlay = document.getElementById('qrOverlay');
+        const overlayImg = document.getElementById('qrOverlayImg');
+        const closeBtn = document.getElementById('closeOverlay');
+        document.querySelectorAll('.qr-thumb').forEach(el => {
+            el.addEventListener('click', () => {
+                overlayImg.src = el.getAttribute('data-qr');
+                overlay.classList.remove('hidden');
+            });
+        });
+        closeBtn.addEventListener('click', () => {
+            overlay.classList.add('hidden');
+            overlayImg.src = '';
+        });
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) {
+                overlay.classList.add('hidden');
+                overlayImg.src = '';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
