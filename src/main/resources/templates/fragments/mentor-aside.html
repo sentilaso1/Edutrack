@@ -1,16 +1,27 @@
 <div class="sidebar" th:fragment="aside">
-    <a class="logo">
-        <img style="width: 100%; aspect-ratio: 1/1;"
-                th:src="@{/assets/images/logo.svg}"
-                width="145"
-                height="27"
-                alt="Youdemi home"
-        />
+    <a th:href="@{/mentor}" class="nav-item"><i class="fas fa-home" aria-hidden="true"></i> Dashboard</a>
+
+    <a th:href="@{/mentor/cv/create}" class="nav-item"><i class="fas fa-file-alt" aria-hidden="true"></i> My CV</a>
+
+    <a th:href="@{/mentor/schedule}" class="nav-item"><i class="fas fa-calendar-week" aria-hidden="true"></i> Weekly Schedule</a>
+
+    <a th:href="@{/mentor/price}" class="nav-item"><i class="fas fa-money-bill" aria-hidden="true"></i> Pricing</a>
+
+    <a th:href="@{/mentor/requests}" class="nav-item"><i class="fas fa-calendar-check" aria-hidden="true"></i> Reschedule Request</a>
+
+    <a th:href="@{/mentor/classes}" class="nav-item"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> My Classes</a>
+
+    <a href="/mentor/censor-class?status=PENDING" class="nav-item">
+        <div style="display: inline-flex; align-items: center;">
+            <i class="fas fa-tasks" aria-hidden="true" style="margin-right: 5px;"></i>
+            <span style="margin-right: 5px;">Class Request</span>
+            <span style="background-color: #b52935; width: 1.5em; aspect-ratio: 1/1; border-radius: 50%; text-align: center; color: white" th:text="${numberOfPending}"></span>
+        </div>
     </a>
-    <h2>Mentor Site</h2>
-    <div class="nav-item"><a href="/mentor"><i class="fa fa-home" aria-hidden="true"></i> Dashboard</a></div>
-    <div class="nav-item"><a href="/mentor/cv/create"><i class="fa fa-file-text-o" aria-hidden="true"></i> My CV</a></div>
-    <div class="nav-item"><a href="/mentor/schedule"><i class="fa fa-calendar" aria-hidden="true"></i> Weekly Schedule</a></div>
-    <div class="nav-item"><a href="/mentor/sensor-class?status=PENDING"><i class="fa fa-list" aria-hidden="true"></i> Request Class</a> <span>10</span></div>
-    <div class="nav-item"><a href="/mentor/working-date"><i class="fa fa-briefcase" aria-hidden="true"></i> My Working Schedule</a></div>
+
+    <a th:href="@{/mentor/working-date}" class="nav-item"><i class="fas fa-briefcase" aria-hidden="true"></i> My Working Schedule</a>
+
+    <a th:href="@{/mentor/your-review}" class="nav-item"><i class="fas fa-comment" aria-hidden="true"></i> Reviews</a>
+
+    <a th:href="@{/profile}" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>
 </div>

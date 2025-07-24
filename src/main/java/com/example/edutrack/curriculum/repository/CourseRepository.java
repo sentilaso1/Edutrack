@@ -112,4 +112,6 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     );
 
     Long countByIsOpen(Boolean isOpen);
+
+    Page<Course> findByIdNotIn(List<UUID> ids, Pageable pageable);
 }

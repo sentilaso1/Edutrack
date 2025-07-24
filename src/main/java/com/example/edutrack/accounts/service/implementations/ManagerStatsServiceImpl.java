@@ -96,8 +96,7 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
                 Long activeCourses = courseRepository.countByIsOpen(true);
                 stats.setActiveCourses(activeCourses != null ? activeCourses.intValue() : 0);
 
-                // Dữ liệu mẫu cho các thống kê khác
-                setMockData(stats);
+                stats.setSatisfactionRate(94.2);
 
                 // Lấy dữ liệu biểu đồ doanh thu
                 stats.setRevenueChart(getRevenueChartData(period, startDate));
@@ -106,22 +105,6 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
                 stats.setTopMentors(getTopMentors(startDate));
 
                 return stats;
-        }
-        
-        private void setMockData(ManagerStatsDTO stats) {
-                stats.setSatisfactionRate(94.2);
-                stats.setNetProfit(1200000000.0);
-                stats.setNetProfitGrowth(22.4);
-                stats.setOperatingCost(850000000.0);
-                stats.setOperatingCostGrowth(-5.2);
-                stats.setAvgROI(340.0);
-                stats.setRoiGrowth(18.7);
-                stats.setChurnRate(12.5);
-                stats.setChurnGrowth(-3.1);
-                stats.setCac(285000.0);
-                stats.setCacGrowth(8.3);
-                stats.setLtv(2800000.0);
-                stats.setLtvGrowth(15.6);
         }
         
         public List<RevenueChartDTO> getRevenueChartData(String period, LocalDateTime startDate) {

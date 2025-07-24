@@ -7,4 +7,5 @@ import com.example.edutrack.accounts.model.ScheduledJob;
 
 public interface ScheduledJobRepository extends JpaRepository<ScheduledJob, Long> {
         Page<ScheduledJob> findByNameContainingIgnoreCase(String name, Pageable pageable);
+        int countByActive(boolean active);
 }

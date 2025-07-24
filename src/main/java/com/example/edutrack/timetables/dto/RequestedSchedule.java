@@ -34,4 +34,13 @@ public class RequestedSchedule implements Serializable {
         return requestedDate;
     }
 
+    @Override
+    public String toString() {
+        return "RequestedSchedule{" +
+               "slot=" + slot +
+               ", day=" + day +
+               ", requestedDate=" + requestedDate +
+               '}';
+    }
+
 }

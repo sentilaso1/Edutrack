@@ -4,15 +4,15 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.model.*;
-import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeRepository;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -113,7 +113,11 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
 
     @Override
     public void insertMentorAvailableTime(LocalDate startDate, LocalDate endDate, Mentor mentor){
+        System.out.println("end date" + endDate.toString());
         List<MentorAvailableTime> mentorAvailableTimes = findAllMentorAvailableTimeByEndDate(mentor, endDate);
+        if(mentorAvailableTimes.isEmpty()) {
+            return;
+        }
         List<Slot> slots = mentorAvailableTimes.stream().map(mat -> mat.getId().getSlot()).collect(Collectors.toList());
         List<Day> days = mentorAvailableTimes.stream().map(mat -> mat.getId().getDay()).collect(Collectors.toList());
 
@@ -129,7 +133,7 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
 
         int i = days.indexOf(Day.valueOf(currentTime.getDayOfWeek().name()));
 
-        while(currentTime.isBefore(endDate)) {
+        while(!currentTime.isAfter(endDate)) {
             Slot currentSlot = slots.get(i);
 
             MentorAvailableTimeDetails schedule = new MentorAvailableTimeDetails();
@@ -154,5 +158,28 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
         }
     }
 
+    @Override
+    public List<MentorAvailableTimeDetails> findByMentorIdAndStatusAndDateRange(
+            UUID mentorId,
+            LocalDate startDate,
+            LocalDate endDate
+    ){
+        return  mentorAvailableTimeRepository.findByMentorIdAndStatusAndDateRange(mentorId, startDate, endDate);
+    }
+
+    @Override
+    public List<MentorAvailableSlotDTO> findOnlyApprovedSlotsByEndDate(Mentor mentor, LocalDate endDate) {
+        return mentorAvailableTimeRepository.findApprovedSlotsByEndDate(mentor, endDate, MentorAvailableTime.Status.APPROVED);
+    }
+
+    @Override
+    public Optional<LocalDate> findEarliestStartDateByMentorId(UUID mentorId) {
+        return mentorAvailableTimeRepository.findEarliestStartDateByMentorId(mentorId);
+    }
+
+    @Override
+    public List<MentorAvailableTimeDetails> getAvailableSlotsForMentor(UUID mentorId, LocalDate startDate, LocalDate endDate) {
+        return mentorAvailableTimeDetailsRepository.findByMentorIdAndMenteeIsNullAndDateBetween(mentorId, startDate, endDate);
+    }
 
 }

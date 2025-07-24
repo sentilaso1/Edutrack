@@ -3,10 +3,7 @@ package com.example.edutrack.timetables.repository;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
-import com.example.edutrack.timetables.model.Day;
-import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.model.MentorAvailableTimeId;
-import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -88,4 +86,24 @@ public interface MentorAvailableTimeRepository extends JpaRepository<MentorAvail
 
     @Query("SELECT MAX(mat.id.endDate) FROM MentorAvailableTime mat WHERE mat.mentor = :mentor AND mat.status = :enumValue")
     LocalDate findMaxEndDateByStatus(Mentor mentor, MentorAvailableTime.Status enumValue);
+
+    @Query("SELECT mat FROM MentorAvailableTimeDetails mat WHERE mat.mentor.id = :mentorId " +
+            "AND mat.date <= :endDate " +
+            "AND mat.date >= :startDate " +
+            "AND mat.mentee IS NOT NULL")
+    List<MentorAvailableTimeDetails> findByMentorIdAndStatusAndDateRange(
+            @Param("mentorId") UUID mentorId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    @Query("SELECT DISTINCT new com.example.edutrack.timetables.dto.MentorAvailableSlotDTO(mat.id.slot, mat.id.day) " +
+            "FROM MentorAvailableTime mat " +
+            "WHERE mat.mentor = :mentor " +
+            "AND mat.id.endDate = :endDate " +
+            "AND mat.status = :status")
+    List<MentorAvailableSlotDTO> findApprovedSlotsByEndDate(Mentor mentor, LocalDate endDate, MentorAvailableTime.Status status);
+
+    @Query("SELECT MIN(mat.id.startDate) FROM MentorAvailableTime mat WHERE mat.mentor.id = :mentorId")
+    Optional<LocalDate> findEarliestStartDateByMentorId(@Param("mentorId") UUID mentorId);
 }

@@ -232,15 +232,15 @@
             border-radius: 25px;
             background: #f2f7fb;
             color: #222;
-            border: 1.5px solid #007bff;
+            border: 1.5px solid #fe8189;
             cursor: pointer;
             transition: all 0.16s;
             font-size: 1.07em;
         }
         #interest-modal-backdrop .tag.selected {
-            background: #007bff;
+            background: #fe8189;
             color: #fff;
-            border-color: #007bff;
+            border-color: #fe8189;
         }
         #interest-modal-backdrop .modal-actions {
             margin-top: 20px;
@@ -249,7 +249,7 @@
             justify-content: center;
         }
         #interest-modal-backdrop .btn-primary {
-            background: #007bff; color: #fff; border: none;
+            background: #fe8189; color: #fff; border: none;
             border-radius: 7px; padding: 9px 26px; font-size: 1em; cursor: pointer;
         }
         #interest-modal-backdrop .btn-primary:disabled { background: #bbb; }
@@ -258,7 +258,7 @@
             border-radius: 7px; padding: 9px 26px; font-size: 1em; cursor: pointer;
         }
         #interest-modal-backdrop input[type="text"] {
-            margin-top: 8px; width: 89%; padding: 7px 12px; border-radius: 6px; border: 1px solid #c0c0c0; font-size: 1em;
+            margin-top: 8px; width: 89%; padding: 7px 12px; border-radius: 6px; border: 1px solid #fe8189; font-size: 1em;
         }
         #interest-modal-backdrop #interest-msg {
             color: #d22632;
@@ -267,7 +267,108 @@
             font-size: 1em;
         }
 
+        .no-tags-msg {
+            padding: 1rem;
+            color: #888;
+            font-style: italic;
+            text-align: center;
+        }
 
+         .contact-button {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 64px;
+            height: 64px;
+            background-color: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            z-index: 1000;
+        }
+        .contact-button:hover {
+            transform: scale(1.1);
+            background-color: #1d4ed8;
+        }
+        .contact-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .contact-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        .contact-modal-content {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+        .contact-modal.active .contact-modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .contact-modal-content h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        .contact-modal-content input,
+        .contact-modal-content textarea {
+            font-size: 1.125rem;
+            font-weight: 400;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .contact-modal-content input:focus,
+        .contact-modal-content textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .contact-modal-content label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .contact-modal-content button[type="submit"] {
+            font-size: 1.125rem;
+            font-weight: 600;
+            background-color: #2563eb;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        .contact-modal-content button[type="submit"]:hover {
+            background-color: #1d4ed8;
+        }
     </style>
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
@@ -285,6 +386,7 @@
 -->
 
 <th:block th:insert="~{fragments/header :: header}"></th:block>
+<div th:replace="fragments/chat-box :: chatbox"></div>
 <main>
     <article>
 
@@ -342,7 +444,7 @@
                                 <p class="title-sm popular-label">🔥Popular</p>
                             </div>
 
-                            <a th:href="@{'/courses'(size_page=6, subject=${tag.tag.id})}"
+                            <a th:href="@{'/courses-only'(size_page=6, subject=${tag.tag.id})}"
                                class="layer-link"
                                aria-label="Browse courses in this category"></a>
                         </div>
@@ -350,7 +452,7 @@
                 </ul>
 
 
-                <a th:href="@{'/courses'(size_page=6, subject=${allCourseTagIds})}" class="btn btn-primary">
+                <a th:href="@{'/courses-only'(size_page=6, subject=${allCourseTagIds})}" class="btn btn-primary">
                     View All Categories
                 </a>
 
@@ -475,7 +577,7 @@
                 <div class="carousel-indicators" id="indicators1"></div>
 
                 <div class="view-more-wrapper text-center" style="margin-top: 30px;">
-                    <a th:href="@{/courses}" class="btn btn-primary">View More</a>
+                    <a th:href="@{/courses-only}" class="btn btn-primary">View More</a>
                 </div>
             </div>
         </section>
@@ -535,7 +637,7 @@
                     <button class="carousel-nav carousel-next" onclick="moveCarousel('carousel2', 1)">›</button>
                 </div>
                 <div class="view-more-wrapper text-center" style="margin-top: 30px;">
-                    <a th:href="@{/courses}" class="btn btn-primary">View More</a>
+                    <a th:href="@{/courses-only}" class="btn btn-primary">View More</a>
                 </div>
             </div>
         </section>
@@ -610,32 +712,53 @@
 <!--
   - #FOOTER
 -->
-<div th:replace="fragments/footer :: footer"></div>
-<div class="container" style="margin-top: 40px; margin-bottom: 10px;">
-    <h2 class="headline-md section-title text-center">Contact Us</h2>
-    <form th:action="@{/contact/send}" method="post" enctype="multipart/form-data" class="contact-form" style="margin-top: 20px;">
-        <div class="grid-list">
-            <input type="email" name="email" placeholder="Your Email" required class="title-sm footer-link"
-                   style="padding: 12px; border-radius: 8px; width: 100%; border: 1px solid #ccc;">
-            <input type="text" name="subject" placeholder="Subject" required class="title-sm footer-link"
-                   style="padding: 12px; border-radius: 8px; width: 100%; border: 1px solid #ccc;">
-            <input type="text" name="phone" placeholder="Phone Number" class="title-sm footer-link"
-                   style="padding: 12px; border-radius: 8px; width: 100%; border: 1px solid #ccc;">
-        </div>
-        <textarea name="message" placeholder="Message" required class="title-sm footer-link"
-                  style="margin-top: 15px; padding: 12px; border-radius: 8px; width: 100%; border: 1px solid #ccc; min-height: 120px;"></textarea>
-        <div style="margin-top: 12px;">
-            <label class="title-sm">Attach File:</label>
-            <input type="file" name="file" class="title-sm footer-link" />
-        </div>
-        <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Send Message</button>
-    </form>
+<!-- Contact Button -->
+<div class="contact-button" onclick="toggleContactForm()">
+    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+        </path>
+    </svg>
 </div>
+
+<!-- Contact Modal -->
+<div class="contact-modal" id="contactModal">
+    <div class="contact-modal-content">
+        <h2>Contact Us</h2>
+        <form th:action="@{/contact/send}" method="post" enctype="multipart/form-data">
+            <div class="mb-6">
+                <label for="email">Your Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" class="w-full" required>
+            </div>
+            <div class="mb-6">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" placeholder="Enter subject" class="w-full" required>
+            </div>
+            <div class="mb-6">
+                <label for="phone">Your Phone</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" class="w-full"
+                    required>
+            </div>
+            <div class="mb-6">
+                <label for="message">Your Message</label>
+                <textarea id="message" name="message" placeholder="Enter your message" class="w-full" rows="5"
+                    required></textarea>
+            </div>
+            <div class="mb-6">
+                <label for="file">Attach File</label>
+                <input type="file" id="file" name="file" class="w-full">
+            </div>
+            <button type="submit">Send Message</button>
+        </form>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
 
 <!-- Interest Selection Modal Layer -->
 <div id="interest-modal-backdrop" th:if="${showInterestModal}" style="display:flex;">
     <div class="interest-modal">
-        <h2>Select Your Interests</h2>
+        <h2>What skills do you want to learn?</h2>
         <input id="interest-search" type="text" placeholder="Search tags..." autocomplete="off"/>
         <div id="interest-tags" class="tag-list"></div>
         <div class="modal-actions">
@@ -654,8 +777,12 @@
             }, 5000);
         }
     });
+    function toggleContactForm() {
+        const modal = document.getElementById('contactModal');
+        modal.classList.toggle('active');
+    }
 </script>
-
+<script src="https://cdn.tailwindcss.com"></script>
 <script th:inline="javascript">
     function moveCarousel(id, direction) {
         const container = document.getElementById(id);
@@ -700,7 +827,17 @@
         function renderInterestTags() {
             const tagsDiv = document.getElementById('interest-tags');
             tagsDiv.innerHTML = '';
+
             if (!Array.isArray(allInterestTags)) return;
+
+            if (allInterestTags.length === 0) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'no-tags-msg';
+                msgDiv.textContent = 'No tags found.';
+                tagsDiv.appendChild(msgDiv);
+                return;
+            }
+
             allInterestTags.forEach(tag => {
                 const tagDiv = document.createElement('div');
                 tagDiv.className = 'tag' + (selectedInterestTagIds.has(tag.id) ? ' selected' : '');

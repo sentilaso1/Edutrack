@@ -1,33 +1,68 @@
 package com.example.edutrack.timetables.service.implementation;
 
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
+import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
+import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
+import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
+import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
+    private final CourseMentorRepository courseMentorRepository;
+    private final EnrollmentScheduleRepository enrollmentScheduleRepository;
+    private final EnrollmentScheduleService enrollmentScheduleService;
+    private final MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository;
 
-    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository) {
+
+    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository, CourseMentorRepository courseMentorRepository, EnrollmentScheduleRepository enrollmentScheduleRepository, EnrollmentScheduleService enrollmentScheduleService, MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository) {
         this.enrollmentRepository = enrollmentRepository;
+        this.courseMentorRepository = courseMentorRepository;
+        this.enrollmentScheduleRepository = enrollmentScheduleRepository;
+        this.enrollmentScheduleService = enrollmentScheduleService;
+        this.mentorAvailableTimeDetailsRepository = mentorAvailableTimeDetailsRepository;
     }
 
     @Override
     public List<CourseMentor> getPopularCoursesForGuest(int maxCount) {
-        Pageable topPopular= PageRequest.of(0, maxCount);
-        return enrollmentRepository.findPopularCoursesByEnrollmentCount(topPopular, Enrollment.EnrollmentStatus.APPROVED);
+        Pageable topPopular = PageRequest.of(0, maxCount);
+
+        // Step 1: Fetch popular courses
+        List<CourseMentor> popularCourses = enrollmentRepository.findPopularCoursesByEnrollmentCount(topPopular, Enrollment.EnrollmentStatus.APPROVED);
+
+        // Step 2: If not enough, fetch random CourseMentors to fill the gap
+        if (popularCourses.size() < maxCount) {
+            int remaining = maxCount - popularCourses.size();
+
+            List<UUID> existingCourseMentorIds = popularCourses.stream()
+                    .map(CourseMentor::getId)
+                    .toList();
+
+            List<CourseMentor> fillerCourses = courseMentorRepository.findRandomCourseMentorsExcluding(existingCourseMentorIds, PageRequest.of(0, remaining));
+            popularCourses.addAll(fillerCourses);
+        }
+
+        return popularCourses;
     }
 
     public int getStudentCountByCourseMentor(UUID courseMentorId) {
@@ -54,7 +89,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public List<Enrollment> getEnrollmentsByMenteeId(UUID menteeId) {
-        return enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+        return enrollmentRepository.findEnrollmentsByMenteeIdWithStatuses(
+                menteeId, Enrollment.EnrollmentStatus.APPROVED
+        );
     }
 
     @Override
@@ -79,9 +116,73 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public List<Enrollment> findOngoingEnrollments(UUID mentor) {
-        LocalDate today = LocalDate.now();
-        return enrollmentRepository.findOngoingEnrollments(today, mentor);
+    public List<Enrollment> findOngoingEnrollments(Mentor mentor) {
+        return enrollmentRepository.findOngoingEnrollments(mentor);
+    }
+
+    @Override
+    public List<Enrollment> findCompletedEnrollments(Mentor mentor) {
+        return enrollmentRepository.findCompletedEnrollments(mentor);
+    }
+
+    @Override
+    public Double getPercentComplete(Enrollment enrollment){
+        return enrollmentRepository.getPercentComplete(enrollment);
+    }
+
+    @Override
+    public Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable) {
+        return enrollmentRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Page<Enrollment> findEnrollmentsWithFilters(Mentor mentor, String status, String courseName, String menteeName, Pageable pageable) {
+        List<Enrollment> enrollments = "ONGOING".equalsIgnoreCase(status)
+                ? enrollmentRepository.findOngoingEnrollments(mentor)
+                : enrollmentRepository.findCompletedEnrollments(mentor);
+
+        if (courseName != null && !courseName.trim().isEmpty()) {
+            enrollments = enrollments.stream()
+                    .filter(e -> e.getCourseMentor().getCourse().getName().toLowerCase().contains(courseName.toLowerCase()))
+                    .toList();
+        }
+
+        if (menteeName != null && !menteeName.trim().isEmpty()) {
+            enrollments = enrollments.stream()
+                    .filter(e -> e.getMentee().getFullName().toLowerCase().contains(menteeName.toLowerCase()))
+                    .toList();
+        }
+
+        Comparator<Enrollment> comparator = Comparator.comparing(Enrollment::getCreatedDate);
+        if (pageable.getSort().stream().anyMatch(order -> order.getProperty().equals("createdDate") && order.getDirection().isDescending())) {
+            comparator = comparator.reversed();
+        }
+        enrollments = enrollments.stream().sorted(comparator).toList();
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), enrollments.size());
+        List<Enrollment> pageContent = enrollments.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, enrollments.size());
+    }
+
+    public List<Mentor> findAllUniqueMentors() {
+        return enrollmentRepository.findAllUniqueMentors();
+    }
+
+    @Override
+    public List<Mentee> findAllUniqueMentees() {
+        return enrollmentRepository.findAllUniqueMentees();
+    }
+
+    @Override
+    public int countPendingClassRequests(Mentor mentor) {
+        return enrollmentRepository.countPendingClassRequest(mentor);
+    }
+
+    @Override
+    public int countTeachingMentees(Mentor mentor) {
+        return enrollmentRepository.countTeachingMentees(mentor);
     }
 
     @Override
@@ -94,7 +195,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.findByMenteeIdAndEnrollmentStatus(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
 
-
     @Override
     public List<Mentor> findMentorsByMentee(UUID menteeId) {
         return enrollmentRepository.findDistinctMentorsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
@@ -105,4 +205,100 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.findCourseMentorByMentee(menteeId, Enrollment.EnrollmentStatus.APPROVED);
     }
 
+    @Override
+    public List<Enrollment> findPendingEnrollmentsForMentee(UUID menteeId) {
+        return enrollmentRepository.findByMenteeIdAndStatus(
+                menteeId,
+                Enrollment.EnrollmentStatus.PENDING
+        );
+    }
+
+    @Override
+    public int getNumberOfPendingSlot(Mentor mentor, LocalDate date, Slot slot){
+        List<Enrollment> enrollment = enrollmentRepository.findByStatus(Enrollment.EnrollmentStatus.PENDING,mentor.getId());
+        List<String> summaries = enrollment.stream().map(Enrollment::getScheduleSummary).toList();
+        int count = 0;
+        for(String summary : summaries){
+            List<RequestedSchedule> requestedScheduleList = enrollmentScheduleService.findStartLearningTime(summary);
+            for(RequestedSchedule requestedSchedule : requestedScheduleList){
+                if(requestedSchedule.getSlot().equals(slot) && requestedSchedule.getRequestedDate().equals(date)){
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public List<Enrollment> getDuplicatedSchedules(Enrollment enrollment) {
+        List<Enrollment> pendingEnrollments = enrollmentRepository.findByStatus(Enrollment.EnrollmentStatus.PENDING, enrollment.getCourseMentor().getMentor().getId());
+
+        String[] schedules = enrollment.getScheduleSummary().split(";");
+        Iterator<Enrollment> iterator = pendingEnrollments.iterator();
+
+        while (iterator.hasNext()) {
+            Enrollment pendingEnrollment = iterator.next();
+            if (!isContainSchedule(pendingEnrollment, schedules) || (long) pendingEnrollment.getId() == enrollment.getId()) {
+                iterator.remove();
+            }
+        }
+
+        return pendingEnrollments;
+    }
+
+    private boolean isContainSchedule(Enrollment pendingEnrollment, String[] schedule) {
+        String summary = pendingEnrollment.getScheduleSummary();
+        for(String s : schedule){
+            if(summary.contains(s.trim())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public long countStudentsByMentor(Mentor mentor) {
+        return enrollmentRepository.countByCourseMentor_MentorAndStatus(mentor, Enrollment.EnrollmentStatus.APPROVED);
+    }
+
+    @Override
+    public Boolean isHavingPendingInSlot(Mentee mentee, Slot slot, LocalDate date) {
+        List<Enrollment> enrollmentList = findPendingEnrollmentsForMentee(mentee.getId());
+        if(enrollmentList.isEmpty()){
+            return false;
+        }
+        for (Enrollment enrollment : enrollmentList) {
+            String pair = date + "," + slot;
+            if(enrollment.getScheduleSummary().contains(pair)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isValidRequest(Mentee mentee, Mentor mentor, Slot slot, LocalDate date){
+        return mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, date) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, date, mentee) && !isHavingPendingInSlot(mentee, slot, date) && !isPendingInRescheduling(date, mentor.getId(), slot);
+    }
+
+    private boolean isPendingInRescheduling(LocalDate date, UUID mentorId, Slot slot) {
+        List<EnrollmentSchedule> pendingRequests = enrollmentScheduleService.getAllPendingSlotsInDateRange(date, date, mentorId);
+        if(pendingRequests.isEmpty()){
+            return false;
+        }
+        return pendingRequests.stream()
+                .anyMatch(pending -> pending.getRequestedNewDate() != null &&
+                                     pending.getRequestedNewDate().equals(date) &&
+                                     pending.getRequestedNewSlot().equals(slot));
+    }
+
+    @Override
+    public Boolean isValidRequests(Mentee mentee, Mentor mentor, List<Slot> slots, List<LocalDate> date){
+        for(int i = 0; i < slots.size(); i++){
+            if(!isValidRequest(mentee, mentor, slots.get(i), date.get(i))){
+                return false;
+            }
+        }
+        return true;
+    }
 }

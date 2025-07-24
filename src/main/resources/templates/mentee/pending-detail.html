@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <style>
+        .main-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .page-title {
+            background-color: hsla(357, 100%, 75%, 0.99);
+            padding: 25px;
+            text-align: center;
+            color: white;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .page-title p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .mentor-info {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid hsla(357, 100%, 75%, 0.99);
+        }
+
+        .mentor-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .course-name {
+            background-color: #369f93;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .slots-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .slots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .slot-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 18px;
+            position: relative;
+        }
+
+        .slot-number {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background-color: #369f93;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 2px solid white;
+        }
+
+        .slot-date {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .slot-time {
+            font-size: 1rem;
+            color: hsla(357, 100%, 75%, 0.99);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .slot-weekday {
+            background-color: #f59e0b;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .stats {
+            background-color: #1e293b;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .cancel-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .slots-container {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="main-wrapper" style="margin-top: 120px; padding-bottom: 4rem; margin-bottom: 100px">
+    <div class="page-title">
+        <h1>Mentor Slot Registration</h1>
+        <p>Your scheduled mentoring session</p>
+    </div>
+
+    <div class="content">
+        <div class="mentor-info">
+            <div class="mentor-name" th:text="${enrollment.courseMentor.mentor.fullName}">Dr. Sarah Johnson</div>
+            <div class="course-name" th:text="${enrollment.courseMentor.course.name}">JavaScript Fundamentals</div>
+        </div>
+
+        <div class="slots-title">Registered Slots</div>
+
+        <div class="slots-container">
+            <div class="slot-card" th:each="item, iStat : ${startTime}">
+                <div class="slot-number" th:text="${iStat.index + 1}">1</div>
+                <div class="slot-date" th:text="${item.requestedDate}" >March 15, 2024</div>
+                <div class="slot-time" th:text="${item.slot.startTime + ' - ' + item.slot.endTime}">10:00 AM - 11:00 AM</div>
+                <div class="slot-weekday" th:text="${item.day}">Friday</div>
+            </div>
+        </div>
+
+        <form th:action="@{/pending-enrollments/{id}/cancel(id=${enrollment.id})}" method="post">
+            <button type="submit" class="cancel-btn">Cancel All Slots</button>
+        </form>
+    </div>
+
+    <div class="stats">
+        <strong>Total Registered Slots: 4</strong>
+    </div>
+</div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+</body>
+</html>

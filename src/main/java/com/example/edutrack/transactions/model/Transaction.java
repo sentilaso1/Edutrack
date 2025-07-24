@@ -83,6 +83,10 @@ public class Transaction {
         return amount;
     }
 
+    public Double getAbsoluteAmount() {
+        return Math.abs(amount);
+    }
+
     public void setAmount(Double amount) {
         this.amount = amount;
     }

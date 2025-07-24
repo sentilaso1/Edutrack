@@ -6,6 +6,7 @@ import com.example.edutrack.transactions.repository.BankingQrRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -17,7 +18,7 @@ public class BankingQrService {
         this.qrRepository = qrRepository;
     }
 
-    public BankingQR save(BankingQR qr) {
+    public BankingQR save(BankingQR qr) throws IOException {
         return qrRepository.save(qr);
     }
 

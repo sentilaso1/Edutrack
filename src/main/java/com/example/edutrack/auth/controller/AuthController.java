@@ -22,6 +22,10 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Optional;
 
 @Controller
@@ -29,12 +33,12 @@ public class AuthController {
     private final UserService userService;
     private final StaffService staffService;
 
-    @Autowired
     private RecaptchaService recaptchaService;
 
-    public AuthController(UserService userService, StaffService staffService) {
+    public AuthController(UserService userService, StaffService staffService, RecaptchaService recaptchaService) {
         this.userService = userService;
         this.staffService = staffService;
+        this.recaptchaService = recaptchaService;
     }
 
     @GetMapping("/login")
@@ -53,7 +57,7 @@ public class AuthController {
         return "auth/login";
     }
 
-    @GetMapping("/admin/login")
+    @GetMapping("/login/admin")
     public String showLoginAdminForm(HttpServletRequest request, Model model) {
         String adminFromCookie;
         Cookie[] cookies = request.getCookies();
@@ -75,6 +79,17 @@ public class AuthController {
         user.setGender("male");
         model.addAttribute("user", user);
         return "auth/signup";
+    }
+
+    private boolean isAtLeast20YearsOld(User user) {
+        Date birthDate = user.getBirthDate();
+        if (birthDate == null) return false;
+
+        LocalDate birthLocal = birthDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        return Period.between(birthLocal, LocalDate.now()).getYears() >= 20;
     }
 
     @PostMapping("/signup")
@@ -99,6 +114,33 @@ public class AuthController {
             model.addAttribute("error", "Email already exists");
             return "auth/signup";
         }
+
+        if("mentor".equals(role) && !isAtLeast20YearsOld(user)) {
+            model.addAttribute("error", "Mentor is at least 20 years old");
+            return "auth/signup";
+        }
+
+        if (user.getPassword().length() < 6) {
+            model.addAttribute("error", "Password must be at least 6 characters");
+            return "auth/signup";
+        }
+
+        if (user.getFullName().trim().split("\\s+").length < 2) {
+            model.addAttribute("error", "Full name must contain at least two words");
+            return "auth/signup";
+        }
+
+        if (!user.getPhone().matches("\\d{10}")) {
+            model.addAttribute("error", "Phone number must be 10 digits");
+            return "auth/signup";
+        }
+
+        LocalDate dob = user.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (Period.between(dob, LocalDate.now()).getYears() < 6) {
+            model.addAttribute("error", "You must be at least 6 years old");
+            return "auth/signup";
+        }
+
 
         if(!confirm_password.equals(user.getPassword())) {
             model.addAttribute("error", "Repeated password does not match original password");
@@ -126,6 +168,13 @@ public class AuthController {
         Optional<User> userOpt = userService.findByEmail(email);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+            if(!user.getIsActive()){
+                model.addAttribute("error", "Account is inactive");
+                return "auth/login";
+            }if(user.getIsLocked()){
+                model.addAttribute("error", "Account is locked");
+                return "auth/login";
+            }
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
             if (encoder.matches(password, user.getPassword())) {
                 session.setAttribute("loggedInUser", user);
@@ -147,7 +196,6 @@ public class AuthController {
                     session.setAttribute("role", "mentor");
                     return "redirect:/mentor";
                 }
-                return "redirect:/admin/login";
             }
         }
         model.addAttribute("error", "Invalid email or password");
@@ -155,7 +203,7 @@ public class AuthController {
         return "auth/login";
     }
 
-    @PostMapping("/admin/login")
+    @PostMapping("/login/admin")
     public String loginAdmin(@RequestParam String email,
                         @RequestParam String password,
                         @RequestParam(required = false) String rememberMe,
@@ -179,7 +227,13 @@ public class AuthController {
                     cookie.setPath("/");
                     response.addCookie(cookie);
                 }
-                return "redirect:/admin/home";
+                String role = user.getRole().name().toLowerCase();
+                session.setAttribute("role", role);
+                if("admin".equals(role)){
+                    return "redirect:/admin";
+                }else if("manager".equals(role)){
+                    return "redirect:/manager/dashboard";
+                }
             }
         }
         model.addAttribute("error", "Invalid email or password");

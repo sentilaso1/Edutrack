@@ -1,13 +1,12 @@
 package com.example.edutrack.curriculum.service.implementation;
 
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.dto.CourseFormDTO;
 import com.example.edutrack.curriculum.model.*;
-import com.example.edutrack.curriculum.repository.ApplicantsRepository;
+import com.example.edutrack.curriculum.repository.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
-import com.example.edutrack.curriculum.repository.CourseRepository;
-import com.example.edutrack.curriculum.repository.TagRepository;
-import com.example.edutrack.curriculum.repository.TeachingMaterialsRepository;
+import com.example.edutrack.profiles.model.CV;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +28,16 @@ public class CourseServiceImpl implements CourseService {
     private final CourseTagServiceImpl courseTagServiceImpl;
     private final CourseMentorServiceImpl courseMentorServiceImpl;
     private final ApplicantsRepository applicantsRepository;
+    private final MentorRepository mentorRepository;
+    private final CVCourseRepository cvCourseRepository;
 
     @Autowired
     public CourseServiceImpl(CourseRepository courseRepository,
                              TeachingMaterialsRepository teachingMaterialsRepository,
                              TagRepository tagRepository,
-                             CourseTagServiceImpl courseTagService, TeachingMaterialsImpl teachingMaterialsImpl, TagServiceImpl tagServiceImpl, CourseTagServiceImpl courseTagServiceImpl, CourseMentorServiceImpl courseMentorServiceImpl, ApplicantsRepository applicantsRepository) {
+                             CourseTagServiceImpl courseTagService, TeachingMaterialsImpl teachingMaterialsImpl, TagServiceImpl tagServiceImpl, CourseTagServiceImpl courseTagServiceImpl, CourseMentorServiceImpl courseMentorServiceImpl, ApplicantsRepository applicantsRepository,
+                             MentorRepository mentorRepository,
+                             CVCourseRepository cvCourseRepository) {
         this.courseRepository = courseRepository;
         this.teachingMaterialsRepository = teachingMaterialsRepository;
         this.tagRepository = tagRepository;
@@ -44,6 +47,8 @@ public class CourseServiceImpl implements CourseService {
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.courseMentorServiceImpl = courseMentorServiceImpl;
         this.applicantsRepository = applicantsRepository;
+        this.mentorRepository = mentorRepository;
+        this.cvCourseRepository = cvCourseRepository;
     }
 
     @Override
@@ -86,24 +91,6 @@ public class CourseServiceImpl implements CourseService {
                 courseTagService.addCourseTag(course.getId(), tag.getId());
             }
         }
-
-        if (courseFormDTO.getFiles() != null) {
-            for (MultipartFile file : courseFormDTO.getFiles()) {
-                if (!file.isEmpty()) {
-                    try {
-                        TeachingMaterial teachingMaterial = new TeachingMaterial();
-                        teachingMaterial.setCourse(course);
-                        teachingMaterial.setFile(file.getBytes());
-                        teachingMaterial.setName(file.getOriginalFilename());
-                        teachingMaterial.setFileType(file.getContentType());
-
-                        teachingMaterialsRepository.save(teachingMaterial);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
         return course.getId();
     }
 
@@ -128,31 +115,6 @@ public class CourseServiceImpl implements CourseService {
                     courseTagService.addCourseTag(course.getId(), tag.getId());
                 }
             }
-        }
-
-
-
-        if (courseFormDTO.getFiles() != null) {
-            for (MultipartFile file : courseFormDTO.getFiles()) {
-                if (!file.isEmpty()) {
-                    try {
-                        TeachingMaterial teachingMaterial = new TeachingMaterial();
-                        teachingMaterial.setCourse(course);
-                        teachingMaterial.setName(file.getOriginalFilename());
-                        teachingMaterial.setFile(file.getBytes());
-                        teachingMaterial.setFileType(file.getContentType());
-
-                        teachingMaterialsRepository.save(teachingMaterial);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("Lỗi khi lưu file " + file.getOriginalFilename(), e);
-                    }
-                } else {
-                    System.out.println("[DEBUG] File rỗng: " + file.getOriginalFilename());
-                }
-            }
-        } else {
-            System.out.println("[DEBUG] Không có file nào được upload.");
         }
     }
 
@@ -210,10 +172,11 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Map<UUID, List<Mentor>> getAcceptedMentorsForCourses(List<Course> courses){
-        Map<UUID, List<Mentor>>  courseMentorMap = new HashMap<>();
+        Map<UUID, List<Mentor>> courseMentorMap = new HashMap<>();
+        List<String> approvedStatuses = List.of(CV.STATUS_APPROVED, CV.STATUS_AIAPPROVED);
         for (Course course : courses) {
-            List<Mentor> acceptedMentor = applicantsRepository.findMentorsByCourseAndStatus(course, ApplicationStatus.ACCEPTED);
-            courseMentorMap.put(course.getId(), acceptedMentor);
+            List<Mentor> acceptedMentors = mentorRepository.findMentorsByCourseAndCVStatusIn(course, approvedStatuses);
+            courseMentorMap.put(course.getId(), acceptedMentors);
         }
         return courseMentorMap;
     }
@@ -222,7 +185,7 @@ public class CourseServiceImpl implements CourseService {
     public Map<UUID, Integer> getPendingApplicantCountForCourses(List<Course> courses) {
         Map<UUID, Integer> pendingCountMap = new HashMap<>();
         for (Course course : courses) {
-            int count = applicantsRepository.countByCourseAndStatus(course, ApplicationStatus.PENDING);
+            int count = cvCourseRepository.countByCourseAndCVStatus(course, CV.STATUS_PENDING);
             pendingCountMap.put(course.getId(), count);
         }
         return pendingCountMap;
@@ -253,4 +216,11 @@ public class CourseServiceImpl implements CourseService {
         this.delete(courseId);
     }
 
+    @Override
+    public Page<Course> findAllExcludingIds(List<UUID> excludeIds, Pageable pageable) {
+        if (excludeIds == null || excludeIds.isEmpty()) {
+            return courseRepository.findAll(pageable);
+        }
+        return courseRepository.findByIdNotIn(excludeIds, pageable);
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.edutrack.curriculum.repository;
 
 import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
 import org.springframework.data.domain.Page;
@@ -32,16 +33,11 @@ public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
     Optional<Feedback> findByMenteeAndCourseMentor(Mentee mentee, CourseMentor courseMentor);
     List<Feedback> findAllByCourseMentor(CourseMentor courseMentor);
     Optional<Feedback> findByMenteeIdAndCourseMentorId(UUID menteeId, UUID courseMentorId);
-    Page<Feedback> findByStatus(Feedback.Status status, Pageable pageable);
 
-    List<Feedback> findByStatus(Feedback.Status status);
+    List<Feedback> findByCourseMentor_Mentor_IdAndStatus(UUID mentorId, Feedback.Status status);
+    long countByCourseMentor_Mentor(Mentor mentor);
+    List<Feedback> findTop3ByCourseMentorOrderByCreatedDateDesc(CourseMentor courseMentor);
 
-    Page<Feedback> findByContentContainingIgnoreCaseOrMentee_FullNameContainingIgnoreCase(
-            String content, String fullName, Pageable pageable);
+    List<Feedback> findByCourseMentor_Mentor_Id(UUID mentorId);
 
-    Page<Feedback> findByStatusAndContentContainingIgnoreCaseOrStatusAndMentee_FullNameContainingIgnoreCase(
-            Feedback.Status status1, String content,
-            Feedback.Status status2, String fullName,
-            Pageable pageable
-    );
 }

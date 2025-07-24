@@ -13,8 +13,9 @@ public class FeedbackReport {
 
     public enum Status {
         PENDING,
+        AIREVIEWED,
         REVIEWED,
-        DISMISSED
+        HIDDEN
     }
 
     public enum Category {
@@ -41,7 +42,7 @@ public class FeedbackReport {
     @Column(nullable = false)
     private Category category; // Violation category
 
-    @Column(nullable = false, length = 512)
+    @Column(nullable = false)
     private String reason; // Free-text description
 
     @Enumerated(EnumType.STRING)

@@ -38,7 +38,7 @@ function showTab(tabId) {
     
         // Xử lý chuyển tab theo hash trên URL
         const hash = window.location.hash.replace('#', '');
-        const validTabs = ['profile', 'edit', 'avatar', 'notifications'];
+        const validTabs = ['profile', 'edit', 'avatar'];
         const tabToShow = validTabs.includes(hash) ? hash : 'profile';
         showTab(tabToShow);
     });

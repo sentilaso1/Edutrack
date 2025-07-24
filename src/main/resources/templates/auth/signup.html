@@ -4,210 +4,259 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!--=============== REMIXICONS ===============-->
-    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css}">
+    <title>Sign Up - EduTrack</title>
 
-    <!--=============== CSS ===============-->
+    <!-- Icons & Styles -->
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}">
+
     <link rel="stylesheet" th:href="@{/assets/css/login.css}">
 
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
-<body style="overflow: scroll;">
-<!--=============== LOGIN IMAGE ===============-->
-<svg class="login__blob" viewBox="0 0 566 840" xmlns="http://www.w3.org/2000/svg">
-    <mask id="mask0" mask-type="alpha">
-        <path d="M342.407 73.6315C388.53 56.4007 394.378 17.3643 391.538
-            0H566V840H0C14.5385 834.991 100.266 804.436 77.2046 707.263C49.6393
-            591.11 115.306 518.927 176.468 488.873C363.385 397.026 156.98 302.824
-            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z"/>
-    </mask>
+<body style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
 
-    <g mask="url(#mask0)">
-        <path d="M342.407 73.6315C388.53 56.4007 394.378 17.3643 391.538
-            0H566V840H0C14.5385 834.991 100.266 804.436 77.2046 707.263C49.6393
-            591.11 115.306 518.927 176.468 488.873C363.385 397.026 156.98 302.824
-            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z"/>
+<!-- Header Fragment -->
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 
-        <image class="login__img" th:href="@{/assets/img/bg-img.jpg}"/>
-    </g>
-</svg>
+<!-- Signup Form -->
+<div class="login container grid"
+     style="display: flex; justify-content: center; width: 100%; margin-top: 120px; padding-bottom: 4rem;"
+     id="loginAccessRegister">
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1>Sign Up</h1>
+            <p>Create account to join EduTrack</p>
+        </div>
 
-<!--=============== LOGIN ===============-->
-<div class="login container grid" id="loginAccessRegister" style="overflow: scroll;">
-    <!--===== LOGIN REGISTER =====-->
-    <div class="login__access">
-        <h1 class="login__title">Create new account.</h1>
+        <form th:action="@{/signup}" method="post" th:object="${user}" id="signupForm" novalidate>
+            <div th:if="${error}" style="color: red;">[[${error}]]</div>
 
-        <div class="login__area">
-            <form th:action="@{/signup}" method="post" th:object="${user}" class="login__form">
-                <div class="login__content grid">
-                    <div th:if="${error}" style="color: red;">[[${error}]]</div>
-                    <div class="login__box">
-                        <input type="text" th:field="*{fullName}" required placeholder=" " class="login__input">
-                        <label class="login__label">Full Name</label>
-                        <i class="ri-mail-fill login__icon"></i>
+            <div class="form-group">
+                <label for="fullname">Full Name *</label>
+                <input id="fullname"  type="text" th:field="*{fullName}" required placeholder=" " class="login__input">
+                <div class="error-message" id="fullname-error"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="birthdate">Birth Date *</label>
+                    <input type="date" th:field="*{birthDate}" required placeholder=" " class="login__input"
+                           id="birthdate">
+                    <div class="error-message" id="birthdate-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input id="phone" type="text" th:field="*{phone}" required placeholder=" " class="login__input">
+                    <div class="error-message" id="phone-error"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Gender</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="male" th:field="*{gender}" name="gender" value="male" required>
+                        <label for="male">Male</label>
                     </div>
-
-                    <div class="login__group grid">
-                        <div class="login__box">
-                            <div class="login__box">
-                                <input type="date" th:field="*{birthDate}" required placeholder=" " class="login__input" id="birthDateInput" style="color: #9c9b9b">
-                                <label class="login__label">Birth Date</label>
-                            </div>
-
-                        </div>
-
-                        <div class="login__box" style="justify-content: space-between; ">
-                            <label style="margin: 0 10px; font-weight: 600;">Gender</label>
-                            <label class="gender-option male">
-                                <input type="radio" th:field="*{gender}" value="male" hidden checked>
-                                <span>Male</span>
-                            </label>
-                            <label class="gender-option">
-                                <input type="radio" th:field="*{gender}" value="female" hidden>
-                                <span>Female</span>
-                            </label>
-                        </div>
-
+                    <div class="radio-option">
+                        <input type="radio" id="female" th:field="*{gender}" name="gender" value="female" required>
+                        <label for="female">Female</label>
                     </div>
-                    <div class="login__box">
-                        <input type="text" th:field="*{phone}" required placeholder=" " class="login__input">
-                        <label class="login__label">Phone</label>
-                        <i class="ri-id-card-fill login__icon"></i>
-                    </div>
-                    <div class="login__box">
-                        <input type="email" th:field="*{email}" required placeholder=" " class="login__input">
-                        <label class="login__label">Email</label>
-                        <i class="ri-mail-fill login__icon"></i>
-                    </div>
+                </div>
+                <div class="error-message" id="gender-error"></div>
+            </div>
 
-                    <div class="login__box">
-                        <select name="role" style="width: 100%; border-radius: 1rem; padding: 1em; border-color: white; background-color: inherit; color: hsl(220, 15%, 66%); font-weight: 600; font-family: inherit; font-size: inherit; height: 72px;">
-                            <option value="mentee">Mentee</option>
-                            <option value="mentor">Mentor</option>
-                        </select>
-                    </div>
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" th:field="*{email}" required placeholder=" " class="login__input">
+                <div class="error-message" id="email-error"></div>
+            </div>
 
-                    <div class="login__group grid">
-                        <div class="login__box">
-                            <input type="password" th:field="*{password}" required placeholder=" " class="login__input">
-                            <label class="login__label">Password</label>
-                            <i class="ri-eye-off-fill login__icon login__password" id="loginPassword"></i>
-                        </div>
-                        <div class="login__box">
-                            <input type="password" name="confirm_password" id="confirm_password" required
-                                   placeholder=" " class="login__input">
-                            <label class="login__label">Repeat Password</label>
-                        </div>
+            <div class="form-group">
+                <label>Vai Trò *</label>
+                <div class="role-selection">
+                    <div class="role-card" data-role="mentee">
+                        <input type="radio" id="mentee" name="role" value="mentee" required>
+                        <div class="role-icon">🎓</div>
+                        <div class="role-title">Mentee</div>
                     </div>
-                    <div class="g-recaptcha" data-sitekey="6Ld2SkkrAAAAAPiQ0oOFQp1QvEd07wsehI43ObCR"></div>
+                    <div class="role-card" data-role="mentor">
+                        <input type="radio" id="mentor" name="role" value="mentor" required>
+                        <div class="role-icon">👨‍🏫</div>
+                        <div class="role-title">Mentor</div>
+                    </div>
+                </div>
+                <div class="error-message" id="role-error"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" th:field="*{password}" id="password" name="password" required>
+                    <div class="error-message" id="password-error"></div>
                 </div>
 
-                <button type="submit" class="login__button">Create account</button>
-            </form>
+                <div class="form-group">
+                    <label for="repassword">Confirm Password *</label>
+                    <input type="password" id="repassword" name="confirm_password" required>
+                    <div class="error-message" id="repassword-error"></div>
+                </div>
+            </div>
 
-            <p class="login__switch">
-                Already have an account?
-                <button id="loginButtonAccess" type="button"><a style="text-decoration: inherit" href="/login">Log In</a></button>
-            </p>
+            <div class="g-recaptcha" data-sitekey="6Ld2SkkrAAAAAPiQ0oOFQp1QvEd07wsehI43ObCR"></div>
+
+
+            <button type="submit" class="signup-btn">Create Account</button>
+        </form>
+
+        <div class="login-link">
+            Already had account? <a href="/login" onclick="showLoginMessage()">Sign In</a>
         </div>
     </div>
 </div>
 
-<!--=============== MAIN JS ===============-->
+<!-- Footer Fragment -->
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+<!-- JavaScript Validation -->
 <script>
-    setInterval(function () {
-        grecaptcha.reset();
-    }, 120000);
-</script>
+    // Role card selection
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const roleValue = this.dataset.role;
+            const radioInput = document.getElementById(roleValue);
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector(".login__form");
-        const fullNameInput = form.querySelector("[name='fullName']");
-        const birthDateInput = document.getElementById("birthDateInput");
-        const phoneInput = form.querySelector("[name='phone']");
-        const emailInput = form.querySelector("[name='email']");
-        const passwordInput = form.querySelector("[name='password']");
-        const confirmPasswordInput = document.getElementById("confirm_password");
+            // Remove selected class from all cards
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
 
-        form.addEventListener("submit", function (e) {
-            const fullName = fullNameInput.value.trim();
-            const birthDate = new Date(birthDateInput.value);
-            const phone = phoneInput.value.trim();
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
+            // Add selected class to clicked card
+            this.classList.add('selected');
 
+            // Check the radio input
+            radioInput.checked = true;
+
+            // Clear error
+            document.getElementById('role-error').style.display = 'none';
+        });
+    });
+
+    // Form validation
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(error => {
+            error.style.display = 'none';
+        });
+
+        let isValid = true;
+
+        // Validate fullname
+        const fullname = document.getElementById('fullname').value.trim();
+        if (!fullname) {
+            showError('fullname-error', 'Please enter Full Name');
+            isValid = false;
+        } else if (fullname.length < 2) {
+            showError('fullname-error', 'Full Name must contain at least 2 words');
+            isValid = false;
+        }
+
+        // Validate birthdate
+        const birthdate = document.getElementById('birthdate').value;
+        if (!birthdate) {
+            showError('birthdate-error', 'Please choose Date of Birth');
+            isValid = false;
+        } else {
             const today = new Date();
-
-            // Full name required
-            if (fullName === "") {
-                alert("Full name is required");
-                e.preventDefault();
-                return;
+            const birth = new Date(birthdate);
+            const age = today.getFullYear() - birth.getFullYear();
+            if (age < 13) {
+                showError('birthdate-error', 'Your Age must at least 13 years old');
+                isValid = false;
             }
+        }
 
-            // Birth date cannot be in the future
-            if (birthDate > today) {
-                alert("Birth date cannot be in the future");
-                e.preventDefault();
-                return;
-            }
+        // Validate phone
+        const phone = document.getElementById('phone').value.trim();
+        const phoneRegex = /^[0-9]{10,11}$/;
+        if (!phone) {
+            showError('phone-error', 'Please enter Phone Number');
+            isValid = false;
+        } else if (!phoneRegex.test(phone)) {
+            showError('phone-error', 'Invalid Phone Number');
+            isValid = false;
+        }
 
-            // Age must be 6 or older
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            if (age < 6) {
-                alert("You must be at least 6 years old to register");
-                e.preventDefault();
-                return;
-            }
+        // Validate gender
+        const gender = document.querySelector('input[name="gender"]:checked');
+        if (!gender) {
+            showError('gender-error', 'Please choose gender');
+            isValid = false;
+        }
 
-            // Phone number format (basic pattern for digits only, 10-15 characters)
-            if (!/^\d{10,15}$/.test(phone)) {
-                alert("Phone number must be between 10 and 15 digits");
-                e.preventDefault();
-                return;
-            }
+        // Validate email
+        const email = document.getElementById('email').value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            showError('email-error', 'Please Enter Email');
+            isValid = false;
+        } else if (!emailRegex.test(email)) {
+            showError('email-error', 'Invalid Email');
+            isValid = false;
+        }
 
-            // Email format
-            if (!/^\S+@\S+\.\S+$/.test(email)) {
-                alert("Email format is invalid");
-                e.preventDefault();
-                return;
-            }
+        // Validate role
+        const role = document.querySelector('input[name="role"]:checked');
+        if (!role) {
+            showError('role-error', 'Please choose role');
+            isValid = false;
+        }
 
-            // Password length
-            if (password.length < 6) {
-                alert("Password must be at least 6 characters");
-                e.preventDefault();
-                return;
-            }
+        // Validate password
+        const password = document.getElementById('password').value;
+        if (!password) {
+            showError('password-error', 'Please enter password');
+            isValid = false;
+        } else if (password.length < 6) {
+            showError('password-error', 'Password must contain at least 6 characters');
+            isValid = false;
+        }
 
-            // Confirm password
-            if (password !== confirmPassword) {
-                alert("Passwords do not match");
-                e.preventDefault();
-                return;
-            }
+        // Validate repassword
+        const repassword = document.getElementById('repassword').value;
+        if (!repassword) {
+            showError('repassword-error', 'Please Confirm Password');
+            isValid = false;
+        } else if (password !== repassword) {
+            showError('repassword-error', 'Passwords not matched');
+            isValid = false;
+        }
 
-            // Check reCAPTCHA
-            const recaptchaResponse = grecaptcha.getResponse();
-            if (recaptchaResponse.length === 0) {
-                alert("Please verify reCAPTCHA");
-                e.preventDefault();
-                return;
-            }
+        if (isValid) {
 
-            // All good, allow submit
+            // Here you would typically send the form data to your server
+            document.getElementById('signupForm').submit();
+        }
+    });
+
+    function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
+
+
+    // Add input event listeners for real-time validation
+    document.querySelectorAll('input, select').forEach(input => {
+        input.addEventListener('input', function() {
+            const errorElement = document.getElementById(this.name + '-error') ||
+                document.getElementById(this.id + '-error');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
         });
     });
 </script>
 
-<script th:src="@{/assets/js/login.js}"></script>
 </body>
 </html>

@@ -1,8 +1,8 @@
 package com.example.edutrack.curriculum.service.interfaces;
 
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.Tag;
+import com.example.edutrack.accounts.model.Mentee;
+import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.curriculum.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -44,4 +44,20 @@ public interface CourseMentorService {
     List<CourseMentor> getRecommendedByHistory(UUID menteeId, int limit);
 
     List<CourseMentor> getReviewablePairsForMentee(UUID menteeId);
+
+    void updatePrices(UUID mentorId, List<UUID> courseIds, List<Double> prices);
+
+    List<CourseMentor> findByMentorId(UUID mentorId);
+    Page<CourseMentor> findByMentorIdPaged(UUID mentorId, Pageable pageable);
+    boolean isCourseLocked(UUID courseId);
+
+    void addCourseMentor(UUID userId, UUID courseId, String description);
+    void removeCourseMentor(UUID userId, UUID courseId);
+    void updateCourseMentorDescription(UUID userId, UUID courseId, String description);
+
+    long countCoursesByMentor(Mentor mentor);
+
+    boolean alreadyHasPendingEnrollment(CourseMentor courseMentor, Mentee mentee);
+
+    void save(CourseMentor courseMentor);
 }

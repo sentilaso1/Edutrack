@@ -1,32 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>EduTrack - Add Funds</title>
-    <link rel="stylesheet" th:href="@{/css/master.css}"/>
-    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background: linear-gradient(to right, #e6f7f9, #ffeef0);
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
+        h2.headline-md {
+            margin-bottom: 1rem;
             text-align: center;
             color: #2C3E50;
         }
@@ -40,10 +23,18 @@
             margin-right: auto;
         }
 
-        .main-layout {
+        .wallet-section-layout {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 30px;
+            align-items: flex-start;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
 
         .fund-options {
@@ -53,14 +44,12 @@
         }
 
         .fund-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
             border: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 20px;
+            border-radius: 12px;
             transition: all 0.3s ease;
         }
 
@@ -84,6 +73,7 @@
             font-weight: bold;
             color: rgba(255, 128, 134, 0.99);
             margin-bottom: 10px;
+            text-align: right;
         }
 
         .add-fund-btn {
@@ -109,19 +99,12 @@
             text-align: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
+            width: 100%;
         }
 
         .balance-amount {
             font-size: 28px;
             font-weight: bold;
-        }
-
-        .quick-links, .instructions {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
         }
 
         .quick-links a {
@@ -142,6 +125,7 @@
 
         .instructions ol {
             padding-left: 20px;
+            counter-reset: step;
         }
 
         .instructions li {
@@ -154,8 +138,8 @@
         }
 
         .instructions li::before {
-            content: counter(item);
-            counter-increment: item;
+            content: counter(step);
+            counter-increment: step;
             position: absolute;
             left: 0;
             top: 50%;
@@ -172,118 +156,131 @@
             font-size: 14px;
         }
 
-        .instructions ol {
-            counter-reset: item;
+        aside {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         @media (max-width: 992px) {
-            .main-layout {
+            .wallet-section-layout {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>Add Funds</h1>
-    <p class="header-description">Add funds to your EduTrack account to unlock premium courses and continue your
-        learning journey with the best online education platform.</p>
-    <div class="main-layout">
-        <div>
-            <div class="fund-options">
-                <div class="fund-card">
-                    <div class="fund-info">
-                        <h3>Starter Pack</h3>
-                        <p>Perfect for trying out premium courses</p>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<main>
+    <section class="section course has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="container">
+            <h2 class="headline-md">Add Funds</h2>
+            <p class="header-description">
+                Add funds to your EduTrack account to unlock premium courses and continue your
+                learning journey with the best online education platform.
+            </p>
+
+            <div class="wallet-section-layout">
+                <div class="fund-options">
+                    <div class="card fund-card">
+                        <div class="fund-info">
+                            <h3>Starter Pack</h3>
+                            <p>Perfect for trying out premium courses</p>
+                        </div>
+                        <div>
+                            <div class="amount-display">100,000 VND</div>
+                            <form th:action="@{/api/vnpay/pay}" method="post">
+                                <input type="hidden" name="amount" value="100000"/>
+                                <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
+                            </form>
+                        </div>
                     </div>
-                    <div>
-                        <div class="amount-display">100,000 VND</div>
-                        <form th:action="@{/api/vnpay/pay}" method="post">
-                            <input type="hidden" name="amount" value="100000"/>
-                            <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
-                        </form>
+                    <div class="card fund-card">
+                        <div class="fund-info">
+                            <h3>Basic Pack</h3>
+                            <p>Great for multiple course purchases</p>
+                        </div>
+                        <div>
+                            <div class="amount-display">200,000 VND</div>
+                            <form th:action="@{/api/vnpay/pay}" method="post">
+                                <input type="hidden" name="amount" value="200000"/>
+                                <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card fund-card">
+                        <div class="fund-info">
+                            <h3>Standard Pack</h3>
+                            <p>Most popular choice for serious learners</p>
+                        </div>
+                        <div>
+                            <div class="amount-display">500,000 VND</div>
+                            <form th:action="@{/api/vnpay/pay}" method="post">
+                                <input type="hidden" name="amount" value="500000"/>
+                                <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card fund-card">
+                        <div class="fund-info">
+                            <h3>Premium Pack</h3>
+                            <p>Ideal for comprehensive learning programs</p>
+                        </div>
+                        <div>
+                            <div class="amount-display">1,000,000 VND</div>
+                            <form th:action="@{/api/vnpay/pay}" method="post">
+                                <input type="hidden" name="amount" value="1000000"/>
+                                <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card fund-card">
+                        <div class="fund-info">
+                            <h3>Ultimate Pack</h3>
+                            <p>Maximum value for dedicated learners</p>
+                        </div>
+                        <div>
+                            <div class="amount-display">2,000,000 VND</div>
+                            <form th:action="@{/api/vnpay/pay}" method="post">
+                                <input type="hidden" name="amount" value="2000000"/>
+                                <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-                <div class="fund-card">
-                    <div class="fund-info">
-                        <h3>Basic Pack</h3>
-                        <p>Great for multiple course purchases</p>
+
+                <aside>
+                    <div class="card balance-card">
+                        <h3>Current Balance</h3>
+                        <div class="balance-amount" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">0 VND</div>
+                        <div th:if="${wallet != null && wallet.onHold > 0}" style="margin-top: 10px;">
+                            <small th:text="${wallet.onHoldFormatted + ' VND on hold'}"></small>
+                        </div>
                     </div>
-                    <div>
-                        <div class="amount-display">200,000 VND</div>
-                        <form th:action="@{/api/vnpay/pay}" method="post">
-                            <input type="hidden" name="amount" value="200000"/>
-                            <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
-                        </form>
+                    <div class="card quick-links">
+                        <h3>Quick Actions</h3>
+                        <a th:href="@{/wallet}"><i class="fas fa-wallet"></i> View Account Details</a>
+<!--                        <a href="#"><i class="fas fa-gift"></i> Redeem Gift Card</a>-->
+                        <a th:href="@{/wallet/history}"><i class="fas fa-history"></i> Transaction History</a>
                     </div>
-                </div>
-                <div class="fund-card">
-                    <div class="fund-info">
-                        <h3>Standard Pack</h3>
-                        <p>Most popular choice for serious learners</p>
+                    <div class="card instructions">
+                        <h4>How to Add Funds</h4>
+                        <ol>
+                            <li>Select your preferred funding amount from the options above</li>
+                            <li>Click the "Add Fund" button to proceed to secure payment</li>
+                            <li>Complete payment through VNPay gateway and funds will be added instantly</li>
+                        </ol>
                     </div>
-                    <div>
-                        <div class="amount-display">500,000 VND</div>
-                        <form th:action="@{/api/vnpay/pay}" method="post">
-                            <input type="hidden" name="amount" value="500000"/>
-                            <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
-                        </form>
-                    </div>
-                </div>
-                <div class="fund-card">
-                    <div class="fund-info">
-                        <h3>Premium Pack</h3>
-                        <p>Ideal for comprehensive learning programs</p>
-                    </div>
-                    <div>
-                        <div class="amount-display">1,000,000 VND</div>
-                        <form th:action="@{/api/vnpay/pay}" method="post">
-                            <input type="hidden" name="amount" value="1000000"/>
-                            <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
-                        </form>
-                    </div>
-                </div>
-                <div class="fund-card">
-                    <div class="fund-info">
-                        <h3>Ultimate Pack</h3>
-                        <p>Maximum value for dedicated learners</p>
-                    </div>
-                    <div>
-                        <div class="amount-display">2,000,000 VND</div>
-                        <form th:action="@{/api/vnpay/pay}" method="post">
-                            <input type="hidden" name="amount" value="2000000"/>
-                            <button type="submit" class="add-fund-btn"><i class="fas fa-plus"></i> Add Fund</button>
-                        </form>
-                    </div>
-                </div>
+                </aside>
             </div>
         </div>
-        <div>
-            <div class="balance-card">
-                <h3>Current Balance</h3>
-                <div class="balance-amount" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">0
-                    VND
-                </div>
-                <div th:if="${wallet != null && wallet.onHold > 0}" style="margin-top: 10px;">
-                    <small th:text="${wallet.onHoldFormatted + ' VND on hold'}"></small>
-                </div>
-            </div>
-            <div class="quick-links">
-                <h4>Quick Actions</h4>
-                <a th:href="@{/wallet}"><i class="fas fa-wallet"></i> View Account Details</a>
-                <a href="#"><i class="fas fa-gift"></i> Redeem Gift Card</a>
-                <a th:href="@{/wallet/history}"><i class="fas fa-history"></i> Transaction History</a>
-            </div>
-            <div class="instructions">
-                <h4>How to Add Funds</h4>
-                <ol>
-                    <li>Select your preferred funding amount from the options above</li>
-                    <li>Click the "Add Fund" button to proceed to secure payment</li>
-                    <li>Complete payment through VNPay gateway and funds will be added instantly</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</div>
+    </section>
+</main>
+
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+<script th:src="@{/assets/js/courlist.js}"></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 package com.example.edutrack.curriculum.service.implementation;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.dto.SkillProgressDTO;
@@ -25,10 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,15 +47,18 @@ public class DashboardServiceImpl implements DashboardService {
         this.goalRepository = goalRepository;
     }
 
+    // Hàm F5
     @Override
     public String getNextSessionTime(UUID menteeId) {
         List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findAllByMenteeId(menteeId);
+        if (schedules == null || schedules.isEmpty()) {
+            return "No upcoming session";
+        }
 
         EnrollmentSchedule next = null;
         LocalDateTime nearest = null;
 
         for (EnrollmentSchedule s : schedules) {
-            //Temporarily use structure date in EnrollmentSchedule is yyyy:mm:dd and slot is hh:mm:ss
             LocalDate date = s.getDate();
             LocalTime time = s.getSlot().getStartTime();
             LocalDateTime sessionTime = LocalDateTime.of(date, time);
@@ -70,35 +71,72 @@ public class DashboardServiceImpl implements DashboardService {
             }
         }
 
-        if (next == null) return "No upcoming session";
+        if (next == null) {
+            return "No upcoming session";
+        }
 
-        String formattedTime = nearest.format(DateTimeFormatter.ofPattern("EEEE, hh:mm a"));
+        String formattedTime = nearest.format(DateTimeFormatter.ofPattern("EEEE, hh:mm a", Locale.ENGLISH));
         String courseName = next.getEnrollment().getCourseMentor().getCourse().getName();
-
         return courseName + " - " + formattedTime;
     }
 
+    @Override
+    public boolean hasPendingReports(UUID menteeId) {
+        return enrollmentScheduleRepository.hasPendingReports(menteeId);
+    }
 
     @Override
     public int getTotalMentors(UUID menteeId) {
         return mentorRepository.countMentorsByMenteeId(menteeId);
     }
 
+    // Hàm F4
     @Override
     public int getLearningProgress(UUID menteeId) {
-        List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+        List<Enrollment> enrollments = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(
+                menteeId, Enrollment.EnrollmentStatus.APPROVED);
+
         int total = 0;
         for (Enrollment e : enrollments) {
-            total += e.getTotalSlots();
+            total += enrollmentScheduleRepository.countTotalSlot(e.getId());
         }
-        int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(menteeId, EnrollmentSchedule.Attendance.PRESENT);
+
         if (total == 0) return 0;
+
+        int completed = enrollmentScheduleRepository.countAttendedSlotsByMenteeId(
+                menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED);
+
+
+        completed = Math.min(completed, total);
+
         return (int) Math.round((completed * 100.0) / total);
     }
 
     @Override
+    public Optional<Boolean> hasCompletedCourse(CourseMentor courseMentor, Mentee mentee) {
+        List<EnrollmentSchedule> schedules = enrollmentScheduleRepository.findEnrollmentScheduleByMenteeAndCourseMentor(
+                mentee.getId(), courseMentor.getId()
+        );
+
+        if (schedules.isEmpty()) {
+            return Optional.of(true);
+        }
+
+        boolean allPresent = schedules.stream()
+                .allMatch(s -> s.getAttendance() == EnrollmentSchedule.Attendance.PRESENT &&
+                        s.getReport() != null && s.getReport() == false);
+
+        return Optional.of(allPresent);
+    }
+
+    @Override
+    public Optional<Boolean> hasCompletedCourse(Enrollment enrollment) {
+        return this.hasCompletedCourse(enrollment.getCourseMentor(), enrollment.getMentee());
+    }
+
+    @Override
     public boolean isAllCoursesCompleted(UUID menteeId) {
-        return enrollmentScheduleRepository.countUnfinishedSlotsByMentee(menteeId, EnrollmentSchedule.Attendance.PRESENT) == 0;
+        return enrollmentScheduleRepository.countUnfinishedSlotsByMentee(menteeId, EnrollmentSchedule.Attendance.PRESENT, Enrollment.EnrollmentStatus.APPROVED) == 0;
     }
 
     @Override
@@ -108,7 +146,7 @@ public class DashboardServiceImpl implements DashboardService {
         int completedGoals = goalRepository.countCompletedGoalsByMenteeId(menteeId, Goal.Status.DONE);
         int totalGoals = goalRepository.findByMenteeIdOrderByTargetDateAsc(menteeId).size();
         String goalsCompleted = completedGoals + "/" + totalGoals;
-        int skillsCompleted = enrollmentScheduleRepository.countCompletedCourseByMentee(menteeId);
+        int skillsCompleted = enrollmentScheduleRepository.countCompletedCourseByMentee(menteeId, Enrollment.EnrollmentStatus.APPROVED);
 
         int percent = (totalGoals == 0) ? 0 : (completedGoals * 100) / totalGoals;
         return new TrackerDTO(learningProgres, goalsCompleted, totalTrackedSkills, skillsCompleted, percent);
@@ -128,49 +166,38 @@ public class DashboardServiceImpl implements DashboardService {
         return new PageImpl<>(pageContent, pageable, fullList.size());
     }
 
+    // Hàm F2
     @Override
     public List<SkillProgressDTO> getSkillProgressList(UUID menteeId, String keyword, YearMonth selectedMonth, UUID mentorId) {
-        List<Enrollment> menteeEnrollment = enrollmentRepository.findAcceptedEnrollmentsByMenteeId(menteeId, Enrollment.EnrollmentStatus.APPROVED);
+        List<Enrollment> menteeEnrollment = enrollmentRepository.findWithFilters(menteeId, keyword, mentorId);
+
         List<SkillProgressDTO> skillProgressList = new ArrayList<>();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
-
         for (Enrollment e : menteeEnrollment) {
+
+            if (selectedMonth != null) {
+                Optional<EnrollmentSchedule> firstSchedule = enrollmentScheduleRepository.findFirstByEnrollmentOrderByDateAsc(e);
+                if (firstSchedule.isPresent()) {
+                    LocalDate startDate = firstSchedule.get().getDate();
+                    if (!YearMonth.from(startDate).equals(selectedMonth)) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+            }
+
             CourseMentor courseMentor = e.getCourseMentor();
             Course course = courseMentor.getCourse();
             Mentor mentor = courseMentor.getMentor();
 
-            // --- Lọc theo từ khóa ---
-            if (keyword != null && !keyword.isBlank()) {
-                if (!course.getName().toLowerCase().contains(keyword.toLowerCase())) {
-                    continue;
-                }
-            }
-
-            // --- Lọc theo mentor ---
-            if (mentorId != null && mentor != null && !mentor.getId().equals(mentorId)) {
-                continue;
-            }
-
-            // --- Lọc theo tháng từ startTime ---
-            try {
-                LocalDateTime parsedStart = LocalDateTime.parse(e.getStartTime(), formatter);
-                if (selectedMonth != null && !YearMonth.from(parsedStart).equals(selectedMonth)) {
-                    continue;
-                }
-            } catch (Exception ex) {
-                continue;
-            }
-
             Long enrollmentId = e.getId();
-            UUID courseId = course.getId();
-
-            int total = e.getTotalSlots() != null ? e.getTotalSlots() : 1;
+            int total = enrollmentScheduleRepository.countTotalSlot(enrollmentId);
             int completed = enrollmentScheduleRepository.countByEnrollment_IdAndAttendance(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
             int percentage = (total == 0) ? 0 : (int) Math.round((completed * 100.0) / total);
 
             LocalDate lastSession = enrollmentScheduleRepository.findLastPresentSessionDate(enrollmentId, EnrollmentSchedule.Attendance.PRESENT);
-            List<String> tags = tagRepository.findByCourseId(courseId)
+            List<String> tags = tagRepository.findByCourseId(course.getId())
                     .stream()
                     .map(Tag::getTitle)
                     .collect(Collectors.toList());
@@ -178,7 +205,7 @@ public class DashboardServiceImpl implements DashboardService {
             String mentorName = (mentor != null) ? mentor.getFullName() : "Unknown";
             UUID mentorUuid = (mentor != null) ? mentor.getId() : null;
 
-            SkillProgressDTO dto = new SkillProgressDTO(
+            SkillProgressDTO dto = new SkillProgressDTO(course.getId(), courseMentor.getId(),
                     course.getName(), lastSession, completed, percentage, tags, total, mentorName, mentorUuid
             );
 
@@ -194,32 +221,29 @@ public class DashboardServiceImpl implements DashboardService {
             int month,
             int year,
             UUID courseId,
+            UUID mentorId,
             String status,
             Pageable pageable
     ) {
 
-        Page<EnrollmentSchedule> rawPage = enrollmentScheduleRepository
-                .findByMenteeAndMonthWithCourseFilter(menteeId, month, year, courseId, pageable);
-
-        List<EnrollmentSchedule> filteredList = new ArrayList<>();
-
-        for (EnrollmentSchedule schedule : rawPage.getContent()) {
-            boolean match = true;
-
-            if (status != null && !status.isBlank()) {
-                match = schedule.getAttendance().name().equalsIgnoreCase(status);
-            }
-
-            if (match) {
-                filteredList.add(schedule);
+        EnrollmentSchedule.Attendance statusEnum = null;
+        if (status != null && !status.isBlank()) {
+            try {
+                statusEnum = EnrollmentSchedule.Attendance.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
             }
         }
 
-        filteredList.sort(Comparator
-                .comparing(EnrollmentSchedule::getDate)
-                .thenComparing(s -> s.getSlot().getStartTime()));
-
-        return new PageImpl<>(filteredList, pageable, rawPage.getTotalElements());
+        return enrollmentScheduleRepository.findByMenteeAndMonthWithCourseFilter(
+                menteeId,
+                month,
+                year,
+                courseId,
+                mentorId,
+                statusEnum,
+                pageable
+        );
     }
 
 

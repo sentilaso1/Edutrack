@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>Request Reschedule - Youdemi</title>
+    <!-- Meta tags và links giữ nguyên -->
+    <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/mentee-calendar-style.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/reschedule-page-style.css}"/>
+
+    <style>
+
+        .slot-cell-request.reviewing-self {
+            background-color: #cce5ff !important;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .slot-cell-request.reviewing-self::after {
+            content: "Your Pending Request";
+            font-family: sans-serif;
+            color: #004085;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .slot-cell-request.reviewing-other {
+            background-color: #e9ecef !important;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .slot-cell-request.reviewing-other::after {
+            content: "Slot Held";
+            font-family: sans-serif;
+            font-weight: 900;
+            color: #495057;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+        }
+
+        .reason-section textarea.error {
+            border: 1px solid red;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+
+<main>
+    <section class="section has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="container">
+            <div class="schedule-request-container">
+                <h2 class="section-title">Request Schedule Change</h2>
+
+                <!-- Current Schedule Info giữ nguyên -->
+                <div class="current-schedule-info">
+                    <h3><i class="fas fa-calendar-alt"></i> Current Schedule</h3>
+                    <div class="current-info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-book"></i>
+                            <span><strong>Course:</strong> <span th:text="${currentSchedule.courseName}">Java Programming</span></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user-tie"></i>
+                            <span><strong>Mentor:</strong> <span th:text="${currentSchedule.mentorName}">John Doe</span></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-day"></i>
+                            <span><strong>Day:</strong> <span th:text="${currentSchedule.day}">Monday</span></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>Time:</strong> <span
+                                    th:text="${currentSchedule.startTime + ' - ' + currentSchedule.endTime}">07:30 - 09:00</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="new-schedule-section">
+                    <h3><i class="fas fa-calendar-plus"></i> Select New Schedule</h3>
+                    <h1 style="color: maroon" th:text="${errorMessage}"></h1>
+                    <form id="rescheduleForm" method="post" th:action="@{/schedules/reschedule-request}" novalidate>
+                        <input type="hidden" name="scheduleId" th:value="${currentSchedule.id}"/>
+                        <input type="hidden" id="selectedSlot" name="newSlot" value=""/>
+                        <input type="hidden" id="selectedDate" name="newDate" value=""/>
+
+                        <div class="week-nav-request">
+                            <a th:href="@{/schedules/reschedule(scheduleId=${currentSchedule.id}, weekOffset=${weekOffset - 1})}"
+                               class="week-button-request">← Previous Week</a>
+                            <span class="week-label-request">
+                                Week of <span
+                                    th:text="${#temporals.format(mondayOfWeek, 'MMM dd, yyyy')}">Jul 01, 2025</span>
+                            </span>
+                            <a th:href="@{/schedules/reschedule(scheduleId=${currentSchedule.id}, weekOffset=${weekOffset + 1})}"
+                               class="week-button-request">Next Week →</a>
+                        </div>
+
+                        <div class="schedule-grid-request">
+                            <!-- Header row -->
+                            <div class="time-header-request">Time</div>
+                            <div class="day-header"
+                                 th:each="day : ${daysInWeek}"
+                                 th:classappend="${day.equals(todayDate)} ? ' today-border' : ''"
+                                 th:text="${#temporals.format(day, 'EEEE')}">
+                            </div>
+
+                            <th:block th:each="slot : ${slots}">
+                                <div class="time-cell-request"
+                                     th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></div>
+
+                                <th:block th:each="day : ${daysInWeek}">
+                                    <th:block
+                                            th:with="slotKey=${slot.name() + '_' + #temporals.format(day, 'yyyy-MM-dd')}">
+                                        <div class="slot-cell-request"
+                                             th:data-slot="${slot.name()}"
+                                             th:data-day="${#temporals.format(day, 'yyyy-MM-dd')}"
+                                             th:data-day-name="${#temporals.format(day, 'EEEE')}"
+                                             th:data-start-time="${slot.startTime}"
+                                             th:data-end-time="${slot.endTime}"
+
+                                             th:classappend="
+                                    ${day.equals(todayDate) ? ' today-border' : ''} +
+                                    ${#sets.contains(occupiedSlotKeys, slotKey) ? ' occupied' : ''} +
+                                    ${#sets.contains(myReviewingKeys, slotKey) ? ' reviewing-self' : ''} +
+                                    ${#sets.contains(otherMenteesReviewingKeys, slotKey) ? ' reviewing-other' : ''}
+                                 "
+                                             onclick="selectSlot(this)">
+                                        </div>
+                                    </th:block>
+                                </th:block>
+                            </th:block>
+                        </div>
+
+                        <!-- Selection info và form fields giữ nguyên -->
+                        <div id="selectionInfo" class="selection-info">
+                            <h4><i class="fas fa-check-circle"></i> Selected Schedule</h4>
+                            <p><strong>Day:</strong> <span id="selectedDayName"></span></p>
+                            <p><strong>Date:</strong> <span id="selectedDateFormatted"></span></p>
+                            <p><strong>Time:</strong> <span id="selectedTimeRange"></span></p>
+                        </div>
+
+                        <div class="reason-section">
+                            <label for="reason"><i class="fas fa-comment-alt"></i> Reason for Reschedule</label>
+                            <textarea id="reason" name="reason"
+                                      placeholder="Please provide a reason for rescheduling this session..."
+                                      th:text="${enrollmentSchedule.rescheduleReason}"
+                                      th:disabled="${enrollmentSchedule.rescheduleReason != null and !enrollmentSchedule.rescheduleReason.isEmpty()}">
+                            </textarea>
+                            <span id="reason-error" class="error-message"></span>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button type="submit" id="submitBtn" class="btn-submit-request" disabled>
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                            <a th:href="@{/schedules}" class="btn-cancel-request">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+<script>
+    let selectedSlotElement = null;
+
+    function selectSlot(element) {
+        // Kiểm tra tất cả các trạng thái không thể chọn
+        if (element.classList.contains('occupied') ||
+            element.classList.contains('reviewing-self') ||
+            element.classList.contains('reviewing-other')) {
+            return;
+        }
+
+        if (selectedSlotElement) {
+            selectedSlotElement.classList.remove('selected');
+        }
+
+        element.classList.add('selected');
+        selectedSlotElement = element;
+
+        const slot = element.dataset.slot;
+        const date = element.dataset.day;
+        const dayName = element.dataset.dayName;
+        const startTime = element.dataset.startTime;
+        const endTime = element.dataset.endTime;
+
+        document.getElementById('selectedSlot').value = slot;
+        document.getElementById('selectedDate').value = date;
+
+        document.getElementById('selectedDayName').textContent = dayName;
+        document.getElementById('selectedDateFormatted').textContent = formatDate(date);
+        document.getElementById('selectedTimeRange').textContent = startTime + ' - ' + endTime;
+
+        document.getElementById('selectionInfo').classList.add('show');
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        return date.toLocaleDateString('en-US', { ...options, timeZone: 'UTC' });
+    }
+
+    document.getElementById('rescheduleForm').addEventListener('submit', function (e) {
+        const reasonTextarea = document.getElementById('reason');
+        const reasonError = document.getElementById('reason-error');
+        const reasonValue = reasonTextarea.value.trim();
+        reasonTextarea.classList.remove('error');
+        reasonError.style.display = 'none';
+        reasonError.textContent = '';
+
+        if (reasonValue === '') {
+            e.preventDefault();
+            reasonTextarea.classList.add('error');
+            reasonError.textContent = 'Can not be empty';
+            reasonError.style.display = 'block';
+            return;
+        }
+        if (!selectedSlotElement) {
+            e.preventDefault();
+            alert('Please select a new time slot before submitting.');
+            return;
+        }
+
+        const dayName = selectedSlotElement.dataset.dayName;
+        const startTime = selectedSlotElement.dataset.startTime;
+        const endTime = selectedSlotElement.dataset.endTime;
+
+        if (!confirm(`Are you sure you want to request a reschedule to ${dayName} ${startTime} - ${endTime}?`)) {
+            e.preventDefault();
+        }
+    });
+</script>
+
+</body>
+</html>

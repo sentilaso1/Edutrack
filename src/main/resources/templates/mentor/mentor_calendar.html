@@ -6,155 +6,139 @@
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
     <link rel="stylesheet" th:href="@{/assets/css/calendar.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}">
+    <style>
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 16px;
+            margin: 5px 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
 
+        .status-tag.available {
+            background-color: rgba(16, 185, 129, 0.56); /* Xanh lá */
+        }
+
+        .status-tag.unavailable {
+            background-color: rgba(245, 158, 11, 0.6); /* Vàng */
+        }
+    </style>
 </head>
 <body>
-<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
-<div class="main">
-    <div class="dashboard-header">
-        <h1>Schedule</h1>
-    </div>
-    <div class="graph">
-        <h3>Schedule</h3>
-        <div class="week-nav">
-            <form th:action="@{/mentor/schedule}" method="get">
-                <input type="hidden" name="weekStart" th:value="${previousWeek}">
-                <button type="submit">&#10094;</button>
-            </form>
-
-            <span th:text="${startDateFormatted + ' – ' + endDateFormatted}"></span>
-
-
-            <form th:action="@{/mentor/schedule}" method="get">
-                <input type="hidden" name="weekStart" th:value="${nextWeek}">
-                <button type="submit">&#10095;</button>
-            </form>
-
-            <form th:action="@{/mentor/schedule}" method="get" style="margin-left:16px">
-                <input type="date" name="weekStart" required>
-                <button type="submit">Go</button>
-            </form>
-        </div>
-
-        <table class="calendar">
-            <thead>
-            <tr>
-                <th>Slot</th>
-                <th th:each="label : ${dayLabels}" th:text="${label}"></th>
-            </tr>
-
-            </thead>
-            <tbody>
-            <tr th:each="slot : ${slots}">
-                <td>
-                    <div class="slot-label" th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></div>
-                </td>
-
-                <td th:each="i : ${#numbers.sequence(0,6)}"
-                    th:with="currentDate=${startDate.plusDays(i)}">
-                    <div th:each="s : ${schedules}"
-                         th:if="${s.slot == slot and s.date == currentDate}"
-                         class="slot-card">
-                        <a th:href="@{/mentor/schedule/{eid}(eid=${s.id})}">
-                        <p th:text="${s.enrollment.courseMentor.course.name}"></p>
-                            <p th:text="${s.enrollment.mentee.fullName}"></p>
-                        </a>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 1em;">
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
         <div class="graph">
-            <h3>Upcoming Exam</h3>
-            <div class="project-item">
-                <div class="project-tag">Yoast Esoc</div>
-                <div class="project-title">Redesign Kripton Mobile App</div>
-                <div class="project-meta">
-                    <svg class="calendar-icon icon" viewBox="0 0 24 24">
-                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                    </svg>
-                    <span class="created-date">Created on Sep 8th, 2020</span>
-                </div>
-                <div class="deadline-section">
-                    <div class="deadline-icon">
-                        <svg class="lightning-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                        </svg>
-                    </div>
-                    <div class="deadline-info">
-                        <div class="deadline-label">Deadline</div>
-                        <div class="deadline-date">Tuesday, Sep 29th 2020</div>
-                    </div>
-                </div>
-                <div class="menu-dots">⋮</div>
+            <div class="dashboard-header">
+                <h2>Weekly Schedule</h2>
             </div>
-            <div class="project-item">
-                <div class="project-tag">Yoast Esoc</div>
-                <div class="project-title">Redesign Kripton Mobile App</div>
-                <div class="project-meta">
-                    <svg class="calendar-icon icon" viewBox="0 0 24 24">
-                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                    </svg>
-                    <span class="created-date">Created on Sep 8th, 2020</span>
-                </div>
-                <div class="deadline-section">
-                    <div class="deadline-icon">
-                        <svg class="lightning-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+            <div class="week-nav">
+                <form th:action="@{/mentor/schedule}" method="get">
+                    <input type="hidden" name="weekStart" th:value="${previousWeek}">
+                    <button type="submit">&#10094;</button>
+                </form>
+
+                <span th:text="${startDateFormatted + ' – ' + endDateFormatted}"></span>
+
+
+                <form th:action="@{/mentor/schedule}" method="get">
+                    <input type="hidden" name="weekStart" th:value="${nextWeek}">
+                    <button type="submit">&#10095;</button>
+                </form>
+
+                <form th:action="@{/mentor/schedule}" method="get" style="display: flex; gap: 1em;">
+                    <input type="date" name="weekStart" required>
+                    <button type="submit">Go</button>
+                </form>
+            </div>
+
+            <table class="calendar">
+                <thead>
+                <tr>
+                    <th>Slot</th>
+                    <th th:each="label : ${dayLabels}" th:text="${label}"></th>
+                </tr>
+
+                </thead>
+                <tbody>
+                <tr th:each="slot : ${slots}">
+                    <td>
+                        <div class="slot-label" th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></div>
+                    </td>
+
+                    <td th:each="i : ${#numbers.sequence(0,6)}"
+                        th:with="currentDate=${startDate.plusDays(i)}">
+                        <div th:each="s : ${schedules}"
+                             th:if="${s.slot == slot and s.date == currentDate}"
+                             class="slot-card">
+                            <div class="status-tag"
+                                 th:classappend="${s.available ? 'available' : 'unavailable'}"
+                                 th:text="${s.available ? 'Available' : 'Unavailable'}">
+                            </div>
+                            <div style="font-weight: bold; color: #721c24" th:if="${!s.available}" th:text="${'Reschedule to: ' + s.requestedNewSlot.startTime + '-' + s.requestedNewSlot.endTime + ' ' + s.requestedNewDate}"></div>
+                            <a th:href="@{${s.available ? '/mentor/schedule/' + s.id : '/mentor/requests'}}">
+                                <p th:text="${s.enrollment.courseMentor.course.name}"></p>
+                                <p th:text="${s.enrollment.mentee.fullName}"></p>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 1em;">
+            <div class="graph">
+                <h3>Upcoming Exam</h3>
+                <a th:href="@{/mentor/schedule/{esid}(esid=${item.id})}" class="project-item" th:each="item : ${upcomingExams}" th:if="${upcomingExams != null}">
+                    <div class="project-tag" th:text="${item.enrollment.courseMentor.course.name}">Yoast Esoc</div>
+                    <div class="project-title" th:text="'Mentee: ' + ${item.enrollment.mentee.fullName}">Redesign Kripton Mobile App</div>
+                    <div class="project-meta">
+                        <svg class="calendar-icon icon" viewBox="0 0 24 24">
+                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
                         </svg>
+                        <span class="created-date">Created on Sep 8th, 2020</span>
                     </div>
-                    <div class="deadline-info">
-                        <div class="deadline-label">Deadline</div>
-                        <div class="deadline-date">Tuesday, Sep 29th 2020</div>
+                    <div class="deadline-section">
+                        <div class="deadline-icon">
+                            <svg class="lightning-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                            </svg>
+                        </div>
+                        <div class="deadline-info">
+                            <div class="deadline-label">Date</div>
+                            <div class="deadline-date" th:text="${item.date.dayOfWeek + ', ' + item.date.month + ' ' + item.date.dayOfMonth + ' ' + item.date.year}">Tuesday, Sep 29th 2020</div>
+                        </div>
                     </div>
+                    <div class="menu-dots">⋮</div>
+                </a>
+                <div th:if="${upcomingExams == null || upcomingExams.isEmpty()}">
+                    No upcoming exam
                 </div>
-                <div class="menu-dots">⋮</div>
+            </div>
+            <div class="timeline">
+                <h3>Timeline Today</h3>
+
+                <a th:href="@{/mentor/schedule/{esid}(esid=${slot.id})}" class="timeline-item timeline-green" th:each="slot :${slotToday}" th:if="${slotToday != null && !slotToday.isEmpty()}">
+                    <div class="timeline-badge"></div>
+                    <div class="timeline-content" >
+                        <p><small th:text="${slot.slot.startTime + '-' + slot.slot.endTime}">10 minutes ago</small></p>
+                        <p><strong th:text="${slot.enrollment.courseMentor.course.name}">Youtube, a video-sharing website</strong><span th:text="${slot.enrollment.mentee.fullName}">$500</span></p>
+                    </div>
+                </a>
+                <div th:if="${slotToday == null || slotToday.isEmpty()}">No slot today</div>
             </div>
         </div>
-        <div class="timeline">
-            <h3>Timeline Today</h3>
 
-            <div class="timeline-item timeline-green">
-                <div class="timeline-badge"></div>
-                <div class="timeline-content">
-                    <p><small>10 minutes ago</small></p>
-                    <p><strong>Youtube, a video-sharing website</strong>, goes live <span>$500</span></p>
-                </div>
-            </div>
-
-            <div class="timeline-item timeline-blue">
-                <div class="timeline-badge"></div>
-                <div class="timeline-content">
-                    <p><small>20 minutes ago</small></p>
-                    <p><strong>New order placed</strong> <a href="#">#XF-2356</a></p>
-                    <p>Quisque a consequat ante Sit amet magna at volutapt...</p>
-                </div>
-            </div>
-
-            <div class="timeline-item timeline-orange">
-                <div class="timeline-badge"></div>
-                <div class="timeline-content">
-                    <p><small>30 minutes ago</small></p>
-                    <p><strong>John just buy your product</strong> <span>Sell $250</span></p>
-                </div>
-            </div>
-
-            <div class="timeline-item timeline-lightgreen">
-                <div class="timeline-badge"></div>
-                <div class="timeline-content">
-                    <p><small>15 minutes ago</small></p>
-                    <p>Meeting with new client scheduled</p>
-                </div>
-            </div>
-        </div>
     </div>
 
 </div>
-
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
 
 </body>

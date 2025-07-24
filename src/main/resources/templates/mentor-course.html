@@ -7,22 +7,11 @@
           href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
           rel="stylesheet"
   />
+  <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+  <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>Mentor Detail</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      line-height: 1.6;
-      color: #2c3e50;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      min-height: 100vh;
-    }
 
     .container {
       max-width: 1200px;
@@ -469,6 +458,9 @@
       align-items: center;
       gap: 0.1em;
     }
+    .review-rating-stars span{
+      display: flex !important;
+    }
     .review-rating-stars i.ri-star-fill,
     .review-rating-stars i.ri-star-half-fill {
       color: #fa6262;
@@ -528,6 +520,194 @@
       cursor: pointer;
     }
 
+    /* Report overlay */
+    #report-overlay {
+      position: fixed;
+      z-index: 10001;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.22);
+      animation: fadeInModalBg 0.18s;
+      display: flex;
+      justify-content: center;
+      overflow-y: auto;
+    }
+    @keyframes fadeInModalBg {
+      from { background: rgba(0,0,0,0); }
+      to   { background: rgba(0,0,0,0.22); }
+    }
+    .report-modal {
+      background: #fff;
+      margin: 25vh auto auto auto;
+      padding: 0.7rem 1.2rem 1.2rem 1.2rem;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 1.25rem;
+      box-shadow: 0 12px 40px rgba(255, 123, 123, 0.12), 0 2px 8px rgba(0,0,0,0.05);
+      position: relative;
+      animation: popUpModal 0.22s;
+      max-height: 80vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    @keyframes popUpModal {
+      from { transform: scale(0.94) translateY(40px); opacity: 0; }
+      to   { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .report-modal-close {
+      position: absolute; right: 1.1rem; top: 1.1rem;
+      font-size: 2.1rem;
+      color: #e63946;
+      background: none; border: none; cursor: pointer; line-height: 1;
+      opacity: 0.8; transition: opacity 0.18s, color 0.18s;
+    }
+    .report-modal-close:hover { opacity: 1; color: #ff7b7b; }
+    .report-modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ff7b7b;
+      margin-bottom: 1.6rem;
+      letter-spacing: 0.01em;
+      text-align: center;
+    }
+    .report-modal-group {
+      margin-bottom: 1.1rem;
+    }
+    .report-modal-label {
+      font-size: 1.05rem;
+      margin-bottom: 0.55em;
+      color: #2c3e50;
+      display: block;
+    }
+    .report-modal-content {
+      background: #f5f5f5;
+      padding: 0.8em 1em;
+      border-radius: 7px;
+      font-size: 1.3rem;
+      color: #333;
+      box-shadow: 0 2px 6px rgba(220,220,220,0.08);
+      margin-bottom: 0.15em;
+      word-break: break-word;
+    }
+    .report-modal-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7em;
+      margin-top: 0.3em;
+    }
+    .report-modal-categories label {
+      background: #fbe4e4;
+      color: #fa6262;
+      padding: 0.38em 0.95em;
+      border-radius: 1.4em;
+      font-size: 0.97em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .report-modal-categories input[type="radio"] {
+      margin-right: 0.4em;
+    }
+    .report-modal-categories label:hover {
+      background: #ff7b7b; color: #fff;
+    }
+    .report-modal-textarea {
+      width: 100%;
+      padding: 0.65em 1em;
+      border-radius: 0.7em;
+      border: 1.5px solid #ffeaea;
+      background: #f8f9fa;
+      font-size: 1.3rem;
+      color: #222;
+      resize: vertical;
+      font-family: inherit;
+      min-height: 60px;
+      box-shadow: 0 1.5px 4px rgba(255,123,123,0.03);
+      outline: none;
+      transition: border 0.18s, box-shadow 0.18s;
+    }
+    .report-modal-textarea:focus {
+      border-color: #ff7b7b;
+      box-shadow: 0 2px 10px rgba(255,123,123,0.10);
+    }
+    .report-modal-actions {
+      text-align: right;
+      margin-top: 2.2em;
+    }
+    .report-modal-submit {
+      background: linear-gradient(135deg, #ff7b7b, #ff9999);
+      color: #fff;
+      border: none;
+      padding: 0.38em 1.05em;
+      border-radius: 1.8em;
+      font-size: 1.07em;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 2px 12px rgba(255, 123, 123, 0.16);
+      transition: background 0.18s, box-shadow 0.18s;
+    }
+    .report-modal-submit:hover {
+      background: linear-gradient(135deg, #ff9999, #ff7b7b);
+      box-shadow: 0 5px 18px rgba(255, 123, 123, 0.20);
+    }
+
+    .pretty-select-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 210px; /* a bit narrower, adjust as you wish */
+    }
+
+    .pretty-select {
+      padding: 7px 32px 7px 12px; /* less vertical/horizontal padding */
+      border: 2px solid #ff7b7b;
+      border-radius: 1.1em;
+      font-size: 1rem;
+      background: linear-gradient(90deg, #fff, #ffeaea);
+      color: #e63946;
+      box-shadow: 0 2px 9px rgba(255, 123, 123, 0.10);
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      font-family: inherit;
+      width: 100%;
+      transition: border 0.18s, box-shadow 0.18s;
+      outline: none;
+    }
+
+    .pretty-select:focus {
+      border-color: #e63946;
+      box-shadow: 0 2px 16px rgba(255, 123, 123, 0.15);
+    }
+
+    /* Custom arrow inside the select box */
+    .pretty-select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 14px;
+      top: 70%;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid #e63946;
+      transform: translateY(-50%);
+    }
+
+
+    @media (max-width: 600px) {
+      .report-modal {
+        padding: 1.3rem 0.8rem 1.3rem 0.8rem;
+        max-width: 99vw;
+        max-height: 99vh;
+      }
+      .report-modal-title {
+        font-size: 1.18rem;
+      }
+    }
+
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .hero-content {
@@ -577,15 +757,8 @@
     }
   </style>
 </head>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 <body>
-<div class="back-button-container">
-  <div class="container">
-    <button class="back-button" onclick="history.back()">
-      <i class="ri-arrow-left-line"></i>
-      <span>Back</span>
-    </button>
-  </div>
-</div>
 <!-- Hero Section -->
 <section class="hero">
   <div class="container">
@@ -641,26 +814,24 @@
 <section class="schedule-section">
   <div class="container">
     <div class="schedule-container">
-      <h3 class="schedule-title">Available Schedule This Month</h3>
-      <table class="schedule-table" th:if="${slotDayMatrix}">
-        <thead>
-        <tr>
-          <th style="background-color: #369F93FF">Time Slot</th>
-          <th style="background-color: #369F93FF" th:each="day : ${dayLabels}"
-              th:text="${day.name().toLowerCase()}"></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="slot, iStat : ${slots}">
-          <td th:text="${slot.startTime} + ' - ' + ${slot.endTime}"></td>
-          <td th:each="day, jStat : ${dayLabels}">
-            <div th:class="'mentor-button' + (${slotDayMatrix[iStat.index][jStat.index]} ? ' active' : '')">
-            </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+      <h3 class="schedule-title">Monthly Available Schedule</h3>
+      <div class="mb-3">
+        <div class="pretty-select-wrapper">
+        <label for="monthSelect"><b>Choose Month:</b></label>
+        <select id="monthSelect" name="month" class="pretty-select">
+          <option th:each="month : ${selectableMonths}"
+                  th:value="${month.value}"
+                  th:text="${month.label}"
+                  th:selected="${month.value == selectedMonth}">
+            Month
+          </option>
+        </select>
+        </div>
+        <div id="scheduleTableContainer">
+          <th:block th:replace="fragments/schedule-table :: scheduleTable"></th:block>
+        </div>
     </div>
+  </div>
   </div>
 </section>
 
@@ -687,19 +858,25 @@
   <div class="section__header">
     <div class="schedule-container">
       <h3 class="schedule-title">Mentee Reviews</h3>
-      <div style="display: flex; flex-direction: column; align-items: center;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 2rem;">
         <div class="review__card course-card" style="width: 70%;" th:each="feedback : ${feedbacks}" th:if="${feedbacks != null and !#lists.isEmpty(feedbacks)}">
           <div class="review-card-header">
             <div class="review-avatar">
-              <img th:src="@{'/avatar/' + ${feedback.mentee.id}}"
+              <img th:if="${feedback.isAnonymous}"
+                   th:src="@{/assets/images/default-avatar.svg}"
+                   alt="Anonymous Mentee"
+                   style="width: 60px; height: 60px;"
+                   class="mentee-avatar" />
+
+              <img th:unless="${feedback.isAnonymous}"
+                   th:src="@{/avatar/{id}(id=${feedback.mentee.id})}"
                    th:alt="${feedback.mentee.fullName}"
                    style="width: 60px; height: 60px;"
-                   onerror="this.onerror=null;this.src='/assets/images/default-avatar.svg';"
-                   class="mentee-avatar"/>
+                   class="mentee-avatar" />
             </div>
             <div class="review-info-main">
               <div class="mentee-course-row">
-                <span class="mentee-name" th:text="${feedback.mentee.fullName}">Mentee Name</span>
+                <span th:text="${feedback.isAnonymous} ? 'Anonymous Mentee' : ${feedback.mentee.fullName}"></span>
                 <div style="display: flex; gap: 0.5rem">
                   <span class="review-date" style="margin-left: 0.3rem">for</span>
                   <span class="review-course-name" th:text="${feedback.courseMentor.course.name}">Course Name</span>
@@ -729,7 +906,9 @@
               </div>
             </div>
             <div class="review-date" style="gap: 0.1rem;">
-              <a href="/report" class="flag-link" title="Report this">
+              <a href="javascript:void(0)" class="flag-link" title="Report this"
+                 th:attr="data-feedback-id=${feedback.id},data-feedback-content=${feedback.content}"
+                 onclick="openReportForm(this)">
                 <span class="flag-icon">
                   <svg width="26" height="26" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path class="flag-stroke" d="M4 3V17" stroke-width="1.3" stroke-linecap="round"/>
@@ -744,12 +923,87 @@
             Review content...
           </div>
         </div>
+        <div th:if="${feedbacks == null or #lists.isEmpty(feedbacks)}"
+             style="margin: 3rem auto; text-align: center; color: #888;">
+          <div style="font-size: 2rem; margin-bottom: 0.5em;">😶</div>
+          <div style="font-size: 1.2rem;">No reviews yet.<br>Be the first to share your feedback!</div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
+<div id="report-overlay" style="display:none;">
+  <div class="report-modal">
+    <button class="report-modal-close" onclick="closeReportForm()" title="Close">&times;</button>
+    <h2 class="report-modal-title">Report Feedback</h2>
+    <form id="report-form" method="post" th:action="@{/review/report}" onsubmit="return submitReportAjax(event)">
+      <div class="report-modal-group">
+        <label class="report-modal-label"><strong>Feedback Content:</strong></label>
+        <div id="feedback-content" class="report-modal-content"></div>
+      </div>
+      <div class="report-modal-group">
+        <label class="report-modal-label"><strong>Category:</strong></label>
+        <div class="report-modal-categories">
+          <label><input type="radio" name="category" value="SPAM" required> Spam</label>
+          <label><input type="radio" name="category" value="OFFENSIVE"> Offensive</label>
+          <label><input type="radio" name="category" value="HARASSMENT"> Harassment</label>
+          <label><input type="radio" name="category" value="MISINFORMATION"> Misinformation</label>
+          <label><input type="radio" name="category" value="OTHER"> Other</label>
+        </div>
+      </div>
+      <div class="report-modal-group">
+        <label class="report-modal-label"><strong>Reason:</strong></label>
+        <textarea name="reason" rows="3" class="report-modal-textarea" placeholder="Add more detail..." required></textarea>
+      </div>
+      <input type="hidden" name="feedbackId" id="feedback-id">
+      <div class="report-modal-actions">
+        <button type="submit" class="btn btn-primary report-modal-submit">Submit Report</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="notify-overlay" style="display:none; position:fixed; z-index:12000; left:0; top:0; width:100vw; height:100vh; background:rgba(40,40,40,0.27);">
+  <div style="background:#fff; padding:2em 2.5em; border-radius:1.3em; box-shadow:0 6px 36px #ff7b7b22; max-width:350px; max-height: 300px; margin:10vh auto 0 auto; text-align:center;">
+    <div id="notify-message" style="font-size:1.12em; color:#e63946; margin-bottom:1.7em;">Your message here!</div>
+    <button onclick="closeNotifyOverlay()" style="background:linear-gradient(135deg, #ff7b7b, #ff9999); color:#fff; border:none; border-radius:2em; padding:0.7em 2em; font-size:1.02em; font-weight:600; cursor:pointer;">Cool!</button>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  const IS_LOGGED_IN = [[${isLoggedIn}]];
+
+</script>
 <script src="https://unpkg.com/scrollreveal"></script>
+
+<script th:inline="javascript">
+  document.addEventListener("DOMContentLoaded", function() {
+    const monthSelect = document.getElementById("monthSelect");
+
+    const initialMonth = /*[[${selectedMonth}]]*/ 'current-month';
+    console.log("Initial month:", initialMonth); // Log initial month
+    const mentorId = /*[[${mentor.get().id}]]*/ 'mentor-id';
+    fetch(`/mentors/${mentorId}/schedule-table?month=${initialMonth}`)
+            .then(response => response.text())
+            .then(html => {
+              document.getElementById("scheduleTableContainer").innerHTML = html;
+            })
+            .catch(err => alert("Failed to load schedule for selected month!"));
+
+    monthSelect.addEventListener("change", function() {
+      const month = this.value;
+      const mentorId = /*[[${mentor.get().id}]]*/ 'mentor-id';
+      fetch(`/mentors/${mentorId}/schedule-table?month=${month}`)
+              .then(response => response.text())
+              .then(html => {
+                document.getElementById("scheduleTableContainer").innerHTML = html;
+              })
+              .catch(err => alert("Failed to load schedule for selected month!"));
+    });
+  });
+</script>
+
 <script>
   // Initialize ScrollReveal animations
   ScrollReveal().reveal('.hero-content', {
@@ -782,5 +1036,71 @@
     duration: 1000
   });
 </script>
+
+<script>
+  function openReportForm(link) {
+    // Get feedback info from data- attributes
+    if (!IS_LOGGED_IN) {
+      window.location.href = '/login';
+      return;
+    }
+    var feedbackId = link.getAttribute('data-feedback-id');
+    var content = link.getAttribute('data-feedback-content');
+    // Set values in the overlay form
+    document.getElementById('feedback-id').value = feedbackId;
+    document.getElementById('feedback-content').textContent = content;
+    document.getElementById('report-overlay').style.display = 'block';
+    // Reset form
+    document.getElementById('report-form').reset();
+  }
+
+  function closeReportForm() {
+    document.getElementById('report-overlay').style.display = 'none';
+  }
+
+  document.getElementById('report-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeReportForm();
+  });
+</script>
+
+<script>
+  function submitReportAjax(e) {
+    e.preventDefault();
+    var form = document.getElementById('report-form');
+    var formData = new FormData(form);
+
+    fetch(form.action, {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+            .then(response => {
+              if (response.ok) return response.text();
+              throw new Error('Could not submit report. Please try again.');
+            })
+            .then(_ => {
+              closeReportForm();
+              showNotifyOverlay("Report submitted successfully!");
+            })
+            .catch(err => {
+              closeReportForm();
+              showNotifyOverlay("Failed to submit report: " + err.message);
+            });
+
+    return false; // Prevent normal form submission
+  }
+
+  function showNotifyOverlay(msg) {
+    document.getElementById('notify-message').textContent = msg;
+    document.getElementById('notify-overlay').style.display = 'flex';
+  }
+  function closeNotifyOverlay() {
+    document.getElementById('notify-overlay').style.display = 'none';
+  }
+</script>
+
 </body>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </html>

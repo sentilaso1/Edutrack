@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class SkillProgressDTO {
+    public UUID courseId;
+    public UUID courseMentorId;
     private String courseTitle;
     private List<String> tags;
     private int progressPercentage;
@@ -15,10 +17,11 @@ public class SkillProgressDTO {
     private UUID mentorId;
     private LocalDate startDate;
 
-    public SkillProgressDTO(String courseTitle, LocalDate lastSessionDate, int sessionsCompleted, int progressPercentage,
+    public SkillProgressDTO(UUID courseId, UUID courseMentorId,String courseTitle, LocalDate lastSessionDate, int sessionsCompleted, int progressPercentage,
                             List<String> tags, int totalSessions,
                             String mentorName, UUID mentorId) {
         this.courseTitle = courseTitle;
+        this.courseMentorId = courseMentorId;
         this.lastSessionDate = lastSessionDate;
         this.sessionsCompleted = sessionsCompleted;
         this.progressPercentage = progressPercentage;
@@ -27,6 +30,15 @@ public class SkillProgressDTO {
         this.mentorName = mentorName;
         this.mentorId = mentorId;
         this.startDate = startDate;
+        this.courseId = courseId;
+    }
+
+    public UUID getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(UUID courseId) {
+        this.courseId = courseId;
     }
 
     public int getTotalSessions() {
@@ -68,6 +80,14 @@ public class SkillProgressDTO {
 
     public List<String> getTags() {
         return tags;
+    }
+
+    public UUID getCourseMentorId() {
+        return courseMentorId;
+    }
+
+    public void setCourseMentorId(UUID courseMentorId) {
+        this.courseMentorId = courseMentorId;
     }
 
     public void setTags(List<String> tags) {

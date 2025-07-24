@@ -48,36 +48,32 @@
                     <div class="dashboard-card">
                         <div class="card-header">
                             <i class="fa fa-clock-o card-icon"></i>
-                            <h3 class="card-title" th:text="${isAllCompleted} ? 'All Sessions Completed' : 'Upcoming Session'">Upcoming Session</h3>
+                            <h3 class="card-title"
+                                th:text="${sessionStatus == 'COMPLETED' ? 'All Sessions Completed' : (sessionStatus == 'UNDER_REVIEW' ? 'Pending Review' : 'Upcoming Session')}">
+                                Upcoming Session
+                            </h3>
                         </div>
 
-                        <!-- Styled and emphasized session info -->
-                        <div th:if="${isAllCompleted}">
+                        <div th:if="${sessionStatus == 'COMPLETED'}">
                             <div class="stat-label" style="font-weight: bold;">
-                                🎉 Congratulations! You’ve completed all sessions.
+                                🎉 <span th:text="${sessionMessage}"></span>
                             </div>
-                            <a href="#" th:href="@{/courses}" class="view-link">
-                                Find New Courses
-                                <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                            <a th:href="@{/courses}" class="view-link">
+                                Find New Courses <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                             </a>
                         </div>
 
-                        <div th:if="${!isAllCompleted}">
+                        <div th:unless="${sessionStatus == 'COMPLETED'}">
                             <div class="stat-label">
-                                <span>Next session: </span>
-                                <span style="font-weight: bold; font-style: italic;"
-                                      th:text="${nextSessionTime} ?: 'No upcoming session'">
-                            No upcoming session
-                        </span>
+                                <span th:if="${sessionStatus == 'UPCOMING'}">Next session: </span>
+                                <span style="font-weight: bold; font-style: italic;" th:text="${sessionMessage}">
+                                </span>
                             </div>
-
-                            <a href="#" class="view-link" th:href="@{/mentee/schedule}">
-                                View schedule
-                                <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                            <a th:href="@{/schedules}" class="view-link">
+                                View schedule <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                             </a>
                         </div>
                     </div>
-
                     <!-- Learning Progress -->
                     <div class="dashboard-card">
                         <div class="card-header">
@@ -90,7 +86,7 @@
                         </div>
                         <div class="stat-label">Overall course completion</div>
                         <a href="#" class="view-link" th:href="@{/learning-tracker}">
-                            View details
+                            View Your Learning Tracker
                             <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                         </a>
                     </div>
@@ -108,108 +104,26 @@
                             <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                         </a>
                     </div>
-                </div>
 
-                <!-- Recent Activity -->
-                <!--            Chưa có notification cho nhóm-->
-                <div class="dashboard-card" style="margin-bottom: 40px;">
-                    <div class="card-header">
-                        <i class="fa fa-history card-icon"></i>
-                        <h3 class="card-title">Recent Activity</h3>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fa fa-users card-icon"></i>
+                            <h3 class="card-title">Reviews</h3>
+                        </div>
+                        <div class="stat-label">Write a review for courses and mentors</div>
+                        <a href="#" class="view-link" th:href="@{/reviews}">
+                            Write
+                            <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
+                        </a>
                     </div>
-                    <ul class="activity-list">
-                        <!-- Dynamic activities from backend -->
-                        <li class="activity-item" th:each="activity : ${recentActivities ?: {}}">
-                            <div class="activity-icon" th:classappend="${activity.type}">
-                                <i th:class="'fa fa-' + (${activity.icon})"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title" th:text="${activity.title}">Activity Title</div>
-                                <div class="activity-description" th:text="${activity.description}">Description</div>
-                                <div class="activity-time" th:text="${activity.time}">Time</div>
-                            </div>
-                        </li>
-
-                        <!-- Default activities based on actual schema -->
-                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                            <div class="activity-icon session">
-                                <i class="fa fa-calendar"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">
-                                    <a th:href="@{/mentee/sessions}" class="view-link" style="text-decoration: none;">
-                                        Session completed with John Mentor
-                                    </a>
-                                </div>
-                                <div class="activity-description">Introduction to Java - 90 minutes • Status: Present</div>
-                                <div class="activity-time">Yesterday at 2:00 PM</div>
-                            </div>
-                        </li>
-
-                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                            <div class="activity-icon enrollment">
-                                <i class="fa fa-check-circle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">
-                                    <a th:href="@{/mentee/enrollments}" class="view-link" style="text-decoration: none;">
-                                        Enrollment accepted
-                                    </a>
-                                </div>
-                                <div class="activity-description">Web Development with React - 8 sessions with Sarah M.
-                                </div>
-                                <div class="activity-time">2 days ago</div>
-                            </div>
-                        </li>
-
-                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                            <div class="activity-icon payment">
-                                <i class="fa fa-credit-card"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">
-                                    <a th:href="@{/mentee/wallet}" class="view-link" style="text-decoration: none;">
-                                        Payment completed
-                                    </a>
-                                </div>
-                                <div class="activity-description">$85.50 paid for Machine Learning Basics course</div>
-                                <div class="activity-time">3 days ago</div>
-                            </div>
-                        </li>
-
-                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                            <div class="activity-icon feedback">
-                                <i class="fa fa-star"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">
-                                    <a th:href="@{/mentee/feedback}" class="view-link" style="text-decoration: none;">
-                                        Feedback submitted
-                                    </a>
-                                </div>
-                                <div class="activity-description">Rated 5 stars for Cloud Computing with AWS course</div>
-                                <div class="activity-time">1 week ago</div>
-                            </div>
-                        </li>
-
-                        <li class="activity-item" th:if="${#lists.isEmpty(recentActivities ?: {})}">
-                            <div class="activity-icon bookmark">
-                                <i class="fa fa-bookmark"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">
-                                    <a th:href="@{/mentee/bookmarks}" class="view-link" style="text-decoration: none;">
-                                        Course bookmarked
-                                    </a>
-                                </div>
-                                <div class="activity-description">Added "Advanced JavaScript Patterns" to bookmarks</div>
-                                <div class="activity-time">1 week ago</div>
-                            </div>
-                        </li>
-                    </ul>
-                    <div style="text-align: center; margin-top: 20px;">
-                        <a th:href="@{/mentee/activity}" class="view-link">
-                            View all activity
+                    <div class="dashboard-card" th:if="${havingPending}">
+                        <div class="card-header">
+                            <i class="fa fa-users card-icon"></i>
+                            <h3 class="card-title">View Pending Requested Class</h3>
+                        </div>
+                        <div class="stat-label">View your registered pending class</div>
+                        <a href="#" class="view-link" th:href="@{/pending-enrollments}">
+                            View
                             <i class="fa fa-arrow-right" style="margin-left: 5px;"></i>
                         </a>
                     </div>
@@ -330,6 +244,10 @@
                     <a th:href="@{/mentors}" class="btn btn-secondary btn-lg">
                         <i class="fa fa-users" style="margin-right: 8px;"></i>
                         Find Mentors
+                    </a>
+                    <a th:href="@{/pending-enrollments}" class="btn btn-secondary btn-lg" style="background-color: #f59e0b;" th:if="${havingPending}">
+                        <i class="fa fa-users" style="margin-right: 8px;"></i>
+                        View Pending Requested Class
                     </a>
                 </div>
 

@@ -2,10 +2,9 @@ package com.example.edutrack.auth.controller;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
-import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
-import com.example.edutrack.accounts.repository.MentorRepository;
-import com.example.edutrack.accounts.repository.UserRepository;
+import com.example.edutrack.accounts.service.interfaces.MenteeService;
+import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.auth.service.interfaces.GoogleOAuthService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +17,18 @@ import java.util.Map;
 @Controller
 public class GoogleAuthController {
 
-    @Autowired
-    private GoogleOAuthService googleOAuthService;
+    private final GoogleOAuthService googleOAuthService;
+    private final MenteeService menteeService;
+    private final MentorService mentorService;
 
-    @Autowired
-    private UserRepository userRepository;
+    public GoogleAuthController(GoogleOAuthService googleOAuthService,
+                                MenteeService menteeService,
+                                MentorService mentorService){
+        this.googleOAuthService = googleOAuthService;
+        this.menteeService = menteeService;
+        this.mentorService = mentorService;
+    }
 
-    @Autowired
-    private MenteeRepository menteeRepository;
-
-    @Autowired
-    private MentorRepository mentorRepository;
 
     @GetMapping("/login/google")
     public void googleLogin(HttpServletResponse response) throws IOException {
@@ -47,19 +47,19 @@ public class GoogleAuthController {
                 userInfo = null;
             }
         }
-        if (userInfo == null) {
+        if (userInfo == null || userInfo.get("email") == null) {
             return "redirect:/404";
         }
         session.setAttribute("googleUserInfo", userInfo);
         String email = (String) userInfo.get("email");
 
-        if (menteeRepository.findByEmail(email).isPresent()) {
-            Mentee mentee = menteeRepository.findByEmail(email).get();
+        if (menteeService.findByEmail(email).isPresent()) {
+            Mentee mentee = menteeService.findByEmail(email).get();
             session.setAttribute("loggedInUser", mentee);
             session.setAttribute("role", "mentee");
             return "redirect:/";
-        } else if (mentorRepository.findByEmail(email).isPresent()) {
-            Mentor mentor = mentorRepository.findByEmail(email).get();
+        } else if (mentorService.findByEmail(email).isPresent()) {
+            Mentor mentor = mentorService.findByEmail(email).get();
             session.setAttribute("loggedInUser", mentor);
             session.setAttribute("role", "mentor");
             return "redirect:/mentor";

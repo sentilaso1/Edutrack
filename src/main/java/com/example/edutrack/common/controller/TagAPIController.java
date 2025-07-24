@@ -4,8 +4,6 @@ import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.curriculum.model.Tag;
 import com.example.edutrack.curriculum.repository.TagRepository;
-import com.example.edutrack.curriculum.service.interfaces.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,14 +37,12 @@ public class TagAPIController {
     ) {
         Mentee mentee = menteeRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mentee not found"));
-        // If interests already set or skipped, prevent resubmission
         if (mentee.getInterests() != null && !mentee.getInterests().isEmpty()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("User already selected interests or skipped.");
         }
 
         if (request.isSkipped()) {
-            // Mark as skipped by setting interests to an empty string
             mentee.setInterests(" ");
         } else {
             List<Integer> tagIds = request.getTags();
@@ -54,7 +50,6 @@ public class TagAPIController {
                 return ResponseEntity.badRequest().body("No tags selected.");
             }
 
-            // Validate tag IDs exist
             List<Tag> tags = tagRepository.findAllById(tagIds);
             if (tags.size() != tagIds.size()) {
                 return ResponseEntity.badRequest().body("One or more tags not found.");
@@ -64,7 +59,6 @@ public class TagAPIController {
                     .map(Tag::getTitle)
                     .toList();
 
-            // Save as comma-separated IDs
             String interestStr = tagsTitle.stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(","));

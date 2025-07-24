@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Ký Khóa Học - Lập Trình Web Cơ Bản</title>
+    <title th:text="${'Register Skill: ' + courseMentor.course.name}"></title>
     <script th:src="@{/js/master.js}"></script>
 
     <link rel="stylesheet" th:href="@{/assets/css/register-section.css}">
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <style>
         .schedule-table td.selected {
-            background: linear-gradient(135deg, #ffc107, #ffca2c);
+            background: linear-gradient(135deg, #fa5e5e, #fd979c);
             color: #000;
+        }
+
+        .highlight {
+            background-color: yellow !important;
         }
     </style>
 </head>
@@ -57,20 +61,21 @@
                         </div>
 
                         <!-- Registration Form -->
-                        <form id="registrationForm" th:action="@{/courses/checkout/{cmid}(cmid=${courseMentor.id})}" method="POST">
+                        <form id="registrationForm" th:action="@{/courses/checkout/{cmid}(cmid=${courseMentor.id})}"
+                              method="POST">
                             <div class="section">
                                 <h3>Skill Summary</h3>
                                 <div class="summary-item">
                                     <span>Skill name</span>
-                                    <span>Machine Learning</span>
+                                    <span th:text="${courseMentor.course.name}">Machine Learning</span>
                                 </div>
                                 <div class="summary-item">
                                     <span>Subject</span>
-                                    <span>Artificial Intelligence</span>
+                                    <span th:each="tag : ${tagList}" th:text="${tag.title}"></span>
                                 </div>
                                 <div class="summary-item">
                                     <span>Mentor</span>
-                                    <span>John Doe</span>
+                                    <span th:text="${courseMentor.mentor.fullName}">John Doe</span>
                                 </div>
                                 <div class="summary-item">
                                     <span>Price per Slot</span>
@@ -93,24 +98,34 @@
                                         <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg2QTc4OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSAxOVYyMEgzVjE5QzMgMTYuNzkgNi41OCAxNSAxMiAxNUMxNy40MiAxNSAyMSAxNi43OSAyMSAxOVoiLz4KPC9zdmc+"
                                              alt="Mentor Avatar" class="mentor-avatar">
                                         <div class="mentor-details">
-                                            <h4>John Doe</h4>
+                                            <h4 th:text="${courseMentor.mentor.fullName}">John Doe</h4>
                                             <div class="mentor-rating">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                                 </svg>
-                                                <span>4.9/5 (25 đánh giá)</span>
+                                                <span th:text="${courseMentor.mentor.rating + '/5'}"></span>
                                             </div>
-                                            <p><strong>Expertises: </strong> Web Development, JavaScript, React</p>
+                                            <p style="display: flex; align-items: center; gap: 5px;">
+                                                <span th:text="${courseMentor.mentor.getBio()}"></span>
+                                            </p>
+                                            <p style="display: flex; align-items: center; gap: 5px;">
+                                                <strong>Experience: </strong>
+                                                <span th:each="item : ${courseMentor.mentor.expertiseItem}" th:text="${item}">span</span>
+                                            </p>
                                         </div>
                                     </div>
-                                    <p><strong>Experience:</strong>None</p>
+
                                 </div>
 
                                 <div class="schedule-section">
                                     <div class="schedule-container">
                                         <h3 class="schedule-title">Available Schedule This Month</h3>
                                         <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                                            Click on an available slot (✔) to select it for booking. You can only select one slot.
+                                            Click on an available slot (✔) to select it for booking. You can only select
+                                            one slot.
+                                        </p>
+                                        <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                                            (WARNING: If you check the pending slot, your request might be rejected. Consider carefully before choosing)
                                         </p>
 
                                         <div class="schedule-wrapper">
@@ -119,7 +134,7 @@
                                                 <tr>
                                                     <th>Slot / Date</th>
                                                     <th th:each="i : ${#numbers.sequence(0, #lists.size(slotDayMatrix[0]) - 1)}"
-                                                        th:text="${minDate.plusDays(i)}"
+                                                        th:text="${minDate.plusDays(i) + ''}"
                                                         th:attr="data-date=${minDate.plusDays(i)}">
                                                         Date
                                                     </th>
@@ -127,14 +142,15 @@
                                                 </thead>
                                                 <tbody>
                                                 <tr th:each="slot, rowStat : ${slots}">
-                                                    <td th:text="${slot}">Time Slot</td>
+                                                    <td th:text="${slot.startTime + '-' + slot.endTime}">Time Slot</td>
                                                     <td th:each="colStat : ${#numbers.sequence(0, #lists.size(slotDayMatrix[0]) - 1)}"
-                                                        th:classappend="${slotDayMatrix[rowStat.index][colStat]} ? 'available' : 'inactive'"
+                                                        th:classappend="${(slotDayMatrix[rowStat.index][colStat] == -1) ? 'inactive' : 'available'}"
                                                         th:data-date="${minDate.plusDays(colStat)}"
                                                         th:data-slot="${'SLOT_' + (rowStat.index + 1)}"
-                                                        th:onclick="${slotDayMatrix[rowStat.index][colStat]} ? 'selectSlot(this)' : ''"
-                                                        th:style="${slotDayMatrix[rowStat.index][colStat]} ? 'cursor: pointer;' : ''">
-                                                        <span th:text="${slotDayMatrix[rowStat.index][colStat] ? '✔' : ''}"></span>
+                                                        th:onclick="${slotDayMatrix[rowStat.index][colStat] != -1} ? 'selectSlot(this)' : ''"
+                                                        th:style="${slotDayMatrix[rowStat.index][colStat] != -1 } ? 'cursor: pointer;' : ''">
+                                                        <span th:text="${slotDayMatrix[rowStat.index][colStat] == 0 ? '✔' : ''}"></span>
+                                                        <span th:text="${slotDayMatrix[rowStat.index][colStat] > 0 ? slotDayMatrix[rowStat.index][colStat] + ' Pendings' : ''}"></span>
                                                     </td>
                                                 </tr>
                                                 </tbody>
@@ -233,7 +249,6 @@
             element.classList.remove('selected');
             element.classList.add('available');
 
-            // Xóa input tương ứng
             const dateInput = container.querySelector(`input[name="date"][value="${date}"][data-slot="${slot}"]`);
             const slotInput = container.querySelector(`input[name="slot"][value="${slot}"][data-date="${date}"]`);
             if (dateInput) dateInput.remove();

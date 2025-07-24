@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -36,7 +36,6 @@ public class AdminController {
         @Autowired
         private RequestLogRepository requestLogRepository;
 
-
         @Autowired
         public AdminController(UserService userService, SystemConfigService systemConfigService,
                         ScheduledJobService scheduledJobService) {
@@ -44,34 +43,34 @@ public class AdminController {
                 this.systemConfigService = systemConfigService;
                 this.scheduledJobService = scheduledJobService;
         }
-        
+
         @GetMapping("/users")
         public String showUserManagement(Model model,
-                                        @RequestParam(required = false) String email,
-                                        @RequestParam(required = false) String fullName,
-                                        @RequestParam(required = false) Boolean isLocked,
-                                        @RequestParam(required = false) Boolean isActive,
-                                        @RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "5") int size) {
+                        @RequestParam(required = false) String email,
+                        @RequestParam(required = false) String fullName,
+                        @RequestParam(required = false) Boolean isLocked,
+                        @RequestParam(required = false) Boolean isActive,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<User> userPage = userService.searchUsers(email, fullName, isLocked, isActive, pageable);
                 List<UserWithRoleDTO> userDtos = new ArrayList<>();
 
                 for (User user : userPage.getContent()) {
-                String role = "USER";
-                if (user.getId() != null) {
-                        Staff staff = userService.getStaffByUserId(user.getId().toString());
-                        if (staff != null) {
-                        role = staff.getRole().toString();
+                        String role = "USER";
+                        if (user.getId() != null) {
+                                Staff staff = userService.getStaffByUserId(user.getId().toString());
+                                if (staff != null) {
+                                        role = staff.getRole().toString();
+                                }
                         }
-                }
-                userDtos.add(new UserWithRoleDTO(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getFullName(),
-                        role,
-                        user.getIsLocked(),
-                        user.getIsActive()));
+                        userDtos.add(new UserWithRoleDTO(
+                                        user.getId(),
+                                        user.getEmail(),
+                                        user.getFullName(),
+                                        role,
+                                        user.getIsLocked(),
+                                        user.getIsActive()));
                 }
 
                 model.addAttribute("users", userDtos);
@@ -83,23 +82,71 @@ public class AdminController {
                 return "accounts/html/user-management";
         }
 
+        // Function 2
         @PostMapping("/users/{id}/lock")
         public String toggleLock(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
-                        User user = userService.getUserById(id);
-                        if (user == null) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng!");
+                        if (id == null || id.trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "User ID cannot be empty!");
                                 return "redirect:/admin/users";
                         }
-                        user.setIsLocked(!user.getIsLocked()); // Toggle lock state
-                        userService.saveUser(user);
-                        redirectAttributes.addFlashAttribute("successMessage",
-                                        user.getIsLocked() ? "Khóa người dùng thành công!"
-                                                        : "Mở khóa người dùng thành công!");
+
+                        UUID userId;
+                        try {
+                                userId = UUID.fromString(id);
+                        } catch (IllegalArgumentException e) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Invalid user ID format!");
+                                return "redirect:/admin/users";
+                        }
+
+                        User user = userService.getUserById(id);
+                        if (user == null) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "User not found!");
+                                return "redirect:/admin/users";
+                        }
+
+                        if (!user.getIsActive()) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Cannot lock/unlock inactive user!");
+                                return "redirect:/admin/users";
+                        }
+
+                        Staff staff = userService.getStaffByUserId(id);
+                        if (staff != null && staff.getRole() == Staff.Role.Admin) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Cannot lock/unlock admin account!");
+                                return "redirect:/admin/users";
+                        }
+
+                        boolean currentLockState = user.getIsLocked();
+                        user.setIsLocked(!currentLockState);
+                        try {
+                                userService.saveUser(user);
+                        } catch (IllegalArgumentException e) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Validation error when saving: " + e.getMessage());
+                                return "redirect:/admin/users";
+                        }
+                        if (user.getIsLocked()) {
+                                redirectAttributes.addFlashAttribute("successMessage", "User locked successfully!");
+                        } else {
+                                redirectAttributes.addFlashAttribute("successMessage", "User unlocked successfully!");
+                        }
+
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("User not found")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "User not found in system!");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "System error when changing lock status: " + e.getMessage());
+                        }
+                        return "redirect:/admin/users";
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Lỗi khi thay đổi trạng thái khóa: " + e.getMessage());
+                                        "Unknown error when changing lock status: " + e.getMessage());
+                        return "redirect:/admin/users";
                 }
+
                 return "redirect:/admin/users";
         }
 
@@ -108,17 +155,18 @@ public class AdminController {
                 try {
                         User user = userService.getUserById(id);
                         if (user == null) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng!");
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Can not find user with ID: " + id);
                                 return "redirect:/admin/users";
                         }
                         user.setIsActive(!user.getIsActive()); // Toggle active state
                         userService.saveUser(user);
                         redirectAttributes.addFlashAttribute("successMessage",
-                                        user.getIsActive() ? "Kích hoạt người dùng thành công!"
-                                                        : "Hủy kích hoạt người dùng thành công!");
+                                        user.getIsActive() ? "Activate user successfully!"
+                                                        : "Deactivate user successfully!");
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Lỗi khi thay đổi trạng thái kích hoạt: " + e.getMessage());
+                                        "Error when change status: " + e.getMessage());
                 }
                 return "redirect:/admin/users";
         }
@@ -127,43 +175,59 @@ public class AdminController {
         public String grantStaff(@PathVariable String id, @RequestParam String role,
                         RedirectAttributes redirectAttributes) {
                 try {
-                        if (role == null || role.isEmpty()) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn vai trò!");
-                                return "redirect:/admin/users";
-                        }
-                        Staff.Role staffRole;
-                        try {
-                                staffRole = Staff.Role.valueOf(role);
-                        } catch (IllegalArgumentException e) {
-                                redirectAttributes.addFlashAttribute("errorMessage", "Vai trò không hợp lệ!");
-                                return "redirect:/admin/users";
-                        }
-                        userService.grantStaffRole(id, Staff.Role.valueOf(role));
-                        redirectAttributes.addFlashAttribute("successMessage", "Cấp vai trò Staff thành công!");
+                        Staff.Role staffRole = Staff.Role.valueOf(role);
+                        userService.grantStaffRole(id, staffRole);
+                        redirectAttributes.addFlashAttribute("successMessage", "Staff role granted successfully!");
+                } catch (IllegalArgumentException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Invalid role");
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Lỗi khi cấp vai trò Staff: " + e.getMessage());
+                                        "Error when grant staff role: " + e.getMessage());
                 }
                 return "redirect:/admin/users";
         }
 
-        @PostMapping("/users/{id}/revoke-staff")      
+        @PostMapping("/users/{id}/revoke-staff")
         public String revokeStaff(@PathVariable String id, RedirectAttributes redirectAttributes) {
                 try {
                         userService.revokeStaffRole(id);
-                        redirectAttributes.addFlashAttribute("successMessage", "Hủy vai trò Staff thành công!");
+                        redirectAttributes.addFlashAttribute("successMessage", "Staff role revoked successfully!");
+
+                } catch (IllegalArgumentException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                        return "redirect:/admin/users";
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                        return "redirect:/admin/users";
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("User not found")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "User not found in system!");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "System error when revoking staff role: " + e.getMessage());
+                        }
+                        return "redirect:/admin/users";
                 } catch (Exception e) {
                         redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Lỗi khi hủy vai trò Staff: " + e.getMessage());
+                                        "Unknown error when revoking staff role: " + e.getMessage());
+                        return "redirect:/admin/users";
                 }
                 return "redirect:/admin/users";
+        }
+
+        @GetMapping("/users/export-log")
+        public void exportUser(HttpServletResponse response) throws IOException {
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=\"users.csv\"");
+                userService.exportToCsv(response.getWriter());
         }
 
         @GetMapping("/dashboard")
         public String showDashboard(Model model) {
                 model.addAttribute("systemStatus", systemConfigService.getSystemStatus());
                 model.addAttribute("userStats", userService.getUserStatistics());
-                model.addAttribute("loginStats", userService.getLoginStats());
                 model.addAttribute("jobStats", scheduledJobService.getJobSummary());
                 return "accounts/html/index.html";
         }
@@ -175,7 +239,8 @@ public class AdminController {
                         @RequestParam(required = false) String method,
                         @RequestParam(required = false) String uri,
                         Model model) {
-                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));;
+                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+                ;
                 Page<RequestLog> logPage = requestLogRepository.filterLogs(
                                 (ip != null && !ip.isEmpty()) ? ip : null,
                                 (method != null && !method.isEmpty()) ? method : null,
@@ -205,8 +270,22 @@ public class AdminController {
         }
 
         @PostMapping("/system-settings/update")
-        public String updateSystemSettings(@RequestParam String key, @RequestParam String value) {
-                systemConfigService.updateValue(key, value);
+        public String updateSystemSettings(@RequestParam String key, @RequestParam String value,
+                        RedirectAttributes redirectAttributes) {
+                systemConfigService.updateValue(key, value);                
+                if (key.equals("app.email")) {
+                        redirectAttributes.addAttribute("success",
+                                        "You must change config(username and password) in properties file to take effect.");
+                        return "redirect:/admin/system-settings";
+                } else if (key.equals("smtp.host")) {
+                        redirectAttributes.addAttribute("success",
+                                        "You must sure smtp server is config with the port and username password to take effect.");
+                        return "redirect:/admin/system-settings";
+                } else if (key.equals("smtp.port")) {
+                        redirectAttributes.addAttribute("success",
+                                        "You must sure smtp server is config with this open port to take effect.");
+                        return "redirect:/admin/system-settings";
+                }
                 return "redirect:/admin/system-settings?success=Configuration updated successfully";
         }
 
@@ -232,36 +311,126 @@ public class AdminController {
         }
 
         @GetMapping("/jobs")
-        public String viewJobs( @RequestParam(required = false) String search,
-                                @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "10") int size,
-                                Model model) {
+        public String viewJobs(@RequestParam(required = false) String search,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size,
+                        Model model) {
                 Pageable pageable = PageRequest.of(page, size);
                 Page<ScheduledJobDTO> jobPage = scheduledJobService.getJobs(search, pageable);
-
+                int startPage = Math.max(0, page - 2);
+                int endPage = Math.min(jobPage.getTotalPages() - 1, page + 2);
                 model.addAttribute("jobs", jobPage.getContent());
                 model.addAttribute("currentPage", page);
                 model.addAttribute("totalPages", jobPage.getTotalPages());
                 model.addAttribute("search", search);
+                model.addAttribute("startPage", startPage);
+                model.addAttribute("endPage", endPage);
+                model.addAttribute("pageSize", size);
                 return "accounts/html/scheduled-jobs";
         }
-        
+
         @PostMapping("/jobs/{id}/toggle")
-        public String toggleJob(@PathVariable Long id, @RequestParam boolean active) {
-                scheduledJobService.toggleJob(id, active);
+        public String toggleJob(@PathVariable Long id, @RequestParam boolean active, RedirectAttributes redirectAttributes) {
+                try {
+                        scheduledJobService.toggleJob(id, active);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job status updated successfully.");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                }
                 return "redirect:/admin/jobs";
         }
 
         @PostMapping("/jobs/{id}/run")
-        public String runJobNow(@PathVariable Long id) {
-                scheduledJobService.runJobNow(id);
+        public String runJobNow(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+                try {
+                        scheduledJobService.runJobNow(id);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job is running now.");
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Job is not active");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Error running job");
+                }
                 return "redirect:/admin/jobs";
         }
 
         @PostMapping("/jobs/{id}/update")
-        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto) {
+        public String updateJob(@PathVariable Long id, @ModelAttribute ScheduledJobDTO dto,
+                        RedirectAttributes redirectAttributes) {
                 scheduledJobService.updateJob(id, dto);
+                redirectAttributes.addFlashAttribute("successMessage", "Job updated successfully");
+                return "redirect:/admin/jobs";
+        }
+        
+        @PostMapping("/jobs/add")
+        public String addJob(@ModelAttribute ScheduledJobDTO dto, RedirectAttributes redirectAttributes) {
+                try {
+                        // Validate required fields
+                        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job name is required");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        if (dto.getCronExpression() == null || dto.getCronExpression().trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Time is required");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        // Create new job
+                        scheduledJobService.createJob(dto);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job created successfully");
+
+                } catch (IllegalArgumentException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Invalid job data: " + e.getMessage());
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("already exists")) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Job with this name already exists");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Error creating job: " + e.getMessage());
+                        }
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "System error when creating job");
+                }
+
+                return "redirect:/admin/jobs";
+        }
+
+        @PostMapping("/jobs/{id}/delete")
+        public String deleteJob(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+                try {
+                        // Check if job exists
+                        ScheduledJobDTO job = scheduledJobService.getJob(id);
+                        if (job == null) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job not found");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        if (scheduledJobService.isJobRunning(id)) {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Cannot delete job while it's active. Please wait for it to complete.");
+                                return "redirect:/admin/jobs";
+                        }
+
+                        // Delete the job
+                        scheduledJobService.deleteJob(id);
+                        redirectAttributes.addFlashAttribute("successMessage", "Job deleted successfully");
+
+                } catch (IllegalStateException e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete job: " + e.getMessage());
+                } catch (RuntimeException e) {
+                        if (e.getMessage().contains("not found")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Job not found");
+                        } else if (e.getMessage().contains("running")) {
+                                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete running job");
+                        } else {
+                                redirectAttributes.addFlashAttribute("errorMessage",
+                                                "Error deleting job: " + e.getMessage());
+                        }
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "System error when deleting job");
+                }
+
                 return "redirect:/admin/jobs";
         }
 }
-

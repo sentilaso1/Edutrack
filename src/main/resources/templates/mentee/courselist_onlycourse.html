@@ -5,77 +5,72 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <!--
-    - primary meta tags
-    -->
     <title>Youdemi</title>
     <meta name="title" content="Youdemi"/>
     <meta name="description" content="This is an education HTML template made by codewithsadee"/>
 
-    <!--
-    - favicon
-    -->
     <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-
-    <!--
-    - custom font link
-    -->
-
-    <!--
-    - custom css link
-    -->
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
 
-    <!--
-    - preload images
-    -->
-    <!--  <link rel="preload" as="image" th:href="@{/assets/images/hero-banner.png}" />-->
-    <!--  <link rel="preload" as="image" th:href="@{/assets/images/hero-bg.png}" />-->
+    <style>
+        .course-card {
+            position: relative;
+        }
+
+        .bookmark-container {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1;
+        }
+
+        .bookmark-btn {
+            background-color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .bookmark-btn:hover {
+            background-color: hsl(0, 0%, 95%);
+        }
+
+        .bookmark-btn ion-icon {
+            font-size: 20px;
+            color: hsl(0, 0%, 30%);
+        }
+
+        .course-card .layer-link {
+            z-index: 0;
+        }
+    </style>
 </head>
-
-
 <body>
-
-
-<!--
-- #HEADER
--->
 
 <th:block th:insert="~{fragments/header :: header}"></th:block>
 
 <main>
     <article>
-        <section
-                class="section course has-bg-image"
-                aria-labelledby="course-label"
-                th:style="|background-image: url('@{/assets/images/course-bg.png}')|"
-        >
-            <!-- Search Bar -->
+        <section class="section course has-bg-image" aria-labelledby="course-label"
+                 th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+
             <div class="search-wrapper">
                 <form class="search-form" action="#" method="get">
-                    <input
-                            id="searchInput"
-                            type="text"
-                            name="q"
-                            class="search-input"
-                            placeholder="Search for courses..."
-                    />
+                    <input id="searchInput" type="text" name="q" class="search-input" placeholder="Search for courses..."/>
                     <button type="submit" class="search-btn" aria-label="Search">
                         <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
                     </button>
                 </form>
             </div>
 
-
             <div class="container">
-                <!--          sort and filter-->
-
-                <!-- Bắt đầu bố cục 2 cột -->
                 <div class="course-section-layout">
-                    <!-- Cột trái: bộ lọc -->
                     <aside class="course-filter">
                         <form th:action="@{/courses-only}" method="get" id="filterForm">
                             <input type="hidden" name="size_page" th:value="${param.size_page}"/>
@@ -86,12 +81,10 @@
                                 <ul class="price-filter" th:each="subject : ${subjectList}">
                                     <li>
                                         <label style="display: flex;">
-                                            <input class="custom-checkbox" type="checkbox"
-                                                   name="subject"
-                                                   th:value="${subject.id}"
+                                            <input class="custom-checkbox" type="checkbox" name="subject" th:value="${subject.id}"
                                                    th:checked="${selectedSubjects != null and selectedSubjects.contains(subject.id)}"
                                                    onchange="submitForm()"/>
-                                            <span style="margin-left: 0.5em; " th:text="${subject.title}"></span>
+                                            <span style="margin-left: 0.5em;" th:text="${subject.title}"></span>
                                         </label>
                                     </li>
                                 </ul>
@@ -102,12 +95,10 @@
                                 <ul class="price-filter" th:each="skill : ${skillList}">
                                     <li>
                                         <label style="display: flex;">
-                                            <input class="custom-checkbox" type="checkbox"
-                                                   name="skill"
-                                                   th:value="${skill.id}"
+                                            <input class="custom-checkbox" type="checkbox" name="skill" th:value="${skill.id}"
                                                    th:checked="${selectedSkills != null and selectedSkills.contains(skill.id)}"
                                                    onchange="submitForm()"/>
-                                            <span style="margin-left: 0.5em; " th:text="${skill.name}"></span>
+                                            <span style="margin-left: 0.5em;" th:text="${skill.name}"></span>
                                         </label>
                                     </li>
                                 </ul>
@@ -115,253 +106,77 @@
                         </form>
                         <script>
                             function submitForm() {
-                                document.getElementById('filterForm').submit()
+                                document.getElementById('filterForm').submit();
                             }
                         </script>
                     </aside>
 
                     <script src="https://unpkg.com/lucide@latest"></script>
-                    <!-- Cột phải: danh sách khóa học -->
                     <div class="course-listing">
-                        <div class="filter-bar">
-                            <div class="course-topbar">
-                                <div class="view-toggle">
-                                    <button class="view-btn active" id="gridView" aria-label="Grid view"><i
-                                            class="fa fa-list" aria-hidden="true"></i></button>
-                                    <button class="view-btn" id="listView" aria-label="List view"><i class="fa fa-th"
-                                                                                                     aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div style="display: flex">
-                                <div class="dropdown">
-                                    <button class="dropdown-toggle">▾Show</button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a th:href="@{/courses-only(
-                                                    size_page=6,
-                                                    subject=${param.subject},
-                                                    skill=${param.skill},
-                                                    order_by=${param.order_by}
-                                            )}">
-                                                <button type="button">6</button>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a th:href="@{/courses-only(
-                                                    size_page=9,
-                                                    subject=${param.subject},
-                                                    skill=${param.skill},
-                                                    order_by=${param.order_by}
-                                            )}">
-                                                <button type="button">9</button>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a th:href="@{/courses-only(
-                                                    size_page=12,
-                                                    subject=${param.subject},
-                                                    skill=${param.skill},
-                                                    order_by=${param.order_by}
-                                            )}">
-                                                <button type="button">12</button>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a th:href="@{/courses-only(
-                                                    size_page=18,
-                                                    subject=${param.subject},
-                                                    skill=${param.skill},
-                                                    order_by=${param.order_by}
-                                            )}">
-                                                <button type="button">18</button>
-                                            </a>
-                                        </li>
-                                    </ul>
-
-                                </div>
-
-                                <div class="dropdown">
-                                    <button class="dropdown-toggle">▾Sort by</button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a th:href="@{/courses-only(
-                                                    size_page=${param.size_page},
-                                                    subject=${param.subject},
-                                                    skill=${param.skill},
-                                                    order_by='newest'
-                                            )}">
-                                                <button type="button">Newest</button>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a th:href="@{/courses-only(
-                                                    size_page=${param.size_page},
-                                                    subject=${param.subject},
-                                                    skill=${param.skill},
-                                                    order_by='oldest'
-                                            )}">
-                                                <button type="button">Oldest</button>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a th:href="@{/courses-only(
-                                                    size_page=${param.size_page},
-                                                    subject=${param.subject},
-                                                    skill=${param.skill},
-                                                    order_by='title_asc'
-                                            )}">
-                                                <button type="button">Alphabet: A to Z</button>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a th:href="@{/courses-only(
-                                                    size_page=${param.size_page},
-                                                    subject=${param.subject},
-                                                    skill=${param.skill},
-                                                    order_by='title_desc'
-                                            )}">
-                                                <button type="button">Alphabet: Z to A</button>
-                                            </a>
-                                        </li>
-                                    </ul>
-
-                                </div>
-                            </div>
-
-                        </div>
                         <ul class="grid-list" th:with="courses = ${coursePage.content}">
                             <li class="card-container" th:each="course : ${courses}">
                                 <div class="card course-card">
                                     <figure class="card-banner">
-                                        <img
-                                                th:src="@{/assets/images/default-avatar.jpg}"
-                                                width="370"
-                                                height="248"
-                                                loading="lazy"
-                                                alt="Default Avatar"
-                                                class="img-cover"
-                                        />
+                                        <img th:src="@{/assets/images/default-avatar.jpg}" width="370" height="248" loading="lazy" alt="Default Avatar" class="img-cover"/>
                                     </figure>
 
                                     <div class="card-content">
                                         <div class="wrapper">
                                             <p class="title-lg card-price">$29.28</p>
                                             <div class="rating-wrapper">
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
-                                                     loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
-                                                     loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
-                                                     loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
-                                                     loading="lazy" alt=""/>
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt=""/>
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt=""/>
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt=""/>
+                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt=""/>
                                             </div>
                                         </div>
 
-                                        <h6 class="title-lg card-title" th:text="${course.name}">Course
-                                            Name</h6>
+                                        <h6 class="title-lg card-title" th:text="${course.name}">Course Name</h6>
 
                                         <div class="card-meta wrapper card-meta-inlayout">
                                             <p class="title-sm">
-                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20"
-                                                     loading="lazy" alt=""/>
-                                                <span class="span"
-                                                      th:text="${#lists.size(course.materials)} + ' Lessons'">0 Lessons</span>
+                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20" loading="lazy" alt=""/>
+                                                <span class="span" th:text="${#lists.size(course.materials)} + ' Lessons'">0 Lessons</span>
                                             </p>
                                         </div>
                                     </div>
 
-                                    <a
-                                            th:href="@{/courses/{courseId}/list(courseId=${course.id})}"
-                                            class="layer-link"
-                                            th:aria-label="'Course Details, ' + ${course.name}"
-                                    ></a>
+                                    <form th:if="${session.loggedInUser != null}" th:action="@{/bookmark/add/{courseId}(courseId=${course.id})}" method="post" class="bookmark-container">
+                                        <button class="bookmark-btn" aria-label="Bookmark">
+                                            <ion-icon th:if="${!@bookmarkServiceImpl.isBookmarkedByUser(course, session.loggedInUser)}" name="bookmark-outline"></ion-icon>
+                                            <ion-icon th:if="${@bookmarkServiceImpl.isBookmarkedByUser(course, session.loggedInUser)}" name="bookmark"></ion-icon>
+                                        </button>
+                                    </form>
+
+                                    <a th:href="@{/courses/{courseId}/list(courseId=${course.id})}" class="layer-link"
+                                       th:aria-label="'Course Details, ' + ${course.name}"></a>
                                 </div>
                             </li>
-
                         </ul>
-
                     </div>
                 </div>
-                <nav class="pagination">
-                    <!-- Previous Page -->
-                    <button th:disabled="${coursePage.first}">
-                        <a th:if="${!coursePage.first}" class="page-btn"
-                           th:href="@{/courses-only(
-                           page=${coursePage.number},
-                           size_page=${param.size_page},
-                           subject=${param.subject},
-                           skill=${param.skill},
-                           order_by=${param.order_by}
-                       )}">&laquo;</a>
-                    </button>
-
-                    <!-- Page Numbers -->
-                    <th:block th:each="i : ${#numbers.sequence(1, coursePage.totalPages)}">
-                        <a th:href="@{/courses-only(
-                            page=${i},
-                            size_page=${param.size_page},
-                            subject=${param.subject},
-                            skill=${param.skill},
-                            order_by=${param.order_by}
-                        )}"
-                           th:classappend="${i == coursePage.number + 1} ? 'page-btn active' : 'page-btn'"
-                           th:text="${i}">1</a>
-                    </th:block>
-
-                    <!-- Next Page -->
-                    <button th:disabled="${coursePage.last}">
-                        <a th:if="${!coursePage.last}" class="page-btn"
-                           th:href="@{/courses-only(
-                           page=${coursePage.number + 2},
-                           size_page=${param.size_page},
-                           subject=${param.subject},
-                           skill=${param.skill},
-                           order_by=${param.order_by}
-                       )}">&raquo;</a>
-                    </button>
-                </nav>
-
             </div>
         </section>
     </article>
 </main>
 
-
-<!--
-- #FOOTER
--->
-
 <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
-
-<!--
-- custom js link
--->
-<!-- Custom JS -->
 <script th:src="@{/assets/js/courlist.js}"></script>
-
-<!-- Ionicons -->
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
-
 <script>
-    // Toggle dropdown visibility
     document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', function () {
             const menu = this.nextElementSibling;
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-
-            // Close others
             document.querySelectorAll('.dropdown-menu').forEach(other => {
                 if (other !== menu) other.style.display = 'none';
             });
         });
     });
 
-    // Option click: update button text
     document.querySelectorAll('.dropdown-menu button').forEach(option => {
         option.addEventListener('click', function () {
             const menu = this.closest('.dropdown-menu');
@@ -371,7 +186,6 @@
         });
     });
 
-    // Click outside to close dropdowns
     document.addEventListener('click', function (e) {
         if (!e.target.closest('.dropdown')) {
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.style.display = 'none');
@@ -380,33 +194,21 @@
 </script>
 
 <script>
-    // lấy phần tử input tìm kiếm
-    const searchInput = document.getElementById('searchInput')
-
-    // lấy danh sách tất cả các thẻ li chứa course
-    const courseItems = document.querySelectorAll('.grid-list .card-container')
+    const searchInput = document.getElementById('searchInput');
+    const courseItems = document.querySelectorAll('.grid-list .card-container');
 
     searchInput.addEventListener('input', function () {
-        const filterText = this.value.toLowerCase() // chữ thường để dễ so sánh
+        const filterText = this.value.toLowerCase();
 
         courseItems.forEach(item => {
-            // tìm thẻ chứa tên course (theo HTML bạn cho là h6.card-title)
-            const courseNameElement = item.querySelector('.card-title')
+            const courseNameElement = item.querySelector('.card-title');
+            if (!courseNameElement) return;
 
-            if (!courseNameElement) return
-
-            const courseName = courseNameElement.textContent.toLowerCase()
-
-            // so sánh tên khóa học với từ khóa tìm kiếm
-            if (courseName.includes(filterText)) {
-                item.style.display = ''  // hiển thị
-            } else {
-                item.style.display = 'none'  // ẩn
-            }
-        })
-    })
+            const courseName = courseNameElement.textContent.toLowerCase();
+            item.style.display = courseName.includes(filterText) ? '' : 'none';
+        });
+    });
 </script>
-
 
 </body>
 </html>

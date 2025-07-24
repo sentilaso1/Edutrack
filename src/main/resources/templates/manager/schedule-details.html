@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>EduTrack - Manage Schedule Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
+
+<div class="ml-64 min-h-screen p-10">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="overflow-x-auto">
+            <div class="flex items-center justify-start mb-4">
+                <a th:href="@{/manager/schedules}"
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                    ← Return
+                </a>
+            </div>
+
+            <div class="mb-4 space-y-1">
+                <p>
+                    Mentor: <span class="font-semibold" th:text="${enrollment.courseMentor.mentor.fullName}"></span>
+                </p>
+                <p>
+                    Mentee: <span class="font-semibold" th:text="${enrollment.mentee.fullName}"></span>
+                </p>
+            </div>
+
+            <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                <!-- Filter Form: only filters & hidden page input -->
+                <form id="filterForm" method="get"
+                      th:action="@{/manager/schedules/view/{eid}(eid=${enrollment.id})}"
+                      class="flex flex-wrap items-center gap-4 w-full">
+                    <!-- Attendance Filter -->
+                    <div>
+                        <label for="attendanceFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Attendance</label>
+                        <select id="attendanceFilter" name="attendance" class="w-44 px-3 py-2 border border-gray-300 rounded shadow-sm text-sm bg-white">
+                            <option value="" th:selected="${selectedAttendanceStatus == null}">All</option>
+                            <option value="NOT_YET" th:selected="${selectedAttendanceStatus == 'NOT_YET'}">Not Yet</option>
+                            <option value="PRESENT" th:selected="${selectedAttendanceStatus == 'PRESENT'}">Present</option>
+                            <option value="ABSENT" th:selected="${selectedAttendanceStatus == 'ABSENT'}">Absent</option>
+                            <option value="CANCELLED" th:selected="${selectedAttendanceStatus == 'CANCELLED'}">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <!-- Slot Filter -->
+                    <div>
+                        <label for="slotFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Slot</label>
+                        <select id="slotFilter" name="slot" class="w-44 px-3 py-2 border border-gray-300 rounded shadow-sm text-sm bg-white">
+                            <option value="" th:selected="${selectedSlot == null}">All</option>
+                            <option value="SLOT_1" th:selected="${selectedSlot == 'SLOT_1'}">Slot 1</option>
+                            <option value="SLOT_2" th:selected="${selectedSlot == 'SLOT_2'}">Slot 2</option>
+                            <option value="SLOT_3" th:selected="${selectedSlot == 'SLOT_3'}">Slot 3</option>
+                            <option value="SLOT_4" th:selected="${selectedSlot == 'SLOT_4'}">Slot 4</option>
+                            <option value="SLOT_5" th:selected="${selectedSlot == 'SLOT_5'}">Slot 5</option>
+                        </select>
+                    </div>
+
+                    <!-- Order By Date -->
+                    <div>
+                        <label for="orderByDate" class="block text-sm font-medium text-gray-700 mb-1">Order by Date</label>
+                        <select id="orderByDate" name="dateDirection" class="w-44 px-3 py-2 border border-gray-300 rounded shadow-sm text-sm bg-white">
+                            <option value="" th:selected="${dateDirection == null}">None</option>
+                            <option value="asc" th:selected="${dateDirection == 'asc'}">Ascending</option>
+                            <option value="desc" th:selected="${dateDirection == 'desc'}">Descending</option>
+                        </select>
+                    </div>
+
+                    <!-- Order By Slot -->
+                    <div>
+                        <label for="orderBySlot" class="block text-sm font-medium text-gray-700 mb-1">Order by Slot</label>
+                        <select id="orderBySlot" name="slotDirection" class="w-44 px-3 py-2 border border-gray-300 rounded shadow-sm text-sm bg-white">
+                            <option value="" th:selected="${slotDirection == null}">None</option>
+                            <option value="asc" th:selected="${slotDirection == 'asc'}">Ascending</option>
+                            <option value="desc" th:selected="${slotDirection == 'desc'}">Descending</option>
+                        </select>
+                    </div>
+
+                    <!-- Hidden field for current page number -->
+                    <input type="hidden" id="page" name="page" th:value="${schedulePage.number + 1}" />
+                </form>
+
+                <form th:if="${canBeFinalized != null && canBeFinalized}" method="post" th:action="@{/manager/schedules/finalize/{eid}(eid=${enrollment.id})}">
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                        Finalize Enrollment
+                    </button>
+                </form>
+
+                <p th:text="${(isFinalized) ? 'COMPLETED' : 'IN PROGRESS'}"></p>
+            </div>
+
+            <!-- Schedule Table -->
+            <table class="min-w-full border border-blue-200 rounded-lg">
+                <thead>
+                <tr class="bg-blue-600 text-white text-sm text-left">
+                    <th class="px-4 py-2">Date</th>
+                    <th class="px-4 py-2">Slot</th>
+                    <th class="px-4 py-2">Attendance</th>
+                    <th class="px-4 py-2">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="schedule : ${schedulePage.content}" class="text-sm border-b">
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.date}"></td>
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.slot}"></td>
+                    <td class="px-4 py-3 text-gray-800" th:text="${schedule.attendance}"></td>
+                    <td class="px-4 py-3 text-gray-800">
+                        <a th:href="@{/manager/schedules/{id}(id=${schedule.id})}"
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination Bar BELOW the schedule table -->
+            <div class="flex justify-center mt-4">
+                <nav class="pagination inline-flex items-center space-x-3 bg-white rounded shadow px-4 py-2">
+                    <button type="button" id="firstPageBtn"
+                            class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            th:if="${!schedulePage.first}">First</button>
+                    <button type="button" id="previousPageBtn"
+                            class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            th:if="${!schedulePage.first}">Previous</button>
+
+                    <span class="px-4 py-1 font-semibold text-gray-700 select-none"
+                          th:text="'Page ' + (${schedulePage.number} + 1) + ' of ' + ${schedulePage.totalPages}"></span>
+
+                    <button type="button" id="nextPageBtn"
+                            class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            th:if="${!schedulePage.last}">Next</button>
+                    <button type="button" id="lastPageBtn"
+                            class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            th:if="${!schedulePage.last}">Last</button>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const filterForm = document.getElementById('filterForm');
+    const totalPages = [[${schedulePage.totalPages}]];
+    let currentPage = [[${schedulePage.number + 1}]];
+
+    function goToPage(page) {
+        if(page < 1) page = 1;
+        if(page > totalPages) page = totalPages;
+        if(page === currentPage) return;
+        document.getElementById('page').value = page;
+        filterForm.submit();
+    }
+
+    document.getElementById('firstPageBtn')?.addEventListener('click', () => goToPage(1));
+    document.getElementById('previousPageBtn')?.addEventListener('click', () => goToPage(currentPage - 1));
+    document.getElementById('nextPageBtn')?.addEventListener('click', () => goToPage(currentPage + 1));
+    document.getElementById('lastPageBtn')?.addEventListener('click', () => goToPage(totalPages));
+
+    ['attendanceFilter', 'slotFilter', 'orderByDate', 'orderBySlot'].forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) {
+            elem.addEventListener('change', () => {
+                document.getElementById('page').value = 1;
+                filterForm.submit();
+            });
+        }
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>

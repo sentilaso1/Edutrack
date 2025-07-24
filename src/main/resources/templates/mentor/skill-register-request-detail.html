@@ -82,36 +82,154 @@
                 text-align: left;
             }
         }
+        .back-button {
+            background-color: #FF4A33;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            width: fit-content;
+        }
+        .back-button:hover {
+            background-color: #e53d2a;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            justify-content: end;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-approve {
+            background-color: #28a745; /* green */
+        }
+
+        .btn-approve:hover {
+            background-color: #218838;
+        }
+
+        .btn-reject {
+            background-color: #dc3545;
+        }
+
+        .btn-reject:hover {
+            background-color: #c82333;
+        }
+
+        .more-btn{
+            border: none;
+            background: none;
+            cursor: pointer;
+            margin: 0 4px;
+            font-size: 16px;
+            padding: 0.5em 0.7em;
+            color: white;
+            width: 3em;
+            border-radius: 5px;
+        }
+        .more-btn {
+            width: 80%;
+            color: #ff4d30;
+        }
     </style>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}" />
 </head>
 <body>
-<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <div class="graph">
+            <a href="javascript:history.back()" class="back-button">&#8592; Back</a>
+            <div class="product-section">
+                <p th:text="${param.status}">Class Schedule</p>
 
-<div class="main">
-    <div class="graph">
-        <div class="product-section">
-            <p th:text="${param.status}">Class Schedule</p>
+                <table class="product-table">
+                    <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Date</th>
+                        <th>Day of Week</th>
+                        <th>Slot</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item, iStat : ${startTime}">
+                        <td th:text="${iStat.index + 1}" data-label="Session"></td>
+                        <td th:text="${item.requestedDate}" data-label="Date"></td>
+                        <td th:text="${item.day}" data-label="Day of Week"></td>
+                        <td th:text="${item.slot}" data-label="Slot"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div th:if="${enrollment.status.toString() == 'pending'}" class="action-buttons">
+                    <form th:action="@{/mentor/censor-class/{eid}(eid=${enrollment.id})}">
+                        <button th:if="${duplicatedEnrollments == null || duplicatedEnrollments.size() == 0}" type="submit" class="btn btn-approve" name="action" value="approve" title="Approve">
+                            <i class="fa fa-check" aria-hidden="true"></i> Approve
+                        </button>
+                        <button type="submit" class="btn btn-reject" name="action" value="reject" title="Reject">
+                            <i class="fa fa-times" aria-hidden="true"></i> Reject
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="graph" th:if="${duplicatedEnrollments != null && duplicatedEnrollments.size() != 0}">
+            <div style="display: flex; justify-content: space-between">
+                <h4>Clash Pending Schedule</h4>
+                <form th:action="@{/mentor/censor-class/{eid}(eid=${enrollment.id})}">
+                    <button type="submit" class="btn btn-reject" name="action" value="rejectAll" title="Reject">
+                        <i class="fa fa-times" aria-hidden="true"></i> Reject All
+                    </button>
+                </form>
+            </div>
 
             <table class="product-table">
                 <thead>
                 <tr>
-                    <th>Session</th>
-                    <th>Date</th>
-                    <th>Day of Week</th>
-                    <th>Slot</th>
+                    <th>Student Name</th>
+                    <th>Skill</th>
+                    <th>Total slots</th>
+                    <th>Created Date</th>
+                    <th style="min-width: 10em;">ACTION</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="item, iStat : ${startTime}">
-                    <td th:text="${iStat.index + 1}" data-label="Session"></td>
-                    <td th:text="${item.requestedDate}" data-label="Date"></td>
-                    <td th:text="${item.day}" data-label="Day of Week"></td>
-                    <td th:text="${item.slot}" data-label="Slot"></td>
+                <tr th:each="item : ${duplicatedEnrollments}">
+                    <td th:text="${item.mentee.fullName}">Monstera</td>
+                    <td th:text="${item.courseMentor.course.name}">48.00</td>
+                    <td th:text="${item.totalSlots}">39.02</td>
+                    <td th:text="${item.createdDate}">A/22</td>
+                    <td>
+                        <form th:action="@{/mentor/censor-class/{eid}(eid=${item.id})}">
+                            <button class="more-btn" name="action" value="view"><i class="fa fa-arrow-right"
+                                                                                   aria-hidden="true"></i> View</button>
+                        </form>
+                    </td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+
 </body>
 </html>

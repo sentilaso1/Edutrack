@@ -1,131 +1,88 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
 
+    <style>
+        .upcoming-schedules-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .upcoming-schedules-header a {
+            color: #ff6b35;
+            text-decoration: none;
+        }
+
+        .upcoming-schedules-header a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
-<body>
-<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
-<div class="main">
-    <div class="dashboard-header">
-        <h1>Dashboard</h1>
-    </div>
-    <div class="stats">
-        <div class="card">
-            <h3>78</h3>
-            <p>Total Project Handled</p>
+<body style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <div class="dashboard-header">
+            <h2>Dashboard</h2>
         </div>
-        <div class="card">
-            <h3>214</h3>
-            <p>Contacts You Have</p>
-        </div>
-        <div class="card">
-            <h3>93</h3>
-            <p>Total Unfinished Task</p>
-        </div>
-        <div class="card">
-            <h3>12</h3>
-            <p>Unread Messages</p>
-        </div>
-    </div>
-    <div class="graph">
-        <h3>Project Created</h3>
-        <p>25% - Last month $563,443</p>
-        <canvas id="barChart" height="100"></canvas>
-    </div>
-    <div class="graph">
-        <h3>Upcoming Projects</h3>
-        <div class="project-item">
-            <div class="project-tag">Yoast Esoc</div>
-            <div class="project-title">Redesign Kripton Mobile App</div>
-            <div class="project-meta">
-                <svg class="calendar-icon icon" viewBox="0 0 24 24">
-                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                </svg>
-                <span class="created-date">Created on Sep 8th, 2020</span>
+        <div class="stats">
+            <div class="card">
+                <h3 th:text="${pendingClassRequests}"></h3>
+                <p>Pending Class Requests</p>
             </div>
-            <div class="deadline-section">
-                <div class="deadline-icon">
-                    <svg class="lightning-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                    </svg>
-                </div>
-                <div class="deadline-info">
-                    <div class="deadline-label">Deadline</div>
-                    <div class="deadline-date">Tuesday, Sep 29th 2020</div>
-                </div>
+            <div class="card">
+                <h3 th:text="${classesThisWeek}"></h3>
+                <p>Classes This Week</p>
             </div>
-            <div class="menu-dots">⋮</div>
-        </div>
-        <div class="project-item">
-            <div class="project-tag">Yoast Esoc</div>
-            <div class="project-title">Redesign Kripton Mobile App</div>
-            <div class="project-meta">
-                <svg class="calendar-icon icon" viewBox="0 0 24 24">
-                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                </svg>
-                <span class="created-date">Created on Sep 8th, 2020</span>
+            <div class="card">
+                <h3 th:text="${teachingMentees}"></h3>
+                <p>Teaching Mentees</p>
             </div>
-            <div class="deadline-section">
-                <div class="deadline-icon">
-                    <svg class="lightning-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                    </svg>
-                </div>
-                <div class="deadline-info">
-                    <div class="deadline-label">Deadline</div>
-                    <div class="deadline-date">Tuesday, Sep 29th 2020</div>
-                </div>
-            </div>
-            <div class="menu-dots">⋮</div>
-        </div>
-    </div>
-    <div class="timeline">
-        <h3>Timeline</h3>
-
-        <div class="timeline-item timeline-green">
-            <div class="timeline-badge"></div>
-            <div class="timeline-content">
-                <p><small>10 minutes ago</small></p>
-                <p><strong>Youtube, a video-sharing website</strong>, goes live <span>$500</span></p>
+            <div class="card">
+                <h3 th:text="${mentor.rating}"></h3>
+                <p>Current Rating</p>
             </div>
         </div>
 
-        <div class="timeline-item timeline-blue">
-            <div class="timeline-badge"></div>
-            <div class="timeline-content">
-                <p><small>20 minutes ago</small></p>
-                <p><strong>New order placed</strong> <a href="#">#XF-2356</a></p>
-                <p>Quisque a consequat ante Sit amet magna at volutapt...</p>
-            </div>
-        </div>
+<!--        <div class="graph">-->
+<!--            <h3>Project Created</h3>-->
+<!--            <p>25% - Last month $563,443</p>-->
+<!--            <canvas id="barChart" height="100"></canvas>-->
+<!--        </div>-->
 
-        <div class="timeline-item timeline-orange">
-            <div class="timeline-badge"></div>
-            <div class="timeline-content">
-                <p><small>30 minutes ago</small></p>
-                <p><strong>John just buy your product</strong> <span>Sell $250</span></p>
+        <div class="graph">
+            <div class="upcoming-schedules-header">
+                <h3>Upcoming Schedules</h3>
+                <a th:href="@{/mentor/schedule}">View more</a>
             </div>
-        </div>
 
-        <div class="timeline-item timeline-lightgreen">
-            <div class="timeline-badge"></div>
-            <div class="timeline-content">
-                <p><small>15 minutes ago</small></p>
-                <p>...</p>
-            </div>
+            <th:block th:each="upcomingClass : ${upcomingClasses}"
+                      th:with="mentee = ${upcomingClass.mentee}, course = ${upcomingClass.course}, schedule = ${upcomingClass.schedule}">
+                <div class="project-item">
+                    <div class="project-tag" th:text="${mentee.fullName}"></div>
+                    <div class="project-title" th:text="${course.name + (schedule.test ? ' (Test)' : '')}"></div>
+                    <div class="project-meta">
+                        <svg class="calendar-icon icon" viewBox="0 0 24 24">
+                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                        </svg>
+                        <span class="created-date" th:text="${upcomingClass.formattedDate}"></span>
+                    </div>
+                </div>
+            </th:block>
         </div>
-    </div>
-    <div class="footer">
-        Designed | AC 2022
     </div>
 </div>
 
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 </body>
 </html>

@@ -6,49 +6,62 @@
     <link rel="stylesheet" th:href="@{/assets/css/courselist.css}" />
     <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}" />
     <style>
-        /* Make the background cover the whole page, always */
+
         body {
             min-height: 100vh;
-            /* Use the same gradient or image as your course list page: */
             background: url('/assets/images/course-bg.png');
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            /* Fallback gradient for browsers that don’t support the image or for faster loading: */
-            /* background: linear-gradient(120deg, #e0f7fa 0%, #ffe4ec 100%); */
         }
         .review-list-container {
             max-width: 1200px;
-            margin: 40px auto;
-            padding: 2rem 1rem;
+            margin: 0 auto;
+            padding: 96px;
         }
         .review-list-header {
             text-align: center;
             margin-top: 2rem;
             margin-bottom: 2.5rem;
-            font-size: 4rem;
-            font-weight: bold;
+            font-size: 3.5rem;
+            font-weight: 600;
             color: #333;
         }
         .review-card-list {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 2rem;
-            overflow-x: auto;
-            padding-bottom: 1rem;
-            justify-content: center;
+            justify-items: center;
         }
+
+        .empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #888;
+            padding: 2rem;
+        }
+
         .review-card {
-            min-width: 350px;
+            width: 100%;
+            min-width: 0;
+            max-width: 500px;
             background: #fff;
             border-radius: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            padding: 2rem;
+            padding: 3rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
             transition: box-shadow 0.2s;
         }
+
+        .review-card-list > .review-card:only-child,
+        .review-card-list > .review-card:nth-last-child(1):nth-child(odd) {
+            grid-column: 1 / -1;
+            justify-self: center;
+        }
+
         .review-card strong {
             font-size: 2.5rem;
             font-weight: 600;
@@ -80,7 +93,7 @@
             background: #fa6262;
             color: #fff;
         }
-        /* Add horizontal scroll bar styling if you want */
+
         .review-card-list::-webkit-scrollbar {
             height: 10px;
         }
@@ -91,12 +104,13 @@
     </style>
 </head>
 <body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 <div class="review-list-container">
     <h2 class="review-list-header">Courses & Mentors You Can Review</h2>
     <div class="review-card-list">
 
-        <div th:if="${reviewPairs == null or #lists.isEmpty(reviewPairs)}" style="padding: 2rem; color: #888; text-align: center;">
-            <p>No courses or mentors available for review.</p>
+        <div th:if="${reviewPairs == null or #lists.isEmpty(reviewPairs)}" class="empty-message">
+            <p style="text-align: center">No courses or mentors available for review.</p>
         </div>
 
         <div class="review-card"

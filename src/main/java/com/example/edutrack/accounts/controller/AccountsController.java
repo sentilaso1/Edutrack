@@ -26,6 +26,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class AccountsController {
@@ -51,8 +52,10 @@ public class AccountsController {
                 this.mentorRepository = mentorRepository;
         }
 
-        @GetMapping("/profile/{id}")
-        public String viewProfile(@PathVariable String id, Model model) throws IOException {
+        @GetMapping("/profile")
+        public String viewProfile(Model model, HttpSession session) throws IOException {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                String id = loggedInUser.getId().toString();
                 User user = userService.getUserById(id);
                 model.addAttribute("user", user);
                 Mentor mentor = mentorService.getMentorById(id);
@@ -82,90 +85,134 @@ public class AccountsController {
         }
 
         public boolean verifyBirthDate(String birthDateStr) {
-        if (birthDateStr == null || birthDateStr.trim().isEmpty()) {
-            return false;
+                if (birthDateStr == null || birthDateStr.trim().isEmpty()) {
+                        return false;
+                }
+                try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        sdf.setLenient(false); // Strict parsing
+                        Date birthDate = sdf.parse(birthDateStr);
+                        Date today = new Date();
+
+                        // Check if birth date is in the future
+                        if (!birthDate.before(today)) {
+                                return false;
+                        }
+
+                        return true;
+                } catch (Exception e) {
+                        return false; // Invalid date format
+                }
         }
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            sdf.setLenient(false); // Strict parsing
-            Date birthDate = sdf.parse(birthDateStr);
-            Date today = new Date();
 
-            // Check if birth date is in the future
-            if (!birthDate.before(today)) {
-                return false;
-            }
-
-            return true;
-        } catch (Exception e) {
-            return false; // Invalid date format
-        }
-    }
-
-        @PostMapping("/profile/{id}/edit")
-        public String editProfile(@PathVariable String id,
+        // Function 5
+        @PostMapping("/profile/edit")
+        public String editProfile(HttpSession session,
                         @RequestParam String fullName,
-                        @RequestParam String email,
                         @RequestParam String phone,
                         @RequestParam String bio,
                         @RequestParam String birthDate,
+                        @RequestParam String gender,
                         @RequestParam(required = false) String expertise,
                         @RequestParam(required = false) String interests,
                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes)
                         throws IOException {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                String id = loggedInUser.getId().toString();
+                // Validate fullName
                 if (fullName == null || fullName.trim().isEmpty()) {
                         redirectAttributes.addFlashAttribute("error", "Full name is required");
-                        return "redirect:/profile/" + id + "#edit";
-                }
-                if (email == null || email.trim().isEmpty() || !verifyEmail(email)) {
-                        redirectAttributes.addFlashAttribute("error", "Email không hợp lệ");
-                        return "redirect:/profile/" + id + "#edit";
-                }
-                if (phone == null || phone.trim().isEmpty() || !verifyPhone(phone)) {
-                        redirectAttributes.addFlashAttribute("error", "Phone number không hợp lệ");
-                        return "redirect:/profile/" + id + "#edit";
-                }
-                if (birthDate == null || birthDate.trim().isEmpty() || !verifyBirthDate(birthDate)) {
-                        redirectAttributes.addFlashAttribute("error",
-                                        "Ngày sinh không hợp lệ (phải trước hôm nay và định dạng yyyy-MM-dd)");
-                        return "redirect:/profile/" + id + "#edit";
+                        return "redirect:/profile" + "#edit";
                 }
 
+                // Validate phone
+                if (!verifyPhone(phone)) {
+                        redirectAttributes.addFlashAttribute("error",
+                                        "Phone number is not valid (must start with 0 and be 10 or 11 digits)");
+                        return "redirect:/profile" + "#edit";
+                }
+
+                // Validate birthDate
+                if (!verifyBirthDate(birthDate)) {
+                        redirectAttributes.addFlashAttribute("error",
+                                        "Birth date is not valid (must be a past date in yyyy-MM-dd format)");
+                        return "redirect:/profile" + "#edit";
+                }
+
+                // Validate expertise for mentors
+                Mentor mentor = mentorService.getMentorById(id);
+                if (mentor != null) {
+                        if (expertise == null || expertise.trim().isEmpty()) {
+                                redirectAttributes.addFlashAttribute("error", "Expertise is required");
+                                return "redirect:/profile" + "#edit";
+                        }
+                        if (expertise.trim().length() < 3 || expertise.trim().length() > 100) {
+                                redirectAttributes.addFlashAttribute("error",
+                                                "Expertise must be between 3 and 100 characters");
+                                return "redirect:/profile" + "#edit";
+                        }
+                }
+
+                // Validate interests for mentees
+                Mentee mentee = null;
+                try{
+                        mentee = menteeService.getMenteeById(id);
+                }catch (Exception e){
+                        mentee = null;
+                }
+                if (mentor == null && mentee != null) {
+                        if (interests != null && (interests.trim().length() < 3 || interests.trim().length() > 100)) {
+                                redirectAttributes.addFlashAttribute("error",
+                                                "Interests must be between 3 and 100 characters");
+                                return "redirect:/profile" + "#edit";
+                        }
+                }
+
+                // Load user
                 User user = userService.getUserById(id);
                 if (user == null) {
                         throw new IllegalArgumentException("User not found with id: " + id);
                 }
-                Mentor mentor = mentorService.getMentorById(id);
-                if ((expertise == null || expertise.trim().isEmpty()) && mentor != null) {
-                        redirectAttributes.addFlashAttribute("error", "Expertise is required");
-                        return "redirect:/profile/" + id + "#edit";
-                }
+
+                // Update user
                 user.setFullName(fullName.trim());
-                user.setEmail(email.trim());
                 user.setPhone(phone);
                 user.setBio(bio != null ? bio.trim() : null);
+                try {
+                        user.setBirthDate(new SimpleDateFormat("yyyy-MM-dd").parse(birthDate));
+                } catch (java.text.ParseException e) {
+                        redirectAttributes.addFlashAttribute("error", "Invalid birth date format.");
+                        return "redirect:/profile" + "#edit";
+                }
+                user.setGender(gender);
                 userRepository.save(user);
 
+                // Update mentor or mentee
                 if (mentor != null) {
-                        mentor.setExpertise(expertise);
+                        mentor.setExpertise(expertise.trim());
                         mentorRepository.save(mentor);
-                } else {
-                        Mentee mentee = menteeService.getMenteeById(id);
-                        mentee.setInterests(interests);
+                } else if (mentee != null) {
+                        mentee.setInterests(interests != null ? interests.trim() : null);
                         menteeRepository.save(mentee);
                 }
-                return "redirect:/profile/" + id;
+
+                return "redirect:/profile";
         }
 
-        @PostMapping("/upload/{id}")
-        public String uploadAvatar(@PathVariable String id, @RequestParam("image") MultipartFile file)
+        @PostMapping("/avatar/upload/")
+        public String uploadAvatar(
+                        HttpSession session, @RequestParam("image") MultipartFile file)
                         throws IOException {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                String id = loggedInUser.getId().toString();
                 userService.updateAvatar(id, file);
-                return "redirect:/profile/" + id;
+                return "redirect:/profile";
         }
 
-        @GetMapping("/avatar/{id}")
-        public void getAvatar(@PathVariable String id, HttpServletResponse response) throws IOException {
+        @GetMapping("/avatar")
+        public void getAvatar(HttpSession session, HttpServletResponse response) throws IOException {
+                User loggedInUser = (User) session.getAttribute("loggedInUser");
+                String id = loggedInUser.getId().toString();
                 User user = userService.getUserById(id);
                 if (user != null && user.getAvatar() != null) {
                         response.setContentType("image/jpeg");
@@ -173,5 +220,4 @@ public class AccountsController {
                         response.getOutputStream().close();
                 }
         }
-
 }

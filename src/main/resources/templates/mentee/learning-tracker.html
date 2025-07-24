@@ -198,7 +198,8 @@
                                         <div class="calendar-icon"></div>
                                         <span th:text="'Latest Session: ' + ${#temporals.format(skill.lastSessionDate, 'M/d/yyyy')}">5/12/2025</span>
                                     </div>
-                                    <a href="#" class="details-link">View Details</a>
+                                    <a th:href="@{/schedules(courseId=${skill.courseId}, mentorId=${skill.mentorId})}" class="details-link">View Schedules</a>
+
                                 </div>
                             </div>
                         </div>
@@ -250,7 +251,6 @@
                         <h2 class="skills-title">Your Learning Goals</h2>
                         <button class="add-skill-btn" onclick="toggleGoalForm()">Create Goal</button>
                     </div>
-
                     <form th:action="@{/learning-tracker}" method="get" class="attendance-filter-form">
                         <input type="hidden" name="activeTab" value="goals"/>
                         <input type="hidden" name="size" th:value="${size}"/>
@@ -265,7 +265,6 @@
                         </select>
                         <button type="submit">Filter</button>
                     </form>
-
                     <!-- Goal Form -->
                     <div id="goalFormContainer"
                          th:classappend="${showGoalForm} ? 'show' : ''"
@@ -388,6 +387,9 @@
                             </form>
                         </div>
                     </div>
+                    <div th:if="${#lists.isEmpty(goals)}" class="no-results">
+                        <p>No goal yet</p>
+                    </div>
                     <div class="pagination" th:if="${goalTotalPages > 0}">
                         <ul class="pagination-list">
                             <li th:if="${goalCurrentPage > 0}">
@@ -458,6 +460,16 @@
                             </option>
                         </select>
 
+                        <label>Mentor:</label>
+                        <select name="mentorId">
+                            <option value="">All Mentors</option>
+                            <option th:each="mentor : ${mentorList}"
+                                    th:value="${mentor.id}"
+                                    th:text="${mentor.fullName}"
+                                    th:selected="${selectedMentorId != null and mentor.id.equals(selectedMentorId)}">
+                            </option>
+                        </select>
+
                         <button type="submit">Filter</button>
                     </form>
 
@@ -484,27 +496,48 @@
                                 </div>
                                 <div class="attendance-status" th:text="${schedule.attendance}">PRESENT</div>
 
-                                <form method="post" th:action="@{/report}" class="report-form">
+                                <!-- Report Status Display -->
+                                <div class="report-status" th:if="${schedule.report != null}">
+                                    <div th:if="${schedule.report}" class="report-indicator issue-reported">
+                                        <span class="status-icon">🚨</span>
+                                        <span>Issue reported - Under review</span>
+                                    </div>
+                                    <div th:unless="${schedule.report}" class="report-indicator no-issue">
+                                        <span class="status-icon">✅</span>
+                                        <span>No issues reported</span>
+                                    </div>
+                                </div>
+
+                                <!-- Feedback expired notice -->
+                                <div class="feedback-expired" th:if="${schedule.isFeedbackExpired()}">
+                                    <span class="info-icon">ℹ️</span>
+                                    <span>Feedback period expired - Marked as satisfactory</span>
+                                </div>
+
+                                <!-- Report Form - chỉ hiện khi còn trong thời hạn -->
+                                <form method="post" th:action="@{/report}" class="report-form"
+                                      th:if="${schedule.canSubmitFeedback()}">
                                     <input type="hidden" name="scheduleId" th:value="${schedule.id}"/>
 
-                                    <input type="text" name="report"
-                                           th:value="${schedule.report}"
-                                           placeholder="Report an issue (e.g., mentor didn't teach)"
-                                           required
-                                           th:disabled="${schedule.attendance.name() == 'NOT_YET'}"/>
+                                    <div class="report-options">
+                                        <div class="report-question">
+                                            <p>How was your session?</p>
+                                        </div>
 
-                                    <button type="submit"
-                                            th:disabled="${schedule.attendance.name() == 'NOT_YET'}">
-                                        Report
-                                    </button>
-
-                                    <p th:if="${schedule.attendance.name() == 'NOT_YET'}"
-                                       style="font-size: 12px; color: gray; margin-top: 5px;">
-                                        ⚠️ You can only report after this session is marked as attended or absent.
-                                    </p>
+                                        <div class="report-buttons">
+                                            <button type="submit" name="hasIssue" value="false"
+                                                    class="report-btn satisfactory">
+                                                <span class="btn-icon">👍</span>
+                                                Everything was good
+                                            </button>
+                                            <button type="submit" name="hasIssue" value="true" class="report-btn issue"
+                                                    onclick="return confirm('Are you sure you want to report an issue with this session?')">
+                                                <span class="btn-icon">🚨</span>
+                                                Report an issue
+                                            </button>
+                                        </div>
+                                    </div>
                                 </form>
-
-
                                 <div id="toast" class="toast" th:if="${success}" th:text="${success}"></div>
                                 <div id="toast-error" class="toast error" th:if="${error}" th:text="${error}"></div>
                             </div>
@@ -515,34 +548,34 @@
                             <!-- Previous button -->
                             <li th:if="${currentPage > 0}">
                                 <a th:href="@{/attendance(
-                    page=${currentPage - 1},
-                    month=${filterMonth},
-                    courseId=${selectedCourseId},
-                    status=${selectedStatus},
-                    activeTab='sessions'
-                )}" class="pagination-link">Prev</a>
+                                page=${currentPage - 1},
+                                month=${filterMonth},
+                                courseId=${selectedCourseId},
+                                status=${selectedStatus},
+                                mentorId=${selectedMentorId}, activeTab='sessions'
+                            )}" class="pagination-link">Prev</a>
                             </li>
 
                             <!-- Page numbers -->
                             <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                 th:classappend="${i == currentPage} ? 'active' : ''">
                                 <a th:href="@{/attendance(
-                    page=${i},
-                    month=${filterMonth},
-                    courseId=${selectedCourseId},
-                    status=${selectedStatus},
-                    activeTab='sessions'
+                                page=${i},
+                                month=${filterMonth},
+                                courseId=${selectedCourseId},
+                                status=${selectedStatus},
+                                mentorId=${selectedMentorId}, activeTab='sessions'
                 )}" th:text="${i + 1}" class="pagination-link"></a>
                             </li>
 
                             <!-- Next button -->
                             <li th:if="${currentPage < totalPages - 1}">
                                 <a th:href="@{/attendance(
-                    page=${currentPage + 1},
-                    month=${filterMonth},
-                    courseId=${selectedCourseId},
-                    status=${selectedStatus},
-                    activeTab='sessions'
+                                page=${currentPage + 1},
+                                month=${filterMonth},
+                                courseId=${selectedCourseId},
+                                status=${selectedStatus},
+                                mentorId=${selectedMentorId}, activeTab='sessions'
                 )}" class="pagination-link">Next</a>
                             </li>
                         </ul>
@@ -583,7 +616,8 @@
                             <div class="review-header">
                                 <strong th:text="${review.courseTitle}">Game Development with Unity</strong>
                                 <span>
-                                    <div class="mentor-avatar" th:text="${#strings.substring(review.mentorName,0,1)}">D</div>
+                                    <div class="mentor-avatar"
+                                         th:text="${#strings.substring(review.mentorName,0,1)}">D</div>
                                     <span th:text="${review.mentorName}">David Kim</span>
                                 </span>
                             </div>
@@ -743,30 +777,24 @@
     });
 
     function setAttendanceColors() {
-        // Lấy tất cả attendance cards
         const attendanceCards = document.querySelectorAll('.attendance-card');
 
         attendanceCards.forEach(card => {
-            // Tìm attendance status element
             const statusElement = card.querySelector('.attendance-status');
-            // Tìm report input để check có report không
-            const reportInput = card.querySelector('.report-form input[type="text"]');
+            const hasReportIndicator = card.querySelector('.report-status');
+            const hasIssueReported = card.querySelector('.report-indicator.issue-reported');
 
             if (statusElement) {
                 const status = statusElement.textContent.trim().toUpperCase();
-                const hasReport = reportInput && reportInput.value && reportInput.value.trim() !== '';
-
-                // Remove existing status classes
-                card.classList.remove('present', 'absent', 'not-yet', 'cancelled', 'reported');
-                statusElement.classList.remove('present', 'absent', 'not-yet', 'cancelled', 'reported');
-
-                // Add appropriate classes based on status and report
-                if (hasReport) {
-                    // Nếu có report thì ưu tiên màu vàng
+                card.classList.remove('present', 'absent', 'not-yet', 'cancelled', 'reported', 'no-issue');
+                statusElement.classList.remove('present', 'absent', 'not-yet', 'cancelled', 'reported', 'no-issue');
+                if (hasIssueReported) {
                     card.classList.add('reported');
                     statusElement.classList.add('reported');
+                } else if (hasReportIndicator && !hasIssueReported) {
+                    card.classList.add('no-issue');
+                    statusElement.classList.add('no-issue');
                 } else {
-                    // Áp dụng màu theo status
                     switch (status) {
                         case 'PRESENT':
                             card.classList.add('present');
@@ -786,7 +814,6 @@
                             statusElement.classList.add('cancelled');
                             break;
                         default:
-                            // Default case for unknown status
                             card.classList.add('not-yet');
                             statusElement.classList.add('not-yet');
                     }

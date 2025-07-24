@@ -2,107 +2,118 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
-    <title>Tạo Khóa Học</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management - EduTrack Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background-color: #f3f4f6;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #FFFCFC;
-            padding: 30px;
+        .form-card {
+            background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
         }
 
-        h2 {
-            text-align: center;
-            color: #86A788;
+        .form-input, .form-select, .form-textarea {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            background: white;
         }
 
-        label {
-            font-weight: 600;
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"],
-        textarea,
-        input[type="file"],
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #FFE2E2;
-            border-radius: 6px;
-            background-color: #FFE2E2;
-            font-size: 14px;
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
-            resize: vertical;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        /* Style cho input có lỗi */
-        input.error,
-        textarea.error {
-            border: 2px solid #dc3545;
-            background-color: #fff5f5;
+        .form-input.error, .form-textarea.error {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
         }
 
-        /* Style cho thông báo lỗi */
         .error-message {
-            color: #dc3545;
-            font-size: 13px;
-            margin-top: 5px;
-            margin-bottom: 10px;
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 8px;
             display: block;
         }
 
-        /* Style cho thông báo lỗi chung */
         .alert {
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 8px;
             border: 1px solid transparent;
-            border-radius: 6px;
         }
 
         .alert-danger {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
+            color: #991b1b;
+            background-color: #fee2e2;
+            border-color: #fecaca;
         }
 
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-
-        input[type="checkbox"] {
-            margin-right: 8px;
-        }
-
-        button {
-            margin-top: 25px;
-            width: 100%;
-            background-color: #86A788;
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 12px;
+            font-weight: 600;
+            padding: 12px 24px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        button:hover {
-            background-color: #759976;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #374151);
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 114, 128, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
         }
 
         .modal-overlay {
@@ -111,69 +122,51 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
+            backdrop-filter: blur(5px);
         }
 
         .modal-content {
-            background-color: #d4edda;
-            padding: 25px 30px;
-            border-radius: 10px;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
             width: 90%;
+            text-align: center;
+            border: 1px solid #e5e7eb;
         }
 
-        .modal-content p{
-            font-weight: bold;
-            font-size: 25px;
+        .modal-success {
+            border-left: 4px solid #10b981;
         }
 
-        .modal-button {
-            padding: 10px 20px;
-            background-color: #86A788;
-            width: 200px;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .modal-button:hover {
-            background-color: #759976;
-        }
-
-        .modal-button.secondary {
-            background-color: #6c757d;
-        }
-
-        .modal-button.secondary:hover {
-            background-color: #5a6268;
-        }
-
-        /* Style cho tag động */
         .tag-container {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin: 10px 0px 10px 0px;
-            min-height: 38px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            padding: 4px 8px;
+            margin: 12px 0;
+            min-height: 44px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px 12px;
             background: white;
+            transition: all 0.2s ease;
+        }
+
+        .tag-container:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .tag-container.error {
-            border: 2px solid #dc3545;
-            background-color: #fff5f5;
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
         }
 
         .tag {
@@ -183,9 +176,21 @@
             border-radius: 20px;
             color: white;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 0.875rem;
             cursor: default;
             user-select: none;
+            animation: slideIn 0.2s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .tag button {
@@ -197,297 +202,476 @@
             font-weight: bold;
             font-size: 16px;
             line-height: 1;
-            padding: 0;
+            padding: 2px 4px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .tag button:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .tag-input-wrapper {
             display: flex;
-            gap: 8px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 16px;
+            position: relative;
         }
 
         .tag-input-wrapper input[type="text"] {
             flex-grow: 1;
-            padding: 8px 12px;
-            font-size: 16px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease;
         }
 
-        .tag-input-wrapper button.add-btn {
-            padding: 8px 20px;
-            background-color: #4caf50;
+        .tag-input-wrapper input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .add-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             color: white;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.2s ease;
         }
 
-        .tag-input-wrapper button.add-btn:hover {
-            background-color: #45a049;
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
         }
-        #filePreview {
-            margin-top: 10px;
-            list-style-type: disc;
-            padding-left: 20px;
-            color: #555;
+
+        .file-preview {
+            margin-top: 16px;
+            list-style: none;
+            padding: 0;
         }
-        /* Style cho tooltip */
+
+        .file-preview li {
+            background: #f3f4f6;
+            padding: 8px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
         .tooltip {
             cursor: help;
-            color: #86A788;
-            margin-left: 5px;
+            color: #3b82f6;
+            margin-left: 8px;
             font-weight: bold;
+            font-size: 0.875rem;
         }
-        /* Style loading button */
-        button.loading {
-            background-color: #759976 !important;
+
+        .loading {
+            opacity: 0.7;
             cursor: not-allowed;
         }
-        /* Style autocomplete dropdown */
-        #tagInput {
-            position: relative;
-        }
+
         .autocomplete-items {
             position: absolute;
-            border: 1px solid #d4d4d4;
+            border: 1px solid #d1d5db;
             border-bottom: none;
             border-top: none;
             z-index: 99;
             top: 100%;
             left: 0;
             right: 0;
-            max-height: 150px;
+            max-height: 200px;
             overflow-y: auto;
             background: white;
-            border-radius: 0 0 6px 6px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .autocomplete-items div {
-            padding: 10px;
+            padding: 12px 16px;
             cursor: pointer;
             background-color: #fff;
-            border-bottom: 1px solid #d4d4d4;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #374151;
+            transition: background-color 0.2s ease;
         }
+
         .autocomplete-items div:hover {
-            background-color: #e9e9e9;
+            background-color: #f3f4f6;
+        }
+
+        .sidebar {
+            width: 256px;
+            background: linear-gradient(135deg, #1f2937, #111827);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 24px 16px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar nav a {
+            display: block;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: #3b82f6;
+        }
+
+        .sidebar nav a.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+            border-left-color: #3b82f6;
+        }
+
+        .main-content {
+            margin-left: 256px;
+            padding: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 32px;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #6b7280;
+            font-size: 1rem;
         }
     </style>
 </head>
-<body>
-<div class="container">
-    <!-- Modal thành công -->
+<body class="bg-gray-100">
+<!-- Sidebar -->
+<th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Create New Course</h1>
+        <p>Add a new course to the system with mentors and materials</p>
+    </div>
+
+    <!-- Success Modal -->
     <div th:if="${successMessage}" class="modal-overlay">
-        <div class="modal-content">
-            <p th:text="${successMessage}"></p>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <a th:href="@{/manager/view}" class="modal-button">Về Trang Chủ</a>
-                <a th:href="@{/manager/courses/create}" class="modal-button secondary">Tiếp tục </a>
+        <div class="modal-content modal-success">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Success!</h3>
+                <p class="text-sm text-gray-600 mb-6" th:text="${successMessage}"></p>
+                <div class="flex gap-3 justify-center">
+                    <a th:href="@{/manager/course-dashboard}" class="btn-primary">📋 View Courses</a>
+                    <a th:href="@{/manager/courses/create}" class="btn-secondary">➕ Create Another</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Thông báo lỗi chung -->
+    <!-- Error Alert -->
     <div th:if="${errorMessage}" class="alert alert-danger">
-        <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
+        <div class="flex items-center">
+            <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            <span><strong>Error!</strong> <span th:text="${errorMessage}"></span></span>
+        </div>
     </div>
 
-    <h2>Tạo Khóa Học</h2>
+    <!-- Form Card -->
+    <div class="form-card">
+        <form th:action="@{/manager/courses/create}" method="post" enctype="multipart/form-data" th:object="${courseForm}" id="courseForm">
+            <div class="form-grid">
+                <!-- Course Name -->
+                <div class="form-group">
+                    <label for="name">
+                        Course Name
+                        <span class="tooltip" title="Enter course name, minimum 3 characters">❓</span>
+                    </label>
+                    <input type="text" id="name" th:field="*{name}"
+                           th:class="${#fields.hasErrors('name')} ? 'form-input error' : 'form-input'"
+                           placeholder="Enter course name" required />
+                    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></span>
+                </div>
 
-    <form th:action="@{/manager/courses/create}" method="post" enctype="multipart/form-data" th:object="${courseForm}" id="courseForm">
-        <!-- Tên khóa học -->
-        <label for="name">Tên Khóa Học
-            <span class="tooltip" title="Nhập tên khóa học, tối thiểu 3 ký tự">❓</span>
-        </label>
-        <input type="text" id="name" th:field="*{name}"
-               th:class="${#fields.hasErrors('name')} ? 'error' : ''"
-               placeholder="Tên khóa học" required />
-        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></span>
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="description">
+                        Description
+                        <span class="tooltip" title="Detailed course description">❓</span>
+                    </label>
 
-        <!-- Mô tả -->
-        <label for="description">Mô Tả
-            <span class="tooltip" title="Mô tả chi tiết về khóa học (tối đa 500 ký tự)">❓</span>
-        </label>
-        <textarea id="description" th:field="*{description}"
-                  th:class="${#fields.hasErrors('description')} ? 'error' : ''"
-                  placeholder="Mô tả khóa học" maxlength="500"></textarea>
-        <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
+                    <textarea id="description" th:field="*{description}"
+                              th:class="${#fields.hasErrors('description')} ? 'form-textarea error' : 'form-textarea'"
+                              placeholder="Enter course description" rows="4"></textarea>
 
-        <!-- Tags -->
-        <label>Kỹ năng / Nội dung (Tags)
-            <span class="tooltip" title="Thêm kỹ năng hoặc nội dung liên quan tới khóa học">❓</span>
-        </label>
+                    <div id="description-counter" class="text-right text-sm text-gray-500 mt-1"></div>
 
-        <div class="tag-container" id="tagContainer"
-             th:class="${#fields.hasErrors('tagTexts')} ? 'tag-container error' : 'tag-container'"></div>
+                    <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label>
+                        Skills / Content (Tags)
+                        <span class="tooltip" title="Add skills or content related to the course">❓</span>
+                    </label>
+                    <div class="tag-container" id="tagContainer"
+                         th:class="${#fields.hasErrors('tagTexts')} ? 'tag-container error' : 'tag-container'"></div>
+                    <div class="tag-input-wrapper">
+                        <input type="text" id="tagInput" placeholder="Press Enter or click Add" autocomplete="off" />
+                        <div id="autocomplete-list" class="autocomplete-items"></div>
+                        <button class="add-btn" type="button" onclick="addTag()">Add</button>
+                    </div>
 
-        <div class="tag-input-wrapper" style="position:relative;">
-            <input type="text" id="tagInput" placeholder="Nhấn Enter hoặc Add" autocomplete="off" />
-            <div id="autocomplete-list" class="autocomplete-items"></div>
-            <button class="add-btn" type="button" onclick="addTag()">Add</button>
-        </div>
-        <span th:if="${#fields.hasErrors('tagTexts')}" th:errors="*{tagTexts}" class="error-message"></span>
-        <div id="hiddenInput"></div>
+                    <span id="tag-input-error" class="error-message"></span>
 
-        <!-- Files -->
-        <label for="files">Tài liệu giảng dạy
-            <span class="tooltip" title="Chọn tài liệu giảng dạy (PDF, DOC, PPT) có thể chọn nhiều file">❓</span>
-        </label>
-        <input type="file" id="files" name="files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx"
-               th:class="${#fields.hasErrors('files')} ? 'error' : ''" />
-        <span th:if="${#fields.hasErrors('files')}" th:errors="*{files}" class="error-message"></span>
-        <ul id="filePreview"></ul>
+                    <span th:if="${#fields.hasErrors('tagTexts')}" th:errors="*{tagTexts}" class="error-message"></span>
+                    <div id="hiddenInput"></div>
+                </div>
+            </div>
 
-        <button type="submit" id="submitBtn">Tạo Khóa Học</button>
-        <button type="reset" style="background-color:#f44336; margin-top:10px;">Xóa dữ liệu</button>
-        <a href="/manager/view" style="display: inline-block; margin-top: 10px; width: 96%; background-color: #ccc; color: #333; font-weight: bold; padding: 12px; text-align: center; text-decoration: none; border-radius: 6px;">
-            Quay Lại
-        </a>
-    </form>
+            <!-- Buttons -->
+            <div class="button-group">
+                <button type="submit" id="submitBtn" class="btn-primary">
+                    ✅ Create Course
+                </button>
+                <button type="reset" class="btn-danger">
+                    🗑️ Clear Form
+                </button>
+                <a href="/manager/course-dashboard" class="btn-secondary">
+                    ← Back to Courses
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
+
     const tags = [];
-
-    const serverTags = /*[[${courseForm.tagTexts}]]*/ [];
-    if (serverTags && serverTags.length > 0) {
-        serverTags.forEach(tagText => {
-            tags.push({value: tagText, color: randomColor()});
-        });
-        renderTags();
-    }
-
     const availableTags = [
         "JavaScript", "Java", "Python", "Spring", "React", "Angular", "HTML", "CSS", "Docker", "DevOps",
         "Machine Learning", "Data Science", "SQL", "NoSQL", "Kubernetes", "AWS", "Azure", "Git", "Agile"
     ];
 
     function randomColor() {
-        const r = Math.floor(150 + Math.random() * 100);
-        const g = Math.floor(150 + Math.random() * 100);
-        const b = Math.floor(150 + Math.random() * 100);
-        return `rgb(${r},${g},${b})`;
+        const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'];
+        return colors[Math.floor(Math.random() * colors.length)];
     }
+    const TAG_MAX_LENGTH = 30;
+    const TAG_MIN_LENGTH = 2;
 
-    function addTag(){
+    function addTag() {
         const tagInput = document.getElementById("tagInput");
+        const tagErrorSpan = document.getElementById("tag-input-error");
         const tagValue = tagInput.value.trim();
-        if(!tagValue) return;
-        if(tags.some(t => t.value.toLowerCase() === tagValue.toLowerCase())) {
-            alert("Tag đã tồn tại!");
+        tagErrorSpan.textContent = "";
+
+        if (!tagValue) {
             return;
         }
+
+        if (tagValue.length < TAG_MIN_LENGTH || tagValue.length > TAG_MAX_LENGTH) {
+            tagErrorSpan.textContent = `Tag must be between ${TAG_MIN_LENGTH} and ${TAG_MAX_LENGTH} characters.`;
+            return;
+        }
+
+        if (tags.some(t => t.value.toLowerCase() === tagValue.toLowerCase())) {
+            tagErrorSpan.textContent = "Tag already exists!";
+            return;
+        }
+
         tags.push({value: tagValue, color: randomColor()});
         renderTags();
         tagInput.value = '';
         tagInput.focus();
         closeAllLists();
     }
-
-    function removeTag(index){
+    function removeTag(index) {
         tags.splice(index, 1);
         renderTags();
     }
-
-    function renderTags(){
+    function renderTags() {
         const tagContainer = document.getElementById("tagContainer");
-        tagContainer.innerHTML = "";
+        const hiddenInputContainer = document.getElementById("hiddenInput");
 
-        const hiddenInput = document.getElementById("hiddenInput");
-        hiddenInput.innerHTML = "";
+        tagContainer.innerHTML = "";
+        hiddenInputContainer.innerHTML = "";
 
         tags.forEach((tag, index) => {
             const tagElement = document.createElement("div");
             tagElement.className = "tag";
             tagElement.style.backgroundColor = tag.color;
-
-            const tagValue = document.createElement("span");
-            tagValue.textContent = tag.value;
+            tagElement.textContent = tag.value;
 
             const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "x";
-            deleteBtn.onclick = () => removeTag(index);
+            deleteBtn.innerHTML = "×";
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeTag(index);
+            };
 
-            tagElement.appendChild(tagValue);
             tagElement.appendChild(deleteBtn);
-
             tagContainer.appendChild(tagElement);
-
             const inputHidden = document.createElement('input');
             inputHidden.type = 'hidden';
             inputHidden.name = 'tagTexts';
             inputHidden.value = tag.value;
-
-            hiddenInput.appendChild(inputHidden);
+            hiddenInputContainer.appendChild(inputHidden);
         });
     }
-
-    const filesInput = document.getElementById('files');
-    const filePreview = document.getElementById('filePreview');
-
-    filesInput.addEventListener('change', () => {
-        filePreview.innerHTML = '';
-        for(let i=0; i < filesInput.files.length; i++){
-            const li = document.createElement('li');
-            li.textContent = filesInput.files[i].name;
-            filePreview.appendChild(li);
-        }
-    });
-
-    document.getElementById('courseForm').addEventListener('submit', e => {
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.classList.add('loading');
-        submitBtn.textContent = 'Đang gửi...';
-    });
-
-    document.getElementById("tagInput").addEventListener("keydown", function (event){
-        if (event.key === "Enter"){
-            event.preventDefault();
-            addTag();
-        }
-    });
-
-    document.getElementById('courseForm').addEventListener('reset', () => {
-        filePreview.innerHTML = '';
-        tags.length = 0;
-        renderTags();
-    });
-
-    const tagInput = document.getElementById("tagInput");
-    const autocompleteList = document.getElementById("autocomplete-list");
-
-    tagInput.addEventListener("input", function(){
-        closeAllLists();
-        const val = this.value.toLowerCase();
-        if (!val) return false;
-        const filteredTags = availableTags.filter(t => t.toLowerCase().startsWith(val) && !tags.some(existing => existing.value.toLowerCase() === t.toLowerCase()));
-        if(filteredTags.length === 0) return false;
-
-        filteredTags.forEach(tag => {
-            const item = document.createElement("div");
-            item.textContent = tag;
-            item.addEventListener("click", function(){
-                tagInput.value = this.textContent;
-                addTag();
-            });
-            autocompleteList.appendChild(item);
-        });
-    });
 
     function closeAllLists() {
-        while (autocompleteList.firstChild) {
-            autocompleteList.removeChild(autocompleteList.firstChild);
+        const autocompleteList = document.getElementById("autocomplete-list");
+        if (autocompleteList) {
+            autocompleteList.innerHTML = "";
         }
     }
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('courseForm');
+        const tagInput = document.getElementById('tagInput');
+        const addTagBtn = document.querySelector('.add-btn');
+        const filesInput = document.getElementById('files');
+        const filePreview = document.getElementById('filePreview');
+        const descriptionTextarea = document.getElementById('description');
+        const descriptionCounter = document.getElementById('description-counter');
+        const maxLength = 255;
+        const autocompleteList = document.getElementById("autocomplete-list");
+        tagInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addTag();
+            }
+        });
+        addTagBtn.addEventListener('click', addTag);
+        form.addEventListener('submit', e => {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '⏳ Creating...';
+        });
+        function updateCounter() {
+            const currentLength = descriptionTextarea.value.length;
+            descriptionCounter.textContent = `${currentLength} / ${maxLength}`;
 
-    document.addEventListener("click", function (e) {
-        if (e.target !== tagInput) {
+            // Optionally, change color if the user goes over the limit
+            if (currentLength > maxLength) {
+                descriptionCounter.classList.add('text-red-500', 'font-bold');
+            } else {
+                descriptionCounter.classList.remove('text-red-500', 'font-bold');
+            }
+        }
+
+        descriptionTextarea.addEventListener('input', updateCounter);
+        updateCounter();
+        form.addEventListener('reset', () => {
+            if(filePreview) filePreview.innerHTML = '';
+            tags.length = 0;
+            renderTags();
+        });
+
+        tagInput.addEventListener("input", function() {
             closeAllLists();
+            const val = this.value.toLowerCase();
+            if (!val) return;
+
+            const filteredTags = availableTags.filter(t =>
+                t.toLowerCase().startsWith(val) &&
+                !tags.some(existing => existing.value.toLowerCase() === t.toLowerCase())
+            );
+
+            if (filteredTags.length === 0) return;
+
+            filteredTags.forEach(tag => {
+                const item = document.createElement("div");
+                item.textContent = tag;
+                item.addEventListener("click", function() {
+                    tagInput.value = this.textContent;
+                    addTag();
+                });
+                autocompleteList.appendChild(item);
+            });
+        });
+
+        document.addEventListener("click", function (e) {
+            if (e.target !== tagInput) {
+                closeAllLists();
+            }
+        });
+
+        const serverTags = /*[[${courseForm.tagTexts}]]*/ null;
+        if (serverTags && serverTags.length > 0) {
+            serverTags.forEach(tagText => {
+                if (!tags.some(t => t.value === tagText)) {
+                    tags.push({value: tagText, color: randomColor()});
+                }
+            });
+            renderTags();
         }
     });
-
 </script>
 </body>
 </html>

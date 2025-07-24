@@ -1,15 +1,18 @@
 package com.example.edutrack.profiles.dto;
 
+import java.util.UUID;
+
 public class CourseApplicationDetail {
-    private double price;
+    private UUID courseId;
     private String description;
 
-    public Double getPrice() {
-        return price;
+    // Getters and setters
+    public UUID getCourseId() {
+        return courseId;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setCourseId(UUID courseId) {
+        this.courseId = courseId;
     }
 
     public String getDescription() {

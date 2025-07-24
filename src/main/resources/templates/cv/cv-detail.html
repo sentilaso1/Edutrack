@@ -4,638 +4,542 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View CV Detail - EduTrack</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background: linear-gradient(to right, #e6f7f9, #ffeef0);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        textarea{
+            font-style: inherit;
+            font-family: inherit;
+            color: black;
+        }
         .container {
-            max-width: 1720px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            overflow-x: hidden; /* Prevent container overflow */
         }
-
+        .back-link {
+            display: inline-block;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 18px;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: var(--color-primary-hover);
+        }
+        .page-title {
+            font-size: 2.2rem;
+            color: var(--text-accent);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 32px;
+            letter-spacing: 1px;
+        }
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            padding: 30px;
-            min-height: 80vh;
+            grid-template-columns: 1fr 400px;
+            gap: 34px;
+            overflow: hidden; /* Prevent grid overflow */
         }
-
-        .back-link {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 14px;
-            margin-bottom: 10px;
-            display: inline-block;
-            transition: all 0.3s ease;
-            grid-column: 1 / -1;
-        }
-
-        .back-link:hover {
-            color: #764ba2;
-            transform: translateX(-3px);
-        }
-
-        .page-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            grid-column: 1 / -1;
-        }
-
         .cv-section {
             display: flex;
             flex-direction: column;
+            gap: 20px;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent section overflow */
         }
-
         .cv-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(255, 124, 150, 0.08);
+            padding: 26px 24px 18px 24px;
+            margin-bottom: 0;
+            border: 1px solid var(--border-light);
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent card overflow */
         }
-
-        .cv-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
         .profile-section {
             display: flex;
+            gap: 28px;
             align-items: flex-start;
-            gap: 20px;
-            margin-bottom: 25px;
+            min-width: 0; /* Allow flex items to shrink */
         }
-
         .avatar-container {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 96px;
+            flex-shrink: 0; /* Prevent avatar from shrinking */
         }
-
         .avatar {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 12px;
+            border-radius: 18px;
+            color: var(--color-primary);
+            font-size: 2.6rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 32px;
-            margin-bottom: 8px;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-sizing: border-box;
+            overflow: hidden;
+            border: #0f0f23 solid 1px;
+            margin-bottom: 7px;
+            box-shadow: 0 2px 12px rgba(255,124,150,0.07);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
         }
 
         .avatar-label {
-            font-size: 12px;
-            color: #666;
+            font-size: 13px;
+            color: var(--text-muted);
             font-weight: 600;
         }
-
         .profile-info {
             flex: 1;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent profile info overflow */
         }
-
         .status-section {
             text-align: right;
+            min-width: 120px;
+            max-width: 120px; /* Prevent expansion */
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0; /* Prevent status section from shrinking */
         }
-
         .created-date {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
+            font-size: 13px;
+            color: var(--text-muted);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
-
         .status-badge {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 12px;
+            border-radius: 14px;
+            padding: 5px 16px;
+            font-size: 14px;
             font-weight: 600;
+            display: inline-block;
             text-align: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
-
+        .bg-approved {
+            background: var(--color-success);
+            color: var(--text-inverse);
+        }
+        .bg-rejected {
+            background: var(--color-error);
+            color: var(--text-inverse);
+        }
+        .bg-pending {
+            background: var(--color-warning);
+            color: #b18500;
+        }
         .info-item {
-            margin-bottom: 12px;
+            margin-bottom: 9px;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent info item overflow */
         }
-
         .info-label {
             font-weight: 600;
-            color: #333;
-            font-size: 14px;
+            color: var(--color-primary);
+            font-size: 15px;
         }
-
         .info-value {
-            color: #666;
-            font-size: 14px;
+            color: var(--text-primary);
+            font-size: 16px;
             margin-top: 2px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
+            max-width: 100%;
+            overflow: hidden;
         }
-
         .section-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            background: white;
-            transition: all 0.3s ease;
+            background: #fff;
+            border-radius: 10px;
+            padding: 19px 22px;
+            box-shadow: 0 1.5px 8px rgba(255, 124, 150, 0.07);
+            margin-bottom: 0;
+            border: 1px solid var(--border-light);
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent section card overflow */
         }
-
-        .section-card:hover {
-            border-color: #667eea;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
         .section-title {
             font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #f0f0f0;
+            font-weight: bold;
+            color: var(--text-accent);
+            margin-bottom: 9px;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 6px;
         }
-
         .section-content {
-            max-height: 120px;
+            max-height: 130px;
             overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #ccc transparent;
+            overflow-x: hidden; /* Prevent horizontal scroll in sections */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
         }
-
-        .section-content::-webkit-scrollbar {
-            width: 6px;
+        .section-content pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            font-family: inherit;
+            margin: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll in pre tags */
         }
-
-        .section-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
+        .tag-item {
+            background-color: rgba(255, 128, 134, 0.1);
+            color: rgba(255, 100, 110, 1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 128, 134, 0.3);
+            display: inline-block;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            max-width: 100%;
         }
-
-        .section-content::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 3px;
-        }
-
-        .section-content::-webkit-scrollbar-thumb:hover {
-            background: #999;
-        }
-
         .list-item {
-            margin-bottom: 8px;
-            padding-left: 15px;
-            position: relative;
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
-            line-height: 1.5;
+            margin-bottom: 8px;
+            padding-left: 16px;
+            position: relative;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
         }
-
         .list-item:before {
-            content: "•";
+            content: '•';
             position: absolute;
             left: 0;
-            color: #667eea;
+            color: var(--color-primary);
             font-weight: bold;
         }
-
-        .experience-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
+        .portfolio-section {
+            background: var(--bg-modal, #f5e3e0);
+            border-radius: 7px;
+            padding: 13px 18px;
+            margin: 12px 0 10px 0;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent portfolio section overflow */
         }
-
-        .experience-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .experience-title {
+        .portfolio-label {
+            font-size: 15px;
             font-weight: 600;
-            color: #333;
-            font-size: 14px;
+            color: var(--color-secondary);
             margin-bottom: 5px;
         }
-
-        .experience-details {
-            color: #666;
-            font-size: 13px;
-        }
-
-        .portfolio-section {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .portfolio-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
         .portfolio-url {
-            color: #667eea;
+            color: var(--color-primary);
             text-decoration: none;
             font-size: 14px;
-            word-break: break-all;
+            word-break: break-all; /* Force breaking of URLs */
+            overflow-wrap: break-word;
+            display: block;
+            max-width: 100%;
+            overflow: hidden; /* Hide any overflow */
         }
-
         .portfolio-url:hover {
             text-decoration: underline;
         }
-
         .action-buttons {
             display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 25px;
+            gap: 16px;
+            justify-content: flex-end;
+            margin-top: 15px;
+            flex-wrap: wrap;
         }
-
         .btn {
-            padding: 12px 30px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 10px 32px;
+            border-radius: 7px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
+            border: none;
+            transition: all 0.25s;
+            white-space: nowrap;
         }
-
         .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-color: #667eea;
+            background: var(--color-primary);
+            color: var(--text-inverse);
+            box-shadow: 0 1px 8px rgba(255, 124, 150, 0.08);
         }
-
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            background: var(--color-primary-hover);
         }
-
         .btn-secondary {
-            background: white;
-            color: #667eea;
+            background: var(--color-secondary);
+            color: var(--text-inverse);
         }
-
         .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+            background: var(--color-secondary-hover);
         }
-
-        /* Courses Section Styles (from create-cv.html) */
+        .courses-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 24px 17px;
+            box-shadow: 0 2px 8px rgba(255, 124, 150, 0.09);
+            border: 1px solid var(--border-light);
+            height: fit-content;
+            max-width: 400px; /* Fixed width for right column */
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent courses section overflow */
+        }
         .section-header {
+            font-size: 19px;
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-bottom: 19px;
             text-align: center;
-            padding: 15px 25px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            transition: all 0.3s ease;
+            background: none;
+            border: none;
         }
-
-        .section-header:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
         .course-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-            transition: all 0.3s ease;
-            position: relative;
+            background: #fafafa;
+            border-radius: 9px;
+            box-shadow: 0 1px 4px rgba(255,124,150,0.04);
+            padding: 15px 14px 13px 14px;
+            margin-bottom: 15px;
+            min-width: 0; /* Allow flex items to shrink */
+            overflow: hidden; /* Prevent course card overflow */
         }
-
-        .course-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-color: #667eea;
-        }
-
         .course-title {
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
+            color: var(--text-primary);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
         }
-
-        .course-tags {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .tag {
-            background: #e9ecef;
-            border: 1px solid #ced4da;
-            border-radius: 20px;
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #495057;
-        }
-
-        .tag.azure {
-            background: #cce7ff;
-            border-color: #99d6ff;
-            color: #0066cc;
-        }
-
-        .tag.microsoft {
-            background: #ffe6cc;
-            border-color: #ffcc99;
-            color: #cc6600;
-        }
-
-        .tag.beginner {
-            background: #d4edda;
-            border-color: #a3d9a4;
-            color: #155724;
-        }
-
-        .tag.data {
-            background: #f8d7da;
-            border-color: #f1aeb5;
-            color: #721c24;
-        }
-
         .course-description {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.4;
-            margin-bottom: 15px;
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
         }
 
-        .course-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            font-size: 12px;
-            color: #888;
+        /* Alert styles for consistent text handling */
+        .alert-error, .alert-warning {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word; /* Force breaking of long words */
+            hyphens: auto;
         }
 
-        .add-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: absolute;
-            top: 15px;
-            right: 15px;
+        /* Additional overflow prevention */
+        * {
+            box-sizing: border-box;
         }
 
-        .add-btn:hover {
-            background: #218838;
-            transform: scale(1.1);
+        /* Ensure all text content respects container boundaries */
+        .cv-section *,
+        .courses-section * {
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .pagination button {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .pagination button:hover {
-            background: #e9ecef;
-        }
-
-        .pagination button.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .pagination a {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 8px 12px;
-            text-decoration: none;
-            color: #333;
-            transition: all 0.3s ease;
-        }
-
-        .pagination a:hover {
-            background: #e9ecef;
-        }
-
-        @media (max-width: 1024px) {
+        @media (max-width: 1000px) {
             .main-content {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 28px;
+            }
+            .courses-section {
+                margin-top: 34px;
+                padding: 21px 8px;
+                max-width: none; /* Remove fixed width on mobile */
             }
         }
-
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px 1vw;
+            }
+            .main-content {
+                gap: 16px;
+            }
+            .cv-card, .section-card, .courses-section {
+                padding: 11px 5vw;
+            }
             .profile-section {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .status-section {
-                text-align: center;
-            }
-
-            .action-buttons {
                 flex-direction: column;
                 align-items: center;
             }
-
-            .btn {
-                width: 200px;
+            .status-section {
+                text-align: center;
+                margin-top: 10px;
+                max-width: none; /* Remove fixed width on mobile */
             }
-
-            .main-content {
-                padding: 20px;
-                grid-template-columns: 1fr;
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <a href="/admin/cv/list" class="back-link">← Back to CV List</a>
+    <a href="/manager/cv/list" class="back-link"><i class="fa fa-arrow-left"></i> Back to CV List</a>
     <h1 class="page-title">CV Detail</h1>
-
     <div class="main-content">
-        <!-- CV Details Section (Left Column) -->
-        <div class="cv-section">
-            <div class="cv-card">
-                <div class="profile-section">
-                    <div class="avatar-container">
-                        <div class="avatar">👤</div>
-                        <div class="avatar-label">Avatar</div>
-                    </div>
 
-                    <div class="profile-info">
-                        <div class="info-item">
-                            <div class="info-label">Full Name</div>
-                            <div class="info-value" th:text="${cv.user.fullName}"></div>
+        <!-- LEFT: CV Detail -->
+        <div th:if="${cv != null}">
+            <div class="cv-section">
+                <!-- Profile Card (no summary here) -->
+                <div class="cv-card">
+                    <div class="profile-section">
+                        <div class="avatar-container">
+                            <div class="avatar">
+                                <img th:src="@{'/avatar/' + ${cv.user.id}}"
+                                     th:alt="${cv.user.fullName}"
+                                     width="80px"
+                                     height="80px"
+                                     onerror="this.onerror=null;this.src='/assets/images/default-avatar.svg';"/>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Email</div>
-                            <div class="info-value" th:text="${cv.user.email}"></div>
+                        <div class="profile-info">
+                            <div class="info-item">
+                                <div class="info-label">Full Name</div>
+                                <div class="info-value" th:text="${cv.user.fullName}"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Email</div>
+                                <div class="info-value" th:text="${cv.user.email}"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Phone Number</div>
+                                <div class="info-value" th:text="${cv.user.phone}"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Gender</div>
+                                <div class="info-value" th:text="${cv.user.gender}"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Birth Date</div>
+                                <div class="info-value" th:text="${#dates.format(cv.user.birthDate, 'dd/MM/yyyy')}"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Bio</div>
+                                <div class="info-value" th:utext="${#strings.isEmpty(cv.user.bio) ? 'No bio available' : cv.user.bio}"></div>
+                            </div>
+                            <!-- Summary moved below as a card -->
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Phone Number</div>
-                            <div class="info-value" th:text="${cv.user.phone}"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Gender</div>
-                            <div class="info-value" th:text="${cv.user.gender}"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Birth Date</div>
-                            <div class="info-value" th:text="${cv.user.birthDate}"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Bio</div>
-                            <div class="info-value" th:text="${cv.user.bio}"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Summary</div>
-                            <div class="info-value" th:text="${cv.summary}"></div>
-                        </div>
-                    </div>
+                        <div class="status-section">
+                            <div class="created-date" th:text="'Created date: ' + ${#dates.format(cv.createdDate, 'yyyy-MM-dd')}"></div>
+                            <span class="status-badge"
+                                  th:classappend="${#strings.equalsIgnoreCase(cv.status, 'approved')} ? ' bg-approved' : (${#strings.equalsIgnoreCase(cv.status, 'rejected')} ? ' bg-rejected' : ' bg-pending')"
+                                  th:text="${cv.status}"></span>
 
-                    <div class="status-section">
-                        <div class="created-date" th:text="${cv.createdDate}"></div>
-                        <div class="status-badge" th:text="${cv.status}"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Experience Years</div>
-                <div class="section-content">
-                    <div class="info-value" th:text="${cv.experienceYears}"></div>
-                </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Professional Experience</div>
-                <div class="section-content">
-                    <div th:each="experience : ${cv.experienceItems}">
-                        <div class="list-item" th:text="${experience}"></div>
+                <!-- Section Cards (using th:utext and replace for linebreaks) -->
+                <div class="section-card">
+                    <div class="section-title">Experience Years</div>
+                    <div class="section-content">
+                        <div class="info-value" th:text="${cv.experienceYears}"></div>
                     </div>
                 </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Skills</div>
-                <div class="section-content">
-                    <div th:each="skill : ${cv.skillItems}">
-                        <div class="list-item" th:text="${skill}"></div>
+                <div class="section-card" style="margin-top: 20px;">
+                    <div class="section-title">Summary</div>
+                    <div class="section-content">
+                        <div class="info-value"
+                             th:utext="${cv.summary}"></div>
                     </div>
                 </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Education</div>
-                <div class="section-content">
-                    <div th:each="education : ${cv.educationItems}">
-                        <div class="list-item" th:text="${education}"></div>
+                <div class="section-card">
+                    <div class="section-title">Professional Experience</div>
+                    <div class="section-content">
+                        <div class="info-value"
+                             th:utext="${cv.experience}"></div>
                     </div>
                 </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Certifications</div>
-                <div class="section-content">
-                    <div th:each="certification : ${cv.certificationItems}">
-                        <div class="list-item" th:text="${certification}"></div>
+                <div class="section-card">
+                    <div class="section-title">Skills</div>
+                    <div class="section-content">
+                        <pre th:utext="${cv.skills}"></pre>
                     </div>
                 </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Languages</div>
-                <div class="section-content">
-                    <div th:each="language : ${cv.languageItems}">
-                        <div class="list-item" th:text="${language}"></div>
+                <div class="section-card">
+                    <div class="section-title">Education</div>
+                    <div class="section-content">
+                        <div class="info-value"
+                             th:utext="${cv.education}"></div>
                     </div>
                 </div>
-            </div>
-
-            <div class="portfolio-section">
-                <div class="portfolio-label">Portfolio URL</div>
-                <a th:href="${cv.portfolioUrl}" class="portfolio-url" th:text="${cv.portfolioUrl}"></a>
-            </div>
-
-            <div th:if="${cv.status == 'aiapproved'}" class="action-buttons">
-                <form th:action="@{/cv/accept/{id}(id=${cv.id})}" method="post">
-                    <button type="submit" class="btn btn-primary">Accept CV</button>
-                </form>
-                <form th:action="@{/cv/reject/{id}(id=${cv.id})}" method="post">
-                    <button type="submit" class="btn btn-secondary">Reject CV</button>
-                </form>
+                <div class="section-card">
+                    <div class="section-title">Certifications</div>
+                    <div class="section-content">
+                        <div class="info-value"
+                             th:utext="${cv.certifications}"></div>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="section-title">Languages</div>
+                    <div class="section-content">
+                        <div class="info-value"
+                             th:utext="${cv.languages}"></div>
+                    </div>
+                </div>
+                <div class="portfolio-section">
+                    <div class="portfolio-label">Portfolio URL</div>
+                    <a th:href="${cv.portfolioUrl}" class="portfolio-url" th:text="${cv.portfolioUrl}"></a>
+                </div>
+                <div th:if="${cv.status != 'approved'}" class="action-buttons">
+                    <form th:action="@{/cv/accept/{id}(id=${cv.id})}" method="post">
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Accept CV</button>
+                    </form>
+                    <form th:action="@{/cv/reject/{id}(id=${cv.id})}" method="post">
+                        <button type="submit" class="btn btn-secondary"><i class="fa fa-times"></i> Reject CV</button>
+                    </form>
+                </div>
             </div>
         </div>
+        <p th:unless="${cv != null}" class="alert-error" style="margin:0;">CV is not found.</p>
 
-        <!-- Courses Section (Right Column) -->
+        <!-- RIGHT: Courses -->
         <div class="courses-section">
             <div class="section-header">Registered Courses</div>
-
-            <div th:if="${registeredCourses != null}">
+            <div th:if="${registeredCourses != null and !registeredCourses.isEmpty()}">
                 <div th:each="cm : ${registeredCourses}">
                     <div class="course-card">
                         <div class="course-title" th:text="${cm.course.name}"></div>
                         <div class="course-description" th:text="${cm.course.description}"></div>
-
-                        <div class="info-item">
-                            <div class="info-label">Price (VND):</div>
-                            <div class="info-value" th:text="${cm.price} + ' VND'"></div>
-                        </div>
-
                         <div class="info-item">
                             <div class="info-label">Teaching Description:</div>
                             <div class="info-value" th:text="${cm.description}"></div>
@@ -643,15 +547,8 @@
                     </div>
                 </div>
             </div>
-
-            <div th:if="${registeredCourses.isEmpty()}">
-                <p>No courses registered for this CV.</p>
-            </div>
-
-            <div class="pagination">
-                <a th:href="@{/cv/detail/{id}(id=${cv.id}, page=${pageNumber - 1}, size=6)}" th:if="${coursePage.hasPrevious()}" style="margin-right: 10px;">« Prev</a>
-                <span>Page <span th:text="${pageNumber}"></span></span>
-                <a th:href="@{/cv/detail/{id}(id=${cv.id}, page=${pageNumber + 1}, size=6)}" th:if="${coursePage.hasNext()}" style="margin-left: 10px;">Next »</a>
+            <div th:if="${registeredCourses == null or registeredCourses.isEmpty()}">
+                <p class="alert-warning" style="margin:0;">No courses registered for this CV.</p>
             </div>
         </div>
     </div>

@@ -2,6 +2,7 @@ package com.example.edutrack.auth.service;
 
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
+import com.example.edutrack.accounts.model.Staff;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
 import com.example.edutrack.accounts.repository.MentorRepository;
@@ -53,7 +54,9 @@ public class UserService {
         mentee.setIsLocked(false);
         mentee.setTotalSessions(0);
         mentee.setInterests("");
-        menteeRepository.save(mentee);
+        mentee = menteeRepository.save(mentee);
+
+        walletService.save(mentee.getUser());
     }
 
     public void registerMentor(User user) {
@@ -69,7 +72,9 @@ public class UserService {
         mentor.setTotalSessions(0);
         mentor.setExpertise("");
         mentor.setRating(0.0);
-        mentorRepository.save(mentor);
+        mentor = mentorRepository.save(mentor);
+
+        walletService.save(mentor.getUser());
     }
 
     public boolean isMentor(User user){
@@ -81,4 +86,5 @@ public class UserService {
         Optional<Mentee> mentee = menteeRepository.findById(user.getId());
         return mentee.isPresent();
     }
+
 }

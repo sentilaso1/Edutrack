@@ -199,8 +199,10 @@ public class WalletController {
 
         if (qrOpt.isPresent()) {
             try {
-                qrOpt.get().setQrImage(qrImage);
-                bankingQrService.save(qrOpt.get());
+                if (qrImage != null && !qrImage.isEmpty()) {
+                    qrOpt.get().setQrImage(qrImage);
+                    bankingQrService.save(qrOpt.get());
+                }
             } catch (IOException e) {
                 model.addAttribute("error", "Failed to process banking qr image.");
                 model.addAttribute("details", e.getStackTrace());

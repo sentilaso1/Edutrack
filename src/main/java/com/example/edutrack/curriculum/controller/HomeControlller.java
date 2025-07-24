@@ -57,7 +57,7 @@ public class HomeControlller {
         User user = (User) session.getAttribute("loggedInUser");
 
         if (user == null) return handleGuestUser(model);
-        if (user instanceof Mentor) return "redirect:/mentor/dashboard";
+        if (user instanceof Mentor) return handleGuestUser(model);
         if ("Manager".equals(user.getClass().getSimpleName())) return "redirect:/manager/dashboard";
 
         Mentee mentee = (Mentee) user;
@@ -92,7 +92,7 @@ public class HomeControlller {
         LandingPageConfig config = landingPageConfigService.getConfigByRole(MenteeLandingRole.MENTEE_NEW);
         populateCommonModel(model, config);
 
-        model.addAttribute("heroHeadline", "Welcome, <span class=\"span\">" + user.getFullName() + "!</span>");
+        model.addAttribute("heroHeadline", "Welcome," + user.getFullName());
         model.addAttribute("userType", "newUser");
         model.addAttribute("showSchedulesLink", false);
         model.addAttribute("showDashboard", true);

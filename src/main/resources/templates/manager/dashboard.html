@@ -1,38 +1,241 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Admin Dashboard</title>
-        <link rel="stylesheet" th:href="@{/css/colors.css}"/>
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <!-- Tailwind CSS CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+                .chart-container {
+                        position: relative;
+                        height: 300px;
+                        width: 100%;
+                }
+
+                .mentor-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 0.75rem;
+                        margin-bottom: 0.5rem;
+                        background-color: #f8f9fa;
+                        border-radius: 0.5rem;
+                        border: 1px solid #e5e7eb;
+                }
+
+                .mentor-item:hover {
+                        background-color: #f3f4f6;
+                }
+
+                .badge {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 2rem;
+                        height: 2rem;
+                        background-color: #3b82f6;
+                        color: white;
+                        border-radius: 50%;
+                        font-weight: 600;
+                        font-size: 0.875rem;
+                        margin-right: 0.75rem;
+                }
+
+                .period-btn.active {
+                        background-color: #3b82f6;
+                        color: white;
+                }
+
+                .growth-positive {
+                        color: #10b981;
+                        font-weight: 500;
+                }
+
+                .animate-fade-in {
+                        animation: fadeIn 0.5s ease-in-out;
+                }
+
+                @keyframes fadeIn {
+                        from {
+                                opacity: 0;
+                                transform: translateY(10px);
+                        }
+
+                        to {
+                                opacity: 1;
+                                transform: translateY(0);
+                        }
+                }
+        </style>
 </head>
-<body class="bg-gray-100 flex">
-        <div class="w-64 bg-gray-800 text-white h-screen fixed">
-                <div class="p-4 text-2xl font-bold">EduTrack Admin</div>
-                <nav class="mt-4">
-                        <a th:href="@{/manager/dashboard}" class="block py-2 px-4 hover:bg-gray-700">Dashboard</a>
-                        <a th:href="@{/manager/mentees}" class="block py-2 px-4 hover:bg-gray-700">Mentees</a>
-                        <a th:href="@{/manager/mentors}" class="block py-2 px-4 hover:bg-gray-700">Mentors</a>
-                        <a th:href="@{/manager/payments}" class="block py-2 px-4 hover:bg-gray-700">Payments</a>
-                </nav>
-        </div>
+
+<body class="bg-gray-100">
+        <th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
 
         <div class="ml-64 flex-1 p-6">
-                <h1 class="text-2xl font-bold mb-6">Manager Dashboard</h1>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white p-4 rounded shadow">
-                                <h2 class="text-lg font-semibold">Total Mentees</h2>
-                                <p th:text="${menteeCount}"></p>
+                <h1 class="text-2xl font-bold mb-6 text-gray-800">Manager Dashboard</h1>
+
+                <!-- Period Selector -->
+                <div class="mb-6">
+                        <div class="flex gap-2">
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition period-btn"
+                                        th:classappend="${currentPeriod == 'week'} ? 'active' : ''"
+                                        onclick="changePeriod('week')">
+                                        7 days
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition period-btn"
+                                        th:classappend="${currentPeriod == 'month'} ? 'active' : ''"
+                                        onclick="changePeriod('month')">
+                                        30 days
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition period-btn"
+                                        th:classappend="${currentPeriod == 'quarter'} ? 'active' : ''"
+                                        onclick="changePeriod('quarter')">
+                                        3 months
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition period-btn"
+                                        th:classappend="${currentPeriod == 'year'} ? 'active' : ''"
+                                        onclick="changePeriod('year')">
+                                        1 year
+                                </button>
                         </div>
-                        <div class="bg-white p-4 rounded shadow">
-                                <h2 class="text-lg font-semibold">Total Mentors</h2>
-                                <p th:text="${mentorCount}"></p>
+                </div>
+
+                <!-- Main Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white rounded-lg border border-gray-300 p-6 animate-fade-in">
+                                <h5 class="text-gray-600 text-sm mb-2">
+                                        <i class="fas fa-money-bill-wave mr-2"></i>Total revenue of the system
+                                </h5>
+                                <h2 class="text-2xl font-bold text-gray-800 mb-2" id="totalRevenue"
+                                        th:text="${#numbers.formatDecimal(stats.totalRevenue, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                        2,450,000,000₫
+                                </h2>
+                                <span class="growth-positive text-sm" id="revenueGrowth"
+                                        th:text="'+' + ${#numbers.formatDecimal(stats.revenueGrowth, 1, 'COMMA', 1, 'POINT')} + '% compared to the previous month'">
+                                        +15.2% compared to the previous month
+                                </span>
                         </div>
-                        <div class="bg-white p-4 rounded shadow">
-                                <h2 class="text-lg font-semibold">Disk Usage</h2>
+
+                        <div class="bg-white rounded-lg border border-gray-300 p-6 animate-fade-in">
+                                <h5 class="text-gray-600 text-sm mb-2">
+                                        <i class="fas fa-chalkboard-teacher mr-2"></i>Total mentor
+                                </h5>
+                                <h2 class="text-2xl font-bold text-gray-800 mb-2" id="totalMentors"
+                                        th:text="${stats.totalMentors}">145</h2>
+                                <span class="growth-positive text-sm" id="mentorGrowth"
+                                        th:text="'+' + ${stats.mentorGrowth} + ' new mentor'">
+                                        +12 new mentor
+                                </span>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-300 p-6 animate-fade-in">
+                                <h5 class="text-gray-600 text-sm mb-2">
+                                        <i class="fas fa-users mr-2"></i>Total student
+                                </h5>
+                                <h2 class="text-2xl font-bold text-gray-800 mb-2" id="totalStudents"
+                                        th:text="${#numbers.formatDecimal(stats.totalStudents, 0, 'COMMA', 0, 'POINT')}">
+                                        3,247
+                                </h2>
+                                <span class="growth-positive text-sm" id="studentGrowth"
+                                        th:text="'+' + ${stats.studentGrowth} + ' student'">
+                                        +156 student
+                                </span>
+                        </div>
+                </div>
+
+                <!-- System Overview -->
+                <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                                <i class="fas fa-chart-bar mr-2"></i>System overview
+                        </h3>
+
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                <div class="bg-white rounded-lg border border-gray-300 p-4 text-center">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-1" id="activeCourses"
+                                                th:text="${#numbers.formatDecimal(stats.activeCourses, 0, 'COMMA', 0, 'POINT')}">
+                                                1,234
+                                        </h4>
+                                        <p class="text-gray-600 text-sm">Active course</p>
+                                </div>
+
+                                <div class="bg-white rounded-lg border border-gray-300 p-4 text-center">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-1" id="satisfactionRate"
+                                                th:text="${stats.satisfactionRate} + '%'">94%</h4>
+                                        <p class="text-gray-600 text-sm">Satisfaction Rate</p>
+                                </div>
+
+                                <div class="bg-white rounded-lg border border-gray-300 p-4 text-center">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-1" id="avgRevenuePerMentor"
+                                                th:text="${#numbers.formatDecimal(stats.avgRevenuePerMentor/1000000, 1, 'COMMA', 1, 'POINT')} + 'M₫'">
+                                                16.9M₫
+                                        </h4>
+                                        <p class="text-gray-600 text-sm">Average revenue per Mentor</p>
+                                </div>
+
+                                <div class="bg-white rounded-lg border border-gray-300 p-4 text-center">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-1" id="avgStudentsPerMentor"
+                                                th:text="${stats.avgStudentsPerMentor}">22</h4>
+                                        <p class="text-gray-600 text-sm">Average student per Mentor</p>
+                                </div>
+
+                                <div class="bg-white rounded-lg border border-gray-300 p-4 text-center">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-1" id="avgRating"
+                                                th:text="${stats.avgRating} + '⭐'">4.8⭐</h4>
+                                        <p class="text-gray-600 text-sm">Average Rating</p>
+                                </div>
+                        </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2">
+                                <div class="bg-white rounded-lg border border-gray-300">
+                                        <div class="px-6 py-4 border-b border-gray-200">
+                                                <h5 class="text-lg font-semibold text-gray-800">
+                                                        <i class="fas fa-chart-line mr-2"></i>System revenue over time
+                                                </h5>
+                                        </div>
+                                        <div class="p-6">
+                                                <div class="chart-container">
+                                                        <canvas id="revenueChart"></canvas>
+                                                </div>
+                                        </div>
+                                </div>
+                        </div>
+
+                        <div class="lg:col-span-1">
+                                <div class="bg-white rounded-lg border border-gray-300">
+                                        <div class="px-6 py-4 border-b border-gray-200">
+                                                <h5 class="text-lg font-semibold text-gray-800">
+                                                        <i class="fas fa-trophy mr-2"></i>Top 5 mentor according to
+                                                        revenue
+                                                </h5>
+                                        </div>
+                                        <div class="p-6">
+                                                <div id="topMentorsList">
+                                                        <div class="mentor-item"
+                                                                th:each="mentor, iterStat : ${stats.topMentors}">
+                                                                <div class="flex items-center">
+                                                                        <span class="badge"
+                                                                                th:text="${iterStat.count}">1</span>
+                                                                        <span class="text-gray-800 font-medium"
+                                                                                th:text="${mentor.mentorName}">Nguyễn
+                                                                                Văn A</span>
+                                                                </div>
+                                                                <strong class="text-gray-800"
+                                                                        th:text="${mentor.formattedRevenue}">45,000,000₫</strong>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>
                         </div>
                 </div>
         </div>
+        <script src="/accounts/js/stats.js"></script>
 </body>
+
 </html>

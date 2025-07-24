@@ -9,76 +9,67 @@
 
     <!--=============== CSS ===============-->
     <link rel="stylesheet" th:href="@{/assets/css/login.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}">
 
-    <title>Responsive login and registration form - Bedimcode</title>
+    <title>Login - EduTrack</title>
 </head>
-<body>
-<!--=============== LOGIN IMAGE ===============-->
-<svg class="login__blob" viewBox="0 0 566 840" xmlns="http://www.w3.org/2000/svg">
-    <mask id="mask0" mask-type="alpha">
-        <path d="M342.407 73.6315C388.53 56.4007 394.378 17.3643 391.538
-            0H566V840H0C14.5385 834.991 100.266 804.436 77.2046 707.263C49.6393
-            591.11 115.306 518.927 176.468 488.873C363.385 397.026 156.98 302.824
-            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z"/>
-    </mask>
+<body style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
 
-    <g mask="url(#mask0)">
-        <path d="M342.407 73.6315C388.53 56.4007 394.378 17.3643 391.538
-            0H566V840H0C14.5385 834.991 100.266 804.436 77.2046 707.263C49.6393
-            591.11 115.306 518.927 176.468 488.873C363.385 397.026 156.98 302.824
-            167.945 179.32C173.46 117.209 284.755 95.1699 342.407 73.6315Z"/>
-
-        <image class="login__img" th:href="@{/assets/img/bg-img.jpg}"/>
-    </g>
-</svg>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 
 <!--=============== LOGIN ===============-->
-<div class="login container grid" id="loginAccessRegister">
+<div class="login container grid"
+     style="display: flex; justify-content: center; width: 100%; margin-top: 120px; padding-bottom: 4rem;"
+     id="loginAccessRegister">
     <!--===== LOGIN ACCESS =====-->
-    <div class="login__access">
-        <h1 class="login__title">Log in to your account.</h1>
-
-        <div class="login__area">
-            <form th:action="@{/login}" method="post" class="login__form">
-                <div class="login__content grid">
-                    <div th:if="${error}" style="color: red;">[[${error}]]</div>
-                    <div class="login__box">
-                        <input type="email" id="email" name="email" required th:value="${email != null} ? ${email} : ''"  placeholder=" " class="login__input">
-                        <label for="email" class="login__label">Email</label>
-                        <i class="ri-mail-fill login__icon"></i>
-                    </div>
-
-                    <div class="login__box">
-                        <input type="password" id="password" name="password" required placeholder=" " class="login__input">
-                        <label for="password" class="login__label">Password</label>
-                        <i class="ri-eye-off-fill login__icon login__password" id="loginPassword"></i>
-                    </div>
-                </div>
-                <div style="display: flex">
-                    <label class="login__remember">
-                        <input type="checkbox" name="rememberMe"> Remember Me
-                    </label>
-                    <a href="/forgot-password" class="login__forgot">Forgot your password?</a>
-                </div>
-
-                <button type="submit" class="login__button">Login</button>
-            </form>
-
-            <div class="login__social">
-                <p class="login__social-title">Or login with</p>
-                <div class="login__social-links">
-                    <a href="/login/google" class="login__social-link" style="width: 100%; height: 3em;">
-                        <img th:src="@{/assets/img/icon-google.svg}" alt="image" class="login__social-img">
-                    </a>
-                </div>
+    <div class="signup-container" style="max-width: 40vw;">
+        <div class="signup-header">
+            <h1 class="login__title">Log in to your account.</h1>
+        </div>
+        <form th:action="@{/login}" method="post" class="login__form">
+            <div th:if="${error}" style="color: red;">[[${error}]]</div>
+            <div class="form-group">
+                <label for="email" class="login__label">Email</label>
+                <input type="email" id="email" name="email" required th:value="${email != null} ? ${email} : ''"
+                       placeholder=" " class="login__input">
             </div>
-            <p class="login__switch">
-                Don't have an account?
-                <button id="loginButtonRegister" type="button"><a style="text-decoration: inherit" href="/signup">Create Account</a></button>
-            </p>
+
+            <div class="form-group">
+                <label for="password" class="login__label">Password</label>
+                <input type="password" id="password" name="password" required placeholder=" " class="login__input">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 1.25rem;">
+                <label class="login__remember" style="display: flex; align-items: center; gap: 0.4rem;">
+                    <input type="checkbox" name="rememberMe" style="transform: scale(1.2);"> Remember Me
+                </label>
+                <a href="/forgot-password" class="login__forgot" style="font-size: 1.2rem;">Forgot your password?</a>
+            </div>
+
+            <button type="submit" class="signup-btn">Login</button>
+        </form>
+
+        <!-- Social login -->
+        <div class="login__social" style="margin-top: 2rem; display: flex; flex-direction: column; justify-content: center; align-items: center">
+            <p class="login__social-title" style="font-size: 1.2rem; font-weight: 500;">Or login with</p>
+            <div class="login__social-links" style="width: 100%">
+                <a href="/login/google" class="login__social-link"
+                   style="width: 100%; height: 3.5em; display: flex; align-items: center; justify-content: center; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <img th:src="@{/assets/img/icon-google.svg}" alt="Google Login" class="login__social-img"
+                         style="width: 34px; height: 34px;">
+                </a>
+            </div>
+        </div>
+
+        <!-- Signup link -->
+        <div style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 0.6rem; font-size: 1.25rem;">
+            <span style="color: #333;">Don't have an account?</span>
+            <a href="/signup" style="color: #ff6b6b; font-weight: 600; text-decoration: none;">Create Account</a>
         </div>
     </div>
 </div>
+
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
 <!--=============== MAIN JS ===============-->
 <script th:src="@{/assets/js/login.js}"></script>
@@ -93,7 +84,6 @@
             const emailValue = emailInput.value.trim();
             const passwordValue = passwordInput.value.trim();
 
-            // Email validation
             if (emailValue === "") {
                 alert("Email is required");
                 e.preventDefault();
@@ -104,7 +94,6 @@
                 return;
             }
 
-            // Password validation
             if (passwordValue === "") {
                 alert("Password is required");
                 e.preventDefault();
@@ -114,8 +103,6 @@
                 e.preventDefault();
                 return;
             }
-
-            // No need to preventDefault if everything is valid
         });
     });
 </script>

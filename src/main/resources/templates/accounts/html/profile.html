@@ -4,172 +4,663 @@
 <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hồ sơ</title>
+        <title>Profile</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="/accounts/js/profile.js"></script>
+        <link rel="stylesheet" th:href="@{/assets/css/courselist.css}" />
+        <link rel="stylesheet"
+                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <style>
+                /* Dashboard styling similar to mentee-dashboard */
+                .dashboard-container {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                        padding: 2rem 1rem;
+                }
+
+                .dashboard-header {
+                        text-align: center;
+                        margin-bottom: 3rem;
+                }
+
+                .dashboard-title {
+                        font-size: 2.5rem;
+                        font-weight: 700;
+                        color: #1f2937;
+                        margin-bottom: 0.5rem;
+                }
+
+                .dashboard-subtitle {
+                        font-size: 1.125rem;
+                        color: #6b7280;
+                }
+
+                .dashboard-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 1.5rem;
+                        margin-bottom: 3rem;
+                }
+
+                .dashboard-card {
+                        background: white;
+                        border-radius: 1rem;
+                        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                        padding: 2rem;
+                        transition: all 0.3s ease;
+                        border: 1px solid #e5e7eb;
+                }
+
+                .dashboard-card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                }
+
+                .card-header {
+                        display: flex;
+                        align-items: center;
+                        margin-bottom: 1.5rem;
+                }
+
+                .card-icon {
+                        font-size: 1.5rem;
+                        color: #3b82f6;
+                        margin-right: 0.75rem;
+                        width: 2rem;
+                        text-align: center;
+                }
+
+                .card-title {
+                        font-size: 1.25rem;
+                        font-weight: 600;
+                        color: #1f2937;
+                        margin: 0;
+                }
+
+                .info-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin-bottom: 1rem;
+                        padding-bottom: 0.75rem;
+                        border-bottom: 1px solid #f3f4f6;
+                }
+
+                .info-item:last-child {
+                        border-bottom: none;
+                        margin-bottom: 0;
+                }
+
+                .info-label {
+                        font-weight: 600;
+                        color: #374151;
+                        min-width: 100px;
+                }
+
+                .info-value {
+                        color: #6b7280;
+                        flex: 1;
+                        text-align: right;
+                        word-break: break-word;
+                }
+
+                .status-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        padding: 0.5rem 1rem;
+                        border-radius: 9999px;
+                        font-size: 0.875rem;
+                        font-weight: 500;
+                }
+
+                .status-active {
+                        background-color: #dcfce7;
+                        color: #166534;
+                }
+
+                .status-inactive {
+                        background-color: #fef2f2;
+                        color: #991b1b;
+                }
+
+                .tab-navigation {
+                        display: flex;
+                        background: white;
+                        border-radius: 1rem;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                        margin-bottom: 2rem;
+                        overflow: hidden;
+                }
+
+                .tab-button {
+                        flex: 1;
+                        padding: 1rem 1.5rem;
+                        font-weight: 500;
+                        color: #6b7280;
+                        background: white;
+                        border: none;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        position: relative;
+                }
+
+                .tab-button:hover {
+                        color: #3b82f6;
+                        background-color: #f8fafc;
+                }
+
+                .tab-button.active {
+                        color: #3b82f6;
+                        background-color: #eff6ff;
+                }
+
+                .tab-button.active::after {
+                        content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        height: 3px;
+                        background-color: #3b82f6;
+                }
+
+                .tab-content {
+                        background: white;
+                        border-radius: 1rem;
+                        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                        padding: 2rem;
+                }
+
+                .form-group {
+                        margin-bottom: 1.5rem;
+                }
+
+                .form-label {
+                        display: block;
+                        font-weight: 500;
+                        color: #374151;
+                        margin-bottom: 0.5rem;
+                }
+
+                .form-input {
+                        width: 100%;
+                        padding: 0.75rem;
+                        border: 2px solid #e5e7eb;
+                        border-radius: 0.5rem;
+                        font-size: 1rem;
+                        transition: border-color 0.3s ease;
+                }
+
+                .form-input:focus {
+                        outline: none;
+                        border-color: #3b82f6;
+                        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                }
+
+                .form-select {
+                        width: 100%;
+                        padding: 0.75rem;
+                        border: 2px solid #e5e7eb;
+                        border-radius: 0.5rem;
+                        font-size: 1rem;
+                        background-color: white;
+                        transition: border-color 0.3s ease;
+                        cursor: pointer;
+                }
+
+                .form-select:focus {
+                        outline: none;
+                        border-color: #3b82f6;
+                        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                }
+
+                .gender-options {
+                        display: flex;
+                        gap: 1rem;
+                        margin-top: 0.5rem;
+                }
+
+                .gender-option {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.75rem 1rem;
+                        border: 2px solid #e5e7eb;
+                        border-radius: 0.5rem;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        background: white;
+                        flex: 1;
+                        justify-content: center;
+                }
+
+                .gender-option:hover {
+                        border-color: #3b82f6;
+                        background-color: #f8fafc;
+                }
+
+                .gender-option input[type="radio"] {
+                        margin: 0;
+                        width: auto;
+                }
+
+                .gender-option.selected {
+                        border-color: #3b82f6;
+                        background-color: #eff6ff;
+                        color: #3b82f6;
+                }
+
+                .gender-icon {
+                        font-size: 1.25rem;
+                }
+
+                .btn-primary {
+                        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                        color: white;
+                        padding: 0.75rem 2rem;
+                        border-radius: 0.5rem;
+                        font-weight: 500;
+                        border: none;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        display: inline-flex;
+                        align-items: center;
+                }
+
+                .btn-primary:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+                }
+
+                .avatar-section {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        text-align: center;
+                        width: 100%;
+                        max-width: 400px;
+                        margin: 0 auto;
+                }
+
+                .avatar-preview {
+                        width: 8rem;
+                        height: 8rem;
+                        border-radius: 50%;
+                        object-fit: cover;
+                        border: 4px solid #e5e7eb;
+                        margin-bottom: 1.5rem;
+                        transition: all 0.3s ease;
+                }
+
+                .avatar-preview:hover {
+                        border-color: #3b82f6;
+                        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+                }
+
+                .top-avatar {
+                        position: absolute;
+                        top: 2rem;
+                        right: 2rem;
+                        width: 4rem;
+                        height: 4rem;
+                        border-radius: 50%;
+                        object-fit: cover;
+                        border: 3px solid white;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                }
+
+                .error-message {
+                        color: #ef4444;
+                        font-size: 0.875rem;
+                        margin-top: 0.5rem;
+                        display: none;
+                }
+
+                .error-message.show {
+                        display: block;
+                }
+
+                @media (max-width: 768px) {
+                        .dashboard-container {
+                                padding: 1rem;
+                        }
+
+                        .dashboard-title {
+                                font-size: 2rem;
+                        }
+
+                        .dashboard-grid {
+                                grid-template-columns: 1fr;
+                        }
+
+                        .tab-navigation {
+                                flex-direction: column;
+                        }
+
+                        .gender-options {
+                                flex-direction: column;
+                        }
+                }
+        </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 relative">
-                <!-- User Avatar in Top-Right Corner -->
-                <img id="top-avatar" th:src="@{/avatar/{id}(id=${user.id})}" alt="Avatar"
-                        class="absolute top-4 right-4 w-16 h-16 rounded-full object-cover border-2 border-gray-200">
-                <h1 class="text-2xl font-bold text-gray-800 mb-6">Chào, <span th:text="${user.fullName}">Tên User</span></h1>
+<body style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;"
+        class="min-h-screen">
 
-                <!-- Tab Navigation -->
-                <div class="flex border-b border-gray-200 mb-6">
-                        <button class="tab-button px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
-                                onclick="showTab('profile')">Hồ sơ</button>
-                        <button class="tab-button px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
-                                onclick="showTab('edit')">Chỉnh sửa</button>
-                        <button class="tab-button px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
-                                onclick="showTab('avatar')">Ảnh đại diện</button>
-                        <button class="tab-button px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
-                                onclick="showTab('notifications')">Thông báo</button>
-                </div>
+        <th:block th:insert="~{fragments/header :: header}"></th:block>
 
-                <!-- Profile Tab -->
-                <div id="profile" class="tab-content">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                        <h2 class="text-lg font-semibold text-gray-700 mb-4">Thông tin cá nhân</h2>
-                                        <p><strong>Email:</strong> <span class="text-gray-600" th:text="${user.email}"></span></p>
-                                        <p><strong>Phone:</strong> <span class="text-gray-600" th:text="${user.phone}"></span></p>
-                                        <p><strong>Ngày sinh:</strong> <span th:text="${#dates.format(user.birthDate, 'yyyy-MM-dd')}"></span></p>
-                                        <p><strong>Giới tính:</strong> <span th:text="${user.gender == 'male' ? 'Nam' : 'Nữ'}"></span></p>
-                                        <p><strong>Bio:</strong> <span class="text-gray-600" th:text="${user.bio} ?: 'Chưa có mô tả'"></span></p>
+        <main>
+                <section class="section has-bg-image">
+                        <div class="dashboard-container">
+
+                                <!-- Dashboard Header -->
+                                <div class="dashboard-header">
+                                        <h1 class="dashboard-title">Hello, <span
+                                                        th:text="${user.fullName}">Username</span></h1>
+                                        <p class="dashboard-subtitle">Manage your profile and personal information</p>
                                 </div>
-                                <div th:if="${role == 'mentor'}">
-                                        <h2 class="text-lg font-semibold text-gray-700 mb-4">Thông tin Mentor</h2>
-                                        <p><strong>Chuyên môn:</strong> <span class="text-gray-600 max-w-full break-words"
-                                                        th:text="${mentor.expertise}"></span></p>
-                                        <p><strong>Tổng số buổi dạy:</strong> <span class="text-gray-600" th:text="${mentor.totalSessions}"></span></p>
-                                        <p><strong>Đánh giá:</strong> <span class="text-gray-600" th:text="${mentor.rating}"></span></p>
-                                        <p class="mt-4">
-                                                <span th:if="${mentor != null and mentor.isAvailable}" class="text-green-600">✅ Bạn đang dạy</span>
-                                                <span th:unless="${mentor != null and mentor.isAvailable}" class="text-red-600">❌ Bạn đang không có buổi
-                                                        dạy nào</span>
-                                        </p>
+
+                                <!-- Tab Navigation -->
+                                <div class="tab-navigation">
+                                        <button class="tab-button active" onclick="showTab('profile')">
+                                                <i class="fa fa-user" style="margin-right: 8px;"></i>
+                                                Profile
+                                        </button>
+                                        <button class="tab-button" onclick="showTab('edit')">
+                                                <i class="fa fa-edit" style="margin-right: 8px;"></i>
+                                                Edit
+                                        </button>
+                                        <button class="tab-button" onclick="showTab('avatar')">
+                                                <i class="fa fa-camera" style="margin-right: 8px;"></i>
+                                                Avatar
+                                        </button>
                                 </div>
-                                <div th:if="${role == 'mentee'}">
-                                        <h2 class="text-lg font-semibold text-gray-700 mb-4">Thông tin Mentee</h2>
-                                        <p><strong>Sở thích:</strong> <span class="text-gray-600 max-w-full break-words"
-                                                        th:text="${mentee.interests}"></span></p>
-                                        <p><strong>Số buổi học:</strong> <span class="text-gray-600" th:text="${mentee.totalSessions}"></span></p>                              
+
+                                <!-- Profile Tab -->
+                                <div id="profile" class="tab-content">
+                                        <div class="dashboard-grid">
+                                                <!-- Personal Information Card -->
+                                                <div class="dashboard-card">
+                                                        <div class="card-header">
+                                                                <i class="fa fa-user card-icon"></i>
+                                                                <h3 class="card-title">Personal Information</h3>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Email:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${user.email}">user@example.com</span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Phone:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${user.phone} ?: 'Not provided'">Not
+                                                                        provided</span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Birthday:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${#dates.format(user.birthDate, 'yyyy-MM-dd')} ?: 'Not provided'">Not
+                                                                        provided</span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Gender:</span>
+                                                                <span class="info-value"
+                                                                      th:text="${user.gender == 'male' ? 'Male' : (user.gender == 'female' ? 'Female' : 'Not specified')}">
+                                                                    Not specified
+                                                                </span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Bio:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${user.bio} ?: 'No bio available'">No
+                                                                        bio available</span>
+                                                        </div>
+                                                </div>
+
+                                                <!-- Role-specific Information Card -->
+                                                <div class="dashboard-card" th:if="${role == 'mentor'}">
+                                                        <div class="card-header">
+                                                                <i class="fa fa-graduation-cap card-icon"></i>
+                                                                <h3 class="card-title">Mentor Information</h3>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Expertise:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${mentor.expertise}">Programming, Web
+                                                                        Development</span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Total Sessions:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${mentor.totalSessions}">25</span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Rating:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${mentor.rating} + ' ⭐'">4.8 ⭐</span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Status:</span>
+                                                                <span th:if="${mentor != null and mentor.isAvailable}"
+                                                                        class="status-badge status-active">
+                                                                        ✅ Currently Teaching
+                                                                </span>
+                                                                <span th:unless="${mentor != null and mentor.isAvailable}"
+                                                                        class="status-badge status-inactive">
+                                                                        ❌ Not Teaching
+                                                                </span>
+                                                        </div>
+                                                </div>
+
+                                                <div class="dashboard-card" th:if="${role == 'mentee'}">
+                                                        <div class="card-header">
+                                                                <i class="fa fa-book card-icon"></i>
+                                                                <h3 class="card-title">Mentee Information</h3>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Interests:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${mentee.interests}">Web Development,
+                                                                        AI</span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                                <span class="info-label">Total Sessions:</span>
+                                                                <span class="info-value"
+                                                                        th:text="${mentee.totalSessions}">12</span>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </div>
+
+                                <!-- Edit Tab -->
+                                <div id="edit" class="tab-content hidden">
+                                        <form th:action="@{/profile/edit}" method="post" class="space-y-6">
+                                                <div class="dashboard-grid">
+                                                        <div>
+                                                                <div class="form-group">
+                                                                        <label class="form-label">Full Name:</label>
+                                                                        <input type="text" name="fullName"
+                                                                                th:value="${user.fullName}" required
+                                                                                class="form-input">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                        <label class="form-label">Phone:</label>
+                                                                        <input type="text" name="phone"
+                                                                                th:value="${user.phone}"
+                                                                                class="form-input">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                        <label class="form-label">Date of Birth:</label>
+                                                                        <input type="date" name="birthDate"
+                                                                                th:value="${#dates.format(user.birthDate, 'yyyy-MM-dd')}"
+                                                                                class="form-input">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                        <label class="form-label">Gender:</label>
+                                                                        <div class="gender-options">
+                                                                                <label class="gender-option"
+                                                                                        onclick="selectGender('male', this)">
+                                                                                        <input type="radio"
+                                                                                                name="gender"
+                                                                                                value="male"
+                                                                                                th:checked="${user.gender == 'male'}"
+                                                                                                style="display: none;">
+                                                                                        <i
+                                                                                                class="fa fa-mars gender-icon"></i>
+                                                                                        <span>Male</span>
+                                                                                </label>
+                                                                                <label class="gender-option"
+                                                                                        onclick="selectGender('female', this)">
+                                                                                        <input type="radio"
+                                                                                                name="gender"
+                                                                                                value="female"
+                                                                                                th:checked="${user.gender == 'female'}"
+                                                                                                style="display: none;">
+                                                                                        <i
+                                                                                                class="fa fa-venus gender-icon"></i>
+                                                                                        <span>Female</span>
+                                                                                </label>
+                                                                        </div>
+                                                                </div>
+                                                        </div>
+                                                        <div>
+                                                                <div class="form-group">
+                                                                        <label class="form-label">Bio:</label>
+                                                                        <textarea name="bio" th:text="${user.bio}"
+                                                                                rows="4" class="form-input"></textarea>
+                                                                </div>
+                                                                <div class="form-group" th:if="${role == 'mentor'}">
+                                                                        <label class="form-label">Expertise:</label>
+                                                                        <textarea name="expertise"
+                                                                                th:text="${mentor.expertise}" rows="4"
+                                                                                class="form-input"></textarea>
+                                                                </div>
+                                                                <div class="form-group" th:if="${role == 'mentee'}">
+                                                                        <label class="form-label">Interests:</label>
+                                                                        <textarea name="interests"
+                                                                                th:text="${mentee.interests}" rows="4"
+                                                                                class="form-input"></textarea>
+                                                                </div>
+                                                        </div>
+                                                </div>
+                                                <div class="text-center">
+                                                        <button type="submit" class="btn-primary">
+                                                                <i class="fa fa-save" style="margin-right: 8px;"></i>
+                                                                Save Changes
+                                                        </button>
+                                                </div>
+                                        </form>
+                                </div>
+
+                                <!-- Avatar Tab -->
+                                <div id="avatar" class="tab-content hidden">
+                                        <div class="avatar-section">
+                                                <form th:action="@{/avatar/upload/}" method="post"
+                                                        enctype="multipart/form-data" onsubmit="return validateImage()"
+                                                        style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+
+                                                        <img id="avatar-preview" th:src="@{/avatar}" alt="Avatar"
+                                                                class="avatar-preview">
+
+                                                        <div class="form-group" style="width: 100%; max-width: 300px;">
+                                                                <label class="form-label">Choose New Avatar:</label>
+                                                                <input type="file" id="avatar-input" name="image"
+                                                                        accept="image/*" class="form-input" required
+                                                                        onchange="checkFileType()">
+                                                                <p id="file-error" class="error-message">Only image
+                                                                        formats are allowed (.jpg, .png, .jpeg, .gif,
+                                                                        etc.)</p>
+                                                        </div>
+
+                                                        <button type="submit" class="btn-primary">
+                                                                <i class="fa fa-upload" style="margin-right: 8px;"></i>
+                                                                Update Avatar
+                                                        </button>
+                                                </form>
+                                        </div>
                                 </div>
                         </div>
-                </div>
+                </section>
+        </main>
 
-                <!-- Edit Tab -->
-                <div id="edit" class="tab-content hidden">
-                        <form th:action="@{/profile/{id}/edit(id=${user.id})}" method="post" class="space-y-4">
-                                <input type="text" name="id" th:value="${user.id}" hidden>
-                                <div>
-                                        <label class="block text-sm font-medium text-gray-700">Họ tên:</label>
-                                        <input type="text" name="fullName" th:value="${user.fullName}" required
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                </div>
-                                <div>
-                                        <label class="block text-sm font-medium text-gray-700">Email:</label>
-                                        <input type="email" name="email" th:value="${user.email}" required
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                </div>
-                                <div>
-                                        <label class="block text-sm font-medium text-gray-700">Điện Thoại:</label>
-                                        <input type="text" name="phone" th:value="${user.phone}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                </div>
-                                <div>
-                                        <label class="block text-gray-700">Ngày sinh:</label>
-                                        <input type="date" name="birthDate" th:value="${#dates.format(user.birthDate, 'yyyy-MM-dd')}"
-                                                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">              
-                                </div>
-                                <div>
-                                        <label class="block text-sm font-medium text-gray-700">Bio:</label>
-                                        <textarea name="bio" th:text="${user.bio}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                        </textarea>
-                                </div>
-                                <div th:if="${role == 'mentor'}">
-                                        <label class="block text-sm font-medium text-gray-700">Chuyên môn:</label>
-                                        <textarea name="expertise" th:text="${mentor.expertise}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                        </textarea>
-                                </div>
-                                <div th:if="${role == 'mentee'}">
-                                        <label class="block text-sm font-medium text-gray-700">Sở thích:</label>
-                                        <textarea name="interests" th:text="${mentee.interests}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
-                                        </textarea>
-                                </div>
-                                <button type="submit"
-                                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Lưu thông
-                                        tin</button>
-                        </form>
-                </div>
+        <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
-                <!-- Avatar Tab -->
-                <div id="avatar" class="tab-content hidden">
-                        <form th:action="@{/upload/{id}(id=${user.id})}" method="post" enctype="multipart/form-data"
-                                class="flex flex-col items-center space-y-4" onsubmit="return validateImage()">
-                                <img id="avatar-preview" th:src="@{/avatar/{id}(id=${user.id})}" alt="Avatar"
-                                        class="w-32 h-32 rounded-full object-cover border-2 border-gray-200">
-                                <input type="file" id="avatar-input" name="image" accept="image/*" class="mt-2 text-sm text-gray-600"
-                                        required onchange="checkFileType()">
-                                <p id="file-error" class="text-red-600 text-sm hidden">Chỉ cho phép định dạng ảnh (.jpg, .png, .jpeg,
-                                        .gif, ...)</p>
-                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                        Cập nhật ảnh
-                                </button>
-                        </form>
-                </div>
-
-                <!-- Notifications Tab -->
-                <div id="notifications" class="tab-content hidden">
-                        <form class="space-y-4">
-                                <div class="flex items-center">
-                                        <input type="checkbox" id="email-notifications"
-                                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                        <label for="email-notifications" class="ml-2 text-sm text-gray-700">Nhận thông
-                                                báo qua Email</label>
-                                </div>
-                                <div class="flex items-center">
-                                        <input type="checkbox" id="app-notifications"
-                                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                        <label for="app-notifications" class="ml-2 text-sm text-gray-700">Nhận thông báo
-                                                qua Ứng dụng</label>
-                                </div>
-                                <button type="submit"
-                                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Lưu cài
-                                        đặt</button>
-                        </form>
-                </div>
-        </div>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script th:if="${error}">
                 Swal.fire({
                         icon: 'error',
-                        title: 'Lỗi',
+                        title: 'Error',
                         text: '[[${error}]]'
                 });
         </script>
+
         <script>
+                // Tab functionality
+                function showTab(tabName) {
+                        // Hide all tabs
+                        const tabs = document.querySelectorAll('.tab-content');
+                        tabs.forEach(tab => tab.classList.add('hidden'));
+
+                        // Remove active class from all buttons
+                        const buttons = document.querySelectorAll('.tab-button');
+                        buttons.forEach(button => button.classList.remove('active'));
+
+                        // Show selected tab
+                        document.getElementById(tabName).classList.remove('hidden');
+
+                        // Add active class to clicked button
+                        event.target.classList.add('active');
+                }
+
+                // Gender selection functionality
+                function selectGender(gender, element) {
+                        // Remove selected class from all gender options
+                        document.querySelectorAll('.gender-option').forEach(option => {
+                                option.classList.remove('selected');
+                        });
+
+                        // Add selected class to clicked option
+                        element.classList.add('selected');
+
+                        // Check the radio button
+                        element.querySelector('input[type="radio"]').checked = true;
+                }
+
+                // Initialize gender selection on page load
+                document.addEventListener('DOMContentLoaded', function () {
+                        const checkedRadio = document.querySelector('input[name="gender"]:checked');
+                        if (checkedRadio) {
+                                const parentLabel = checkedRadio.closest('.gender-option');
+                                if (parentLabel) {
+                                        parentLabel.classList.add('selected');
+                                }
+                        }
+                });
+
+                // File validation
                 function checkFileType() {
                         const input = document.getElementById('avatar-input');
                         const error = document.getElementById('file-error');
                         const file = input.files[0];
 
                         if (!file) {
-                                error.classList.add('hidden');
+                                error.classList.remove('show');
                                 return;
                         }
 
-                        // Kiểm tra MIME type
                         if (!file.type.startsWith('image/')) {
-                                error.classList.remove('hidden');
-                                input.value = "";  // Reset file
+                                error.classList.add('show');
+                                input.value = "";
                         } else {
-                                error.classList.add('hidden');
+                                error.classList.remove('show');
+                                // Preview image
+                                const reader = new FileReader();
+                                reader.onload = function (e) {
+                                        document.getElementById('avatar-preview').src = e.target.result;
+                                        document.getElementById('top-avatar').src = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
                         }
                 }
 
@@ -178,19 +669,27 @@
                         const error = document.getElementById('file-error');
 
                         if (!input.files || input.files.length === 0) {
-                                alert("Vui lòng chọn một ảnh.");
+                                Swal.fire({
+                                        icon: 'warning',
+                                        title: 'No File Selected',
+                                        text: 'Please choose an image file.'
+                                });
                                 return false;
                         }
 
                         if (!input.files[0].type.startsWith('image/')) {
-                                error.classList.remove('hidden');
-                                alert("File không hợp lệ. Vui lòng chọn một ảnh.");
+                                error.classList.add('show');
+                                Swal.fire({
+                                        icon: 'error',
+                                        title: 'Invalid File',
+                                        text: 'Please select a valid image file.'
+                                });
                                 return false;
                         }
 
                         return true;
                 }
-           </script>
+        </script>
 </body>
 
 </html>

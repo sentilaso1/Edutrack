@@ -1,0 +1,17 @@
+<div class="w-64 bg-gray-800 text-white h-screen fixed" th:fragment="manager-sidebar">
+    <div class="p-4 text-2xl font-bold">EduTrack Manager</div>
+    <nav class="mt-4">
+        <a th:href="@{/manager/dashboard}" class="block py-2 px-4 hover:bg-gray-700">Dashboard</a>
+        <a th:href="@{/manager/course-dashboard}" class="block py-2 px-4 hover:bg-gray-700">Courses</a>
+        <a th:href="@{/manager/landing-page}" class="block py-2 px-4 hover:bg-gray-700">Mentee Home Page</a>
+        <a th:href="@{/manager/mentees}" class="block py-2 px-4 hover:bg-gray-700">Mentees</a>
+        <a th:href="@{/manager/mentors}" class="block py-2 px-4 hover:bg-gray-700">Mentors</a>
+        <a th:href="@{/manager/mentor-working-date}" class="block py-2 px-4 hover:bg-gray-700">Mentor Working Date</a>
+        <a th:href="@{/manager/cv/list}" class="block py-2 px-4 hover:bg-gray-700">CV List</a>
+        <a th:href="@{/manager/reports/list}" class="block py-2 px-4 hover:bg-gray-700">Feedback Report List</a>
+<!--        <a th:href="@{/manager/payments}" class="block py-2 px-4 hover:bg-gray-700">Payments</a>-->
+        <a th:href="@{/manager/schedules}" class="block py-2 px-4 hover:bg-gray-700">Pending Schedules</a>
+<!--        <a th:href="@{/manager/stats}" class="block py-2 px-4 hover:bg-gray-700">Statistics</a>-->
+        <a th:href="@{/manager/withdrawals}" class="block py-2 px-4 hover:bg-gray-700">Withdrawal Requests</a>
+    </nav>
+</div>

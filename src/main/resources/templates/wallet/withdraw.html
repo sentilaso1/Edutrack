@@ -1,136 +1,134 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>EduTrack - Withdraw Funds</title>
-    <link rel="stylesheet" th:href="@{/css/master.css}"/>
-    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        html, body {
+            height: 100%;
             margin: 0;
-            background: linear-gradient(to right, #e6f7f9, #ffeef0);
-            color: #333;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        body > main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        h1 {
-            font-size: 32px;
-            margin-bottom: 20px;
+        .section.course {
+            flex: 1;
+        }
+
+        h2.headline-md {
+            margin-bottom: 1rem;
             text-align: center;
             color: #2C3E50;
         }
 
-        .flex-layout {
+        .header-description {
+            text-align: center;
+            color: #777;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .withdrawal-layout {
             display: flex;
-            flex-direction: row;
-            gap: 30px;
             flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 30px;
         }
 
-        .form-section, .table-section {
-            flex: 1 1 0;
-            min-width: 450px;
+        .left-col, .right-col {
+            flex: 1 1 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .form-section img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
 
         .balance-card {
             background: linear-gradient(to right, #e6f7f9, #ffeef0);
             color: #2C3E50;
-            padding: 20px;
-            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
         }
 
         .balance-amount {
             font-size: 28px;
             font-weight: bold;
+            margin-top: 10px;
         }
 
-        .instructions {
-            font-size: 14px;
-            color: #555;
-            background-color: #fafafa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        .instructions h4,
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2C3E50;
         }
 
         .instructions ol {
+            padding-left: 20px;
             counter-reset: step;
-            padding-left: 0;
-            margin-top: 20px;
         }
 
         .instructions li {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #555;
             list-style: none;
-            margin-bottom: 20px;
             position: relative;
-            padding-left: 60px;
+            padding-left: 40px;
         }
 
         .instructions li::before {
-            counter-increment: step;
             content: counter(step);
+            counter-increment: step;
             position: absolute;
             left: 0;
             top: 50%;
             transform: translateY(-50%);
             background-color: rgba(255, 128, 134, 0.99);
             color: white;
-            width: 32px;
-            height: 32px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
         }
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        input[type="number"], select {
-            padding: 10px;
+        input[type="number"], select, input[type="file"] {
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 16px;
         }
 
         input[type="file"]::file-selector-button {
             background-color: rgba(255, 128, 134, 0.99);
             color: white;
-            padding: 8px 16px;
+            padding: 10px 18px;
             border: none;
             border-radius: 6px;
             font-weight: bold;
@@ -138,72 +136,28 @@
             margin-right: 10px;
         }
 
-        input[type="file"]::file-selector-button:hover {
-            background-color: rgba(255, 100, 110, 0.99);
-        }
-
         .submit-btn, .filter-btn {
             background-color: rgba(255, 128, 134, 0.99);
             color: white;
-            padding: 12px 20px;
+            padding: 14px 22px;
             border: none;
             border-radius: 8px;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-top: 12px;
         }
 
         .submit-btn:hover, .filter-btn:hover {
             background-color: rgba(255, 100, 110, 0.99);
         }
 
-        .edit-btn, .cancel-btn {
-            margin-top: 12px;
-        }
-
-        .section {
-            background-color: #fafafa;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-        }
-
-        .section-title {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #2C3E50;
-        }
-
-        .table-header {
-            font-size: 22px;
-            font-weight: bold;
-            color: #2C3E50;
-            margin-bottom: 20px;
-        }
-
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .filter-button-wrapper {
-            margin-top: 10px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
-            margin-bottom: 20px;
+            margin-top: 16px;
         }
 
         th, td {
@@ -213,142 +167,162 @@
         }
 
         th {
-            background-color: #fff7f7;
-            color: #444;
+            background-color: #f9f9f9;
+            font-weight: bold;
         }
 
-        tbody tr:nth-child(even) {
-            background-color: #fafafa;
+        .filter-group {
+            margin-bottom: 14px;
+        }
+
+        img[alt="Registered QR"],
+        img[id^="qrPreview"] {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            display: block;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 992px) {
+            .withdrawal-layout {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>Withdraw Funds</h1>
-    <div class="flex-layout">
-        <div class="form-section">
-            <div class="balance-card">
-                <h3>Current Balance</h3>
-                <div class="balance-amount" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">0
-                    VND
-                </div>
-                <div th:if="${wallet != null && wallet.onHold > 0}" style="margin-top: 10px;">
-                    <small th:text="${wallet.onHoldFormatted + ' VND on hold'}"></small>
-                </div>
-            </div>
 
-            <div class="instructions">
-                <strong>Instructions:</strong>
-                <ol>
-                    <li>Enter the amount you want to withdraw. The amount must not exceed your current available
-                        balance.
-                    </li>
-                    <li>Upload your banking QR code that will be used for processing the withdrawal.</li>
-                    <li>Ensure that the QR code belongs to you and is currently active.</li>
-                </ol>
-                <strong>Supported QR types:</strong> VietQR, VNPAYQR, Momo QR, ZaloPay QR, and most popular Vietnamese
-                banking QR standards.
-            </div>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<main>
+    <section class="section course has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="container">
+            <h2 class="headline-md">Withdraw Funds</h2>
+            <p class="header-description">
+                Withdraw funds from your EduTrack account safely and securely using your registered bank QR code.
+            </p>
+            <div class="withdrawal-layout">
+                <div class="left-col">
+                    <div class="card balance-card">
+                        <h4>Current Balance</h4>
+                        <div class="balance-amount"
+                             th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">0 VND
+                        </div>
+                        <div th:if="${wallet != null && wallet.onHold > 0}" style="margin-top: 10px;">
+                            <small th:text="${wallet.onHoldFormatted + ' VND on hold'}"></small>
+                        </div>
+                    </div>
 
-            <form th:action="@{/wallet/withdraw}" method="post" enctype="multipart/form-data">
-                <div class="section">
-                    <div class="section-title">Withdrawal Details</div>
-                    <label for="amount">Amount (VND)</label>
-                    <input type="number" id="amount" name="amount" required min="5000">
-                </div>
+                    <div class="card instructions">
+                        <h4>Instructions:</h4>
+                        <ol>
+                            <li>Enter the amount you want to withdraw. The amount must not exceed your current available
+                                balance.
+                            </li>
+                            <li>Upload your banking QR code used for processing the withdrawal.</li>
+                            <li>Ensure that the QR code belongs to you and is currently active.</li>
+                        </ol>
+                        <p><strong>Supported QR types:</strong> VietQR, VNPAYQR, Momo QR, ZaloPay QR, and most popular
+                            Vietnamese banking QR standards.</p>
+                    </div>
 
-                <div class="section">
-                    <div class="section-title">Bank QR Information</div>
+                    <form th:action="@{/wallet/withdraw}" method="post" enctype="multipart/form-data" class="card">
+                        <h4 class="section-title">Withdrawal Details</h4>
+                        <label for="amount">Amount (VND)</label>
+                        <input type="number" id="amount" name="amount" required min="5000">
 
-                    <!-- QR Already Exists: Preview Mode -->
-                    <div th:if="${qr != null}">
-                        <div id="qr-preview-section">
+                        <h4 class="section-title">Bank QR Information</h4>
+                        <div th:if="${qr != null}" id="qr-preview-section">
                             <label>Your Registered QR Code:</label>
                             <img th:src="'data:image/png;base64,' + ${qr}" alt="Registered QR"
                                  style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);"/>
-                            <button type="button" class="submit-btn edit-btn" onclick="showEditForm()">Edit</button>
+                            <button type="button" class="submit-btn" onclick="showEditForm()">Edit</button>
                         </div>
 
-                        <!-- Edit Mode: Upload New QR -->
-                        <div id="qr-upload-section" style="display: none;">
+                        <div th:if="${qr != null}" id="qr-upload-section" style="display: none;">
                             <label for="qrImageEdit">Upload Your New Banking QR Code</label>
                             <input type="file" id="qrImageEdit" name="qrImage" accept="image/png, image/jpeg"
                                    onchange="previewQR('qrImageEdit', 'qrPreviewEdit')">
                             <img id="qrPreviewEdit" src="#" alt="QR Preview" style="display:none;"/>
-                            <button type="button" class="submit-btn cancel-btn" onclick="cancelEdit()">Cancel</button>
+                            <button type="button" class="submit-btn" onclick="cancelEdit()">Cancel</button>
                         </div>
+
+                        <div th:if="${qr == null}">
+                            <label for="qrImageInit">Upload Your Banking QR Code</label>
+                            <input type="file" id="qrImageInit" name="qrImage" accept="image/png, image/jpeg" required
+                                   onchange="previewQR('qrImageInit', 'qrPreviewInit')">
+                            <img id="qrPreviewInit" src="#" alt="QR Preview" style="display:none;"/>
+                        </div>
+
+                        <button type="submit" class="submit-btn">Submit Withdrawal Request</button>
+                    </form>
+                </div>
+
+                <div class="right-col">
+                    <div class="card">
+                        <h4>Withdrawal Request History</h4>
+                        <form class="controls" th:action="@{/wallet/withdraw}" method="get">
+                            <div class="filter-group">
+                                <label for="sort">Sort:</label>
+                                <select id="sort" name="sort">
+                                    <option value="desc" th:selected="${sort == 'desc'}">Date descending</option>
+                                    <option value="asc" th:selected="${sort == 'asc'}">Date ascending</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="status">Status:</label>
+                                <select id="status" name="status">
+                                    <option value="" th:selected="${status == ''}">All</option>
+                                    <option value="PENDING" th:selected="${status == 'PENDING'}">Pending</option>
+                                    <option value="APPROVED" th:selected="${status == 'APPROVED'}">Approved</option>
+                                    <option value="REJECTED" th:selected="${status == 'REJECTED'}">Rejected</option>
+                                    <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Completed</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="minAmount">Min:</label>
+                                <input type="number" id="minAmount" name="minAmount" min="0"
+                                       th:value="${minAmount != null ? minAmount.longValue() : ''}">
+                                <label for="maxAmount">Max:</label>
+                                <input type="number" id="maxAmount" name="maxAmount" min="0"
+                                       th:value="${maxAmount != null ? maxAmount.longValue() : ''}">
+                            </div>
+                            <div class="filter-button-wrapper">
+                                <button type="submit" class="filter-btn">Apply</button>
+                            </div>
+                        </form>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="withdrawal : ${withdrawals}">
+                                <td th:text="${#dates.format(withdrawal.updatedDate, 'MMM dd yyyy HH:mm:ss')}">Jun 25
+                                    2025 14:30:00
+                                </td>
+                                <td th:text="${withdrawal.amountFormatted + ' VND'}">500,000 VND</td>
+                                <td th:text="${withdrawal.status}">PENDING</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <!-- No QR Registered Yet -->
-                    <div th:if="${qr == null}">
-                        <label for="qrImageInit">Upload Your Banking QR Code</label>
-                        <input type="file" id="qrImageInit" name="qrImage" accept="image/png, image/jpeg" required
-                               onchange="previewQR('qrImageInit', 'qrPreviewInit')">
-                        <img id="qrPreviewInit" src="#" alt="QR Preview" style="display:none;"/>
-                    </div>
                 </div>
-
-                <button type="submit" class="submit-btn">Submit Withdrawal Request</button>
-            </form>
+            </div>
         </div>
-
-        <div class="table-section">
-            <div class="table-header">Withdrawal Request History</div>
-
-            <form class="controls" th:action="@{/wallet/withdraw}" method="get">
-                <div class="filter-group">
-                    <label for="sort">Sort:</label>
-                    <select id="sort" name="sort">
-                        <option value="desc" th:selected="${sort == 'desc'}">Date descending</option>
-                        <option value="asc" th:selected="${sort == 'asc'}">Date ascending</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="status">Status:</label>
-                    <select id="status" name="status">
-                        <option value="" th:selected="${status == ''}">All</option>
-                        <option value="PENDING" th:selected="${status == 'PENDING'}">Pending</option>
-                        <option value="APPROVED" th:selected="${status == 'APPROVED'}">Approved</option>
-                        <option value="REJECTED" th:selected="${status == 'REJECTED'}">Rejected</option>
-                        <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Completed</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="minAmount">Min:</label>
-                    <input type="number" id="minAmount" name="minAmount" min="0"
-                           th:value="${minAmount != null ? minAmount.longValue() : ''}">
-                    <label for="maxAmount">Max:</label>
-                    <input type="number" id="maxAmount" name="maxAmount" min="0"
-                           th:value="${maxAmount != null ? maxAmount.longValue() : ''}">
-                </div>
-                <div class="filter-button-wrapper">
-                    <button type="submit" class="filter-btn">Apply</button>
-                </div>
-            </form>
-
-            <table>
-                <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="withdrawal : ${withdrawals}">
-                    <td th:text="${#dates.format(withdrawal.updatedDate, 'MMM dd yyyy HH:mm:ss')}">Jun 25 2025
-                        14:30:00
-                    </td>
-                    <td th:text="${withdrawal.amountFormatted + ' VND'}">500,000 VND</td>
-                    <td th:text="${withdrawal.status}">PENDING</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+    </section>
+</main>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
 <script th:inline="javascript">
+    /*<![CDATA[*/
+    const error = [[${error}]];
+    if (error) alert(error);
+
     function previewQR(inputId, previewId) {
         const fileInput = document.getElementById(inputId);
         const preview = document.getElementById(previewId);
@@ -366,7 +340,6 @@
     function cancelEdit() {
         document.getElementById('qr-preview-section').style.display = 'block';
         document.getElementById('qr-upload-section').style.display = 'none';
-
         const input = document.getElementById("qrImageEdit");
         const preview = document.getElementById("qrPreviewEdit");
         input.value = '';
@@ -374,15 +347,11 @@
         preview.style.display = "none";
     }
 
-    const fileInput = document.getElementById("qrImage");
-    const preview = document.getElementById("qrPreview");
-    if (fileInput) {
-        fileInput.value = '';
-    }
-    if (preview) {
-        preview.src = "#";
-        preview.style.display = "none";
-    }
+    /*]]>*/
 </script>
+
+<script th:src="@{/assets/js/courlist.js}"></script>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </body>
 </html>

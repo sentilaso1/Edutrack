@@ -4,28 +4,33 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.common.controller.EndpointRegistry;
+import com.example.edutrack.common.service.implementations.EmailService;
 import com.example.edutrack.curriculum.model.LandingPageConfig;
 import com.example.edutrack.curriculum.model.MenteeLandingRole;
+import com.example.edutrack.curriculum.service.interfaces.DashboardService;
 import com.example.edutrack.curriculum.service.interfaces.LandingPageConfigService;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
-import com.example.edutrack.timetables.dto.RequestedSchedule;
-import com.example.edutrack.timetables.model.Day;
-import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.model.Slot;
-import com.example.edutrack.timetables.service.implementation.EnrollmentScheduleServiceImpl;
-import com.example.edutrack.timetables.service.implementation.EnrollmentServiceImpl;
+import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.accounts.service.interfaces.ManagerStatsService;
+import com.example.edutrack.transactions.model.BankingQR;
+import com.example.edutrack.transactions.model.Transaction;
+import com.example.edutrack.transactions.model.Wallet;
+import com.example.edutrack.transactions.model.Withdrawal;
+import com.example.edutrack.transactions.service.BankingQrService;
+import com.example.edutrack.transactions.service.TransactionService;
+import com.example.edutrack.transactions.service.WalletService;
+import com.example.edutrack.transactions.service.WithdrawalService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.apache.catalina.Manager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,10 +43,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.example.edutrack.accounts.dto.ManagerStatsDTO;
-import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -54,7 +59,13 @@ public class ManagerController {
     private final EnrollmentScheduleService enrollmentScheduleService;
     private final ManagerStatsService managerStatsService;
     private final LandingPageConfigService landingPageConfigService;
+    private final WalletService walletService;
+    private final TransactionService transactionService;
+    private final DashboardService dashboardService;
     private final EndpointRegistry endpointRegistry;
+    private final WithdrawalService withdrawalService;
+    private final BankingQrService bankingQrService;
+    private final EmailService emailService;
 
     @Autowired
     public ManagerController(MentorService mentorService,
@@ -63,7 +74,7 @@ public class ManagerController {
                              EnrollmentService enrollmentServiceImpl,
                              EnrollmentScheduleService enrollmentScheduleService,
                              ManagerStatsService managerStatsService,
-                             LandingPageConfigService landingPageConfigService, EndpointRegistry endpointRegistry) {
+                             LandingPageConfigService landingPageConfigService, WalletService walletService, TransactionService transactionService, DashboardService dashboardService, EndpointRegistry endpointRegistry, WithdrawalService withdrawalService, BankingQrService bankingQrService, EmailService emailService) {
         this.mentorService = mentorService;
         this.menteeService = menteeService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
@@ -71,13 +82,20 @@ public class ManagerController {
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.managerStatsService = managerStatsService;
         this.landingPageConfigService = landingPageConfigService;
+        this.walletService = walletService;
+        this.transactionService = transactionService;
+        this.dashboardService = dashboardService;
         this.endpointRegistry = endpointRegistry;
+        this.withdrawalService = withdrawalService;
+        this.bankingQrService = bankingQrService;
+        this.emailService = emailService;
     }
 
     @GetMapping("/manager/dashboard")
-    public String showDashboard(Model model) {
-        model.addAttribute("mentorCount", mentorService.countAll());
-        model.addAttribute("menteeCount", menteeService.countAll());
+    public String showDashboard(Model model, @RequestParam(defaultValue = "week") String period) {
+        ManagerStatsDTO stats = managerStatsService.getManagerStats(period);
+        model.addAttribute("stats", stats);
+        model.addAttribute("currentPeriod", period);
 
         return "manager/dashboard";
     }
@@ -92,14 +110,6 @@ public class ManagerController {
     public String showMentors(Model model) {
         model.addAttribute("mentors", mentorService.findAll());
         return "manager/mentors";
-    }
-
-    @GetMapping("/manager/stats")
-    public String showStats(Model model, @RequestParam(defaultValue = "week") String period) {
-        ManagerStatsDTO stats = managerStatsService.getManagerStats(period);
-        model.addAttribute("stats", stats);
-        model.addAttribute("currentPeriod", period);
-        return "accounts/html/manager-stats";
     }
 
     @GetMapping("/manager/api/revenue-chart")
@@ -126,6 +136,134 @@ public class ManagerController {
             @RequestParam(defaultValue = "week") String period) {
         ManagerStatsDTO stats = managerStatsService.getManagerStats(period);
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/manager/schedules")
+    public String redirectShowSchedules(@RequestParam(required = false) String menteeId,
+                                        @RequestParam(required = false) String mentorId) {
+        String queryParams = "";
+
+        if (menteeId != null) queryParams += "&menteeId=" + menteeId;
+        if (mentorId != null) queryParams += "&mentorId=" + mentorId;
+
+        return "redirect:/manager/schedules/1" + (queryParams.isEmpty() ? "" : "?" + queryParams.substring(1));
+    }
+
+    @GetMapping("/manager/schedules/{page}")
+    public String showSchedules(Model model,
+                                @PathVariable Integer page,
+                                @RequestParam(required = false) String menteeId,
+                                @RequestParam(required = false) String mentorId) {
+
+        if (page - 1 < 0) {
+            return "redirect:/404";
+        }
+
+        final int PAGE_SIZE = 30;
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+
+        model.addAttribute("mentors", enrollmentService.findAllUniqueMentors());
+        model.addAttribute("mentees", enrollmentService.findAllUniqueMentees());
+        model.addAttribute("page", page);
+        model.addAttribute("selectedMentee", menteeId);
+        model.addAttribute("selectedMentor", mentorId);
+
+        model.addAttribute(
+                "schedulePage",
+                enrollmentScheduleService.findAllSchedulesToBeConfirmedFiltered(pageable, menteeId, mentorId)
+        );
+
+        return "manager/schedules";
+    }
+
+    @GetMapping("/manager/schedules/view/{eid}")
+    public String showScheduleDetails(@PathVariable Long eid,
+                                      @RequestParam(required = false) String attendance,
+                                      @RequestParam(required = false) String slot,
+                                      @RequestParam(required = false) String dateDirection,
+                                      @RequestParam(required = false) String slotDirection,
+                                      @RequestParam(required = false, defaultValue = "1") int page,
+                                      Model model) {
+        Enrollment enrollment;
+        try {
+            enrollment = enrollmentService.findById(eid);
+        } catch (RuntimeException e) {
+            return "redirect:/manager/schedules?error=enrollment_not_found";
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+
+        Sort sort = Sort.unsorted();
+        if (dateDirection != null && !dateDirection.isEmpty()) {
+            sort = Sort.by(Sort.Direction.fromString(dateDirection), "date");
+        } else if (slotDirection != null && !slotDirection.isEmpty()) {
+            sort = Sort.by(Sort.Direction.fromString(slotDirection), "slot");
+        }
+
+        final int PAGE_SIZE = 30;
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, sort);
+
+        Page<EnrollmentSchedule> schedulePage = enrollmentScheduleService.findScheduleByEnrollmentWithFilters(
+                eid, attendance, slot, pageable
+        );
+
+        boolean canBeFinalized = dashboardService.hasCompletedCourse(enrollment).orElse(false) &&
+                enrollment.getTransaction().getStatus() == Transaction.TransactionStatus.PENDING;
+
+        model.addAttribute("enrollment", enrollment);
+        model.addAttribute("schedulePage", schedulePage);
+        model.addAttribute("selectedAttendanceStatus", attendance);
+        model.addAttribute("selectedSlot", slot);
+        model.addAttribute("dateDirection", dateDirection);
+        model.addAttribute("slotDirection", slotDirection);
+        model.addAttribute("canBeFinalized", canBeFinalized);
+        model.addAttribute("isFinalized", enrollment.getTransaction().getStatus() == Transaction.TransactionStatus.COMPLETED);
+        model.addAttribute("currentPage", page);
+
+        return "manager/schedule-details";
+    }
+
+    @PostMapping("/manager/schedules/finalize/{eid}")
+    public String finalizeEnrollment(@PathVariable Long eid) {
+        Enrollment enrollment = enrollmentService.findById(eid);
+        if (enrollment == null) {
+            return "redirect:/manager/schedules?error=enrollment_not_found";
+        }
+
+        Optional<Boolean> hasCompleted = dashboardService.hasCompletedCourse(enrollment);
+        if (hasCompleted.isEmpty() || !hasCompleted.get()) {
+            return "redirect:/manager/schedules/view/" + eid + "?error=not_completed";
+        }
+
+        Optional<Wallet> menteeWalletOpt = walletService.findByUser(enrollment.getMentee());
+        Optional<Wallet> mentorWalletOpt = walletService.findByUser(enrollment.getCourseMentor().getMentor());
+
+        if (menteeWalletOpt.isEmpty() || mentorWalletOpt.isEmpty()) {
+            return "redirect:/manager/schedules/view/" + eid + "?error=missing_wallet";
+        }
+
+        Wallet menteeWallet = menteeWalletOpt.get();
+        Wallet mentorWallet = mentorWalletOpt.get();
+
+        menteeWallet.setOnHold(menteeWallet.getOnHold() - enrollment.getTransaction().getAbsoluteAmount());
+        mentorWallet.setBalance(mentorWallet.getBalance() + enrollment.getTransaction().getAbsoluteAmount());
+        walletService.save(menteeWallet);
+        walletService.save(mentorWalletOpt.get());
+
+        Transaction transaction = new Transaction(
+                enrollment.getTransaction().getAbsoluteAmount(),
+                "Registration for Course " + enrollment.getCourseMentor().getCourse().getName() + " by " + enrollment.getCourseMentor().getMentor().getFullName(),
+                mentorWallet
+        );
+        transaction.setStatus(Transaction.TransactionStatus.COMPLETED);
+        transactionService.save(transaction);
+
+        enrollment.getTransaction().setStatus(Transaction.TransactionStatus.COMPLETED);
+        transactionService.save(enrollment.getTransaction());
+
+        return "redirect:/manager/schedules/view/" + eid + "?finalize=true";
     }
 
     private LocalDateTime getStartDateByPeriod(String period) {
@@ -163,8 +301,12 @@ public class ManagerController {
             return "redirect:/manager/mentor-working-date";
         }
         List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        List<MentorAvailableTime> mentorAvailableTimes = mentorAvailableTimeService.findAllMentorAvailableTimeByEndDate(mentor, endLocal);
 
-
+        model.addAttribute("editable", true);
+        if (!mentorAvailableTimes.isEmpty() && (mentorAvailableTimes.get(0).getStatus().name().equalsIgnoreCase("rejected")) || mentorAvailableTimes.get(0).getStatus().name().equalsIgnoreCase("approved")) {
+            model.addAttribute("editable", false);
+        }
         boolean[][] slotDayMatrix = mentorAvailableTimeService.slotDayMatrix(setSlots);
         model.addAttribute("slotDayMatrix", slotDayMatrix);
         model.addAttribute("mentor", mentor.getId());
@@ -207,48 +349,6 @@ public class ManagerController {
         return "redirect:/manager/mentor-working-date?approve=success";
     }
 
-
-    @GetMapping("/manager/create-class")
-    public String showCreateClass(Model model) {
-        List<Enrollment> enrollmentRequests = enrollmentService.findAllApprovedEnrollments();
-        model.addAttribute("enrollmentRequests", enrollmentRequests);
-        return "manager/create-class";
-    }
-
-    @GetMapping("manager/create-class/{eid}")
-    public String actionCreateClass(@PathVariable("eid") long eid,
-                                    @RequestParam String action) {
-        Enrollment enrollment = enrollmentService.findById(eid);
-        if (enrollment == null) {
-            return "redirect:/mentor/schedule?error=enrollmentNotFound";
-        }
-        if (action.equals("reject")) {
-            enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
-            enrollmentService.save(enrollment);
-            return "redirect:/manager/create-class?status=REJECTED&reject=" + eid;
-        }
-        if (action.equals("approve")) {
-            enrollment.setStatus(Enrollment.EnrollmentStatus.CREATED);
-            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
-            return "redirect:/manager/create-class?status=APPROVED&approve=" + eid;
-        }
-        if (action.equals("view")) {
-            return "redirect:/manager/create-class/" + eid + "/view";
-        }
-        return "redirect:/manager/create-class";
-    }
-
-    @GetMapping("/manager/create-class/{eid}/view")
-    public String viewSensorClass(@PathVariable Long eid,
-                                  Model model) {
-        Enrollment enrollment = enrollmentService.findById(eid);
-        String summary = enrollment.getScheduleSummary();
-
-
-        List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(summary);
-        model.addAttribute("startTime", startTime);
-        return "manager/skill-register-request-detail";
-    }
 
     @GetMapping("/manager/landing-page")
     public String showLandingPageEditor(
@@ -441,29 +541,122 @@ public class ManagerController {
 
             if (field.startsWith("hero")) {
                 return "hero";
-            }
-
-            else if (field.startsWith("category") || field.equals("tagSuggestion")) {
+            } else if (field.startsWith("category") || field.equals("tagSuggestion")) {
                 return "categories";
-            }
-
-            else if (field.startsWith("about")) {
+            } else if (field.startsWith("about")) {
                 return "about";
-            }
-
-            else if (field.startsWith("sectionOne") || field.startsWith("sectionTwo") ||
+            } else if (field.startsWith("sectionOne") || field.startsWith("sectionTwo") ||
                     field.startsWith("courseSection")) {
                 return "courses";
-            }
-
-            else if (field.startsWith("mentor")) {
+            } else if (field.startsWith("mentor")) {
                 return "mentor";
-            }
-
-            else if (field.startsWith("footer") || field.equals("copyrightText")) {
+            } else if (field.startsWith("footer") || field.equals("copyrightText")) {
                 return "footer";
             }
         }
         return null;
+    }
+
+    @GetMapping("/manager/withdrawals")
+    public String listWithdrawals(Model model) {
+
+        List<Withdrawal> withdrawals = withdrawalService.findAll();
+
+        withdrawals.sort((w1, w2) -> w2.getCreatedDate().compareTo(w1.getCreatedDate()));
+
+        Map<UUID, String> bankingQrImageMap = withdrawals.stream()
+                .map(w -> w.getWallet().getUser())
+                .distinct()
+                .map(user -> {
+                    Optional<BankingQR> qrOpt = bankingQrService.findByUser(user);
+                    if (qrOpt.isPresent() && qrOpt.get().getQrImage() != null) {
+                        String base64Img = Base64.getEncoder().encodeToString(qrOpt.get().getQrImage());
+                        return Map.entry(user.getId(), base64Img);
+                    } else {
+                        return Map.<UUID, String>entry(user.getId(), null);
+                    }
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        model.addAttribute("withdrawals", withdrawals);
+        model.addAttribute("bankingQrImageMap", bankingQrImageMap);
+
+        return "manager/withdraw-requests";
+    }
+
+
+    @PostMapping("/manager/withdrawals/{id}/resolve")
+    public String resolveWithdrawal(
+            @PathVariable("id") UUID id,
+            @RequestParam("action") String action,
+            @RequestParam(value = "response", required = false) String response,
+            RedirectAttributes redirectAttributes) {
+
+        var optWithdrawal = withdrawalService.findById(id);
+
+        if (optWithdrawal.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Withdrawal request not found");
+            return "redirect:/manager/withdrawals";
+        }
+
+        Withdrawal withdrawal = optWithdrawal.get();
+
+        if (!withdrawal.getStatus().equals(Withdrawal.Status.PENDING)) {
+            redirectAttributes.addFlashAttribute("error", "Withdrawal request already processed");
+            return "redirect:/manager/withdrawals";
+        }
+
+        Wallet wallet = withdrawal.getWallet();
+        var user = wallet.getUser();
+
+        switch (action.toLowerCase()) {
+            case "approve":
+                withdrawal.setStatus(Withdrawal.Status.APPROVED);
+                wallet.setOnHold(wallet.getOnHold() - withdrawal.getAmount());
+                break;
+
+            case "reject":
+                withdrawal.setStatus(Withdrawal.Status.REJECTED);
+                wallet.setBalance(wallet.getBalance() + withdrawal.getAmount());
+                wallet.setOnHold(wallet.getOnHold() - withdrawal.getAmount());
+                walletService.save(wallet);
+                break;
+
+            default:
+                redirectAttributes.addFlashAttribute("error", "Invalid action");
+                return "redirect:/manager/withdrawals";
+        }
+
+        if (response != null && !response.isBlank()) {
+            withdrawal.setResponse(response.trim());
+        }
+
+        withdrawalService.save(withdrawal);
+
+        String formattedDate = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")
+                .format(withdrawal.getCreatedDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime());
+
+        String emailBody = """
+        Dear %s,
+
+        Your withdrawal request of %s VND created on %s has been %s.
+
+        Thank you,
+        EduTrack Team
+        """.formatted(
+                user.getFullName(),
+                String.format("%,d", withdrawal.getAmount()),
+                formattedDate,
+                withdrawal.getStatus().name().toLowerCase()
+        );
+
+        emailService.sendSimpleMail(
+                user.getEmail(),
+                "EduTrack: Withdrawal Request " + withdrawal.getStatus().name(),
+                emailBody
+        );
+
+        redirectAttributes.addFlashAttribute("success", "Withdrawal request " + action + "d successfully");
+        return "redirect:/manager/withdrawals";
     }
 }

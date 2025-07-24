@@ -1,461 +1,593 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Create CV - EduTrack</title>
+    <link rel="stylesheet" th:href="@{/css/master.css}"/>
+    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
     <style>
-
-
-        .container {
-            max-width: 1720px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        .mentor-section-bg {
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            min-height: 100vh;
+        }
+
+        .dashboard-header h1 {
+            font-size: 3.3rem;
+            color: #121633;
+            font-weight: bold;
+            margin-bottom: 28px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            min-height: 80vh;
-            padding: 0 1.2rem;
+            grid-template-columns: 1fr 420px;
+            gap: 36px;
+        }
+        .cv-section, .courses-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 27px 24px 20px 24px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .cv-section {
+            padding-bottom: 16px;
+        }
+        .courses-section {
+            height: fit-content;
+        }
+        .section-header, .cv-section h2 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: #121633;
+            margin-bottom: 20px;
+            text-align: left;
+            border-bottom: 1.5px solid var(--border-light);
+            padding-bottom: 9px;
         }
 
-        .section-header {
-            text-align: center;
-            padding: 15px 25px;
-            border: 2px solid #333;
+        .courses-section h2 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: #121633;
+            margin-bottom: 20px;
+            text-align: left;
+            padding-bottom: 9px;
+        }
+        .alert-info {
+            background: #e3ecff;
+            color: var(--color-primary);
+            padding: 12px 18px;
             border-radius: 8px;
-            font-size: 24px;
+            font-size: 1.5rem;
+            margin-bottom: 14px;
             font-weight: 600;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            transition: all 0.3s ease;
         }
-
-        .section-header:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
         .form-row {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 16px;
+            margin-bottom: 12px;
         }
-
-        .form-row .form-group {
+        .form-group {
             flex: 1;
-            margin-bottom: 0;
+            margin-bottom: 14px;
         }
-
         label {
-            display: block;
             font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-            font-size: 16px;
+            color: #121633;
+            font-size: 15px;
+            margin-bottom: 7px;
+            display: block;
         }
-
         input, textarea {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
+            padding: 11px 14px;
             border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
+            border: 1.5px solid var(--border-light);
+            background: #fff;
+            font-size: 15px;
+            margin-bottom: 0;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-
         input:focus, textarea:focus {
             outline: none;
-            border-color: #ff5722;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(255, 124, 150, 0.10);
         }
-
         textarea {
+            min-height: 95px;
             resize: vertical;
-            min-height: 100px;
         }
-
-        .large-textarea {
-            min-height: 150px;
+        .large-textarea { min-height: 130px; }
+        input[readonly], textarea[readonly] {
+            background: #f7f6fa;
+            color: #bbb;
+            border-color: var(--border-light);
+            cursor: not-allowed;
         }
-
         .create-btn {
-            background: linear-gradient(135deg, #ff5722, #ff5722);
-            color: white;
+            background: var(--color-primary);
+            color: var(--text-inverse);
             border: none;
-            padding: 15px 40px;
+            padding: 15px 50px;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 2.13rem;
+            font-weight: 700;
+            box-shadow: 0 1.5px 8px rgba(255,124,150,0.08);
+            margin-top: 10px;
+            transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: block;
-            margin: 30px auto 0;
+            letter-spacing: 0.7px;
         }
-
-        .create-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(255, 87, 34, 0.36);
+        .create-btn:disabled, .create-btn[disabled] {
+            background: #eee;
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
         }
-
+        .create-btn:hover:not(:disabled) {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px) scale(1.02);
+        }
+        /* Course Card */
         .course-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-            transition: all 0.3s ease;
+            background: #fafafa;
+            gap: 10px !important;
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            padding: 15px 14px 13px 14px;
+            margin-bottom: 13px;
             position: relative;
+            border-block-end: 1px solid var(--border-light) !important;
         }
-
-        .course-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-color: #ff5722;
-        }
-
         .course-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
+            color: var(--text-primary);
         }
-
-        .course-tags {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .tag {
-            background: #e9ecef;
-            border: 1px solid #ced4da;
-            border-radius: 20px;
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #495057;
-        }
-
-        .tag.azure {
-            background: #cce7ff;
-            border-color: #99d6ff;
-            color: #0066cc;
-        }
-
-        .tag.microsoft {
-            background: #ffe6cc;
-            border-color: #ffcc99;
-            color: #cc6600;
-        }
-
-        .tag.beginner {
-            background: #d4edda;
-            border-color: rgba(255, 87, 34, 0.63);
-            color: #ff5722;
-        }
-
-        .tag.data {
-            background: #f8d7da;
-            border-color: #f1aeb5;
-            color: #721c24;
-        }
-
         .course-description {
             font-size: 14px;
-            color: #666;
-            line-height: 1.4;
-            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        .mentor-card-desc-header {
+            font-size: 1.6rem;
+            color: var(--oxford-blue);
+            font-weight: 300;
+            margin-bottom: 6px;
+            max-width: 65%;
+            word-break: break-word;
+        }
+
+        .mentor-card-desc {
+            color: var(--keppei);
+            font-size: 1.35rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            line-height: 1.7;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .course-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            font-size: 12px;
-            color: #888;
+            font-size: 12.5px;
+            color: #999;
+            margin-top: 7px;
         }
-
         .add-btn {
-            background: #ff5722;
+            background: var(--color-primary);
             color: white;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 18px;
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 13px;
+            right: 13px;
+            transition: background 0.15s, transform 0.14s;
+            cursor: pointer;
         }
-
-        .add-btn:hover {
-            background: #ff5722;
-            transform: scale(1.1);
+        .add-btn:hover { background: var(--color-primary-hover);}
+        .dynamic-inputs textarea {
+            margin-top: 6px;
         }
-
+        /* Button Center Wrapper */
+        .button-center-wrapper {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 22px;
+        }
+        /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 11px;
+            margin-top: 14px;
         }
-
-        .pagination button {
+        .pagination a {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 6px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 8px 14px;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        .pagination a:hover {
+            background: #ffeef0;
         }
 
-        .pagination button:hover {
-            background: #e9ecef;
-        }
-
-        .pagination button.active {
-            background: #ff5722;
+        .remove-btn {
+            background: #fa6262;
             color: white;
-            border-color: #ff5722;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-size: 18px;
+            position: absolute;
+            top: 13px;
+            right: 13px;
+            transition: background 0.15s, transform 0.14s;
+            cursor: pointer;
+            line-height: 38px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .remove-btn:hover {
+            background: #c0392b;
         }
 
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
+        @media (max-width: 1000px) {
+            .container { padding: 10px 2vw; }
+            .main-content { grid-template-columns: 1fr; gap: 26px; }
+            .cv-section, .courses-section { padding: 15px 5vw; }
         }
-
-        @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-            }
-
-            .header {
-                padding: 15px 20px;
-            }
-
-            .main-content {
-                padding: 20px;
-            }
-        }
-        .cv-section, .courses-section{
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 2rem;
+        @media (max-width: 600px) {
+            .main-content { gap: 11px; }
+            .cv-section, .courses-section { padding: 10px 2vw; }
+            .button-center-wrapper { flex-direction: column; gap: 9px; }
         }
     </style>
-    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <link rel="shortcut icon" th:href="@{/favicon.svg}" type="image/svg+xml"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}"/>
+    <!-- Add jQuery for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
-<div class="main">
-    <div class="dashboard-header">
-        <h1>Create Your CV</h1>
-    </div>
-    <div class="main-content">
-        <!-- Create CV Section -->
-        <div class="cv-section">
-            <h2>Create your CV</h2>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
+<div class="body" style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+    <div class="main">
+        <main>
+            <article>
+                <section class="mentor-section-bg">
+                    <div class="container" style="margin-top: 1em">
+                        <div class="main-content">
+                            <!-- LEFT: CV fields -->
+                            <div class="cv-section">
+                                <h2>Create your CV</h2>
+                                <div th:if="${cvStatus == 'approved'}" class="alert-info">
+                                    Your CV is approved and can no longer be edited.
+                                </div>
+                                <div th:if="${cvStatus == 'pending' || cvStatus == 'aiapproved'}" class="alert-info">
+                                    Your CV is being evaluated by the manager
+                                </div>
+                                <div th:if="${cvStatus == 'rejected'}" class="alert-info">
+                                    Your CV is rejected, you can create new CV
+                                </div>
+                                <form th:action="@{/mentor/cv/create}" method="post" id="cvForm">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="summary">Summary</label>
+                                            <textarea id="summary" name="summary" maxlength="1024" class="large-textarea"
+                                                      th:text="${cv.summary}" required
+                                                      placeholder="Brief overview of your professional background and goals..."
+                                                      th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="experienceYears">Years of experience</label>
+                                            <input type="number" id="experienceYears" name="experienceYears"
+                                                   th:field="${cv.experienceYears}"
+                                                   min="0" max="100" required placeholder="0"
+                                                   th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="skills">Skills & Tech Stacks</label>
+                                        <textarea id="skills" name="skills" maxlength="1024" class="large-textarea" required
+                                                  th:utext="${cv.skills}"
+                                                  placeholder="List your technical skills, programming languages, frameworks, tools..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="education">Education</label>
+                                        <textarea id="education" name="education" maxlength="1024" required
+                                                  th:utext="${cv.education}"
+                                                  placeholder="Degrees, institutions, graduation dates, relevant coursework..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="certifications">Certifications</label>
+                                        <textarea id="certifications" name="certifications" maxlength="1024" required
+                                                  th:utext="${cv.certifications}"
+                                                  placeholder="Professional certifications, licenses, achievements..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="experience">Experience</label>
+                                        <textarea id="experience" name="experience" maxlength="1024" class="large-textarea" required
+                                                  th:utext="${cv.experience}"
+                                                  placeholder="List of experiences, your past workplaces, products..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="languages">Languages</label>
+                                        <textarea id="languages" name="languages" maxlength="1024" required
+                                                  th:utext="${cv.languages}"
+                                                  placeholder="Languages spoken and proficiency levels..."
+                                                  th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="portfolioUrl">Portfolio URL</label>
+                                        <input id="portfolioUrl" name="portfolioUrl" type="url" required
+                                               th:field="${cv.portfolioUrl}"
+                                               placeholder="https://your-portfolio-website.com"
+                                               th:attr="readonly=${cvStatus != 'new' and cvStatus != 'rejected'}">
+                                    </div>
+                                    <input type="hidden" name="userId" th:value="${userId}">
+                                    <input type="hidden" name="selectedCourses" id="selectedCoursesInput"/>
+                                </form>
+                            </div>
+                            <!-- RIGHT: Courses Section -->
 
-            <form th:action="@{/mentor/cv/create}" method="post" id="cvForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="summary">Summary</label>
-                        <textarea id="summary" name="summary" maxlength="1024" class="large-textarea" required
-                                  placeholder="Brief overview of your professional background and goals..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="experienceYears">Years of experience</label>
-                        <input type="number" id="experienceYears" name="experienceYears"
-                               min="0" max="100" required placeholder="0">
-                    </div>
-                </div>
+                            <div class="courses-section" id="courses-section">
 
-                <div class="form-group">
-                    <label for="skills">Skills & Tech Stacks</label>
-                    <textarea id="skills" name="skills" maxlength="1024" class="large-textarea" required
-                              placeholder="List your technical skills, programming languages, frameworks, tools..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="education">Education</label>
-                    <textarea id="education" name="education" maxlength="1024" required
-                              placeholder="Degrees, institutions, graduation dates, relevant coursework..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="certifications">Certifications</label>
-                    <textarea id="certifications" name="certifications" maxlength="1024" required
-                              placeholder="Professional certifications, licenses, achievements..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="experience">Experience</label>
-                    <textarea id="experience" name="experience" maxlength="1024" class="large-textarea" required
-                              placeholder="List of experiences, your past workplaces, products..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="languages">Languages</label>
-                    <textarea id="languages" name="languages" maxlength="1024" required
-                              placeholder="Languages spoken and proficiency levels..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="portfolioUrl">Portfolio URL</label>
-                    <input id="portfolioUrl" name="portfolioUrl" type="url" required
-                           placeholder="https://your-portfolio-website.com">
-                </div>
-
-                <input type="hidden" name="userId" th:value="${userId}">
-                <input type="hidden" name="selectedCourses" id="selectedCoursesInput" />
-                <div id="courseWarning" style="display:none; color: #d8000c; background: #ffcccc; border-radius:6px; padding:10px; margin-top:10px; text-align:center; font-weight:500;">
-                    Please select at least one course to create your CV.
-                </div>
-                <button type="submit" class="create-btn">Create CV</button>
-            </form>
-        </div>
-
-        <!-- Register Courses Section -->
-        <!-- Courses Section -->
-        <div class="courses-section">
-            <h2>Register Courses</h2>
-
-            <div th:if="${coursePage != null}">
-                <div th:each="course : ${coursePage.content}">
-                    <div class="course-card">
-                        <button class="add-btn" type="button" th:attr="data-course-id=${course.id}">+</button>
-                        <div class="course-title" th:text="${course.name}"></div>
-                        <div class="course-description" th:text="${course.description}"></div>
-                        <div class="course-meta">
-                            <span th:text="'Created date: ' + ${#dates.format(course.createdDate, 'dd/MM/yyyy')}"></span>
+                                    <div th:replace="~{fragments/course-sections :: courseSections(availableCoursePage=${availableCoursePage}, registeredCoursePage=${registeredCoursePage}, pageNumber=${pageNumber}, registeredPageNumber=${registeredPageNumber}, cvStatus=${cvStatus}, userId=${userId})}"></div>
+                            </div>
+                        </div>
+                        <div class="button-center-wrapper">
+                            <div id="courseWarning" style="display:none; color: #d8000c; background: #ffcccc; border-radius:6px; padding:10px; text-align:center; font-weight:500;">
+                                Please select at least one course to create your CV.
+                            </div>
+                            <button type="submit" class="create-btn" form="cvForm"
+                                    th:if="${cvStatus == 'new' || cvStatus == 'rejected'}">Create CV</button>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div th:if="${coursePage.content.isEmpty() || coursePage == null}">
-                <p style="text-align: center">No courses available at the moment.</p>
-            </div>
-
-            <div class="pagination">
-                <a th:href="@{/cv/create(page=${pageNumber - 1}, size=6)}" th:if="${coursePage.hasPrevious()}" style="margin-right: 10px;">« Prev</a>
-                <span>Page <span th:text="${pageNumber}"></span></span>
-                <a th:href="@{/cv/create(page=${pageNumber + 1}, size=6)}" th:if="${coursePage.hasNext()}" style="margin-left: 10px;">Next »</a>
-            </div>
-        </div>
+                </section>
+            </article>
+        </main>
     </div>
 </div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+
+<!-- Custom JS -->
+<script th:src="@{/assets/js/courlist.js}"></script>
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
 <script>
-    // Store selected course details in a Map
-    const selectedCourses = new Map();
-
-    document.querySelectorAll('.add-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const courseId = this.getAttribute('data-course-id');
-            const courseCard = this.closest('.course-card');
-
-            if (selectedCourses.has(courseId)) {
-                selectedCourses.delete(courseId);
-                this.textContent = '+';
-                this.style.background = '#ff5722';
-                // Remove dynamic inputs
-                const dynamicInputs = courseCard.querySelector('.dynamic-inputs');
-                if (dynamicInputs) dynamicInputs.remove();
-            } else {
-                selectedCourses.set(courseId, { price: '', description: '' });
-                this.textContent = '✓';
-                this.style.background = '#218838';
-                // Add price and description inputs
-                const inputDiv = document.createElement('div');
-                inputDiv.className = 'dynamic-inputs';
-                inputDiv.innerHTML = `
-                    <div class="form-group">
-                        <label>Price (VND)</label>
-                        <input type="number" class="course-price" min="0" placeholder="Enter price" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Teaching Description</label>
-                        <textarea class="course-desc" placeholder="Describe how you will teach this course" required></textarea>
-                    </div>
-                `;
-                courseCard.appendChild(inputDiv);
-            }
-            // Hide warning if at least one is selected now
-            document.getElementById('courseWarning').style.display = selectedCourses.size === 0 ? 'block' : 'none';
-        });
-    });
-
-    // Before form submit, populate the hidden input with selected course IDs
-    document.getElementById('cvForm').addEventListener('submit', function (event) {
-        const warning = document.getElementById('courseWarning');
-
-        if (selectedCourses.size === 0) {
-            event.preventDefault();
-            warning.style.display = 'block';
-
-            warning.scrollIntoView({ behavior: "smooth", block: "center" });
-            return;
+    document.addEventListener('DOMContentLoaded', function () {
+        // Build selectedCourses map from DOM and backend
+        const selectedCourses = new Map();
+        function initializeSelectedCourses() {
+            selectedCourses.clear();
+            document.querySelectorAll('#registered-courses-list .course-card').forEach(card => {
+                const courseId = card.getAttribute('data-course-id');
+                let description = card.getAttribute('data-description') || '';
+                selectedCourses.set(courseId, {
+                    courseId: courseId,
+                    description: description
+                });
+            });
         }
-        const courseData = {};
-        let isValid = true;
+        initializeSelectedCourses();
 
-        selectedCourses.forEach((_, courseId) => {
-            const courseCard = document.querySelector(`.add-btn[data-course-id="${courseId}"]`).closest('.course-card');
-            const priceInput = courseCard.querySelector('.course-price');
-            const descInput = courseCard.querySelector('.course-desc');
+        // Elements
+        const coursesSection = document.getElementById('courses-section');
+        const warning = document.getElementById('courseWarning');
+        const selectedCoursesInput = document.getElementById('selectedCoursesInput');
+        const cvForm = document.getElementById('cvForm');
 
-            const price = parseFloat(priceInput.value);
-            const description = descInput.value.trim();
-
-            if (isNaN(price) || price <= 0 || description === '') {
-                isValid = false;
-                priceInput.style.borderColor = 'red';
-                descInput.style.borderColor = 'red';
+        function updateCoursesSection(page, registeredPage) {
+            const userId = document.querySelector('input[name="userId"]').value;
+            if (!userId) {
+                console.error('User ID is missing');
+                alert('User ID is missing. Please refresh the page and try again.');
                 return;
             }
-
-            courseData[courseId] = {
-                price: price,
-                description: description
-            };
-        });
-
-        if (!isValid) {
-            event.preventDefault();
-            alert('Please fill in valid price and teaching description for all selected courses.');
-            return;
+            $.ajax({
+                url: '/mentor/cv/course-sections',
+                method: 'GET',
+                data: {
+                    page: page || 1,
+                    registeredPage: registeredPage || 1,
+                    userId: userId
+                },
+                success: function(data) {
+                    console.log('AJAX response:', data);
+                    coursesSection.innerHTML = data;
+                    document.querySelectorAll('#registered-courses-list .course-card').forEach(card => {
+                        const courseId = card.getAttribute('data-course-id');
+                        let description = card.getAttribute('data-description') || '';
+                        if (selectedCourses.has(courseId)) {
+                            description = selectedCourses.get(courseId).description;
+                        }
+                        selectedCourses.set(courseId, {
+                            courseId: courseId,
+                            description: description
+                        });
+                        const descInput = card.querySelector('.course-desc');
+                        if (descInput) {
+                            descInput.value = description;
+                            descInput.addEventListener('input', function () {
+                                const newDescription = descInput.value.trim();
+                                selectedCourses.set(courseId, {
+                                    courseId: courseId,
+                                    description: newDescription
+                                });
+                                $.ajax({
+                                    url: '/mentor/cv/course/update-description',
+                                    method: 'POST',
+                                    data: {
+                                        courseId: courseId,
+                                        userId: userId,
+                                        description: newDescription
+                                    },
+                                    success: function() {
+                                        console.log('Description updated for course:', courseId);
+                                    },
+                                    error: function(xhr) {
+                                        console.error('AJAX error updating description:', xhr.status, xhr.responseText);
+                                        alert('Failed to update description. Please try again.');
+                                    }
+                                });
+                            });
+                        }
+                    });
+                },
+                error: function(xhr) {
+                    console.error('AJAX error:', xhr.status, xhr.responseText);
+                    let errorMessage = 'Failed to update courses section. Please try again.';
+                    if (xhr.status === 401) {
+                        errorMessage = 'Session expired. Please log in again.';
+                        window.location.href = '/login';
+                    } else if (xhr.status === 400) {
+                        errorMessage = 'Invalid request. Please check your input.';
+                    }
+                    alert(errorMessage);
+                }
+            });
         }
 
-        // Store the JSON stringified data
-        document.getElementById('selectedCoursesInput').value = JSON.stringify(courseData);
-        warning.style.display = 'none';
+        // Handle add/remove buttons
+        coursesSection.addEventListener('click', function(e) {
+            if (e.target.classList.contains('add-btn') || e.target.classList.contains('remove-btn')) {
+                e.preventDefault();
+                const card = e.target.closest('.course-card');
+                const courseId = card.getAttribute('data-course-id');
+                const isAdd = e.target.classList.contains('add-btn');
+                const availableCoursesList = document.querySelector('#available-courses-list');
+                const registeredCoursesList = document.querySelector('#registered-courses-list');
+                const currentPage = availableCoursesList ? parseInt(availableCoursesList.getAttribute('data-page')) || 1 : 1;
+                const currentRegisteredPage = registeredCoursesList ? parseInt(registeredCoursesList.getAttribute('data-page')) || 1 : 1;
+                const userId = document.querySelector('input[name="userId"]').value;
+
+                if (!userId) {
+                    console.error('User ID is missing');
+                    alert('User ID is missing. Please refresh the page and try again.');
+                    return;
+                }
+
+                // Call add or remove endpoint
+                const url = isAdd ? '/mentor/cv/course/add' : '/mentor/cv/course/remove';
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        courseId: courseId,
+                        userId: userId
+                    },
+                    success: function() {
+                        console.log(isAdd ? 'Course added:' : 'Course removed:', courseId);
+                        // Update selectedCourses map
+                        if (isAdd) {
+                            let description = selectedCourses.has(courseId) ? selectedCourses.get(courseId).description : '';
+                            selectedCourses.set(courseId, {
+                                courseId: courseId,
+                                description: description
+                            });
+                        } else {
+                            selectedCourses.delete(courseId);
+                        }
+                        // Refresh courses section
+                        updateCoursesSection(currentPage, currentRegisteredPage);
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX error for', url, ':', xhr.status, xhr.responseText);
+                        let errorMessage = isAdd ? 'Failed to add course.' : 'Failed to remove course.';
+                        if (xhr.status === 401) {
+                            errorMessage = 'Session expired. Please log in again.';
+                            window.location.href = '/login';
+                        } else if (xhr.status === 400) {
+                            errorMessage = xhr.responseText || 'Invalid request.';
+                        }
+                        alert(errorMessage);
+                    }
+                });
+            }
+        });
+
+        // Handle pagination clicks
+        coursesSection.addEventListener('click', function(e) {
+            if (e.target.classList.contains('page-link')) {
+                e.preventDefault();
+                const page = parseInt(e.target.getAttribute('data-page'));
+                const section = e.target.closest('.pagination').getAttribute('data-section');
+                const availableCoursesList = document.querySelector('#available-courses-list');
+                const registeredCoursesList = document.querySelector('#registered-courses-list');
+                const currentPage = availableCoursesList ? parseInt(availableCoursesList.getAttribute('data-page')) || 1 : 1;
+                const currentRegisteredPage = registeredCoursesList ? parseInt(registeredCoursesList.getAttribute('data-page')) || 1 : 1;
+
+                console.log('Pagination clicked:', { section, page, currentPage, currentRegisteredPage });
+                if (section === 'available') {
+                    updateCoursesSection(page, currentRegisteredPage);
+                } else {
+                    updateCoursesSection(currentPage, page);
+                }
+            }
+        });
+
+        // On submit, validate and store all selected course data
+        cvForm.addEventListener('submit', function(event) {
+            if (selectedCourses.size === 0) {
+                event.preventDefault();
+                warning.style.display = 'block';
+                warning.scrollIntoView({ behavior: "smooth", block: "center" });
+                return;
+            }
+            let isValid = true;
+            selectedCourses.forEach((value, courseId) => {
+                if (!value.description.trim()) {
+                    isValid = false;
+                    const descInput = document.querySelector(`#registered-courses-list .course-card[data-course-id="${courseId}"] .course-desc`);
+                    if (descInput) {
+                        descInput.style.borderColor = 'red';
+                    }
+                }
+            });
+            if (!isValid) {
+                event.preventDefault();
+                alert('Please fill in a teaching description for all registered courses.');
+                return;
+            }
+            selectedCoursesInput.value = JSON.stringify(Object.fromEntries(selectedCourses));
+            warning.style.display = 'none';
+        });
     });
-
-
 </script>
 </body>
 </html>

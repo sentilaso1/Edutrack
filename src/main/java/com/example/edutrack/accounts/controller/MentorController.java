@@ -1,25 +1,34 @@
 package com.example.edutrack.accounts.controller;
 
-import com.example.edutrack.accounts.service.MentorService;
+import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.accounts.dto.IncomeStatsDTO;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
+import com.example.edutrack.curriculum.service.implementation.CourseServiceImpl;
+import com.example.edutrack.profiles.model.CV;
+import com.example.edutrack.profiles.service.implementations.CvServiceImpl;
 import com.example.edutrack.timetables.dto.MentorAvailableSlotDTO;
 import com.example.edutrack.timetables.dto.MentorAvailableTimeDTO;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
+import com.example.edutrack.timetables.dto.UpcomingScheduleDTO;
 import com.example.edutrack.timetables.model.*;
-import com.example.edutrack.timetables.service.implementation.EnrollmentScheduleServiceImpl;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
+import com.example.edutrack.timetables.specification.EnrollmentSpecifications;
 import com.example.edutrack.transactions.model.Transaction;
 import com.example.edutrack.transactions.model.Wallet;
 import com.example.edutrack.transactions.service.TransactionService;
 import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.*;
 
 @Controller(value = "mentor")
@@ -43,12 +53,16 @@ public class MentorController {
 
     @Autowired
     public CourseMentorRepository courseMentorRepository;
+    @Autowired
+    private CourseServiceImpl courseServiceImpl;
+    @Autowired
+    private CvServiceImpl cvServiceImpl;
 
     @Autowired
     public MentorController(EnrollmentScheduleService enrollmentScheduleService,
                             EnrollmentService enrollmentService,
                             MentorAvailableTimeService mentorAvailableTimeService, WalletService walletService, TransactionService transactionService,
-                                MentorService mentorService) {
+                            MentorService mentorService) {
         this.enrollmentScheduleService = enrollmentScheduleService;
         this.enrollmentService = enrollmentService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
@@ -65,6 +79,18 @@ public class MentorController {
         if (mentor == null) {
             return "redirect:/login";
         }
+
+        int pendingClassRequests = enrollmentService.countPendingClassRequests(mentor);
+        int classesThisWeek = enrollmentScheduleService.countClassesThisWeek(mentor);
+        int teachingMentees = enrollmentService.countTeachingMentees(mentor);
+        List<UpcomingScheduleDTO> upcomingClasses = enrollmentScheduleService.getUpcomingSchedules(mentor, 3);
+
+        model.addAttribute("mentor", mentor);
+        model.addAttribute("pendingClassRequests", pendingClassRequests);
+        model.addAttribute("classesThisWeek", classesThisWeek);
+        model.addAttribute("teachingMentees", teachingMentees);
+        model.addAttribute("upcomingClasses", upcomingClasses);
+
         return "/mentor/mentor-dashboard";
     }
 
@@ -84,6 +110,11 @@ public class MentorController {
         LocalDate weekEnd = weekStart.plusDays(6);
 
         List<EnrollmentSchedule> schedules = enrollmentScheduleService.findByMentorAndDateBetween(mentor, weekStart, weekEnd);
+        List<EnrollmentSchedule> upcomingExam = enrollmentScheduleService.findTop5UpcomingExam(LocalDate.now(), mentor);
+        List<EnrollmentSchedule> slotToday = enrollmentScheduleService.findSlotToday(mentor);
+
+        model.addAttribute("upcomingExams", upcomingExam);
+        model.addAttribute("slotToday", slotToday);
 
         for (EnrollmentSchedule schedule : schedules) {
             System.out.println("Course: " + schedule.getEnrollment().getCourseMentor().getCourse().getName());
@@ -117,19 +148,66 @@ public class MentorController {
         return "/mentor/mentor_calendar";
     }
 
-    @GetMapping("/mentor/sensor-class")
-    public String viewSensorClassList(Model model,
-                                      @RequestParam(defaultValue = "PENDING") Enrollment.EnrollmentStatus status,
-                                      HttpSession session) {
+    @GetMapping("/mentor/censor-class")
+    public String viewSensorClassList(
+            Model model,
+            @RequestParam(defaultValue = "PENDING") Enrollment.EnrollmentStatus status,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "skill", required = false) String skill,
+            @RequestParam(value = "sort", defaultValue = "createdDateDesc") String sort,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            HttpSession session) {
+
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
         if (mentor == null) {
             return "redirect:/login";
         }
-        List<Enrollment> enrollmentList = enrollmentService.findByStatusAndMentor(status, mentor.getId());
+
+        //auto reject toàn bộ lịch pending chứa slot <= today
+        List<Enrollment> filterEnrollment = enrollmentService.findByStatusAndMentor(Enrollment.EnrollmentStatus.PENDING, mentor.getId());
+        for(Enrollment enrollment : filterEnrollment) {
+            List<RequestedSchedule> requestedSchedules = enrollmentScheduleService.findStartLearningTime(enrollment.getScheduleSummary());
+            for(RequestedSchedule requestedSchedule : requestedSchedules) {
+                if (!requestedSchedule.getRequestedDate().isAfter(LocalDate.now())) {
+                    enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
+                    enrollmentService.save(enrollment);
+                    break;
+                }
+            }
+        }
+
+        // Xây dựng sắp xếp
+        Sort sortOption = switch (sort) {
+            case "priceAsc" -> Sort.by("transaction.amount").ascending();
+            case "priceDesc" -> Sort.by("transaction.amount").descending();
+            case "createdDateAsc" -> Sort.by("createdDate").ascending();
+            default -> Sort.by("createdDate").descending();
+        };
+
+        Pageable pageable = PageRequest.of(page, size, sortOption);
+
+        Specification<Enrollment> spec = Specification.<Enrollment>where(
+                        (root, query, cb) -> cb.equal(root.get("courseMentor").get("mentor").get("id"), mentor.getId())
+                )
+                .and((root, query, cb) -> cb.equal(root.get("status"), status))
+                .and(EnrollmentSpecifications.searchMentee(search))
+                .and(EnrollmentSpecifications.filterBySkill(skill));
+
+        Page<Enrollment> enrollmentPage = enrollmentService.findAll(spec, pageable);
+
         model.addAttribute("status", status);
-        model.addAttribute("enrollmentList", enrollmentList);
+        model.addAttribute("enrollmentList", enrollmentPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", enrollmentPage.getTotalPages());
+        model.addAttribute("search", search);
+        model.addAttribute("skill", skill);
+        model.addAttribute("skills", courseServiceImpl.findAll());
+        model.addAttribute("sort", sort);
+        model.addAttribute("size", size);
         return "mentor/skill-register-request";
     }
+
 
     @GetMapping("/mentor/schedule/{esid}")
     public String menteeReview(Model model, @PathVariable Integer esid, HttpSession session) {
@@ -145,6 +223,7 @@ public class MentorController {
             return "redirect:/mentor/schedule?error=notMentor";
         }
         model.addAttribute("enrollmentSchedule", enrollmentSchedule);
+        model.addAttribute("isValidDay", enrollmentSchedule.getDate().isAfter(LocalDate.now()));
         return "mentor/mentee-review";
     }
 
@@ -169,12 +248,19 @@ public class MentorController {
 
         EnrollmentSchedule enrollmentSchedule = enrollmentScheduleService.findById(esid);
         if (enrollmentSchedule == null) {
-            return "redirect:/mentor/schedule?error=enrollmentNotFound";
+            return "redirect:/mentor/schedule?error=Enrollment Not Found";
+        }
+        if(!enrollmentSchedule.isAvailable()){
+            return "redirect:/mentor/schedule/" + esid + "?error=Unavailable slot";
         }
 
         LocalDate currentDate = LocalDate.now();
         if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isBefore(currentDate)) {
-            return "redirect:/mentor/schedule/" + esid +"?error=toolatetochange";
+            return "redirect:/mentor/schedule/" + esid + "?error=Too late to save";
+        }
+
+        if (enrollmentSchedule.getDate() != null && enrollmentSchedule.getDate().isAfter(currentDate)) {
+            return "redirect:/mentor/schedule/" + esid + "?error=Too soon to save";
         }
 
         // Update relevant fields only
@@ -182,14 +268,14 @@ public class MentorController {
         enrollmentSchedule.setScore(enrollmentScheduleFromForm.getScore());
         enrollmentSchedule.setTitleSection(enrollmentScheduleFromForm.getTitleSection());
         enrollmentSchedule.setDescription(enrollmentScheduleFromForm.getDescription());
-        enrollmentSchedule.setReport(enrollmentScheduleFromForm.getReport());
+        enrollmentSchedule.setReview(enrollmentScheduleFromForm.getReview());
 
         enrollmentScheduleService.save(enrollmentSchedule);
-        return "redirect:/mentor/schedule/" + enrollmentSchedule.getId();
+        return "redirect:/mentor/schedule/" + enrollmentSchedule.getId() + "?save=Save successfully";
     }
 
 
-    @GetMapping("/mentor/sensor-class/{eid}")
+    @GetMapping("/mentor/censor-class/{eid}")
     public String rejectRegistration(@PathVariable Long eid,
                                      @RequestParam String action,
                                      HttpSession session) {
@@ -204,37 +290,72 @@ public class MentorController {
         if (!enrollment.getCourseMentor().getMentor().getId().equals(mentor.getId())) {
             return "redirect:/mentor/schedule?error=notMentor";
         }
+        Optional<Wallet> menteeWalletOpt = walletService.findByUser(enrollment.getMentee());
+        if (menteeWalletOpt.isEmpty()) {
+            return "redirect:/mentor/censor-class?error=menteeWalletNotFound";
+        }
+        Wallet menteeWallet = menteeWalletOpt.get();
+
+        Optional<Wallet> mentorWalletOpt = walletService.findByUser(mentor);
+        if (mentorWalletOpt.isEmpty()) {
+            mentorWalletOpt = Optional.of(walletService.save(mentor));
+        }
+        Wallet mentorWallet = mentorWalletOpt.get();
+
         if (action.equals("reject")) {
             enrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
             enrollmentService.save(enrollment);
 
-            Optional<Wallet> walletOpt = walletService.findByUser(enrollment.getMentee());
-            if (walletOpt.isEmpty()) {
-                walletOpt = Optional.of(walletService.save(enrollment.getMentee()));
-            }
-
-            Wallet wallet = walletOpt.get();
-            wallet.setOnHold(wallet.getOnHold() - enrollment.getTransaction().getAmount());
-            wallet.setBalance(wallet.getBalance() + enrollment.getTransaction().getAmount());
-            walletService.save(wallet);
+            menteeWallet.setOnHold(menteeWallet.getOnHold() - enrollment.getTransaction().getAbsoluteAmount());
+            menteeWallet.setBalance(menteeWallet.getBalance() + enrollment.getTransaction().getAbsoluteAmount());
+            walletService.save(menteeWallet);
 
             enrollment.getTransaction().setStatus(Transaction.TransactionStatus.FAILED);
             transactionService.save(enrollment.getTransaction());
 
-            return "redirect:/mentor/sensor-class?status=REJECTED&reject=" + eid;
+            return "redirect:/mentor/censor-class?status=REJECTED&reject=" + eid;
         }
+
+        if ("rejectAll".equals(action)) {
+            List<Enrollment> duplicatedEnrollments = enrollmentService.getDuplicatedSchedules(enrollment);
+            for (Enrollment duplicatedEnrollment : duplicatedEnrollments) {
+                duplicatedEnrollment.setStatus(Enrollment.EnrollmentStatus.REJECTED);
+                enrollmentService.save(enrollment);
+
+                menteeWalletOpt = walletService.findByUser(duplicatedEnrollment.getMentee());
+                if (menteeWalletOpt.isEmpty()) {
+                    menteeWalletOpt = Optional.of(walletService.save(duplicatedEnrollment.getMentee()));
+                }
+                menteeWallet = menteeWalletOpt.get();
+
+                menteeWallet.setOnHold(menteeWallet.getOnHold() - duplicatedEnrollment.getTransaction().getAbsoluteAmount());
+                menteeWallet.setBalance(menteeWallet.getBalance() + duplicatedEnrollment.getTransaction().getAbsoluteAmount());
+                walletService.save(menteeWallet);
+
+                duplicatedEnrollment.getTransaction().setStatus(Transaction.TransactionStatus.FAILED);
+                transactionService.save(duplicatedEnrollment.getTransaction());
+            }
+            return "redirect:/mentor/censor-class/" + eid + "/view?action=rejected_all";
+        }
+
         if (action.equals("approve")) {
+            List<Enrollment> duplicatedEnrollment = enrollmentService.getDuplicatedSchedules(enrollment);
+            if (!duplicatedEnrollment.isEmpty()) {
+                return "redirect:/mentor/censor-class/" + eid + "/view?approve=fail";
+            }
             enrollment.setStatus(Enrollment.EnrollmentStatus.APPROVED);
             enrollmentService.save(enrollment);
-            return "redirect:/mentor/sensor-class?status=APPROVED&approve=" + eid;
+            enrollmentScheduleService.saveEnrollmentSchedule(enrollment);
+
+            return "redirect:/mentor/censor-class?status=APPROVED&approve=" + eid;
         }
         if (action.equals("view")) {
-            return "redirect:/mentor/sensor-class/" + eid + "/view";
+            return "redirect:/mentor/censor-class/" + eid + "/view";
         }
-        return "redirect:/mentor/sensor-class";
+        return "redirect:/mentor/censor-class";
     }
 
-    @GetMapping("/mentor/sensor-class/{eid}/view")
+    @GetMapping("/mentor/censor-class/{eid}/view")
     public String viewSensorClass(@PathVariable Long eid,
                                   Model model,
                                   HttpSession session) {
@@ -243,12 +364,12 @@ public class MentorController {
             return "redirect:/login";
         }
         Enrollment enrollment = enrollmentService.findById(eid);
-        List<Slot> slots = new ArrayList<>();
-        List<LocalDate> dates = new ArrayList<>();
         String summary = enrollment.getScheduleSummary();
-
+        List<Enrollment> duplicatedEnrollment = enrollmentService.getDuplicatedSchedules(enrollment);
+        model.addAttribute("duplicatedEnrollments", duplicatedEnrollment);
         List<RequestedSchedule> startTime = enrollmentScheduleService.findStartLearningTime(summary);
         model.addAttribute("startTime", startTime);
+        model.addAttribute("enrollment", enrollment);
         return "mentor/skill-register-request-detail";
     }
 
@@ -261,13 +382,17 @@ public class MentorController {
         if (mentor == null) {
             return "redirect:/login";
         }
+        CV cv = cvServiceImpl.getCVByMentorId(mentor.getId());
+        if(cv == null){
+            return "redirect:/mentor/cv/create";
+        }
         MentorAvailableTime.Status enumValue = MentorAvailableTime.Status.valueOf(status);
 
         List<MentorAvailableTimeDTO> setTime = mentorAvailableTimeService.findAllDistinctStartEndDates(mentor, enumValue);
         model.addAttribute("setTime", setTime);
 
-        if("REJECTED".equals(status) || "DRAFT".equals(status)){
-            if(setTime.size() == 1){
+        if ("REJECTED".equals(status) || "DRAFT".equals(status)) {
+            if (setTime.size() == 1) {
                 LocalDate startDate = setTime.get(0).getStartDate();
                 LocalDate endDate = setTime.get(0).getEndDate();
                 model.addAttribute("startDate", startDate);
@@ -283,9 +408,9 @@ public class MentorController {
             endLocal = LocalDate.parse(end, formatter);
         }
 
-        if("REJECTED".equals(status)){
+        if ("REJECTED".equals(status)) {
             List<MentorAvailableTime> foundMentorAvailableTime = mentorAvailableTimeService.findAllMentorAvailableTimeByEndDate(mentor, endLocal);
-            if(!foundMentorAvailableTime.isEmpty()){
+            if (!foundMentorAvailableTime.isEmpty()) {
                 model.addAttribute("reason", foundMentorAvailableTime.get(0).getReason());
             }
         }
@@ -297,6 +422,18 @@ public class MentorController {
         model.addAttribute("activeStatus", status.toUpperCase());
         model.addAttribute("slots", Slot.values());
         model.addAttribute("days", Day.values());
+
+        Map<Integer, String> monthOptions = new LinkedHashMap<>();
+        LocalDate now = LocalDate.now();
+
+        for (int i = 0; i <= 4; i++) {
+            LocalDate target = now.plusMonths(i);
+            String label = target.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH) + " " + target.getYear();
+            monthOptions.put(i, label); // key: 0→4, value: "July 2025", "August 2025", ...
+        }
+
+        model.addAttribute("monthOptions", monthOptions);
+
 
         return "/mentor/mentor-working-date";
     }
@@ -310,19 +447,41 @@ public class MentorController {
         return "accounts/html/mentor-stats";
     }
 
-    @GetMapping("mentor/classes")
+    @GetMapping("/mentor/classes")
     public String mentorClasses(Model model,
                                 HttpSession session,
-                                @RequestParam(defaultValue = "ONGOING") String status) {
+                                @RequestParam(defaultValue = "ONGOING") String status,
+                                @RequestParam(required = false) String courseName,
+                                @RequestParam(required = false) String menteeName,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "5") int size,
+                                @RequestParam(defaultValue = "desc") String sortDir) {
+
         Mentor mentor = (Mentor) session.getAttribute("loggedInUser");
-        if (mentor == null) {
-            return "redirect:/login";
+        if (mentor == null) return "redirect:/login";
+
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by("createdDate").ascending() :
+                Sort.by("createdDate").descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Enrollment> enrollmentPage = enrollmentService.findEnrollmentsWithFilters(
+                mentor, status, courseName, menteeName, pageable
+        );
+
+        for (Enrollment e : enrollmentPage) {
+            Double percent = (enrollmentService.getPercentComplete(e) / e.getTotalSlots()) * 100;
+            e.setPercentComplete(Math.round(percent * 10.0) / 10.0);
         }
 
-        if("ONGOING".equals(status)){
-            List<Enrollment> ongoingEnrollments = enrollmentService.findOngoingEnrollments(mentor.getId());
-            model.addAttribute("ongoingEnrollments", ongoingEnrollments);
-        }
+        model.addAttribute("enrollmentPage", enrollmentPage);
+        model.addAttribute("status", status);
+        model.addAttribute("courseName", courseName);
+        model.addAttribute("menteeName", menteeName);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("size", size);
+        model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
 
         return "mentor/mentor-class";
     }

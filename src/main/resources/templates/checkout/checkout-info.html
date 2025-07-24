@@ -1,134 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>EduTrack - Checkout Success</title>
-    <link rel="stylesheet" th:href="@{/css/master.css}"/>
-    <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <title>EduTrack - Checkout Result</title>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/layout_courselist.css}"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: #fdfdfd;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 40px;
-        }
-
-        .checkout-header h1 {
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-
-        .success-body {
-            display: flex;
-            justify-content: space-between;
-            gap: 40px;
-            margin-top: 30px;
-        }
-
-        .success-message-box {
-            flex: 2;
-            background-color: #fff7f7;
-            border-radius: 8px;
-            padding: 60px 20px;
+        .balance-card {
             text-align: center;
-            border: 1px solid #f1dcdc;
+            margin-top: 16px;
         }
 
-        .success-message-box h2 {
-            font-size: 28px;
-            margin-bottom: 16px;
-            color: #333;
-        }
-
-        .success-message-box p {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .success-actions a {
-            text-decoration: none;
-            padding: 10px 20px;
-            font-size: 15px;
-            margin: 0 8px;
-            border: 1px solid #aaa;
-            background-color: white;
-            color: #333;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .success-actions a:hover {
-            background-color: #f2f2f2;
-        }
-
-        .checkout-summary {
-            flex: 1;
-            padding: 24px;
-            background-color: #fff7f7;
-            border: 1px solid #f1dcdc;
-            border-radius: 8px;
-        }
-
-        .balance-box {
-            text-align: center;
-        }
-
-        .neuron-balance {
+        .balance-amount {
             font-size: 32px;
             color: #ff6666;
             font-weight: bold;
             margin: 8px 0;
         }
 
-        .link {
+        .quick-links > a {
             display: block;
-            margin-top: 4px;
             color: #ff6666;
             text-decoration: none;
             font-size: 14px;
         }
     </style>
 </head>
-<body class="viewport">
-<div class="container">
-    <div class="checkout-header">
-        <h1>Checkout Information</h1>
-    </div>
+<body>
+<th:block th:insert="~{fragments/header :: header}"></th:block>
 
-    <div class="success-body">
-        <div class="success-message-box">
-            <h2 th:if="${success != null && error == null}">Checkout Successful</h2>
-            <p th:if="${success != null && error == null}">Your learning schedule is now being processed.</p>
+<main>
+    <section class="section course has-bg-image" th:style="|background-image: url('@{/assets/images/course-bg.png}')|">
+        <div class="container">
+            <h2 class="headline-md" style="text-align: center; margin-bottom: 1.2rem;">
+                Checkout Result
+            </h2>
+            <p style="text-align:center;color:#777;max-width:700px;margin:0 auto 30px;">
+                View your payment result and wallet state below.
+            </p>
 
-            <h2 th:if="${error != null}">Checkout Failed</h2>
-            <p th:if="${error != null}" th:text="${error}">Checkout process failed. No neurons was deducted.</p>
+            <div class="wallet-section-layout">
+                <!-- Main Result Content -->
+                <div class="wallet-content">
+                    <div class="card" style="text-align: center; padding: 40px 20px;">
+                        <div th:if="${success != null && error == null}">
+                            <h3 style="color:#27ae60; margin-bottom: 1rem;">
+                                <i class="fas fa-check-circle"></i> Checkout Successful
+                            </h3>
+                            <p>Your learning schedule is now being processed.</p>
+                        </div>
+                        <div th:if="${error != null}">
+                            <h3 style="color:#e74c3c; margin-bottom: 1rem;">
+                                <i class="fas fa-times-circle"></i> Checkout Failed
+                            </h3>
+                            <p th:text="${error}">Checkout process failed. No funds were deducted.</p>
+                        </div>
+                        <div style="margin-top: 35px; display:flex; justify-content:center; gap:16px;">
+                            <a th:href="@{/wallet/history}" class="btn btn-primary" style="margin:0;">
+                                <i class="fas fa-receipt"></i> Review Transaction
+                            </a>
+                            <a th:href="@{/dashboard}" class="btn btn-secondary" style="margin:0;">
+                                <i class="fas fa-home"></i> Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="success-actions">
-                <a th:href="@{/wallet/history}">Review Transaction</a>
-                <a th:href="@{/my-learning}">My Courses</a>
+                <!-- Balance/Quick Actions (Sidebar) -->
+                <aside>
+                    <div class="card balance-card" style="box-shadow:none;">
+                        <h3 style="margin-bottom:0.7rem;">Current Balance</h3>
+                        <div class="balance-amount"
+                             th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">
+                            0 VND
+                        </div>
+                        <div th:if="${wallet != null && wallet.onHold > 0}" style="margin-top:8px;">
+                            <small th:text="${wallet.onHoldFormatted + ' VND on hold'}">0 VND on hold</small>
+                        </div>
+                    </div>
+                    <div class="card quick-links" style="margin-top:16px;">
+                        <h3 style="font-size:1.5rem;margin-bottom:10px;">Quick Actions</h3>
+                        <a th:href="@{/wallet}"><i class="fas fa-wallet"></i> Account Details</a>
+                        <a th:href="@{/wallet/recharge}"><i class="fas fa-plus-circle"></i> Add Funds</a>
+                        <a th:href="@{/wallet/history}"><i class="fas fa-receipt"></i> Transaction History</a>
+                    </div>
+                </aside>
             </div>
         </div>
+    </section>
+</main>
 
-        <div class="checkout-summary">
-            <div class="balance-box">
-                <p><strong>Current balance:</strong></p>
-                <p class="neuron-balance" th:text="${wallet != null ? wallet.balanceFormatted + ' VND' : '0 VND'}">250</p>
-                <p th:if="${wallet != null && wallet.onHold != null && wallet.onHold > 0}" th:text="${'(' + wallet.onHoldFormatted + ' VND on hold)' }"></p>
-                <a th:href="@{/wallet}" class="link">View account details</a>
-                <a th:href="@{/wallet/recharge}" class="link">Add funds</a>
-            </div>
-        </div>
-    </div>
-</div>
+<th:block th:insert="~{fragments/footer :: footer}"></th:block>
 </body>
 </html>

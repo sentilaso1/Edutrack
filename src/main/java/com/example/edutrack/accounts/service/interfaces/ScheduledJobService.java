@@ -3,7 +3,6 @@ package com.example.edutrack.accounts.service.interfaces;
 import com.example.edutrack.accounts.dto.ScheduledJobDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import java.util.List;
 import com.example.edutrack.accounts.dto.JobStats;
 
 public interface ScheduledJobService {
@@ -13,4 +12,7 @@ public interface ScheduledJobService {
         void toggleJob(Long id, boolean active);
         void runJobNow(Long id);
         JobStats getJobSummary();
+        void createJob(ScheduledJobDTO dto);
+        boolean isJobRunning(Long id);
+        void deleteJob(Long id);
 }

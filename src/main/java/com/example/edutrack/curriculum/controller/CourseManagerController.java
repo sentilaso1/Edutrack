@@ -2,10 +2,7 @@ package com.example.edutrack.curriculum.controller;
 
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.dto.CourseFormDTO;
-import com.example.edutrack.curriculum.model.Course;
-import com.example.edutrack.curriculum.model.CourseMentor;
-import com.example.edutrack.curriculum.model.Tag;
-import com.example.edutrack.curriculum.model.TeachingMaterial;
+import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
 import com.example.edutrack.curriculum.service.implementation.*;
@@ -52,7 +49,7 @@ public class CourseManagerController {
         this.courseMentorService = courseMentorService;
     }
 
-    @GetMapping("/view")
+    @GetMapping("/course-dashboard")
     public String view(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String mentorSearch,
@@ -119,26 +116,21 @@ public class CourseManagerController {
         return "manager-course-dashboard";
     }
 
-
-    @GetMapping("/materials/download/{id}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable int id) {
-        TeachingMaterial material = teachingMaterials.findById(id);
-        if (material == null) return ResponseEntity.notFound().build();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(material.getFileType()));
-        headers.setContentDisposition(ContentDisposition.attachment().filename(material.getName()).build());
-        return ResponseEntity.ok().headers(headers).body(material.getFile());
-    }
-
     @GetMapping("/courses/toggle-open/{id}")
-    public String toggleOpen(@PathVariable UUID id) {
+    public String toggleOpen(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         Course course = courseService.findById(id);
+        if(course.getOpen()){
+            boolean isCourseLocked = courseMentorService.isCourseLocked(id);
+            if(isCourseLocked){
+                redirectAttributes.addFlashAttribute("errorMessage", "Cannot close this course because it has active sessions or pending applications.");
+                return "redirect:/manager/course-dashboard";
+            }
+        }
         if (course != null) {
             course.setOpen(!course.getOpen());
             courseService.save(course);
         }
-        return "redirect:/manager/view";
+        return "redirect:/manager/course-dashboard";
     }
 
     @GetMapping("/courses/create")
@@ -152,19 +144,6 @@ public class CourseManagerController {
                                BindingResult bindingResult,
                                Model model,
                                RedirectAttributes redirectAttributes) {
-        boolean hasAtLeastOneFile = false;
-        if(courseFormDTO.getFiles() != null) {
-            for (MultipartFile file : courseFormDTO.getFiles()) {
-                if (file != null && !file.isEmpty()) {
-                    hasAtLeastOneFile = true;
-                    break;
-                }
-            }
-        }
-        if (!hasAtLeastOneFile) {
-            bindingResult.rejectValue("files", "files.empty", "Phải upload ít nhất 1 tài liệu");
-        }
-
         if(bindingResult.hasErrors()) {
             model.addAttribute("courseForm", courseFormDTO);
             model.addAttribute("errors", bindingResult.getAllErrors());
@@ -182,25 +161,33 @@ public class CourseManagerController {
     }
 
     @GetMapping("/courses/edit/{id}")
-    public String showEditForm(@PathVariable UUID id, Model model) {
-        Course course = courseService.findById(id);
-        if (course == null) {
-            return "redirect:/manager/view";
+    public String showEditForm(@PathVariable UUID id, Model model, RedirectAttributes redirectAttributes) {
+        boolean hasMentor = courseMentorService.isCourseLocked(id);
+
+        if (hasMentor) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot edit this course because it currently has assigned mentors!");
+            return "redirect:/manager/course-dashboard";
         }
 
-        CourseFormDTO form = new CourseFormDTO();
-        form.setName(course.getName());
-        form.setDescription(course.getDescription());
-        List<String> tagTexts = tagService.findTagsByCourseId(id).stream()
-                .map(Tag::getTitle)
-                .collect(Collectors.toList());
-        form.setTagTexts(tagTexts);
-        List<TeachingMaterial> materials = teachingMaterials.findByCourseId(id);
+        try {
+            Course course = courseService.findById(id);
+            CourseFormDTO form = new CourseFormDTO();
+            form.setName(course.getName());
+            form.setDescription(course.getDescription());
+            List<String> tagTexts = tagService.findTagsByCourseId(id).stream()
+                    .map(Tag::getTitle)
+                    .collect(Collectors.toList());
+            form.setTagTexts(tagTexts);
+            model.addAttribute("courseForm", form);
+            model.addAttribute("courseId", id);
+            model.addAttribute("course", course);
 
-        model.addAttribute("materials", materials);
-        model.addAttribute("courseForm", form);
-        model.addAttribute("courseId", id);
-        return "manager-course-edit";
+            return "manager-course-edit";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Course not found or error occurred!");
+            return "redirect:/manager/course-dashboard";
+        }
     }
 
     @PostMapping("/courses/edit/{id}")
@@ -209,88 +196,62 @@ public class CourseManagerController {
                              BindingResult bindingResult,
                              Model model,
                              RedirectAttributes redirectAttributes) {
-        List<TeachingMaterial> materials = teachingMaterials.findByCourseId(id);
-        int currentFileCount = materials != null ? materials.size() : 0;
-
-        int newFileCount = 0;
-        if (courseFormDTO.getFiles() != null) {
-            for (MultipartFile file : courseFormDTO.getFiles()) {
-                if (file != null && !file.isEmpty()) {
-                    newFileCount++;
-                }
-            }
+        boolean hasMentor = courseMentorService.isCourseLocked(id);
+        if (hasMentor) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot edit this course because it currently has assigned mentors!");
+            return "redirect:/manager/course-dashboard";
         }
 
-        int totalFileCount = currentFileCount + newFileCount;
-        System.out.println("[DEBUG] Current files: " + currentFileCount);
-        System.out.println("[DEBUG] New files: " + newFileCount);
-        System.out.println("[DEBUG] Total files: " + totalFileCount);
-
-        String fileError = null;
-        if (totalFileCount > 5) {
-            fileError = "Vượt quá giới hạn! Hiện tại: " + currentFileCount +
-                    " file, thêm mới: " + newFileCount + " file. Tối đa 5 file.";
-        } else if (totalFileCount < 1) {
-            fileError = "Khóa học phải có ít nhất 1 tài liệu!";
-        }
-
-        if (fileError != null || bindingResult.hasErrors()) {
-            Course course = courseService.findById(id);
-
-            model.addAttribute("materials", materials);
-            model.addAttribute("courseForm", courseFormDTO);
-            model.addAttribute("courseId", id);
-            model.addAttribute("fileError", fileError);
-
-            if (bindingResult.hasErrors()) {
-                model.addAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin đã nhập!");
+        if (bindingResult.hasErrors()) {
+            try {
+                Course course = courseService.findById(id);
+                model.addAttribute("courseForm", courseFormDTO);
+                model.addAttribute("courseId", id);
+                model.addAttribute("course", course);
+                return "manager-course-edit";
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Error loading course data!");
+                return "redirect:/manager/course-dashboard";
             }
-
-            return "manager-course-edit";
         }
 
         try {
             courseService.update(id, courseFormDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật khóa học thành công!");
-            redirectAttributes.addFlashAttribute("courseId", id);
+            redirectAttributes.addFlashAttribute("successMessage", "Course updated successfully!");
+            return "redirect:/manager/course-dashboard";
+
         } catch (Exception e) {
             System.out.println("[ERROR] Exception when updating course: " + e.getMessage());
             e.printStackTrace();
-            Course course = courseService.findById(id);
 
-            model.addAttribute("materials", materials);
-            model.addAttribute("courseForm", courseFormDTO);
-            model.addAttribute("courseId", id);
-            model.addAttribute("errorMessage", "Lỗi khi cập nhật khóa học: " + e.getMessage());
-            return "manager-course-edit";
-        }
-
-        return "redirect:/manager/courses/edit/" + id;
-    }
-
-    @GetMapping("/materials/delete/{id}")
-    public String deleteMaterial(@PathVariable int id, RedirectAttributes redirectAttributes) {
-        try {
-            UUID courseId = teachingMaterials.findCourseByMaterialId(id).getId();
-            teachingMaterials.deleteById(id);
-            return "redirect:/manager/courses/edit/" + courseId;
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa tài liệu: " + e.getMessage());
-            return "redirect:/manager/view";
+            try {
+                Course course = courseService.findById(id);
+                model.addAttribute("courseForm", courseFormDTO);
+                model.addAttribute("courseId", id);
+                model.addAttribute("course", course);
+                model.addAttribute("errorMessage", "Error updating course: " + e.getMessage());
+                return "manager-course-edit";
+            } catch (Exception ex) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Error updating course: " + e.getMessage());
+                return "redirect:/manager/course-dashboard";
+            }
         }
     }
 
     @PostMapping("/courses/delete/{id}")
     public String deleteCourse(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         try {
+            boolean hasMentor = courseMentorService.isCourseLocked(id);
+            if (hasMentor) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete this course because it has assigned mentors!");
+                return "redirect:/manager/course-dashboard";
+            }
             courseService.deleteCourseWithRelatedData(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa khóa học thành công");
+            redirectAttributes.addFlashAttribute("successMessage", "Course deleted successfully");
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa khóa học: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting course: " + e.getMessage());
         }
-        return "redirect:/manager/view";
+        return "redirect:/manager/course-dashboard";
     }
-
-
 }

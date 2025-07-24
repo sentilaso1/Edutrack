@@ -3,6 +3,7 @@ package com.example.edutrack.timetables.controller;
 import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.interfaces.MenteeService;
+import com.example.edutrack.common.service.implementations.EmailService;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.service.implementation.CourseMentorServiceImpl;
 
@@ -36,8 +37,9 @@ public class MenteeScheduleController {
     private final CourseMentorServiceImpl courseMentorService;
     private final WalletService walletService;
     private final TransactionService transactionService;
+    private final EmailService emailService;
 
-    public MenteeScheduleController(MenteeService menteeService, MentorAvailableTimeService mentorAvailableTimeService, EnrollmentService enrollmentService, EnrollmentScheduleService enrollmentScheduleService, CourseMentorServiceImpl courseMentorService, WalletService walletService, TransactionService transactionService) {
+    public MenteeScheduleController(MenteeService menteeService, MentorAvailableTimeService mentorAvailableTimeService, EnrollmentService enrollmentService, EnrollmentScheduleService enrollmentScheduleService, CourseMentorServiceImpl courseMentorService, WalletService walletService, TransactionService transactionService, EmailService emailService) {
         this.menteeService = menteeService;
         this.mentorAvailableTimeService = mentorAvailableTimeService;
         this.enrollmentService = enrollmentService;
@@ -45,6 +47,7 @@ public class MenteeScheduleController {
         this.courseMentorService = courseMentorService;
         this.walletService = walletService;
         this.transactionService = transactionService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/courses/checkout/{cmid}")
@@ -80,12 +83,24 @@ public class MenteeScheduleController {
             return "/checkout/checkout-info";
         }
 
+        List<LocalDate> localDates = date.stream().map(LocalDate::parse).toList();
+
         Optional<Wallet> walletOptional = walletService.findById(user.getId());
         if (walletOptional.isEmpty()) {
             walletOptional = Optional.of(walletService.save(user));
         }
         Wallet wallet = walletOptional.get();
         model.addAttribute("wallet", wallet);
+
+        if (courseMentorService.alreadyHasPendingEnrollment(courseMentor, menteeOpt.get())) {
+            model.addAttribute("error", "You already have a pending enrollment for this course.");
+            return "/checkout/checkout-info";
+        }
+
+        if(!enrollmentService.isValidRequests(menteeOpt.get(), courseMentor.getMentor(), slot, localDates)) {
+            model.addAttribute("error", "Invalid Schedule detected. Please try again!");
+            return "/checkout/checkout-info";
+        }
 
         Double totalCost = Double.parseDouble(totalPrice);
         if (wallet.getBalance() <= 0 || wallet.getBalance() < totalCost) {
@@ -98,13 +113,12 @@ public class MenteeScheduleController {
         walletService.save(wallet);
 
         Transaction transaction = new Transaction(
-                totalCost,
-                "Checkout for Course Mentor: " + courseMentor.getId(),
+                -totalCost,
+                "Checkout for Course " + courseMentor.getCourse().getName() + " by " + courseMentor.getMentor().getFullName(),
                 wallet
         );
         transactionService.save(transaction);
 
-        List<LocalDate> localDates = date.stream().map(LocalDate::parse).toList();
 
         Enrollment enrollment = new Enrollment(
                 menteeOpt.get(),
@@ -115,11 +129,30 @@ public class MenteeScheduleController {
                 ""
         );
         enrollment.setTransaction(transaction);
-
         enrollmentService.save(enrollment);
 
         model.addAttribute("success", "Checkout Successful");
+        String emailBody = """
+        Dear %s,
+
+        Mentee: %s
+        Course: %s
+
+        Click link to view detail:
+        http://localhost:6969/mentor/censor-class/%d/view
+        """.formatted(
+                courseMentor.getMentor().getFullName(),
+                menteeOpt.get().getFullName(),
+                courseMentor.getCourse().getName(),
+                enrollment.getId()
+        );
+
+        emailService.sendSimpleMail(
+                user.getEmail(),
+                "EduTrack: New Request Registration",
+                emailBody
+        );
+
         return "/checkout/checkout-info";
     }
-
 }
