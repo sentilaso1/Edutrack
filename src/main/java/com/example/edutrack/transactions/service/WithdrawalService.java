@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class WithdrawalService {
@@ -17,6 +19,10 @@ public class WithdrawalService {
     @Autowired
     public WithdrawalService(WithdrawalRepository withdrawalRepository) {
         this.withdrawalRepository = withdrawalRepository;
+    }
+
+    public Optional<Withdrawal> findById(UUID id) {
+        return withdrawalRepository.findById(id);
     }
 
     public Withdrawal save(Withdrawal withdrawal) {
@@ -29,6 +35,10 @@ public class WithdrawalService {
 
     public Page<Withdrawal> findAll(Pageable pageable) {
         return withdrawalRepository.findAll(pageable);
+    }
+
+    public List<Withdrawal> findAll() {
+        return withdrawalRepository.findAll();
     }
 
     public Page<Withdrawal> findByStatus(Withdrawal.Status status, Pageable pageable) {
