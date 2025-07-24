@@ -631,7 +631,7 @@ public class MenteeController {
                         "Reschedule request submitted successfully! Your mentor will review it soon.");
             } else {
                 Long count = enrollmentScheduleService.countEnrollmentSchedulesHaveRescheduleRequest(schedule.getEnrollment());
-                if (count >= 2) {
+                if (count >= 1000) {
                     redirectAttributes.addFlashAttribute("errorMessage", "You have used all of your reschedule requests for this course.");
                 } else {
                     redirectAttributes.addFlashAttribute("errorMessage", "Failed to submit reschedule request. Please try again.");
