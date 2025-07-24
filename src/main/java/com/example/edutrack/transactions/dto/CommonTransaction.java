@@ -30,7 +30,7 @@ public record CommonTransaction(String id, String info, Double amount, String st
         }
 
         if (!status.startsWith("0")) {
-            return status;
+            return status.toUpperCase();
         }
 
         VnpayResult result = VnpayResult.fromCode(status);

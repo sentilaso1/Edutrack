@@ -72,7 +72,7 @@ public class VnpayController {
         transaction.setOrderInfo(String.format(
                 "Nap tien EduTrack tai khoan %s. So tien %d %s",
                 user.getEmail(),
-                amount / VnpayTransaction.FRACTION_SHIFT,
+                amount,
                 transaction.getCurrCode()
         ));
         vnpayTransactionService.save(transaction);
