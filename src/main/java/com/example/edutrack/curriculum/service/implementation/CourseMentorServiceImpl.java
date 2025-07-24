@@ -311,6 +311,11 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     }
 
     @Override
+    public boolean alreadyHasPendingEnrollment(CourseMentor courseMentor, Mentee mentee) {
+        return courseMentorRepository.alreadyHasPendingEnrollment(courseMentor, mentee);
+    }
+
+    @Override
     public void save(CourseMentor cm) {
         courseMentorRepository.save(cm);
     }
