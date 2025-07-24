@@ -77,16 +77,20 @@ public class LandingPageConfig {
     private String copyrightText;
 
     @Enumerated(EnumType.STRING)
-    private SuggestionType courseSectionOneSuggestion;
+    @Column(name = "course_section_one_suggestion")
+    private SuggestionType courseSectionOneSuggestion = SuggestionType.POPULAR;
 
     @Enumerated(EnumType.STRING)
-    private SuggestionType mentorSuggestion;
+    @Column(name = "mentor_suggestion")
+    private SuggestionType mentorSuggestion = SuggestionType.TOP_RATED;
 
     @Enumerated(EnumType.STRING)
-    private SuggestionType courseSectionTwoSuggestion;
+    @Column(name = "course_section_two_suggestion")
+    private SuggestionType courseSectionTwoSuggestion = SuggestionType.LATEST;
 
     @Enumerated(EnumType.STRING)
-    private SuggestionType tagSuggestion;
+    @Column(name = "tag_suggestion")
+    private SuggestionType tagSuggestion = SuggestionType.POPULAR;
 
     private String heroImageUrl;
 

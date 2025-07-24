@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.accounts.repository.UserRepository;
+import com.example.edutrack.common.service.implementations.EmailService;
 import com.example.edutrack.common.service.interfaces.LLMService;
 import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.CVCourse;
@@ -52,6 +53,7 @@ public class CvServiceImpl implements CvService {
     private final CourseMentorRepository courseMentorRepository;
     private final LLMService llmService;
     private final CourseMentorService courseMentorService;
+    private final EmailService emailService;
 
     @Autowired
     public CvServiceImpl(EntityManager entityManager,
@@ -62,7 +64,8 @@ public class CvServiceImpl implements CvService {
                          MentorRepository mentorRepository,
                          CourseMentorRepository courseMentorRepository,
                          LLMService llmService,
-                         CourseMentorService courseMentorService) {
+                         CourseMentorService courseMentorService,
+                         EmailService emailService) {
         this.entityManager = entityManager;
         this.cvRepository = cvRepository;
         this.userRepository = userRepository;
@@ -72,6 +75,7 @@ public class CvServiceImpl implements CvService {
         this.courseMentorRepository = courseMentorRepository;
         this.llmService = llmService;
         this.courseMentorService = courseMentorService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -331,6 +335,7 @@ public class CvServiceImpl implements CvService {
     @Override
     public boolean acceptCV(UUID id) {
         Optional<CV> optionalCv = cvRepository.findById(id);
+        logger.warn("Optional CV: {}", optionalCv);
         if (optionalCv.isPresent()) {
             CV cv = optionalCv.get();
             cv.setStatus("approved");
@@ -345,6 +350,9 @@ public class CvServiceImpl implements CvService {
             String aiResponse = aiProcessCV(cv);
             if (aiResponse != null && !aiResponse.isEmpty()) {
                 aiFormatCV(cv, aiResponse);
+            }
+            if (notifyCV(id, true)) {
+                logger.info("Approved email sent for mentor id: {}", id);
             }
             return true;
         }
@@ -364,18 +372,52 @@ public class CvServiceImpl implements CvService {
                 cm.setStatus(ApplicationStatus.REJECTED);
                 courseMentorService.save(cm);
             }
+            if (notifyCV(id, false)) {
+                logger.info("Rejected email sent for mentor id: {}", id);
+            }
             return true;
         }
 
         return false;
     }
 
+    private boolean notifyCV(UUID id, boolean isApproved) {
+        Optional<Mentor> currentMentor = mentorRepository.findById(id);
+        if (currentMentor.isPresent()) {
+            Mentor mentor = currentMentor.get();
+            String mentorEmail = mentor.getEmail();
+            String mentorName = mentor.getFullName() == null ? "EduTrack Mentor" : mentor.getFullName();
+
+            if (mentorEmail != null && !mentorEmail.isEmpty()) {
+                String feeling = isApproved ? "excited" : "sorry";
+                String action = isApproved ? "approved" : "rejected";
+                String subject = "EduTrack: Your CV was " + action;
+
+                String body = "Hello " + mentorName + ",\n\n"
+                        + "We are very " + feeling
+                        + " to send this email to you to notify that your CV was " + action + ".\n"
+                        + (isApproved ?
+                        "Welcome to EduTrack, may your journey be filled with meaningful connections and lasting achievements." :
+                        "Thank you for your submission. We believe in your potential — please review your CV and try again soon.") + "\n"
+                        + "You can recheck the status of your CV in My CV section." + "\n\n"
+                        + "Best regards,\n"
+                        + "EduTrack";
+                emailService.sendSimpleMail(mentorEmail, subject, body);
+                return true;
+            } else {
+                logger.warn("No mentor email found with Mentor: {}", mentor);
+                return false;
+            }
+        } else {
+            logger.warn("No mentor found with id: {}", id);
+            return false;
+        }
+    }
+
     @Override
     public String aiProcessCV(CV cv) {
         String prompt = generateCombinedPromptForAI(cv);
-        String aiResponse = llmService.callModel(prompt);
-        processCombinedAIResponse(cv, aiResponse);
-        return aiResponse;
+        return llmService.callModel(prompt);
     }
 
     @Override
@@ -424,6 +466,7 @@ public class CvServiceImpl implements CvService {
         Format all CV data fields with these rules:
         1. Header and Section Recognition:
             - Identify and REMOVE common section headers/labels such as:
+              • "Date Time (2019, May)", "GPA Number (3.2, 4.0)", "Roles in Professional Experience (Software Engineer)"
               • "Technical Skills:", "Soft Skills:", "Programming Languages:", "Core Competencies:"
               • "Education Background:", "Academic Qualifications:", "Degrees:"
               • "Certifications Earned:", "Professional Certifications:", "Licenses:"
@@ -437,6 +480,7 @@ public class CvServiceImpl implements CvService {
             - Preserve only the actual content items (skill names, degree titles, company names, etc.)
         
         2. Separator Recognition and Normalization:
+            - Connect information that are related (Bachelor of Science, University of Texas should not be separated, instead it should be connected
             - Identify all types of separators used in the input (commas, dashes, line breaks, multiple spaces, tabs, etc.)
             - Convert all separators to semicolons (;)
             - Preserve the actual skill/item names while standardizing the separation
@@ -462,7 +506,7 @@ public class CvServiceImpl implements CvService {
         - Empty or whitespace-only inputs should return empty strings
         - ABSOLUTELY CRITICAL: You are ONLY a formatter for the data fields - do NOT change any text content, spelling, or wording
         - Even if text appears misspelled (e.g., "Puthon" instead of "Python"), preserve it exactly as written
-        - Your job is to: 1) Remove headers/organizational text, 2) Identify separators and replace them with semicolons
+        - Your job is to: 1) Remove headers/organizational text, 2) Concatenate information that are related, 3) Identify separators and replace them with semicolons
         
         Response requirements:
         - You MUST reply ONLY with valid JSON (no markdown, no code block, no natural language, no explanation, no commentary, no tags, no backticks).
@@ -506,7 +550,7 @@ public class CvServiceImpl implements CvService {
           },
           "formatted": {
             "skills": "Java;Python;AWS;Spring Boot",
-            "education": "Bachelor of Computer Science;Master of Data Science",
+            "education": "Bachelor of Computer Science in University of Texas;Master of Data Science in University of California",
             "certifications": "AWS Certified Developer;Google Cloud Professional",
             "experience": "Senior Developer at TechCorp;Junior Analyst at DataFirm",
             "languages": "English;Vietnamese;French"
@@ -515,67 +559,6 @@ public class CvServiceImpl implements CvService {
         
         Respond ONLY with raw JSON, no markdown, no explanation, no code block.
         """.formatted(summary, experienceYears, skills, education, experience, certifications, languages);
-    }
-
-    @Override
-    public void processCombinedAIResponse(CV cv, String aiJson) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            if (aiJson == null || aiJson.trim().isEmpty()) {
-                logger.warn("AI response is null or empty for combined processing");
-                return;
-            }
-
-            JsonNode root = mapper.readTree(aiJson);
-            JsonNode choices = root.path("choices");
-            if (!choices.isArray() || choices.isEmpty()) {
-                logger.error("Invalid or empty choices array for combined processing: {}", aiJson);
-                return;
-            }
-
-            JsonNode message = choices.get(0).path("message");
-            if (message.isMissingNode()) {
-                logger.error("Missing message field for combined processing: {}", aiJson);
-                return;
-            }
-
-            JsonNode contentNode = message.path("content");
-            if (contentNode.isMissingNode() || !contentNode.isTextual()) {
-                logger.error("Missing or invalid content field for combined processing: {}", aiJson);
-                return;
-            }
-
-            String contentJson = contentNode.asText();
-            if (contentJson.startsWith("```")) {
-                contentJson = contentJson.replaceAll("^```(json)?", "").replaceAll("```$", "").trim();
-            }
-
-            JsonNode responseData = mapper.readTree(contentJson);
-
-            // Process validation results
-            JsonNode validationNode = responseData.path("validation");
-            if (!validationNode.isMissingNode()) {
-                processVerificationResponse(cv, validationNode, contentJson);
-            } else {
-                logger.warn("Missing validation data in combined AI response");
-            }
-
-            // Process formatting results
-            JsonNode formattedNode = responseData.path("formatted");
-            if (!formattedNode.isMissingNode()) {
-                processFormattingResponse(cv, formattedNode, contentJson);
-            } else {
-                logger.warn("Missing formatted data in combined AI response");
-            }
-
-            logger.debug("Combined AI response result: {}", aiJson);
-
-        } catch (JsonProcessingException e) {
-            logger.error("JSON parsing error for combined AI response: {}", aiJson, e);
-        } catch (Exception e) {
-            logger.error("Unexpected error processing combined AI response: {}", aiJson, e);
-            throw new RuntimeException("Combined AI processing error", e);
-        }
     }
 
     private void processVerificationFromResponse(CV cv, String aiJson) {
@@ -612,7 +595,6 @@ public class CvServiceImpl implements CvService {
 
             JsonNode responseData = mapper.readTree(contentJson);
 
-            // Process ONLY validation results using existing method
             JsonNode validationNode = responseData.path("validation");
             if (!validationNode.isMissingNode()) {
                 processVerificationResponse(cv, validationNode, contentJson);
@@ -686,7 +668,6 @@ public class CvServiceImpl implements CvService {
 
             JsonNode responseData = mapper.readTree(contentJson);
 
-            // Process ONLY formatting results using existing method
             JsonNode formattedNode = responseData.path("formatted");
             if (!formattedNode.isMissingNode()) {
                 processFormattingResponse(cv, formattedNode, contentJson);

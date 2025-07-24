@@ -5,6 +5,7 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.common.service.implementations.EmailService;
+import com.example.edutrack.curriculum.model.ApplicationStatus;
 import com.example.edutrack.curriculum.model.Course;
 import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.model.Feedback;
@@ -154,7 +155,7 @@ public class MentorController {
         LocalDate endLocal = selectedMonth.withDayOfMonth(selectedMonth.lengthOfMonth());
 
         Mentor mentor = mentorService.getMentorById(id).get();
-        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findOnlyApprovedSlotsByEndDate(mentor, endLocal);
         boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
 
         List<Map<String, String>> selectableMonths = new ArrayList<>();
@@ -223,7 +224,7 @@ public class MentorController {
         if (user == null) {
             return "redirect:/login";
         }
-        List<CourseMentor> courseMentors = courseMentorRepository.findByMentorId(user.getId());
+        List<CourseMentor> courseMentors = courseMentorRepository.findByMentorIdAndStatus(user.getId(), ApplicationStatus.ACCEPTED);
         model.addAttribute("courseMentors", courseMentors);
         return "mentor/skill-price-set";
     }
@@ -255,7 +256,7 @@ public class MentorController {
 
         Mentor mentor = mentorService.getMentorById(id).get();
 
-        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findAllSlotByEndDate(mentor, endLocal);
+        List<MentorAvailableSlotDTO> setSlots = mentorAvailableTimeService.findOnlyApprovedSlotsByEndDate(mentor, endLocal);
         boolean[][] slotDayMatrix = new boolean[Slot.values().length][Day.values().length];
 
         for (MentorAvailableSlotDTO dto : setSlots) {

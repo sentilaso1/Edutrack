@@ -66,4 +66,8 @@ public interface EnrollmentService {
     int countTeachingMentees(Mentor mentor);
 
     long countStudentsByMentor(Mentor mentor);
+
+    Boolean isHavingPendingInSlot(Mentee mentee, Slot slot, LocalDate date);
+
+    Boolean isValidRequests(Mentee mentee, Mentor mentor, List<Slot> slots, List<LocalDate> date);
 }

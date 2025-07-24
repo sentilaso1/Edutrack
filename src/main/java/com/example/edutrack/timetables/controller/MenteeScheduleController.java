@@ -83,12 +83,19 @@ public class MenteeScheduleController {
             return "/checkout/checkout-info";
         }
 
+        List<LocalDate> localDates = date.stream().map(LocalDate::parse).toList();
+
         Optional<Wallet> walletOptional = walletService.findById(user.getId());
         if (walletOptional.isEmpty()) {
             walletOptional = Optional.of(walletService.save(user));
         }
         Wallet wallet = walletOptional.get();
         model.addAttribute("wallet", wallet);
+
+        if(!enrollmentService.isValidRequests(menteeOpt.get(), courseMentor.getMentor(), slot, localDates)) {
+            model.addAttribute("error", "Invalid Schedule detected. Please try again!");
+            return "/checkout/checkout-info";
+        }
 
         Double totalCost = Double.parseDouble(totalPrice);
         if (wallet.getBalance() <= 0 || wallet.getBalance() < totalCost) {
@@ -107,7 +114,6 @@ public class MenteeScheduleController {
         );
         transactionService.save(transaction);
 
-        List<LocalDate> localDates = date.stream().map(LocalDate::parse).toList();
 
         Enrollment enrollment = new Enrollment(
                 menteeOpt.get(),

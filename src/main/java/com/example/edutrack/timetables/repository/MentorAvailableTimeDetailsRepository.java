@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public interface MentorAvailableTimeDetailsRepository extends JpaRepository<MentorAvailableTimeDetails, Long> {
 
@@ -17,6 +18,6 @@ public interface MentorAvailableTimeDetailsRepository extends JpaRepository<Ment
 
     boolean existsBySlotAndDateAndMentee(Slot slot, LocalDate date, Mentee mentee);
 
-
+    List<MentorAvailableTimeDetails> findByMentorIdAndMenteeIsNullAndDateBetween(UUID mentorId, LocalDate startDate, LocalDate endDate);
 
 }

@@ -37,7 +37,7 @@ public class FeedbackReportController {
         this.feedbackRepository = feedbackRepository;
     }
 
-    @GetMapping("/admin/reports/list/{page}")
+    @GetMapping("/manager/reports/list/{page}")
     public String listFeedbackReports(
             @ModelAttribute FeedbackReportFilterForm params,
             Model model,
@@ -82,12 +82,12 @@ public class FeedbackReportController {
         return "manager/list-report";
     }
 
-    @GetMapping("/admin/reports/list")
+    @GetMapping("/manager/reports/list")
     public String redirectToListFeedbackReports() {
-        return "redirect:/admin/reports/list/1";
+        return "redirect:/manager/reports/list/1";
     }
 
-    @GetMapping("/admin/reports/delete/{id}")
+    @GetMapping("/manager/reports/delete/{id}")
     public String deleteFeedbackReport(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         try {
             feedbackReportRepository.deleteById(id);
@@ -95,7 +95,7 @@ public class FeedbackReportController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to delete report: " + e.getMessage());
         }
-        return "redirect:/admin/reports/list/1";
+        return "redirect:/manager/reports/list/1";
     }
 
     @PostMapping("/review/report")
@@ -123,7 +123,7 @@ public class FeedbackReportController {
         }
     }
 
-    @GetMapping("/admin/reports/review-action/{reportId}")
+    @GetMapping("/manager/reports/review-action/{reportId}")
     public String handleReviewAction(
             @PathVariable UUID reportId,
             @RequestParam String action,
@@ -146,7 +146,7 @@ public class FeedbackReportController {
                     ra.addFlashAttribute("success", "Feedback set as active & all reports reviewed!");
                 } else {
                     ra.addFlashAttribute("error", "Invalid action!");
-                    return "redirect:/admin/reports/list/1";
+                    return "redirect:/manager/reports/list/1";
                 }
                 feedbackRepository.save(feedback);
                 feedbackReportRepository.save(targetReport);
@@ -160,7 +160,7 @@ public class FeedbackReportController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Could not update: " + e.getMessage());
         }
-        return "redirect:/admin/reports/list/1";
+        return "redirect:/manager/reports/list/1";
     }
 
 

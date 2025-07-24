@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -112,6 +113,7 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
 
     @Override
     public void insertMentorAvailableTime(LocalDate startDate, LocalDate endDate, Mentor mentor){
+        System.out.println("end date" + endDate.toString());
         List<MentorAvailableTime> mentorAvailableTimes = findAllMentorAvailableTimeByEndDate(mentor, endDate);
         if(mentorAvailableTimes.isEmpty()) {
             return;
@@ -131,7 +133,7 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
 
         int i = days.indexOf(Day.valueOf(currentTime.getDayOfWeek().name()));
 
-        while(currentTime.isBefore(endDate)) {
+        while(!currentTime.isAfter(endDate)) {
             Slot currentSlot = slots.get(i);
 
             MentorAvailableTimeDetails schedule = new MentorAvailableTimeDetails();
@@ -170,5 +172,14 @@ public class MentorAvailableTimeServiceImpl implements MentorAvailableTimeServic
         return mentorAvailableTimeRepository.findApprovedSlotsByEndDate(mentor, endDate, MentorAvailableTime.Status.APPROVED);
     }
 
+    @Override
+    public Optional<LocalDate> findEarliestStartDateByMentorId(UUID mentorId) {
+        return mentorAvailableTimeRepository.findEarliestStartDateByMentorId(mentorId);
+    }
+
+    @Override
+    public List<MentorAvailableTimeDetails> getAvailableSlotsForMentor(UUID mentorId, LocalDate startDate, LocalDate endDate) {
+        return mentorAvailableTimeDetailsRepository.findByMentorIdAndMenteeIsNullAndDateBetween(mentorId, startDate, endDate);
+    }
 
 }

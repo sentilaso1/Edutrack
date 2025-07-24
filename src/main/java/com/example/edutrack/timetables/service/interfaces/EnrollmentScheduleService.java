@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -56,6 +57,8 @@ public interface EnrollmentScheduleService {
 
     List<EnrollmentSchedule> getSlotsUnderReviewByCourse(UUID menteeId, UUID courseMentorId, LocalDate startDate, LocalDate endDate);
 
+    List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate);
+
     List<ScheduleActivityBannerDTO> collectRecentActivityBanners(UUID menteeId);
 
     Long countEnrollmentSchedulesHaveRescheduleRequest(Enrollment enrollment);
@@ -88,4 +91,6 @@ public interface EnrollmentScheduleService {
     List<EnrollmentSchedule> findTop5UpcomingExam(LocalDate now, Mentor mentor);
 
     List<EnrollmentSchedule> findSlotToday(Mentor mentor);
+
+    Optional<EnrollmentSchedule> findFirstScheduleForEnrollment(Enrollment enrollment);
 }

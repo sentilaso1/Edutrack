@@ -268,7 +268,7 @@ public class MentorController {
         enrollmentSchedule.setScore(enrollmentScheduleFromForm.getScore());
         enrollmentSchedule.setTitleSection(enrollmentScheduleFromForm.getTitleSection());
         enrollmentSchedule.setDescription(enrollmentScheduleFromForm.getDescription());
-        enrollmentSchedule.setReport(enrollmentScheduleFromForm.getReport());
+        enrollmentSchedule.setReview(enrollmentScheduleFromForm.getReview());
 
         enrollmentScheduleService.save(enrollmentSchedule);
         return "redirect:/mentor/schedule/" + enrollmentSchedule.getId() + "?save=Save successfully";
