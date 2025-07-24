@@ -412,8 +412,8 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     }
 
     @Override
-    public List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate) {
-        return enrollmentScheduleRepository.findAllPendingRequestsInDateRange(startDate, endDate);
+    public List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate, UUID mentorId) {
+        return enrollmentScheduleRepository.findAllPendingRequestsInDateRange(startDate, endDate, mentorId);
     }
 
     @Override

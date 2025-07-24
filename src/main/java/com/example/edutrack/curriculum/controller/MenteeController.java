@@ -586,7 +586,7 @@ public class MenteeController {
                 }
             }
 
-            List<EnrollmentSchedule> pendingRequests = enrollmentScheduleService.getAllPendingSlotsInDateRange(date, date);
+            List<EnrollmentSchedule> pendingRequests = enrollmentScheduleService.getAllPendingSlotsInDateRange(date, date, mentorId);
             boolean slotHasPendingRequest = pendingRequests.stream()
                     .anyMatch(pending -> pending.getRequestedNewDate() != null &&
                             pending.getRequestedNewDate().equals(date) &&
@@ -736,7 +736,7 @@ public class MenteeController {
         Set<String> myReviewingKeys = new HashSet<>();
         Set<String> otherMenteesReviewingKeys = new HashSet<>();
         List<EnrollmentSchedule> allSystemReviewingSlots = enrollmentScheduleService.getAllPendingSlotsInDateRange(
-                mondayOfWeek, mondayOfWeek.plusDays(6)
+                mondayOfWeek, mondayOfWeek.plusDays(6), mentorId
         );
 
         for (EnrollmentSchedule reviewing : allSystemReviewingSlots) {
