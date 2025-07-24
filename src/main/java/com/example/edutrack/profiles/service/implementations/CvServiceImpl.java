@@ -468,9 +468,6 @@ public class CvServiceImpl implements CvService {
             - Identify and REMOVE common section headers/labels such as:
               • "Date Time (2019, May)", "GPA Number (3.2, 4.0)", "Roles in Professional Experience (Software Engineer)"
               • "Technical Skills:", "Soft Skills:", "Programming Languages:", "Core Competencies:"
-              • "Education Background:", "Academic Qualifications:", "Degrees:"
-              • "Certifications Earned:", "Professional Certifications:", "Licenses:"
-              • "Work Experience:", "Professional Experience:", "Employment History:"
               • "Languages Spoken:", "Language Proficiency:", "Foreign Languages:"
             - Remove organizational markers like:
               • Bullet points (•, *, -, →, ►)
@@ -518,9 +515,6 @@ public class CvServiceImpl implements CvService {
             },
             "formatted": {
               "skills": "formatted_skills_string",
-              "education": "formatted_education_string", 
-              "certifications": "formatted_certifications_string",
-              "experience": "formatted_experience_string",
               "languages": "formatted_languages_string"
             }
           }
@@ -550,9 +544,6 @@ public class CvServiceImpl implements CvService {
           },
           "formatted": {
             "skills": "Java;Python;AWS;Spring Boot",
-            "education": "Bachelor of Computer Science in University of Texas;Master of Data Science in University of California",
-            "certifications": "AWS Certified Developer;Google Cloud Professional",
-            "experience": "Senior Developer at TechCorp;Junior Analyst at DataFirm",
             "languages": "English;Vietnamese;French"
           }
         }

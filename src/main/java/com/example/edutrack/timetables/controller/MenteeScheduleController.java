@@ -92,6 +92,11 @@ public class MenteeScheduleController {
         Wallet wallet = walletOptional.get();
         model.addAttribute("wallet", wallet);
 
+        if (courseMentorService.alreadyHasPendingEnrollment(courseMentor, menteeOpt.get())) {
+            model.addAttribute("error", "You already have a pending enrollment for this course.");
+            return "/checkout/checkout-info";
+        }
+
         if(!enrollmentService.isValidRequests(menteeOpt.get(), courseMentor.getMentor(), slot, localDates)) {
             model.addAttribute("error", "Invalid Schedule detected. Please try again!");
             return "/checkout/checkout-info";

@@ -13,17 +13,16 @@ import com.example.edutrack.curriculum.service.implementation.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseMentorService;
 import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
-import com.example.edutrack.timetables.model.Day;
-import com.example.edutrack.timetables.model.Enrollment;
-import com.example.edutrack.timetables.model.MentorAvailableTime;
-import com.example.edutrack.timetables.model.Slot;
+import com.example.edutrack.timetables.model.*;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.transactions.model.Wallet;
 import com.example.edutrack.transactions.service.WalletService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -60,6 +59,7 @@ CourseController {
     private final MenteeServiceImpl menteeService;
     private final MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository;
     private final FeedbackService feedbackService;
+    private final EnrollmentScheduleService enrollmentScheduleService;
 
     @Autowired
     public CourseController(CourseServiceImpl courseServiceImpl,
@@ -74,7 +74,10 @@ CourseController {
                             EnrollmentService enrollmentService,
                             WalletService walletService,
                             CourseRepository courseRepository,
-                            CourseMentorRepository courseMentorRepository, MenteeServiceImpl menteeService, MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository) {
+                            CourseMentorRepository courseMentorRepository,
+                            MenteeServiceImpl menteeService,
+                            MentorAvailableTimeDetailsRepository mentorAvailableTimeDetailsRepository,
+                            EnrollmentScheduleService enrollmentScheduleService) {
         this.courseServiceImpl = courseServiceImpl;
         this.courseTagServiceImpl = courseTagServiceImpl;
         this.mentorServiceImpl = mentorServiceImpl;
@@ -90,15 +93,16 @@ CourseController {
         this.menteeService = menteeService;
         this.mentorAvailableTimeDetailsRepository = mentorAvailableTimeDetailsRepository;
         this.feedbackService = feedbackService;
+        this.enrollmentScheduleService = enrollmentScheduleService;
     }
 
     @GetMapping("/courses")
-    public String  courses(Model model,
-                           @RequestParam(defaultValue = "1") int page,
-                           @RequestParam(defaultValue = "6") int size_page,
-                           @RequestParam(required = false) List<Integer> subject,
-                           @RequestParam(required = false) List<UUID> skill,
-                           @RequestParam(required = false) String order_by) {
+    public String courses(Model model,
+                          @RequestParam(defaultValue = "1") int page,
+                          @RequestParam(defaultValue = "6") int size_page,
+                          @RequestParam(required = false) List<Integer> subject,
+                          @RequestParam(required = false) List<UUID> skill,
+                          @RequestParam(required = false) String order_by) {
 
         if (page < 1) {
             return "redirect:/404";
@@ -108,14 +112,15 @@ CourseController {
         Page<CourseMentor> coursePage;
 
         List<Integer> subjectIds;
-        if(subject != null && !subject.isEmpty()) {
+        if (subject != null && !subject.isEmpty()) {
             subjectIds = subject;
-        }else{
+        } else {
             subjectIds = null;
         }
-        List<UUID> skillIds;  if(skill != null && !skill.isEmpty()){
+        List<UUID> skillIds;
+        if (skill != null && !skill.isEmpty()) {
             skillIds = skill;
-        }else{
+        } else {
             skillIds = null;
         }
 
@@ -142,26 +147,27 @@ CourseController {
     }
 
     @GetMapping("/courses-only")
-    public String  coursesOnly(Model model,
-                           @RequestParam(defaultValue = "1") int page,
-                           @RequestParam(defaultValue = "6") int size_page,
-                           @RequestParam(required = false) List<Integer> subject,
-                           @RequestParam(required = false) List<UUID> skill,
-                           @RequestParam(required = false) String order_by) {
+    public String coursesOnly(Model model,
+                              @RequestParam(defaultValue = "1") int page,
+                              @RequestParam(defaultValue = "6") int size_page,
+                              @RequestParam(required = false) List<Integer> subject,
+                              @RequestParam(required = false) List<UUID> skill,
+                              @RequestParam(required = false) String order_by) {
 
         if (page < 1) {
             return "redirect:/404";
         }
 
         List<Integer> subjectIds;
-        if(subject != null && !subject.isEmpty()) {
+        if (subject != null && !subject.isEmpty()) {
             subjectIds = subject;
-        }else{
+        } else {
             subjectIds = null;
         }
-        List<UUID> skillIds;  if(skill != null && !skill.isEmpty()){
+        List<UUID> skillIds;
+        if (skill != null && !skill.isEmpty()) {
             skillIds = skill;
-        }else{
+        } else {
             skillIds = null;
         }
 
@@ -209,7 +215,7 @@ CourseController {
         List<Tag> tagList = tagServiceImpl.findTagsByCourseId(course.getId());
 
         List<CourseMentor> relatedCourse = courseMentorService.getRelatedCoursesByTags(course.getId(), null, 6);
-        List<CourseCardDTO> relatedCourseToDTO = enrollmentService .mapToCourseCardDTOList(relatedCourse);
+        List<CourseCardDTO> relatedCourseToDTO = enrollmentService.mapToCourseCardDTOList(relatedCourse);
         List<Feedback> feedbackList = feedbackService.getTopRecentFeedback(courseMentor);
         model.addAttribute("feedbackList", feedbackList);
         model.addAttribute("relatedCourses", relatedCourseToDTO);
@@ -245,26 +251,26 @@ CourseController {
         }
 
         Optional<Mentee> menteeOpt = menteeService.findById(user.getId());
-        if(menteeOpt.isEmpty()) {
+        if (menteeOpt.isEmpty()) {
             return "redirect:/login";
         }
 
         CourseMentor courseMentor = courseMentorService.findById(cmid);
-        List <MentorAvailableTime> mentorAvailableTime = mentorAvailableTimeService.findByMentorId(courseMentor.getMentor());
+        List<MentorAvailableTime> mentorAvailableTime = mentorAvailableTimeService.findByMentorId(courseMentor.getMentor());
         model.addAttribute("courseMentor", courseMentor);
         model.addAttribute("mentorAvailableTime", mentorAvailableTime);
 
         List<Tag> tags = tagServiceImpl.findTagsByCourseId(courseMentor.getCourse().getId());
         model.addAttribute("tagList", tags);
         LocalDate minDate = mentorAvailableTimeService.findMinStartDate(courseMentor.getMentor());
-        if(minDate == null){
+        if (minDate == null) {
             return "redirect:/courses/" + courseMentor.getId() + "?error=Mentor Schedule haven't been registered yet";
         }
-        if(minDate.isBefore(LocalDate.now().plusDays(5))){
+        if (minDate.isBefore(LocalDate.now().plusDays(5))) {
             minDate = LocalDate.now().plusDays(5);
         }
         LocalDate maxDate = mentorAvailableTimeService.findMaxEndDate(courseMentor.getMentor());
-        if(maxDate == null){
+        if (maxDate == null) {
             return "redirect:/courses/" + courseMentor.getId() + "?error=Mentor Schedule haven't been registered yet";
         }
         model.addAttribute("minDate", minDate);
@@ -272,7 +278,7 @@ CourseController {
         model.addAttribute("slots", Slot.values());
         model.addAttribute("dayLabels", Day.values());
         int[][] slotDayMatrix = availableSlotMatrix(courseMentor.getMentor(), menteeOpt.get(), minDate, maxDate);
-        if(slotDayMatrix == null){
+        if (slotDayMatrix == null) {
             slotDayMatrix = new int[5][10];
         }
 
@@ -309,12 +315,12 @@ CourseController {
     }
 
     public int[][] availableSlotMatrix(Mentor mentor,
-                                    Mentee mentee,
-                                    LocalDate minDate,
-                                    LocalDate maxDate) {
+                                       Mentee mentee,
+                                       LocalDate minDate,
+                                       LocalDate maxDate) {
         List<LocalDate> dateList = new ArrayList<>();
         LocalDate currentDate = LocalDate.now();
-        if (minDate.isAfter(currentDate)){
+        if (minDate.isAfter(currentDate)) {
             currentDate = minDate;
         }
 
@@ -328,9 +334,9 @@ CourseController {
             for (int j = 0; j < dayCount; j++) {
                 Slot slot = Slot.values()[i];
                 LocalDate slotDate = dateList.get(j);
-                if(mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, slotDate) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, slotDate, mentee) && !enrollmentService.isHavingPendingInSlot(mentee, slot, slotDate)){
+                if (enrollmentService.isValidRequest(mentee, mentor, slot, slotDate)) {
                     availableSlotMatrix[i][j] = enrollmentService.getNumberOfPendingSlot(mentor, slotDate, slot);
-                }else{
+                } else {
                     availableSlotMatrix[i][j] = -1;
                 }
             }

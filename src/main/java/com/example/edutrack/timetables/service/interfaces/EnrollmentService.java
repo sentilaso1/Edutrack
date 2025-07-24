@@ -69,5 +69,7 @@ public interface EnrollmentService {
 
     Boolean isHavingPendingInSlot(Mentee mentee, Slot slot, LocalDate date);
 
+    boolean isValidRequest(Mentee mentee, Mentor mentor, Slot slot, LocalDate date);
+
     Boolean isValidRequests(Mentee mentee, Mentor mentor, List<Slot> slots, List<LocalDate> date);
 }
