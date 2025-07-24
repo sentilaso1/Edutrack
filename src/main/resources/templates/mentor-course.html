@@ -523,11 +523,12 @@
     /* Report overlay */
     #report-overlay {
       position: fixed;
-      z-index: 10000;
+      z-index: 10001;
       top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0,0,0,0.22);
       animation: fadeInModalBg 0.18s;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      justify-content: center;
       overflow-y: auto;
     }
     @keyframes fadeInModalBg {
@@ -536,15 +537,15 @@
     }
     .report-modal {
       background: #fff;
-      margin: 7vh auto;
-      padding: 2.5rem 2.2rem 1.7rem 2.2rem;
-      width: 95%;
-      max-width: 420px;
+      margin: 25vh auto auto auto;
+      padding: 0.7rem 1.2rem 1.2rem 1.2rem;
+      width: 100%;
+      max-width: 400px;
       border-radius: 1.25rem;
       box-shadow: 0 12px 40px rgba(255, 123, 123, 0.12), 0 2px 8px rgba(0,0,0,0.05);
       position: relative;
       animation: popUpModal 0.22s;
-      max-height: 92vh;
+      max-height: 80vh;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -583,7 +584,7 @@
       background: #f5f5f5;
       padding: 0.8em 1em;
       border-radius: 7px;
-      font-size: 1rem;
+      font-size: 1.3rem;
       color: #333;
       box-shadow: 0 2px 6px rgba(220,220,220,0.08);
       margin-bottom: 0.15em;
@@ -617,7 +618,7 @@
       border-radius: 0.7em;
       border: 1.5px solid #ffeaea;
       background: #f8f9fa;
-      font-size: 1.07rem;
+      font-size: 1.3rem;
       color: #222;
       resize: vertical;
       font-family: inherit;
@@ -638,7 +639,7 @@
       background: linear-gradient(135deg, #ff7b7b, #ff9999);
       color: #fff;
       border: none;
-      padding: 0.76em 2.1em;
+      padding: 0.38em 1.05em;
       border-radius: 1.8em;
       font-size: 1.07em;
       font-weight: 500;
