@@ -16,6 +16,7 @@ import com.example.edutrack.curriculum.service.interfaces.CourseTagService;
 import com.example.edutrack.curriculum.service.interfaces.FeedbackService;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.MentorAvailableTimeDetailsRepository;
+import com.example.edutrack.timetables.service.interfaces.EnrollmentScheduleService;
 import com.example.edutrack.timetables.service.interfaces.EnrollmentService;
 import com.example.edutrack.timetables.service.interfaces.MentorAvailableTimeService;
 import com.example.edutrack.transactions.service.WalletService;
@@ -54,6 +55,7 @@ public class CourseControllerTest {
         MenteeServiceImpl menteeService = Mockito.mock(MenteeServiceImpl.class);
         mentorAvailableTimeDetailsRepository = Mockito.mock(MentorAvailableTimeDetailsRepository.class);
         FeedbackService feedbackService = Mockito.mock(FeedbackService.class);
+        EnrollmentScheduleService enrollmentScheduleService = Mockito.mock(EnrollmentScheduleService.class);
 
         controller = new CourseController(
                 courseServiceImpl,
@@ -70,7 +72,8 @@ public class CourseControllerTest {
                 courseRepository,
                 courseMentorRepository,
                 menteeService,
-                mentorAvailableTimeDetailsRepository
+                mentorAvailableTimeDetailsRepository,
+                enrollmentScheduleService
         );
 
         mentor = new Mentor();

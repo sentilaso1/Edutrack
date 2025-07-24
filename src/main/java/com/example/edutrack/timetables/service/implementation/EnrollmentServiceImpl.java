@@ -9,6 +9,7 @@ import com.example.edutrack.curriculum.model.CourseMentor;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.timetables.dto.RequestedSchedule;
 import com.example.edutrack.timetables.model.Enrollment;
+import com.example.edutrack.timetables.model.EnrollmentSchedule;
 import com.example.edutrack.timetables.model.Slot;
 import com.example.edutrack.timetables.repository.EnrollmentRepository;
 import com.example.edutrack.timetables.repository.EnrollmentScheduleRepository;
@@ -275,8 +276,20 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return false;
     }
 
-    public Boolean isValidRequest(Mentee mentee, Mentor mentor, Slot slot, LocalDate date){
-        return mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, date) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, date, mentee) && !isHavingPendingInSlot(mentee, slot, date);
+    @Override
+    public boolean isValidRequest(Mentee mentee, Mentor mentor, Slot slot, LocalDate date){
+        return mentorAvailableTimeDetailsRepository.existsByMentorAndSlotAndDateAndMenteeIsNull(mentor, slot, date) && !mentorAvailableTimeDetailsRepository.existsBySlotAndDateAndMentee(slot, date, mentee) && !isHavingPendingInSlot(mentee, slot, date) && !isPendingInRescheduling(date, mentor.getId(), slot);
+    }
+
+    private boolean isPendingInRescheduling(LocalDate date, UUID mentorId, Slot slot) {
+        List<EnrollmentSchedule> pendingRequests = enrollmentScheduleService.getAllPendingSlotsInDateRange(date, date, mentorId);
+        if(pendingRequests.isEmpty()){
+            return false;
+        }
+        return pendingRequests.stream()
+                .anyMatch(pending -> pending.getRequestedNewDate() != null &&
+                                     pending.getRequestedNewDate().equals(date) &&
+                                     pending.getRequestedNewSlot().equals(slot));
     }
 
     @Override
