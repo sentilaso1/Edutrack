@@ -1,5 +1,6 @@
 package com.example.edutrack.curriculum.service.interfaces;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.*;
 import org.springframework.data.domain.Page;
@@ -55,6 +56,8 @@ public interface CourseMentorService {
     void updateCourseMentorDescription(UUID userId, UUID courseId, String description);
 
     long countCoursesByMentor(Mentor mentor);
+
+    boolean alreadyHasPendingEnrollment(CourseMentor courseMentor, Mentee mentee);
 
     void save(CourseMentor courseMentor);
 }

@@ -1,5 +1,6 @@
 package com.example.edutrack.curriculum.repository;
 
+import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.curriculum.model.*;
 import org.springframework.data.domain.Page;
@@ -301,5 +302,13 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
 
     Optional<CourseMentor> findByMentorIdAndCourseId(UUID userId, UUID courseId);
     long countByMentorAndStatus(Mentor mentor, ApplicationStatus status);
+
+    @Query("""
+        SELECT COUNT(e) > 0 FROM Enrollment e
+        WHERE e.courseMentor = :courseMentor
+          AND e.mentee = :mentee
+          AND e.status = 'PENDING'
+        """)
+    boolean alreadyHasPendingEnrollment(@Param("courseMentor") CourseMentor courseMentor, @Param("mentee") Mentee mentee);
 }
 

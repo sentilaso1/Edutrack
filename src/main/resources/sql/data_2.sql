@@ -728,3 +728,45 @@ insert into edutrack.landing_page_config (id, about_description, about_section_i
 values  (1, 'EduTrack is your personalized companion for tracking learning progress, setting educational goals, and staying motivated throughout your academic journey', '/assets/images/about-banner.png', 'About Edutrack', 'We Provide The Best Online Education', 'View All Categories', '/uploads/a8fb6ed4-a88d-4d60-8039-4a8ff0404260-login.jpg', 'Course Categories', 'Top Categories', '© Copyright 2025 | EduTrack Group | All Rights Reserved', '/assets/images/course-bg.png', 'POPULAR', 'LATEST', 'EduTrack helps you track and grow your learning journey — with mentors, clear goals, and transparent progress.', 'Explore Courses', '/courses', 'Better Learning Future Starts With EduTrack', '/assets/images/hero-bg.png', 'It is long established fact that reader distracted by the readable content.', '/uploads/6b1063b9-f7c8-460f-8e3f-3d3d2600d82d-welcome.jpg', 'Top Mentors for You', 'Recommended Mentors', 'POPULAR', 'GUEST', 'Popular Courses', 'Featured Courses', 'Top Courses', 'Top Rated Courses', 'POPULAR', true, false),
         (2, 'EduTrack is your personalized companion for tracking learning progress, setting educational goals, and staying motivated throughout your academic journey', '/assets/images/about-banner.png', 'About EduTrack', 'We Provide The Best Online Education', 'View All Categories', '/uploads/a8fb6ed4-a88d-4d60-8039-4a8ff0404260-login.jpg', 'Course Categories', 'Top Categories', '© Copyright 2025 | EduTrack Group | All Rights Reserved', '/assets/images/course-bg.png', 'POPULAR', 'LATEST', 'EduTrack helps you track and grow your learning journey — with mentors, clear goals, and transparent progress.', 'Explore Courses', '/courses', 'Better Learning Future Starts With EduTrack', '/assets/images/hero-bg.png', 'It is long established fact that reader distracted by the readable content.', '/uploads/6b1063b9-f7c8-460f-8e3f-3d3d2600d82d-welcome.jpg', 'Top Mentors for You', 'Recommended Mentors', 'POPULAR', 'MENTEE_NEW', 'Popular Courses', 'Featured Courses', 'Top Courses', 'Top Rated Courses', 'POPULAR', true, false),
         (3, 'EduTrack is your personalized companion for tracking learning progress, setting educational goals, and staying motivated throughout your academic journey', '/assets/images/about-banner.png', 'About EduTrack', 'We Provide The Best Online Education', 'View All Categories', '/uploads/a8fb6ed4-a88d-4d60-8039-4a8ff0404260-login.jpg', 'Course Categories', 'Top Categories', '© Copyright 2025 | EduTrack Group | All Rights Reserved', '/assets/images/course-bg.png', 'POPULAR', 'LATEST', 'EduTrack helps you track and grow your learning journey — with mentors, clear goals, and transparent progress.', 'View schedule →', '/schedules', 'Upcoming Sessions', '/assets/images/hero-bg.png', 'Next session: [auto-filled by system]', '/uploads/6b1063b9-f7c8-460f-8e3f-3d3d2600d82d-welcome.jpg', 'Top Mentors for You', 'Recommended Mentors', 'POPULAR', 'MENTEE_EXPERIENCED', 'Popular Courses', 'Featured Courses', 'Top Courses', 'Top Rated Courses', 'POPULAR', true, true);
+
+INSERT INTO properties (id, prop_key, prop_value, description, created_date)
+VALUES 
+(
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'app.name',
+    'EduTrack',
+    'Application name',
+    NOW()
+),
+(
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'app.email',
+    'lephuonglinhnga1801@gmail.com',
+    'Sender email used in system notifications',
+    NOW()
+),
+(
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'smtp.host',
+    'smtp.gmail.com',
+    'SMTP server host',
+    NOW()
+),
+(
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'smtp.port',
+    '587',
+    'SMTP server port',
+    NOW()
+);
+
+INSERT INTO scheduled_jobs (id, name, cron_expression, description, active, tag, last_run_time, last_status)
+VALUES 
+(1, 'Database Backup',       '0 2 * * *',    'Backup toàn bộ cơ sở dữ liệu vào mỗi 2h sáng hàng ngày',         true,  'system',  NULL, NULL),
+(2, 'Log Cleanup',           '0 3 * * 0',    'Xóa các log cũ hơn 30 ngày mỗi Chủ Nhật',                        true,  'maintenance', NULL, NULL),
+(3, 'Weekly Report Email',   '0 8 * * 1',    'Gửi email báo cáo tổng hợp đến các admin mỗi thứ 2',            true,  'email',  NULL, NULL),
+(4, 'Inactive User Sweep',   '30 1 * * *',   'Tự động khóa user không hoạt động trong 6 tháng',               true,  'user',  NULL, NULL),
+(5, 'Push Notifications',    '*/15 * * * *', 'Gửi thông báo cho người dùng mới mỗi 15 phút',                  true,  'notification', NULL, NULL),
+(6, 'Disk Space Monitor',    '0 */6 * * *',  'Kiểm tra dung lượng ổ đĩa và gửi alert nếu vượt ngưỡng',        true,  'system', NULL, NULL),
+(7, 'Sync External CRM',     '0 */2 * * *',  'Đồng bộ dữ liệu từ hệ thống CRM bên ngoài mỗi 2 giờ',           false, 'integration', NULL, NULL),
+(8, 'Archive Expired Files', '0 4 * * *',    'Nén và lưu trữ các file đã hết hạn sử dụng',                   true,  'archive', NULL, NULL);

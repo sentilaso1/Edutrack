@@ -57,7 +57,7 @@ public interface EnrollmentScheduleService {
 
     List<EnrollmentSchedule> getSlotsUnderReviewByCourse(UUID menteeId, UUID courseMentorId, LocalDate startDate, LocalDate endDate);
 
-    List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate);
+    List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate, UUID mentorId);
 
     List<ScheduleActivityBannerDTO> collectRecentActivityBanners(UUID menteeId);
 

@@ -586,7 +586,7 @@ public class MenteeController {
                 }
             }
 
-            List<EnrollmentSchedule> pendingRequests = enrollmentScheduleService.getAllPendingSlotsInDateRange(date, date);
+            List<EnrollmentSchedule> pendingRequests = enrollmentScheduleService.getAllPendingSlotsInDateRange(date, date, mentorId);
             boolean slotHasPendingRequest = pendingRequests.stream()
                     .anyMatch(pending -> pending.getRequestedNewDate() != null &&
                             pending.getRequestedNewDate().equals(date) &&
@@ -631,7 +631,7 @@ public class MenteeController {
                         "Reschedule request submitted successfully! Your mentor will review it soon.");
             } else {
                 Long count = enrollmentScheduleService.countEnrollmentSchedulesHaveRescheduleRequest(schedule.getEnrollment());
-                if (count >= 2) {
+                if (count >= 1000) {
                     redirectAttributes.addFlashAttribute("errorMessage", "You have used all of your reschedule requests for this course.");
                 } else {
                     redirectAttributes.addFlashAttribute("errorMessage", "Failed to submit reschedule request. Please try again.");
@@ -736,7 +736,7 @@ public class MenteeController {
         Set<String> myReviewingKeys = new HashSet<>();
         Set<String> otherMenteesReviewingKeys = new HashSet<>();
         List<EnrollmentSchedule> allSystemReviewingSlots = enrollmentScheduleService.getAllPendingSlotsInDateRange(
-                mondayOfWeek, mondayOfWeek.plusDays(6)
+                mondayOfWeek, mondayOfWeek.plusDays(6), mentorId
         );
 
         for (EnrollmentSchedule reviewing : allSystemReviewingSlots) {

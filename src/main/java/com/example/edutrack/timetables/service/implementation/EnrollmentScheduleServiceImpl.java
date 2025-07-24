@@ -275,7 +275,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             dto.setDurationInMinutes((int) ChronoUnit.MINUTES.between(start, end));
             long count = rescheduleCounts.get(schedule.getEnrollment());
             dto.setRescheduleCount((int) count);
-            boolean canReschedule = count < 2
+            boolean canReschedule = count <= 1000
                     && schedule.getAttendance() == EnrollmentSchedule.Attendance.NOT_YET
                     && schedule.getRescheduleStatus() == EnrollmentSchedule.RescheduleStatus.NONE
                     && schedule.getDate().isAfter(LocalDate.now());
@@ -308,7 +308,7 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
             );
 
             if(schedule.getRescheduleReason() == null || schedule.getRescheduleReason().isEmpty()){
-                if (rescheduleCount >= 2) {
+                if (rescheduleCount >= 1000) {
                     return false;
                 }
             }
@@ -412,8 +412,8 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
     }
 
     @Override
-    public List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate) {
-        return enrollmentScheduleRepository.findAllPendingRequestsInDateRange(startDate, endDate);
+    public List<EnrollmentSchedule> getAllPendingSlotsInDateRange(LocalDate startDate, LocalDate endDate, UUID mentorId) {
+        return enrollmentScheduleRepository.findAllPendingRequestsInDateRange(startDate, endDate, mentorId);
     }
 
     @Override
