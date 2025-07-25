@@ -15,13 +15,13 @@
             <div class="left">
                 <div>
                     <h1 th:text="${course.course.name}">Course Name</h1>
-                    <p th:text="${course.course.description}">Mô tả khóa học chi tiết sẽ được hiển thị ở đây. Đây là một
-                        khóa học tuyệt vời giúp bạn nâng cao kỹ năng và kiến thức trong lĩnh vực này.</p>
+                    <p th:text="${course.course.description}"></p>
                 </div>
                 <div>
                     <div class="mentor-details" style="margin-bottom: 1em">
                         <h3 th:text="${'Mentor: ' + course.mentor.fullName}">Tên Mentor</h3>
                     </div>
+                    <p th:if="${param.error != null}" th:text="${param.error}" style="color: #721c24; padding: 10px; background-color: white; border-radius: 10px; border-left: 4px solid hsl(357deg 100% 75% / 99%) "></p>
                     <a th:href="@{/courses/register/{cid}(cid=${courseMentor.id})}" class="register-btn">
                         Enroll
                     </a>
@@ -58,8 +58,7 @@
                         <h2 id="session1">What you'll learn</h2>
                         <div class="group">
                             <div class="element">
-                                <p th:text="${course.description}">Mô tả khóa học chi tiết sẽ được hiển thị ở đây. Đây là một
-                                    khóa học tuyệt vời giúp bạn nâng cao kỹ năng và kiến thức trong lĩnh vực này.</p>
+                                <p th:text="${course.description}"></p>
                             </div>
                         </div>
                     </div>

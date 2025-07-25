@@ -10,7 +10,7 @@
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 30px;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid #fa6b6b;
 }
 
 .current-schedule-info h3 {
@@ -32,7 +32,7 @@
 }
 
 .info-item i {
-    color: #007bff;
+    color: #fa6b6b;
     width: 20px;
 }
 
@@ -47,7 +47,7 @@
     color: #333;
     margin-bottom: 20px;
     font-size: 1.3em;
-    border-bottom: 2px solid #007bff;
+    border-bottom: 2px solid #fa6b6b;
     padding-bottom: 10px;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .week-button-request {
-    background: #007bff;
+    background: #fa6b6b;
     color: white;
     padding: 8px 16px;
     border-radius: 6px;
@@ -72,7 +72,7 @@
 }
 
 .week-button-request:hover {
-    background: #0056b3;
+    background: #fa6b6b;
     color: white;
 }
 
@@ -124,7 +124,7 @@
 
 .slot-cell-request:hover {
     background: #e3f2fd;
-    border-color: #2196f3;
+    border-color: #fa6b6b;
 }
 
 .slot-cell-request.occupied {
@@ -198,7 +198,7 @@
 
 .reason-section textarea:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #fa6b6b;
 }
 
 .action-buttons {
