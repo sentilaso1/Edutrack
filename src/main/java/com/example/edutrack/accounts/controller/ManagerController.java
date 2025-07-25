@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
 import com.example.edutrack.accounts.dto.ManagerStatsDTO;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 @Controller
 public class ManagerController {
@@ -354,17 +355,27 @@ public class ManagerController {
     public String showLandingPageEditor(
             @RequestParam(defaultValue = "GUEST") MenteeLandingRole role,
             @RequestParam(defaultValue = "hero") String activeTab,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
         LandingPageConfig config = landingPageConfigService.getConfigByRole(role);
+        Map<String, ?> flashAttributes = RequestContextUtils.getInputFlashMap(request);
+        if (flashAttributes != null && flashAttributes.containsKey("landingConfig")) {
+            config = (LandingPageConfig) flashAttributes.get("landingConfig");
+            if (flashAttributes.containsKey("bindingResult")) {
+                BindingResult bindingResult = (BindingResult) flashAttributes.get("bindingResult");
+                model.addAttribute("org.springframework.validation.BindingResult.landingConfig", bindingResult);
+            }
+        }
+
         model.addAttribute("landingConfig", config);
         model.addAttribute("role", role.name());
         model.addAttribute("activeTab", activeTab);
         model.addAttribute("availableEndpoints", endpointRegistry.getGetEndpoints());
         model.addAttribute("isPersonalized", landingPageConfigService.isPersonalizationEnabled());
+
         return "manager/manage-landing-page";
     }
-
     @GetMapping("/manager/landing-page/reset")
     public String resetLandingPage(
             @RequestParam MenteeLandingRole role,
@@ -377,7 +388,6 @@ public class ManagerController {
         redirectAttributes.addFlashAttribute("isPersonalized", landingPageConfigService.isPersonalizationEnabled());
         return "redirect:/manager/landing-page?role=" + role.name() + "&activeTab=" + activeTab;
     }
-
     @PostMapping("/manager/landing-page/save")
     public String saveLandingPage(
             @Valid @ModelAttribute("landingConfig") LandingPageConfig landingConfig,
@@ -402,7 +412,7 @@ public class ManagerController {
 
             model.addAttribute("errorMessage", "Please fix the validation errors below.");
             model.addAttribute("role", role.name());
-            model.addAttribute("activeTab", activeTab);
+            model.addAttribute("activeTab", activeTab); // Đảm bảo activeTab được truyền đúng
             model.addAttribute("availableEndpoints", endpointRegistry.getGetEndpoints());
             model.addAttribute("isPersonalized", landingPageConfigService.isPersonalizationEnabled());
 
@@ -410,7 +420,11 @@ public class ManagerController {
                     System.out.println("Validation error: " + error.getField() + " - " + error.getDefaultMessage())
             );
 
-            return "manager/manage-landing-page";
+            redirectAttributes.addFlashAttribute("landingConfig", landingConfig);
+            redirectAttributes.addFlashAttribute("bindingResult", bindingResult);
+            redirectAttributes.addFlashAttribute("errorMessage", "Please fix the validation errors below.");
+
+            return "redirect:/manager/landing-page?role=" + role.name() + "&activeTab=" + activeTab;
         }
 
         try {
@@ -465,6 +479,7 @@ public class ManagerController {
             return "redirect:/manager/landing-page?role=" + role.name() + "&activeTab=" + activeTab;
         }
     }
+
 
     @PostMapping("/manager/landing-page/preview")
     public String previewLandingPage(@ModelAttribute LandingPageConfig config,

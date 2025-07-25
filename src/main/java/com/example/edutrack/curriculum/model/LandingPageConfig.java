@@ -2,6 +2,7 @@ package com.example.edutrack.curriculum.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
@@ -76,21 +77,25 @@ public class LandingPageConfig {
     @NotBlank @Size(max = 255)
     private String copyrightText;
 
+    @NotNull(message = "Course suggestion logic for section one cannot be empty.")
     @Enumerated(EnumType.STRING)
     @Column(name = "course_section_one_suggestion")
-    private SuggestionType courseSectionOneSuggestion = SuggestionType.POPULAR;
+    private SuggestionType courseSectionOneSuggestion;
 
+    @NotNull(message = "Mentor suggestion logic cannot be empty.")
     @Enumerated(EnumType.STRING)
     @Column(name = "mentor_suggestion")
-    private SuggestionType mentorSuggestion = SuggestionType.TOP_RATED;
+    private SuggestionType mentorSuggestion;
 
+    @NotNull(message = "Course suggestion logic for section two cannot be empty.")
     @Enumerated(EnumType.STRING)
     @Column(name = "course_section_two_suggestion")
-    private SuggestionType courseSectionTwoSuggestion = SuggestionType.LATEST;
+    private SuggestionType courseSectionTwoSuggestion;
 
+    @NotNull(message = "Tag suggestion logic cannot be empty.")
     @Enumerated(EnumType.STRING)
     @Column(name = "tag_suggestion")
-    private SuggestionType tagSuggestion = SuggestionType.POPULAR;
+    private SuggestionType tagSuggestion;
 
     private String heroImageUrl;
 
