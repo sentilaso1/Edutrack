@@ -41,18 +41,19 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
             Pageable pageable);
 
     @Query("""
-                SELECT cm FROM CourseMentor cm
-                WHERE
-                    (:skillIds IS NULL OR cm.course.id IN :skillIds)
-                AND
-                    (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%')))
-                AND
-                    (:subjectIds IS NULL OR EXISTS (
-                        SELECT 1 FROM CourseTag ct
-                        WHERE ct.course = cm.course
-                        AND ct.tag.id IN :subjectIds
-                    ))
-            """)
+                 SELECT cm FROM CourseMentor cm
+                 WHERE
+                     (:skillIds IS NULL OR cm.course.id IN :skillIds)
+                 AND
+                     (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%')))
+                AND cm.status = 'ACCEPTED'
+                 AND
+                     (:subjectIds IS NULL OR EXISTS (
+                         SELECT 1 FROM CourseTag ct
+                         WHERE ct.course = cm.course
+                         AND ct.tag.id IN :subjectIds
+                     ))
+             """)
     Page<CourseMentor> findFilteredCourseMentors(
             @Param("skillIds") List<UUID> skillIds,
             @Param("subjectIds") List<Integer> subjectIds,
@@ -62,7 +63,7 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     Page<CourseMentor> findAlByOrderByCreatedDateDesc(
             Pageable pageable);
 
-    @Query("SELECT cm FROM CourseMentor cm WHERE (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%')))  ORDER BY cm.course.createdDate DESC")
+    @Query("SELECT cm FROM CourseMentor cm WHERE (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%'))) AND cm.status = 'ACCEPTED' ORDER BY cm.course.createdDate DESC")
     Page<CourseMentor> findAlByOrderByCreatedDateDesc(
             Pageable pageable, String search);
 
@@ -70,7 +71,7 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     Page<CourseMentor> findAlByOrderByCreatedDateAsc(
             Pageable pageable);
 
-    @Query("SELECT cm FROM CourseMentor cm WHERE (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%'))) ORDER BY cm.course.createdDate ASC ")
+    @Query("SELECT cm FROM CourseMentor cm WHERE (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%'))) AND cm.status = 'ACCEPTED' ORDER BY cm.course.createdDate ASC ")
     Page<CourseMentor> findAlByOrderByCreatedDateAsc(
             Pageable pageable, String search);
 
@@ -78,7 +79,7 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     Page<CourseMentor> findAlByOrderByTitleAsc(
             Pageable pageable);
 
-    @Query("SELECT cm FROM CourseMentor cm WHERE (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%')))  ORDER BY cm.course.name ASC")
+    @Query("SELECT cm FROM CourseMentor cm WHERE (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%'))) AND cm.status = 'ACCEPTED' ORDER BY cm.course.name ASC")
     Page<CourseMentor> findAlByOrderByTitleAsc(
             Pageable pageable, String search);
 
@@ -86,7 +87,7 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
     Page<CourseMentor> findAlByOrderByTitleDesc(
             Pageable pageable);
 
-    @Query("SELECT cm FROM CourseMentor cm WHERE (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%')))  ORDER BY cm.course.name DESC")
+    @Query("SELECT cm FROM CourseMentor cm WHERE (:search IS NULL OR LOWER(cm.course.name) LIKE LOWER(CONCAT('%', :search, '%'))) AND cm.status = 'ACCEPTED' ORDER BY cm.course.name DESC")
     Page<CourseMentor> findAlByOrderByTitleDesc(
             Pageable pageable, String search);
 
