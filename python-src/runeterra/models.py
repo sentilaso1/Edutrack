@@ -18,7 +18,7 @@ def create_llm(model_config: ModelConfig) -> BaseChatModel:
             model=model_config.name,
             temperature=model_config.temperature,
             model_kwargs={
-                "top_p": 1.0,
+                "top_p": 0.1,
                 "frequency_penalty": 0.0,
                 "presence_penalty": 0.0,
             }
