@@ -1,4 +1,5 @@
 import mysql.connector
+import mysql.connector.pooling
 from contextlib import contextmanager
 from typing import Any, List
 
@@ -9,6 +10,18 @@ from langchain_core.tools import BaseTool
 
 from runeterra.config import Config
 from runeterra.logging import log, log_panel
+
+connection_pool = mysql.connector.pooling.MySQLConnectionPool(
+    pool_name='edutrack',
+    pool_size=10,
+    pool_reset_session=True,
+    host=Config.MySQL.HOST,
+    port=Config.MySQL.PORT,
+    user=Config.MySQL.USER,
+    password=Config.MySQL.PASSWORD,
+    database=Config.MySQL.DATABASE
+)
+
 
 def get_available_tools() -> List[BaseTool]:
     return [
@@ -29,13 +42,7 @@ def call_tool(tool_call: ToolCall) -> Any:
 
 @contextmanager
 def with_sql_cursor(readonly=True):
-    conn = mysql.connector.connect(
-        host=Config.MySQL.HOST,
-        port=Config.MySQL.PORT,
-        user=Config.MySQL.USER,
-        password=Config.MySQL.PASSWORD,
-        database=Config.MySQL.DATABASE
-    )
+    conn = connection_pool.get_connection()
     cur = conn.cursor()
 
     try:
@@ -68,6 +75,11 @@ def _execute_sql(reasoning: str, sql_query: str) -> str:
 @tool(parse_docstring=True)
 def execute_sql(reasoning: str, sql_query: str) -> str:
     """Executes a SQL query on the MySQL database and returns the result.
+    PERFORMANCE GUIDELINES:
+    - Use LIMIT clause for large result sets
+    - Prefer specific columns over SELECT *
+    - Use appropriate WHERE clauses with indexed columns
+    - Consider using specialized tools for common queries
 
     Args:
         reasoning: Explanation of why this query needs to be run.
