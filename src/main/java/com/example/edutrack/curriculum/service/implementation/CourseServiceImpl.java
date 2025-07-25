@@ -3,6 +3,7 @@ package com.example.edutrack.curriculum.service.implementation;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.repository.MentorRepository;
 import com.example.edutrack.curriculum.dto.CourseFormDTO;
+import com.example.edutrack.curriculum.dto.CourseInformationDTO;
 import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.*;
 import com.example.edutrack.curriculum.service.interfaces.CourseService;
@@ -12,9 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -62,7 +61,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public void save(Course course){
+    public void save(Course course) {
         courseRepository.save(course);
     }
 
@@ -129,6 +128,21 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Page<CourseInformationDTO> mapToCourseInformationDTO(Page<Course> coursePage) {
+        return coursePage.map(
+                course -> new CourseInformationDTO(
+                        course,
+                        courseRepository.findCourseStartingPrice(course) == null ? 0.0 :
+                                courseRepository.findCourseStartingPrice(course),
+                        courseRepository.findAverageCourseRating(course) == null ? 0.0 :
+                                courseRepository.findAverageCourseRating(course),
+                        courseRepository.countTeachingMentors(course) == null ? 0 :
+                                courseRepository.countTeachingMentors(course)
+                )
+        );
+    }
+
+    @Override
     public Page<Course> findFilteredCourses(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable) {
         return courseRepository.findFilteredCourses(skillIds, subjectIds, pageable);
     }
@@ -171,7 +185,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Map<UUID, List<Mentor>> getAcceptedMentorsForCourses(List<Course> courses){
+    public Map<UUID, List<Mentor>> getAcceptedMentorsForCourses(List<Course> courses) {
         Map<UUID, List<Mentor>> courseMentorMap = new HashMap<>();
         List<String> approvedStatuses = List.of(CV.STATUS_APPROVED, CV.STATUS_AIAPPROVED);
         for (Course course : courses) {

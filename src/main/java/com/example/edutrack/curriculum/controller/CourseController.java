@@ -6,6 +6,7 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MenteeServiceImpl;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
+import com.example.edutrack.curriculum.dto.CourseInformationDTO;
 import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
@@ -182,13 +183,14 @@ CourseController {
                 case "title_desc" -> PageRequest.of(page - 1, size_page, Sort.by("name").descending());
                 default -> PageRequest.of(page - 1, size_page);
             };
-            coursePage = courseServiceImpl.getAll(pageable);
+            coursePage = courseServiceImpl.getAll(Pageable.unpaged());
         } else {
             pageable = PageRequest.of(page - 1, size_page);
-            coursePage = courseServiceImpl.findFilteredCourses(skillIds, subjectIds, pageable);
+            coursePage = courseServiceImpl.findFilteredCourses(skillIds, subjectIds, Pageable.unpaged());
         }
+        Page<CourseInformationDTO> courseInformationPage = courseServiceImpl.mapToCourseInformationDTO(coursePage);
 
-        model.addAttribute("coursePage", coursePage);
+        model.addAttribute("coursePage", courseInformationPage);
         model.addAttribute("page", page);
         model.addAttribute("subjectList", courseMentorServiceImpl.findAllTags());
         model.addAttribute("skillList", courseMentorServiceImpl.findAllCourses());
