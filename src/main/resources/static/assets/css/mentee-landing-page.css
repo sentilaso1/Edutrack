@@ -165,3 +165,20 @@ html, body {
     display: block;
 }
 
+.expertise-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.pill {
+    background: #e0f3ff;
+    color: #1877f2;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+}
+

@@ -198,10 +198,9 @@
         <p id="modalMentor"></p>
         <p id="modalTime"></p>
         <p id="modalDay"></p>
-        <div id="testButtonWrapper" style="margin-top: 10px;">
-            <a id="takeTestLink" class="btnTest" th:href="@{'/tests/take?slot=' + __slot__ + '&day=' + __day__}"
-               style="display: none;">Take Test</a>
-        </div>
+        <p id="modalHasTest" class="test-notice" style="display: none;">
+            📝 This session includes a test.
+        </p>
 
         <div id="rescheduleButtonWrapper" style="margin-top: 10px;">
             <a id="rescheduleButton"
@@ -274,12 +273,11 @@
         document.getElementById('modalMentor').textContent = `Mentor: ${mentor}`;
         document.getElementById('modalDay').textContent = `Day: ${day}`;
         document.getElementById('modalTime').textContent = `Time: ${startTime} - ${endTime}`;
-        const testLink = document.getElementById('takeTestLink');
+        const hasTestNotice = document.getElementById('modalHasTest');
         if (hasTest) {
-            testLink.style.display = 'inline-block';
-            testLink.href = `/tests/take?slot=${slot}&day=${day}`;
+            hasTestNotice.style.display = 'block';
         } else {
-            testLink.style.display = 'none';
+            hasTestNotice.style.display = 'none';
         }
 
         const rescheduleButton = document.getElementById('rescheduleButton');
@@ -290,7 +288,7 @@
         if (canReschedule) {
             rescheduleButton.style.display = 'inline-block';
             rescheduleButton.href = `/schedules/reschedule?scheduleId=${scheduleId}`;
-        } else if (rescheduleCount >= 2) {
+        } else if (rescheduleCount >= 1000) {
             limitNotice.textContent = 'You have used all 2 reschedule requests for this course.';
             limitNotice.style.display = 'block';
         }

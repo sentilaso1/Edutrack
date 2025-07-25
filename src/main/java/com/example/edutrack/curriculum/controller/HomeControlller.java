@@ -4,6 +4,7 @@ import com.example.edutrack.accounts.model.Mentee;
 import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.repository.MenteeRepository;
+import com.example.edutrack.accounts.service.interfaces.MenteeService;
 import com.example.edutrack.accounts.service.interfaces.MentorService;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
 import com.example.edutrack.curriculum.dto.TagEnrollmentCountDTO;
@@ -35,21 +36,24 @@ public class HomeControlller {
     private final MentorService mentorService;
     private final DashboardService dashboardService;
     private final MenteeRepository menteeRepository;
+    private final MenteeService menteeService;
 
     public HomeControlller(LandingPageConfigService landingPageConfigService,
                            SuggestionService suggestionService,
                            CourseTagService courseTagService,
                            EnrollmentService enrollmentService, CourseMentorService courseMentorService, MentorService mentorService,
                            MenteeRepository menteeRepository,
-                           DashboardService dashboardService) {
+                           DashboardService dashboardService,
+                           MenteeService menteeService) {
         this.landingPageConfigService = landingPageConfigService;
         this.suggestionService = suggestionService;
         this.courseTagService = courseTagService;
         this.enrollmentService = enrollmentService;
         this.courseMentorService = courseMentorService;
-        this.mentorService = mentorService;
+        this.menteeService = menteeService;
         this.menteeRepository = menteeRepository;
         this.dashboardService = dashboardService;
+        this.mentorService = mentorService;
     }
 
     @GetMapping("/")
@@ -186,7 +190,9 @@ public class HomeControlller {
 
         model.addAttribute("footerDescription", config.getFooterDescription());
         model.addAttribute("copyrightText", config.getCopyrightText());
-
+        model.addAttribute("totalCourses", courseMentorService.getTotalActiveCourseCount());
+        model.addAttribute("totalMentors", mentorService.getTotalMentorCount());
+        model.addAttribute("totalMentees", menteeService.getTotalMenteeCount());
         model.addAttribute("topTags", suggestionService.getSuggestedTags(config.getTagSuggestion(), 9));
         List<Tag> allCourseTags = courseTagService.getAllTags();
         List<Integer> allCourseTagIds = allCourseTags.stream().map(Tag::getId).toList();
