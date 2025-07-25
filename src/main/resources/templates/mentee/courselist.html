@@ -217,7 +217,7 @@
                                 <div class="card course-card">
                                     <figure class="card-banner">
                                         <img
-                                                th:if="${course_mentor.mentor != null}"
+                                                th:if="${course_mentor.mentor.avatar != null}"
                                                 th:src="@{/mentors/{id}/avatar(id=${course_mentor.mentor.id})}"
                                                 width="370"
                                                 height="248"
@@ -228,7 +228,7 @@
 
                                         <img
                                                 th:if="${course_mentor.mentor.avatar == null}"
-                                                th:src="@{/assets/images/default-avatar.svg}"
+                                                th:src="@{/assets/images/mentor.png}"
                                                 width="370"
                                                 height="248"
                                                 loading="lazy"
