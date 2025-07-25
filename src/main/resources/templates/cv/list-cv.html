@@ -6,89 +6,101 @@
     <title>EduTrack - CV Approval List</title>
     <link rel="stylesheet" th:href="@{/css/master.css}"/>
     <link rel="stylesheet" th:href="@{/css/colors.css}"/>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background: linear-gradient(to right, #e6f7f9, #ffeef0);
+            background-color: #f3f4f6;
             color: #333;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        /* Filter Card Styling */
+        .filter-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
         }
 
-        h1 {
-            font-size: 32px;
-            color: #2C3E50;
-            text-align: center;
-            margin-bottom: 20px;
+        /* Form Inputs */
+        .form-input, .form-select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 30px;
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .filter-section {
-            background-color: #fafafa;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-        }
-
-        .filter-section h4 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #2C3E50;
-        }
-
-        .filter-section form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        label {
+        /* Button Styling */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: 600;
-        }
-
-        .filter-text {
-            font-weight: normal;
-        }
-
-        select, input[type="checkbox"] {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-
-        .filter-section button {
-            background-color: rgba(255, 128, 134, 0.99);
-            color: white;
-            padding: 10px 16px;
+            text-decoration: none;
             border: none;
-            border-radius: 8px;
-            font-weight: bold;
             cursor: pointer;
+            transition: all 0.15s ease-in-out;
         }
 
-        .filter-section button:hover {
-            background-color: rgba(255, 100, 110, 0.99);
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
         }
 
-        .cv-table {
-            background-color: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
         }
 
         table {
@@ -100,26 +112,31 @@
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         th {
-            background-color: #fff7f7;
-            color: #444;
+            background-color: #f9fafb;
+            color: #374151;
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        tbody tr:nth-child(even) {
-            background-color: #fafafa;
+        tbody tr:hover {
+            background-color: #f9fafb;
         }
 
+        /* Status badges */
         .tag-item {
-            background-color: rgba(255, 128, 134, 0.1);
-            color: rgba(255, 100, 110, 1);
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #1d4ed8;
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            border: 1px solid rgba(255, 128, 134, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.2);
             display: inline-block;
             margin-right: 5px;
             margin-bottom: 5px;
@@ -127,120 +144,357 @@
 
         .bg-approved {
             color: #fff;
-            background-color: rgba(56, 203, 137, 0.8);
+            background-color: #10b981;
             padding: 4px 10px;
             font-weight: bold;
+            border-radius: 4px;
         }
 
         .bg-rejected {
             color: #fff;
-            background-color: rgba(255, 99, 132, 0.8);
+            background-color: #ef4444;
             padding: 4px 10px;
             font-weight: bold;
+            border-radius: 4px;
         }
 
         .bg-aiapproved {
             color: #fff;
-            background-color: #b3e5fc;
+            background-color: #06b6d4;
             padding: 4px 10px;
             font-weight: bold;
+            border-radius: 4px;
         }
 
         .bg-pending {
             color: #fff;
-            background-color: rgba(255, 205, 86, 0.8);
+            background-color: #f59e0b;
             padding: 4px 10px;
             font-weight: bold;
+            border-radius: 4px;
         }
 
-        .pagination {
-            margin-top: 30px;
+        /* Pagination */
+        .pagination-container {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            margin-top: 24px;
         }
 
-        .pagination button {
-            background-color: rgba(255, 128, 134, 0.99);
-            color: white;
+        .pagination-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 8px;
+        }
+
+        .pagination-list li {
+            display: flex;
+        }
+
+        .pagination-list a,
+        .pagination-list span {
             padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .pagination-list a:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .pagination-list .active a {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .pagination-list .disabled span {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Notification Styling */
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .notification-content {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .notification-success {
+            border-left: 4px solid #10b981;
+        }
+
+        .notification-error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        /* Filter section specific styling */
+        .filter-section {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .filter-section h4 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .filter-section form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .filter-section label {
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .filter-text {
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-section input[type="checkbox"],
+        .filter-section input[type="radio"] {
+            margin-right: 8px;
+        }
+
+        .filter-section select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            background-color: white;
+        }
+
+        .filter-section button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 16px;
             border: none;
             border-radius: 6px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
         }
 
-        .pagination button.disabled {
-            display: none;
+        .filter-section button:hover {
+            background-color: #2563eb;
+        }
+
+        /* Timer styling */
+        #batch-timer {
+            padding: 12px;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #374151;
         }
     </style>
 </head>
-<body>
-<div class="container">
-    <h1>CV Approval List</h1>
-    <div class="grid-layout">
-        <div class="filter-section">
-            <h4>Filter CVs</h4>
-            <div id="batch-timer">
-                <span th:if="${batchRunning}">AI moderation is in progress...</span>
-                <span th:unless="${batchRunning}">
-                    Next AI moderation in <span id="timer"></span>
-                </span>
-            </div>
-            <form id="filter-form">
-                <label for="sort">Sorting Order:</label>
-                <select name="sort" id="sort">
-                    <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Date descending</option>
-                    <option value="date-asc" th:selected="${sort == 'date-asc'}">Date ascending</option>
-                </select>
-                <label>Status Filter:</label>
-                <label class="filter-text"><input type="radio" name="filter" id="pending" value="pending" th:checked="${filter != null && filter == 'pending'}"> Pending</label>
-                <label class="filter-text"><input type="radio" name="filter" id="aiapproved" value="aiapproved" th:checked="${filter != null && filter == 'aiapproved'}"> AI Approved</label>
-                <label class="filter-text"><input type="radio" name="filter" id="approved" value="approved" th:checked="${filter != null && filter == 'approved'}"> Approved</label>
-                <label class="filter-text"><input type="radio" name="filter" id="rejected" value="rejected" th:checked="${filter != null && filter == 'rejected'}"> Rejected</label>
+<body class="bg-gray-100 flex">
+<!-- Sidebar -->
+<th:block th:insert="~{fragments/manager-sidebar :: manager-sidebar}"></th:block>
 
-                <label>Skills Filter:</label>
-                <label class="filter-text"><input id="tags-all" type="checkbox" th:checked="${tags == null || tags.isEmpty() || tags.size() == skills.size()}"/> All</label>
-                <label th:each="skill : ${skills}">
-                    <input type="checkbox" name="tags" th:value="${skill}" th:attr="checked=${tags != null && #lists.contains(tags, skill)}"/>
-                    <span th:text="${skill}" class="filter-text"></span>
-                </label>
-                <button type="submit">Apply Filters</button>
-            </form>
+<!-- Main Content -->
+<div class="ml-64 flex-1 p-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">CV Approval List</h1>
+        <p class="text-gray-600">Manage CV applications and approvals</p>
+    </div>
+
+    <!-- Notifications -->
+    <div id="successOverlay" th:if="${successMessage}" class="notification-overlay">
+        <div class="notification-content notification-success">
+            <button class="close-btn" onclick="closeNotification('successOverlay')">&times;</button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07.02l3.992-4.99a.75.75 0 1 0-1.14-.98L7.477 9.417 5.383 7.323a.75.75 0 0 0-1.06 1.06l2.647 2.647z"/>
+            </svg>
+            <p style="margin: 0;" th:text="${successMessage}"></p>
         </div>
-        <div class="cv-table">
-            <table>
-                <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Created Date</th>
-                    <th>User</th>
-                    <th>Skills</th>
-                    <th>Education</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="cv : ${page.content}">
-                    <td th:text="${cv.status}" th:classappend="${cv.status.equals('approved') ? 'bg-approved' : (cv.status.equals('rejected') ? 'bg-rejected' : (cv.status.equals('aiapproved') ? 'bg-aiapproved' : 'bg-pending'))}"></td>
-                    <td th:text="${cv.createdDate.toLocaleString()}"></td>
-                    <td th:text="${cv.user.fullName}"></td>
-                    <td><span th:each="skill : ${cv.getSkillItems()}" th:text="${skill}" class="tag-item"></span></td>
-                    <td><span th:each="edu : ${cv.getEducationItems()}" th:text="${edu}" class="tag-item"></span></td>
-                    <td><a th:href="@{/manager/cv/detail/{id}(id = ${cv.id})}">View More</a></td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="pagination">
-                <button id="first-page" th:classappend="${(pageNumber > 1) ? '' : 'disabled'}">First</button>
-                <button id="previous-page" th:classappend="${(page.hasPrevious()) ? '' : 'disabled'}">Previous</button>
-                <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
-                <button id="next-page" th:classappend="${(page.hasNext()) ? '' : 'disabled'}">Next</button>
-                <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? '' : 'disabled'}">Last</button>
+    </div>
+
+    <div id="errorOverlay" th:if="${errorMessage}" class="notification-overlay">
+        <div class="notification-content notification-error">
+            <button class="close-btn" onclick="closeNotification('errorOverlay')">&times;</button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+            </svg>
+            <p style="margin: 0;" th:text="${errorMessage}"></p>
+        </div>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Filter Section -->
+        <div class="lg:col-span-1">
+            <div class="filter-section">
+                <h4>Filter CVs</h4>
+                <div id="batch-timer">
+                    <span th:if="${batchRunning}">AI moderation is in progress...</span>
+                    <span th:unless="${batchRunning}">
+                        Next AI moderation in <span id="timer"></span>
+                    </span>
+                </div>
+                <form id="filter-form">
+                    <div>
+                        <label for="sort">Sorting Order:</label>
+                        <select name="sort" id="sort" class="form-select w-full">
+                            <option value="date-desc" th:selected="${sort == null || sort == 'date-desc'}">Date descending</option>
+                            <option value="date-asc" th:selected="${sort == 'date-asc'}">Date ascending</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Status Filter:</label>
+                        <label class="filter-text"><input type="radio" name="filter" id="pending" value="pending" th:checked="${filter != null && filter == 'pending'}"> Pending</label>
+                        <label class="filter-text"><input type="radio" name="filter" id="aiapproved" value="aiapproved" th:checked="${filter != null && filter == 'aiapproved'}"> AI Approved</label>
+                        <label class="filter-text"><input type="radio" name="filter" id="approved" value="approved" th:checked="${filter != null && filter == 'approved'}"> Approved</label>
+                        <label class="filter-text"><input type="radio" name="filter" id="rejected" value="rejected" th:checked="${filter != null && filter == 'rejected'}"> Rejected</label>
+                    </div>
+
+                    <div>
+                        <label>Skills Filter:</label>
+                        <label class="filter-text"><input id="tags-all" type="checkbox" th:checked="${tags == null || tags.isEmpty() || tags.size() == skills.size()}"/> All</label>
+                        <label th:each="skill : ${skills}" class="filter-text">
+                            <input type="checkbox" name="tags" th:value="${skill}" th:attr="checked=${tags != null && #lists.contains(tags, skill)}"/>
+                            <span th:text="${skill}"></span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-action btn-primary w-full">
+                        🔍 Apply Filters
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CV Table Section -->
+        <div class="lg:col-span-3">
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table th:if="${#lists.size(page.content) > 0}">
+                        <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>User</th>
+                            <th>Skills</th>
+                            <th>Education</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="cv : ${page.content}">
+                            <td>
+                                <span th:text="${cv.status}"
+                                      th:classappend="${cv.status.equals('approved') ? 'bg-approved' : (cv.status.equals('rejected') ? 'bg-rejected' : (cv.status.equals('aiapproved') ? 'bg-aiapproved' : 'bg-pending'))}"></span>
+                            </td>
+                            <td th:text="${cv.createdDate.toLocaleString()}"></td>
+                            <td th:text="${cv.user.fullName}"></td>
+                            <td>
+                                <span th:each="skill : ${cv.getSkillItems()}" th:text="${skill}" class="tag-item"></span>
+                            </td>
+                            <td>
+                                <span th:each="edu : ${cv.getEducationItems()}" th:text="${edu}" class="tag-item"></span>
+                            </td>
+                            <td>
+                                <a th:href="@{/manager/cv/detail/{id}(id = ${cv.id})}" class="btn-action btn-primary text-xs">
+                                    👁️ View More
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div th:if="${#lists.size(page.content) == 0}" class="text-center py-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No CVs found</h3>
+                        <p class="text-gray-600">Try adjusting your filters</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container" th:if="${page.totalPages > 0}">
+                <nav>
+                    <ul class="pagination-list">
+                        <li th:classappend="${!page.hasPrevious()} ? 'disabled'">
+                            <button id="first-page" th:classappend="${(pageNumber > 1) ? '' : 'disabled'}"
+                                    th:disabled="${pageNumber <= 1}">First</button>
+                        </li>
+                        <li th:classappend="${!page.hasPrevious()} ? 'disabled'">
+                            <button id="previous-page" th:classappend="${(page.hasPrevious()) ? '' : 'disabled'}"
+                                    th:disabled="${!page.hasPrevious()}">Previous</button>
+                        </li>
+                        <li class="active">
+                            <span th:text="${'Page ' + pageNumber + ' of ' + page.totalPages}"></span>
+                        </li>
+                        <li th:classappend="${!page.hasNext()} ? 'disabled'">
+                            <button id="next-page" th:classappend="${(page.hasNext()) ? '' : 'disabled'}"
+                                    th:disabled="${!page.hasNext()}">Next</button>
+                        </li>
+                        <li th:classappend="${pageNumber >= page.totalPages} ? 'disabled'">
+                            <button id="last-page" th:classappend="${(pageNumber < page.totalPages) ? '' : 'disabled'}"
+                                    th:disabled="${pageNumber >= page.totalPages}">Last</button>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
 </div>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
     const filterForm = document.getElementById("filter-form");
@@ -341,6 +595,59 @@
         updateCountdown();
         var timerInterval = setInterval(updateCountdown, 1000);
     }
+
+    // Close notifications
+    function closeNotification(overlayId) {
+        const overlay = document.getElementById(overlayId);
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // Auto-close notifications
+    window.addEventListener('DOMContentLoaded', function () {
+        const successOverlay = document.getElementById('successOverlay');
+        const errorOverlay = document.getElementById('errorOverlay');
+
+        if (successOverlay) {
+            setTimeout(() => {
+                closeNotification('successOverlay');
+            }, 4000);
+        }
+
+        if (errorOverlay) {
+            setTimeout(() => {
+                closeNotification('errorOverlay');
+            }, 5000);
+        }
+    });
+
+    // Close notifications on click outside or key press
+    document.addEventListener('click', function (event) {
+        const successOverlay = document.getElementById('successOverlay');
+        const errorOverlay = document.getElementById('errorOverlay');
+
+        if (successOverlay && event.target === successOverlay) {
+            closeNotification('successOverlay');
+        }
+
+        if (errorOverlay && event.target === errorOverlay) {
+            closeNotification('errorOverlay');
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === "Enter" || event.key === "Escape") {
+            const successOverlay = document.getElementById('successOverlay');
+            const errorOverlay = document.getElementById('errorOverlay');
+
+            if (successOverlay) closeNotification('successOverlay');
+            if (errorOverlay) closeNotification('errorOverlay');
+        }
+    });
     /*]]>*/
 </script>
 </body>
