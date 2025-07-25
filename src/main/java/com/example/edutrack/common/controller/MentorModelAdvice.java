@@ -23,7 +23,7 @@ public class MentorModelAdvice {
         User mentor = (User) session.getAttribute("loggedInUser");
         String path = request.getRequestURI();
 
-        if (path.startsWith("/mentor")) {
+        if (mentor != null && path.matches("^/mentor(/.*)?$")) {
             return enrollmentService.findByStatusAndMentor(Enrollment.EnrollmentStatus.PENDING, mentor.getId()).size();
         }
 
