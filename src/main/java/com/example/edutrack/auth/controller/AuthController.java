@@ -5,6 +5,7 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.interfaces.StaffService;
 import com.example.edutrack.auth.service.RecaptchaService;
 import com.example.edutrack.auth.service.UserService;
+import com.example.edutrack.common.formatter.NameFormatter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -150,6 +151,7 @@ public class AuthController {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hashed = encoder.encode(user.getPassword());
         user.setPassword(hashed);
+        user.setFullName(NameFormatter.formatName(user.getFullName()));
         if("mentee".equals(role)){
             userService.registerMentee(user);
         }else if("mentor".equals(role)){

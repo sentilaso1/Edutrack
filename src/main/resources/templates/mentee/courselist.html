@@ -36,13 +36,14 @@
         >
             <!-- Search Bar -->
             <div class="search-wrapper">
-                <form class="search-form" action="#" method="get">
+                <form class="search-form" th:action="@{/courses}" method="get">
                     <input
                             id="searchInput"
                             type="text"
-                            name="q"
+                            name="search"
                             class="search-input"
                             placeholder="Search for courses..."
+                            th:value="${param.search}"
                     />
                     <button type="submit" class="search-btn" aria-label="Search">
                         <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
@@ -226,8 +227,8 @@
                                         />
 
                                         <img
-                                                th:unless="${course_mentor.mentor != null}"
-                                                th:src="@{/assets/images/default-avatar.jpg}"
+                                                th:if="${course_mentor.mentor.avatar == null}"
+                                                th:src="@{/assets/images/default-avatar.svg}"
                                                 width="370"
                                                 height="248"
                                                 loading="lazy"
@@ -239,16 +240,19 @@
 
                                     <div class="card-content">
                                         <div class="wrapper">
-                                            <p class="title-lg card-price">$29.28</p>
+                                            <p class="title-lg card-price" style="font-size: 15px" th:text="${#numbers.formatDecimal(course_mentor.price, 0, 'COMMA', 0, 'POINT') + ' VND'}">$29.28</p>
                                             <div class="rating-wrapper">
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
-                                                     loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
-                                                     loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
-                                                     loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
-                                                     loading="lazy" alt=""/>
+                                                <span th:each="i : ${#numbers.sequence(1,5)}">
+                                                    <img
+                                                            th:if="${i <= T(java.lang.Math).floor(course_mentor.mentor.rating)}"
+                                                            th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt="" />
+                                                    <img
+                                                            th:if="${i > T(java.lang.Math).floor(course_mentor.mentor.rating)} and ${i - 1 < course_mentor.mentor.rating}"
+                                                            th:src="@{/assets/images/star-half.svg}" width="16" height="16" loading="lazy" alt="" />
+                                                    <img
+                                                            th:if="${i - 1 >= course_mentor.mentor.rating}"
+                                                            th:src="@{/assets/images/star-empty.svg}" width="16" height="16" loading="lazy" alt="" />
+                                                </span>
                                             </div>
                                         </div>
 
@@ -285,7 +289,7 @@
 
                     </div>
                 </div>
-                <nav class="pagination">
+                <nav class="pagination" th:if="${!coursePage.isEmpty()}">
                     <!-- Previous Page -->
                     <button th:disabled="${coursePage.first}">
                         <a th:if="${!coursePage.first}" class="page-btn"
