@@ -28,13 +28,13 @@ values  (' ', 0, 0x197ED21E11924758B334601DA429D61B),
         (' ', 0, 0x9B61C9A42FA3437D8979B98266ED63A3);
 
 insert into edutrack.mentors (expertise, is_available, rating, total_sessions, user_id)
-values  ('', true, 0.0, 0, 0x0764CB42DE04459E920FE3B7B085A339),
-        ('', true, 0.0, 0, 0x561AA1CE70E44DC29490B30584803514),
-        ('', true, 0.0, 0, 0x5C16354F84A245F1A160DECC6231A880),
-        ('', true, 0.0, 0, 0x74D47CCFE0A44A20A15CA7F5B422DA6C),
-        ('', true, 0.0, 0, 0xCF3A549C5E05418C8A14D397417A92A6),
-        ('', true, 4.5, 0, 0xD4845DC2495243A7A093DA6F2D47E540),
-        ('', true, 0.0, 0, 0xF9FA00D0678F4CD885B4B5C5F47746AE);
+values  ('Python;Machine Learning;Algorithms;Data Structures', true, 0.0, 0, 0x0764CB42DE04459E920FE3B7B085A339),
+        ('React;JavaScript;Front-End;Web Development', true, 0.0, 0, 0x561AA1CE70E44DC29490B30584803514),
+        ('Cybersecurity;Ethical Hacking', true, 0.0, 0, 0x5C16354F84A245F1A160DECC6231A880),
+        ('Python;NumPy;AI', true, 0.0, 0, 0x74D47CCFE0A44A20A15CA7F5B422DA6C),
+        ('Linux;Bash;OS', true, 0.0, 0, 0xCF3A549C5E05418C8A14D397417A92A6),
+        ('Java;SQL;OOP', true, 4.5, 0, 0xD4845DC2495243A7A093DA6F2D47E540),
+        ('Docker;AWS;CI/CD', true, 0.0, 0, 0xF9FA00D0678F4CD885B4B5C5F47746AE);
 
 insert into edutrack.staffs (role, user_id)
 values  ('Admin', 0x11111111111111111111111111111111),
