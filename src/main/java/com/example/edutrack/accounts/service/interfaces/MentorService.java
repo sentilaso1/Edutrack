@@ -38,4 +38,6 @@ public interface MentorService {
     List<String> getAllMentorSkills();
     Optional<Mentor> findByEmail(String email);
     void save(Mentor mentor);
+
+    long getTotalMentorCount();
 }

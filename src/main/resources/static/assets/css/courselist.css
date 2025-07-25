@@ -431,17 +431,25 @@ body {
 }
 
 .about .section-text,
-.progress-list li:not(:last-child) { margin-block-end: 32px; }
+.progress-list li:not(:last-child) {
+  margin-block-end: 32px;
+}
 
 .progress-label-wrapper {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-block-end: 8px;
 }
 
 .progress-label-wrapper .title-sm {
   color: var(--oxford-blue);
   font-weight: var(--fw-600);
+}
+
+.progress-label-wrapper .title-sm:last-child {
+  font-size: 1.2em;
+  font-weight: 700;
 }
 
 .progress {
@@ -453,25 +461,20 @@ body {
 .progress-fill {
   height: 100%;
   border-radius: inherit;
+  width: 100%;
 }
 
 .progress-fill.red {
   background-color: var(--light-coral);
-  width: 86%;
 }
 
 .progress-fill.green {
   background-color: var(--keppei);
-  width: 67%;
 }
 
 .progress-fill.yellow {
   background-color: var(--selective-yellow);
-  width: 95%;
 }
-
-
-
 
 
 /*-----------------------------------*\

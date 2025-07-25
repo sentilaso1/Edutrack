@@ -324,6 +324,11 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     public void save(CourseMentor cm) {
         courseMentorRepository.save(cm);
     }
+
+    @Override
+    public long getTotalActiveCourseCount() {
+        return courseMentorRepository.countDistinctAcceptedCourses();
+    }
 }
 
 

@@ -23,5 +23,4 @@ public interface MentorAvailableTimeDetailsRepository extends JpaRepository<Ment
     List<MentorAvailableTimeDetails> findByMentorIdAndMenteeIsNullAndDateBetween(UUID mentorId, LocalDate startDate, LocalDate endDate);
 
     MentorAvailableTimeDetails findByMentorAndDateAndSlot(Mentor mentor, LocalDate date, Slot slot);
-    MentorAvailableTimeDetails findByMentorAndDateAndSlotAndMenteeIsNull(Mentor mentor, LocalDate date, Slot slot);
 }
