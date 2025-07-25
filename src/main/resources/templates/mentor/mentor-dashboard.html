@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/assets/css/mentor_dashboard.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}"/>
+    <link rel="stylesheet" th:href="@{/assets/css/courselist.css}" />
 
     <style>
         .upcoming-schedules-header {
@@ -25,64 +27,289 @@
         .upcoming-schedules-header a:hover {
             text-decoration: underline;
         }
+
+        .income-section {
+            margin-top: 24px;
+        }
+
+        .income-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .income-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .income-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .income-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .income-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ff6b35;
+            margin-bottom: 8px;
+        }
+
+        .income-card .change {
+            font-size: 14px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .change.positive {
+            color: #10b981;
+        }
+
+        .change.negative {
+            color: #ef4444;
+        }
+
+        .chart-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .chart-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-section canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
     </style>
 </head>
-<body style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
-<th:block th:insert="~{fragments/header :: header}"></th:block>
-<div class="body">
-    <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
-    <div class="main">
-        <div class="dashboard-header">
-            <h2>Dashboard</h2>
-        </div>
-        <div class="stats">
-            <div class="card">
-                <h3 th:text="${pendingClassRequests}"></h3>
-                <p>Pending Class Requests</p>
-            </div>
-            <div class="card">
-                <h3 th:text="${classesThisWeek}"></h3>
-                <p>Classes This Week</p>
-            </div>
-            <div class="card">
-                <h3 th:text="${teachingMentees}"></h3>
-                <p>Teaching Mentees</p>
-            </div>
-            <div class="card">
-                <h3 th:text="${mentor.rating}"></h3>
-                <p>Current Rating</p>
-            </div>
-        </div>
 
-<!--        <div class="graph">-->
-<!--            <h3>Project Created</h3>-->
-<!--            <p>25% - Last month $563,443</p>-->
-<!--            <canvas id="barChart" height="100"></canvas>-->
-<!--        </div>-->
-
-        <div class="graph">
-            <div class="upcoming-schedules-header">
-                <h3>Upcoming Schedules</h3>
-                <a th:href="@{/mentor/schedule}">View more</a>
+<body
+    style="background-image: url('/assets/images/course-bg.png'); background-size: cover; background-position: center;">
+    <th:block th:insert="~{fragments/header :: header}"></th:block>
+    <div class="body">
+        <th:block th:insert="~{fragments/mentor-aside :: aside}"></th:block>
+        <div class="main">
+            <div class="dashboard-header">
+                <h2>Dashboard</h2>
+            </div>
+            <div class="stats">
+                <div class="card">
+                    <h3 th:text="${pendingClassRequests}"></h3>
+                    <p>Pending Class Requests</p>
+                </div>
+                <div class="card">
+                    <h3 th:text="${classesThisWeek}"></h3>
+                    <p>Classes This Week</p>
+                </div>
+                <div class="card">
+                    <h3 th:text="${teachingMentees}"></h3>
+                    <p>Teaching Mentees</p>
+                </div>
+                <div class="card">
+                    <h3 th:text="${mentor.rating}"></h3>
+                    <p>Current Rating</p>
+                </div>
             </div>
 
-            <th:block th:each="upcomingClass : ${upcomingClasses}"
-                      th:with="mentee = ${upcomingClass.mentee}, course = ${upcomingClass.course}, schedule = ${upcomingClass.schedule}">
-                <div class="project-item">
-                    <div class="project-tag" th:text="${mentee.fullName}"></div>
-                    <div class="project-title" th:text="${course.name + (schedule.test ? ' (Test)' : '')}"></div>
-                    <div class="project-meta">
-                        <svg class="calendar-icon icon" viewBox="0 0 24 24">
-                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                        </svg>
-                        <span class="created-date" th:text="${upcomingClass.formattedDate}"></span>
+            <div class="graph">
+                <div class="upcoming-schedules-header">
+                    <h3>Upcoming Schedules</h3>
+                    <a th:href="@{/mentor/schedule}">View more</a>
+                </div>
+
+                <th:block th:each="upcomingClass : ${upcomingClasses}"
+                    th:with="mentee = ${upcomingClass.mentee}, course = ${upcomingClass.course}, schedule = ${upcomingClass.schedule}">
+                    <div class="project-item">
+                        <div class="project-tag" th:text="${mentee.fullName}"></div>
+                        <div class="project-title" th:text="${course.name + (schedule.test ? ' (Test)' : '')}"></div>
+                        <div class="project-meta">
+                            <svg class="calendar-icon icon" viewBox="0 0 24 24">
+                                <path
+                                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+                            </svg>
+                            <span class="created-date" th:text="${upcomingClass.formattedDate}"></span>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+
+            <!-- Income Statistics Section -->
+            <div class="income-section">
+                <div class="income-stats">
+                    <div class="income-card">
+                        <h4>💰 Total Income</h4>
+                        <div class="value" id="total-income"
+                            th:text="${#numbers.formatInteger(incomeStats.totalIncome, 0, 'POINT')} + '₫'">
+                            0₫
+                        </div>
+                        <div class="change" th:classappend="${incomeStats.percentChange >= 0} ? 'positive' : 'negative'"
+                            th:text="${#numbers.formatDecimal(incomeStats.percentChange, 1, 1)} + '% compared to the previous month'">
+                            0% compared to the previous month
+                        </div>
+                    </div>
+
+                    <div class="income-card">
+                        <h4>📊 Income per Slot</h4>
+                        <div class="value"
+                            th:text="${#numbers.formatInteger(incomeStats.incomePerSlot, 0, 'POINT')} + '₫'">
+                            0₫
+                        </div>
+                        <div class="change">
+                            Average earning per teaching session
+                        </div>
                     </div>
                 </div>
-            </th:block>
+
+                <div class="chart-section">
+                    <h3>📈 Income Over Time</h3>
+                    <canvas id="incomeChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<th:block th:insert="~{fragments/footer :: footer}"></th:block>
+    <script th:inline="javascript">
+        // Dữ liệu từ IncomeStatsDTO
+        var incomeData = {
+                incomeOverTime: /*[[${incomeStats.incomeOverTime}]]*/[],
+                monthLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            };
+
+        let charts = {};
+
+        function initCharts() {
+            try {
+                const incomeCanvas = document.getElementById('incomeChart');
+                if (!incomeCanvas) {
+                    console.error('Canvas element not found');
+                    return;
+                }
+
+                const incomeCtx = incomeCanvas.getContext('2d');
+
+                // Kiểm tra dữ liệu
+                console.log('incomeData:', incomeData);
+
+                if (!incomeData.monthLabels || !incomeData.incomeOverTime) {
+                    console.error('Missing data for chart');
+                    return;
+                }
+
+                // Đảm bảo số lượng labels và data khớp nhau
+                const dataLength = Math.min(incomeData.monthLabels.length, incomeData.incomeOverTime.length);
+                const labels = incomeData.monthLabels.slice(0, dataLength);
+                const data = incomeData.incomeOverTime.slice(0, dataLength);
+
+                charts.income = new Chart(incomeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Thu Nhập (VNĐ)',
+                            data: data,
+                            borderColor: '#ff6127',
+                            backgroundColor: 'rgba(255, 107, 157, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 4,
+                            pointBackgroundColor: '#ff6127',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 3,
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(255,97,39,0.41)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: '#ff6127',
+                                borderWidth: 2,
+                                cornerRadius: 10,
+                                callbacks: {
+                                    label: function (context) {
+                                        const value = context.parsed.y;
+                                        return 'Thu nhập: ' + new Intl.NumberFormat('vi-VN').format(value) + '₫';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        if (value >= 1000000) {
+                                            return (value / 1000000).toFixed(1) + 'M₫';
+                                        } else if (value >= 1000) {
+                                            return (value / 1000).toFixed(0) + 'K₫';
+                                        }
+                                        return value + '₫';
+                                    },
+                                    color: '#666'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 107, 157, 0.1)'
+                                }
+                            },
+                            x: {
+                                ticks: { color: '#666' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing chart:', error);
+            }
+        }
+
+        // Khởi tạo chart sau khi DOM load
+        document.addEventListener('DOMContentLoaded', function () {
+            initCharts();
+        });
+
+        // Fallback nếu DOMContentLoaded đã fire
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCharts);
+        } else {
+            initCharts();
+        }
+    </script>
+    <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 </body>
+
 </html>

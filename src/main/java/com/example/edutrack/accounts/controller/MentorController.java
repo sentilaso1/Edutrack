@@ -86,6 +86,7 @@ public class MentorController {
         List<UpcomingScheduleDTO> upcomingClasses = enrollmentScheduleService.getUpcomingSchedules(mentor, 3);
 
         model.addAttribute("mentor", mentor);
+        model.addAttribute("incomeStats", mentorService.getIncomeStats(mentor.getId()));
         model.addAttribute("pendingClassRequests", pendingClassRequests);
         model.addAttribute("classesThisWeek", classesThisWeek);
         model.addAttribute("teachingMentees", teachingMentees);
