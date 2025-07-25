@@ -498,6 +498,10 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         if (schedule == null || schedule.getRescheduleStatus() != EnrollmentSchedule.RescheduleStatus.REQUESTED) {
             return;
         }
+        String originalReason = schedule.getRescheduleReason();
+
+        LocalDate oldDate = schedule.getDate();
+        Slot oldSlot = schedule.getSlot();
         LocalDate newDate = schedule.getRequestedNewDate();
         Slot newSlot = schedule.getRequestedNewSlot();
         Mentor mentor = schedule.getEnrollment().getCourseMentor().getMentor();
@@ -512,9 +516,21 @@ public class EnrollmentScheduleServiceImpl implements EnrollmentScheduleService 
         schedule.setRescheduleReason(null);
         save(schedule);
 
-        MentorAvailableTimeDetails newMentorAvailability = new MentorAvailableTimeDetails(mentor, newSlot, newDate);
-        newMentorAvailability.setMentee(mentee);
-        mentorAvailableTimeDetailsRepository.save(newMentorAvailability);
+        if (originalReason == null || !originalReason.trim().startsWith("Mentor:")) {
+            MentorAvailableTimeDetails oldMentorSlot = mentorAvailableTimeDetailsRepository
+                    .findByMentorAndDateAndSlot(mentor, oldDate, oldSlot);
+            if (oldMentorSlot != null) {
+                oldMentorSlot.setMentee(null);
+                mentorAvailableTimeDetailsRepository.save(oldMentorSlot);
+            }
+        }
+
+        MentorAvailableTimeDetails newMentorSlot = mentorAvailableTimeDetailsRepository
+                .findByMentorAndDateAndSlot(mentor, newDate, newSlot);
+        if (newMentorSlot != null) {
+            newMentorSlot.setMentee(mentee);
+            mentorAvailableTimeDetailsRepository.save(newMentorSlot);
+        }
     }
 
     @Override

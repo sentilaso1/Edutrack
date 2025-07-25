@@ -11,3 +11,4 @@ fastapi
 pymysql
 sqlalchemy
 mysql-connector-python
+pytest

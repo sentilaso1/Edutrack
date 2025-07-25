@@ -5,6 +5,8 @@ import com.example.edutrack.accounts.model.Mentor;
 import com.example.edutrack.timetables.model.MentorAvailableTimeDetails;
 import com.example.edutrack.timetables.model.Slot;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,4 +22,6 @@ public interface MentorAvailableTimeDetailsRepository extends JpaRepository<Ment
 
     List<MentorAvailableTimeDetails> findByMentorIdAndMenteeIsNullAndDateBetween(UUID mentorId, LocalDate startDate, LocalDate endDate);
 
+    MentorAvailableTimeDetails findByMentorAndDateAndSlot(Mentor mentor, LocalDate date, Slot slot);
+    MentorAvailableTimeDetails findByMentorAndDateAndSlotAndMenteeIsNull(Mentor mentor, LocalDate date, Slot slot);
 }

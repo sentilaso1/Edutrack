@@ -62,7 +62,8 @@
 
             <div class="search-wrapper">
                 <form class="search-form" action="#" method="get">
-                    <input id="searchInput" type="text" name="q" class="search-input" placeholder="Search for courses..."/>
+                    <input id="searchInput" type="text" name="q" class="search-input"
+                           placeholder="Search for courses..."/>
                     <button type="submit" class="search-btn" aria-label="Search">
                         <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
                     </button>
@@ -81,7 +82,8 @@
                                 <ul class="price-filter" th:each="subject : ${subjectList}">
                                     <li>
                                         <label style="display: flex;">
-                                            <input class="custom-checkbox" type="checkbox" name="subject" th:value="${subject.id}"
+                                            <input class="custom-checkbox" type="checkbox" name="subject"
+                                                   th:value="${subject.id}"
                                                    th:checked="${selectedSubjects != null and selectedSubjects.contains(subject.id)}"
                                                    onchange="submitForm()"/>
                                             <span style="margin-left: 0.5em;" th:text="${subject.title}"></span>
@@ -95,7 +97,8 @@
                                 <ul class="price-filter" th:each="skill : ${skillList}">
                                     <li>
                                         <label style="display: flex;">
-                                            <input class="custom-checkbox" type="checkbox" name="skill" th:value="${skill.id}"
+                                            <input class="custom-checkbox" type="checkbox" name="skill"
+                                                   th:value="${skill.id}"
                                                    th:checked="${selectedSkills != null and selectedSkills.contains(skill.id)}"
                                                    onchange="submitForm()"/>
                                             <span style="margin-left: 0.5em;" th:text="${skill.name}"></span>
@@ -114,44 +117,57 @@
                     <script src="https://unpkg.com/lucide@latest"></script>
                     <div class="course-listing">
                         <ul class="grid-list" th:with="courses = ${coursePage.content}">
-                            <li class="card-container" th:each="course : ${courses}">
-                                <div class="card course-card">
-                                    <figure class="card-banner">
-                                        <img th:src="@{/assets/images/default-avatar.jpg}" width="370" height="248" loading="lazy" alt="Default Avatar" class="img-cover"/>
-                                    </figure>
+                            <th:block th:each="courseInformationDTO : ${courses}">
+                                <li class="card-container" th:with="course = ${courseInformationDTO.course}">
+                                    <div class="card course-card">
+                                        <figure class="card-banner">
+                                            <img th:src="@{/assets/images/course.png}" width="370" height="248"
+                                                 loading="lazy" alt="Default Avatar" class="img-cover"/>
+                                        </figure>
 
-                                    <div class="card-content">
-                                        <div class="wrapper">
-                                            <p class="title-lg card-price">$29.28</p>
-                                            <div class="rating-wrapper">
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt=""/>
-                                                <img th:src="@{/assets/images/star-fill.svg}" width="16" height="16" loading="lazy" alt=""/>
+                                        <div class="card-content">
+                                            <div class="wrapper">
+                                                <p class="title-lg card-price">
+                                                    <span class="span" th:text="${'From ' + courseInformationDTO.priceFormatted + ' VND'}">0.00</span>
+                                                </p>
+                                            </div>
+
+                                            <h6 class="title-lg card-title" th:text="${course.name}">Course Name</h6>
+
+                                            <div class="card-meta wrapper card-meta-inlayout">
+                                                <p class="title-sm" style="margin-bottom: 5px">
+                                                    <i class="fa fa-user-o" aria-hidden="true"></i>
+                                                    <span class="span"
+                                                          th:text="${courseInformationDTO.mentors} + ' Mentors'">0 Mentors</span>
+                                                </p>
+
+                                                <p class="title-sm">
+                                                    <i class="fa fa-star-o" aria-hidden="true"></i>
+                                                    <span class="span"
+                                                          th:text="${courseInformationDTO.rating} + ' Rating'">0 Rating</span>
+                                                </p>
                                             </div>
                                         </div>
 
-                                        <h6 class="title-lg card-title" th:text="${course.name}">Course Name</h6>
+                                        <form th:if="${session.loggedInUser != null}"
+                                              th:action="@{/bookmark/add/{courseId}(courseId=${course.id})}"
+                                              method="post" class="bookmark-container">
+                                            <button class="bookmark-btn" aria-label="Bookmark">
+                                                <ion-icon
+                                                        th:if="${!@bookmarkServiceImpl.isBookmarkedByUser(course, session.loggedInUser)}"
+                                                        name="bookmark-outline"></ion-icon>
+                                                <ion-icon
+                                                        th:if="${@bookmarkServiceImpl.isBookmarkedByUser(course, session.loggedInUser)}"
+                                                        name="bookmark"></ion-icon>
+                                            </button>
+                                        </form>
 
-                                        <div class="card-meta wrapper card-meta-inlayout">
-                                            <p class="title-sm">
-                                                <img th:src="@{/assets/images/file-outline.svg}" width="20" height="20" loading="lazy" alt=""/>
-                                                <span class="span" th:text="${#lists.size(course.materials)} + ' Lessons'">0 Lessons</span>
-                                            </p>
-                                        </div>
+                                        <a th:href="@{/courses/{courseId}/list(courseId=${course.id})}"
+                                           class="layer-link"
+                                           th:aria-label="'Course Details, ' + ${course.name}"></a>
                                     </div>
-
-                                    <form th:if="${session.loggedInUser != null}" th:action="@{/bookmark/add/{courseId}(courseId=${course.id})}" method="post" class="bookmark-container">
-                                        <button class="bookmark-btn" aria-label="Bookmark">
-                                            <ion-icon th:if="${!@bookmarkServiceImpl.isBookmarkedByUser(course, session.loggedInUser)}" name="bookmark-outline"></ion-icon>
-                                            <ion-icon th:if="${@bookmarkServiceImpl.isBookmarkedByUser(course, session.loggedInUser)}" name="bookmark"></ion-icon>
-                                        </button>
-                                    </form>
-
-                                    <a th:href="@{/courses/{courseId}/list(courseId=${course.id})}" class="layer-link"
-                                       th:aria-label="'Course Details, ' + ${course.name}"></a>
-                                </div>
-                            </li>
+                                </li>
+                            </th:block>
                         </ul>
                     </div>
                 </div>

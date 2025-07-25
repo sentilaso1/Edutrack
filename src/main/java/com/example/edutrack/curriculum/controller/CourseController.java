@@ -6,6 +6,7 @@ import com.example.edutrack.accounts.model.User;
 import com.example.edutrack.accounts.service.implementations.MenteeServiceImpl;
 import com.example.edutrack.accounts.service.implementations.MentorServiceImpl;
 import com.example.edutrack.curriculum.dto.CourseCardDTO;
+import com.example.edutrack.curriculum.dto.CourseInformationDTO;
 import com.example.edutrack.curriculum.model.*;
 import com.example.edutrack.curriculum.repository.CourseMentorRepository;
 import com.example.edutrack.curriculum.repository.CourseRepository;
@@ -102,6 +103,7 @@ CourseController {
                           @RequestParam(defaultValue = "6") int size_page,
                           @RequestParam(required = false) List<Integer> subject,
                           @RequestParam(required = false) List<UUID> skill,
+                          @RequestParam(required = false) String search,
                           @RequestParam(required = false) String order_by) {
 
         if (page < 1) {
@@ -124,16 +126,17 @@ CourseController {
             skillIds = null;
         }
 
+
         if ("newest".equalsIgnoreCase(order_by)) {
-            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateDesc(pageable);
+            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateDesc(pageable, search);
         } else if ("oldest".equalsIgnoreCase(order_by)) {
-            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateAsc(pageable);
+            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateAsc(pageable, search);
         } else if ("title_asc".equalsIgnoreCase(order_by)) {
-            coursePage = courseMentorServiceImpl.findAlByOrderByTitleAsc(pageable);
+            coursePage = courseMentorServiceImpl.findAlByOrderByTitleAsc(pageable, search);
         } else if ("title_desc".equalsIgnoreCase(order_by)) {
-            coursePage = courseMentorServiceImpl.findAlByOrderByTitleDesc(pageable);
+            coursePage = courseMentorServiceImpl.findAlByOrderByTitleDesc(pageable, search);
         } else {
-            coursePage = courseMentorServiceImpl.findFilteredCourseMentors(skillIds, subjectIds, pageable);
+            coursePage = courseMentorServiceImpl.findFilteredCourseMentors(skillIds, subjectIds, pageable, search);
         }
 
         model.addAttribute("coursePage", coursePage);
@@ -182,13 +185,14 @@ CourseController {
                 case "title_desc" -> PageRequest.of(page - 1, size_page, Sort.by("name").descending());
                 default -> PageRequest.of(page - 1, size_page);
             };
-            coursePage = courseServiceImpl.getAll(pageable);
+            coursePage = courseServiceImpl.getAll(Pageable.unpaged());
         } else {
             pageable = PageRequest.of(page - 1, size_page);
-            coursePage = courseServiceImpl.findFilteredCourses(skillIds, subjectIds, pageable);
+            coursePage = courseServiceImpl.findFilteredCourses(skillIds, subjectIds, Pageable.unpaged());
         }
+        Page<CourseInformationDTO> courseInformationPage = courseServiceImpl.mapToCourseInformationDTO(coursePage);
 
-        model.addAttribute("coursePage", coursePage);
+        model.addAttribute("coursePage", courseInformationPage);
         model.addAttribute("page", page);
         model.addAttribute("subjectList", courseMentorServiceImpl.findAllTags());
         model.addAttribute("skillList", courseMentorServiceImpl.findAllCourses());
