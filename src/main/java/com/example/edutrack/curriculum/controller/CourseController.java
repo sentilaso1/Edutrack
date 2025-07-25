@@ -103,6 +103,7 @@ CourseController {
                           @RequestParam(defaultValue = "6") int size_page,
                           @RequestParam(required = false) List<Integer> subject,
                           @RequestParam(required = false) List<UUID> skill,
+                          @RequestParam(required = false) String search,
                           @RequestParam(required = false) String order_by) {
 
         if (page < 1) {
@@ -125,16 +126,17 @@ CourseController {
             skillIds = null;
         }
 
+
         if ("newest".equalsIgnoreCase(order_by)) {
-            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateDesc(pageable);
+            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateDesc(pageable, search);
         } else if ("oldest".equalsIgnoreCase(order_by)) {
-            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateAsc(pageable);
+            coursePage = courseMentorServiceImpl.findAlByOrderByCreatedDateAsc(pageable, search);
         } else if ("title_asc".equalsIgnoreCase(order_by)) {
-            coursePage = courseMentorServiceImpl.findAlByOrderByTitleAsc(pageable);
+            coursePage = courseMentorServiceImpl.findAlByOrderByTitleAsc(pageable, search);
         } else if ("title_desc".equalsIgnoreCase(order_by)) {
-            coursePage = courseMentorServiceImpl.findAlByOrderByTitleDesc(pageable);
+            coursePage = courseMentorServiceImpl.findAlByOrderByTitleDesc(pageable, search);
         } else {
-            coursePage = courseMentorServiceImpl.findFilteredCourseMentors(skillIds, subjectIds, pageable);
+            coursePage = courseMentorServiceImpl.findFilteredCourseMentors(skillIds, subjectIds, pageable, search);
         }
 
         model.addAttribute("coursePage", coursePage);
