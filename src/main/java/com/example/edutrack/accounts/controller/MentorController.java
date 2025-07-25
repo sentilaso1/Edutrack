@@ -86,6 +86,7 @@ public class MentorController {
         List<UpcomingScheduleDTO> upcomingClasses = enrollmentScheduleService.getUpcomingSchedules(mentor, 3);
 
         model.addAttribute("mentor", mentor);
+        model.addAttribute("incomeStats", mentorService.getIncomeStats(mentor.getId()));
         model.addAttribute("pendingClassRequests", pendingClassRequests);
         model.addAttribute("classesThisWeek", classesThisWeek);
         model.addAttribute("teachingMentees", teachingMentees);
@@ -177,7 +178,7 @@ public class MentorController {
             }
         }
 
-        // Xây dựng sắp xếp
+        // xây dựng sắp xếp
         Sort sortOption = switch (sort) {
             case "priceAsc" -> Sort.by("transaction.amount").ascending();
             case "priceDesc" -> Sort.by("transaction.amount").descending();
