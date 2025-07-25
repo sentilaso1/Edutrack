@@ -2,6 +2,8 @@ package com.example.edutrack.accounts.service.implementations;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -45,14 +47,14 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
                 ManagerStatsDTO stats = new ManagerStatsDTO();
 
                 // Tính toán doanh thu từ database
-                Double totalRevenue = transactionRepository.getTotalRevenueFromDate(startDate);
+                Double totalRevenue = -transactionRepository.getTotalRevenueFromDate(startDate);
                 if (totalRevenue == null)
                         totalRevenue = 0.0;
                 stats.setTotalRevenue(totalRevenue);
 
                 // Tính toán tăng trưởng doanh thu
                 LocalDateTime previousPeriodStart = getPreviousPeriodStart(period, startDate);
-                Double previousRevenue = transactionRepository.getTotalRevenueFromDate(previousPeriodStart);
+                Double previousRevenue = -transactionRepository.getTotalRevenueFromDate(previousPeriodStart);
                 if (previousRevenue == null)
                         previousRevenue = 0.0;
 
@@ -75,6 +77,9 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
 
                 // Tính toán đánh giá trung bình
                 Double avgRating = mentorRepository.getAverageRating();
+                if (avgRating != null) {
+                        avgRating = Math.round(avgRating * 100.0) / 100.0; // Làm tròn đến 2 chữ số thập phân
+                }
                 stats.setAvgRating(avgRating != null ? avgRating : 0.0);
 
                 // Tính toán số lượng học viên
@@ -87,7 +92,9 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
 
                 // Tính toán học viên trung bình per mentor
                 if (activeMentors != null && activeMentors > 0 && totalStudents != null) {
-                        stats.setAvgStudentsPerMentor(totalStudents.doubleValue() / activeMentors.doubleValue());
+                        double avgStudentsPerMentor = totalStudents.doubleValue() / activeMentors.doubleValue();
+                        avgStudentsPerMentor = Math.round(avgStudentsPerMentor * 100.0) / 100.0;
+                        stats.setAvgStudentsPerMentor(avgStudentsPerMentor);
                 } else {
                         stats.setAvgStudentsPerMentor(0.0);
                 }
@@ -110,51 +117,82 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
         public List<RevenueChartDTO> getRevenueChartData(String period, LocalDateTime startDate) {
                 List<RevenueChartDTO> chartData = new ArrayList<>();
                 
-                if ("week".equals(period) || "month".equals(period)) {
-                // Dữ liệu theo ngày
-                List<Object[]> dailyRevenue = transactionRepository.getDailyRevenueFromDate(startDate);
-                for (Object[] row : dailyRevenue) {
-                        LocalDate date = ((java.sql.Date) row[0]).toLocalDate();
-                        Double revenue = (Double) row[1];
-                        String label = date.format(DateTimeFormatter.ofPattern("dd/MM"));
-                        chartData.add(new RevenueChartDTO(date, revenue, label));
-                }
-                } else {
-                // Dữ liệu theo tháng
-                List<Object[]> monthlyRevenue = transactionRepository.getMonthlyRevenueFromDate(startDate);
-                for (Object[] row : monthlyRevenue) {
-                        Integer year = (Integer) row[0];
-                        Integer month = (Integer) row[1];
-                        Double revenue = (Double) row[2];
-                        LocalDate date = LocalDate.of(year, month, 1);
-                        String label = String.format("%02d/%d", month, year);
-                        chartData.add(new RevenueChartDTO(date, revenue, label));
-                }
+                if ("week".equals(period)) {
+                        // Dữ liệu theo ngày
+                        List<Object[]> dailyRevenue = transactionRepository.getDailyRevenueFromDate(startDate);
+                        for (Object[] row : dailyRevenue) {
+                                LocalDate date = ((java.sql.Date) row[0]).toLocalDate();
+                                Double revenue = (Double) row[1];
+                                String label = date.format(DateTimeFormatter.ofPattern("dd/MM"));
+                                chartData.add(new RevenueChartDTO(date, revenue, label));
+                        }
+                } else if ("month".equals(period)) {
+                        // Dữ liệu theo tháng
+                        List<Object[]> monthlyRevenue = transactionRepository.getMonthlyRevenueFromDate(startDate);
+                        for (Object[] row : monthlyRevenue) {
+                                Integer year = (Integer) row[0];
+                                Integer month = (Integer) row[1];
+                                Double revenue = (Double) row[2];
+                                LocalDate date = LocalDate.of(year, month, 1);
+                                String label = String.format("%02d/%d", month, year);
+                                chartData.add(new RevenueChartDTO(date, revenue, label));
+                        }
+                }else if ("quarter".equals(period)) {
+                        // Dữ liệu theo quy
+                        List<Object[]> quarterlyRevenue = transactionRepository.getQuarterlyRevenueFromDate(startDate);
+                        for (Object[] row : quarterlyRevenue) {
+                                Integer year = (Integer) row[0];
+                                Integer quarter = (Integer) row[1];
+                                Double revenue = (Double) row[2];
+                                LocalDate date = LocalDate.of(year, (quarter - 1) * 3 + 1, 1);
+                                String label = String.format("Q%d/%d", quarter, year);
+                                chartData.add(new RevenueChartDTO(date, revenue, label));
+                        }
+                } else if ("year".equals(period)) {
+                        // Dữ liệu theo năm
+                        List<Object[]> yearlyRevenue = transactionRepository.getYearlyRevenueFromDate(startDate);
+                        for (Object[] row : yearlyRevenue) {
+                                Integer year = (Integer) row[0];
+                                Double revenue = (Double) row[1];
+                                LocalDate date = LocalDate.of(year, 1, 1);
+                                String label = String.valueOf(year);
+                                chartData.add(new RevenueChartDTO(date, revenue, label));
+                        }
                 }
                 
                 return chartData;
         }
         
         public List<TopMentorDTO> getTopMentors(LocalDateTime startDate) {
-                List<Object[]> topMentorsData = transactionRepository.getTopMentorsByRevenue(
+        // Convert LocalDateTime to Date
+        Date start = Date.from(startDate.atZone(ZoneId.systemDefault()).toInstant());
+        
+        List<Object[]> topMentorsData = transactionRepository.getTopMentorsByRevenue(
                 startDate, PageRequest.of(0, 5));
-                
-                List<TopMentorDTO> topMentors = new ArrayList<>();
-                int rank = 1;
-                
-                for (Object[] row : topMentorsData) {
+        
+        List<TopMentorDTO> topMentors = new ArrayList<>();
+        int rank = 1;
+        
+        for (Object[] row : topMentorsData) {
                 UUID mentorId = (UUID) row[0];
                 String mentorName = (String) row[1];
-                Double totalRevenue = (Double) row[2];
-                
+                Double totalRevenue = -(Double) row[2];
+
                 TopMentorDTO mentor = new TopMentorDTO(mentorId, mentorName, totalRevenue, rank);
                 mentor.setFormattedRevenue(formatCurrency(totalRevenue));
                 topMentors.add(mentor);
                 rank++;
-                }
-                
-                return topMentors;
         }
+        int descRank = topMentors.size();
+        List<TopMentorDTO> descTopMentor = new ArrayList<>();
+        for (int i = topMentors.size() - 1; i >= 0; i--) {
+                TopMentorDTO mentor = topMentors.get(i);
+                mentor.setRank(descRank);
+                descTopMentor.add(mentor);
+                descRank--;
+        }
+        return descTopMentor;
+    }
         
         private LocalDateTime getStartDateByPeriod(String period) {
                 LocalDateTime now = LocalDateTime.now();
