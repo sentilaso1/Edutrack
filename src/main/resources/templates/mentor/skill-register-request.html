@@ -26,7 +26,7 @@
         }
 
         .tab.active {
-            border-bottom: 3px solid #ff2000;
+            border-bottom: 3px solid hsla(358, 100%, 70%, 0.99);
             color: #000;
         }
 
@@ -65,7 +65,7 @@
         }
 
         .product-table th {
-            background-color: #ff4d30;
+            background-color: hsla(358, 100%, 70%, 0.99);
             color: white;
             padding: 14px;
             font-size: 14px;
@@ -88,7 +88,7 @@
         }
 
         .product-table tr td:first-child {
-            border-left: 4px solid #ff4d30;
+            border-left: 4px solid hsl(357deg 100% 75% / 99%);
         }
 
         /* Responsive */
@@ -117,7 +117,7 @@
                 position: absolute;
                 left: 20px;
                 font-weight: bold;
-                color: #ff6f00;
+                color: hsl(357deg 100% 75% / 99%);
                 text-align: left;
             }
         }
@@ -135,7 +135,7 @@
         }
         .more-btn {
             width: 80%;
-            color: #ff4d30;
+            color: hsl(357deg 100% 75% / 99%);
         }
         .pagination{
             display: flex;
@@ -152,8 +152,8 @@
         .pagination ul li a {
             display: block;
             padding: 8px 12px;
-            border: 1px solid #ff4d30;
-            color: #ff4d30;
+            border: 1px solid hsla(358, 100%, 70%, 0.99);
+            color: hsla(358, 100%, 70%, 0.99);
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
@@ -161,7 +161,7 @@
 
         .pagination ul li.active a,
         .pagination ul li a:hover {
-            background-color: #ff4d30;
+            background-color: hsl(357deg 100% 75% / 99%);
             color: white;
         }
 
@@ -237,7 +237,7 @@
                         <option th:value="20" th:selected="${size == 20}">20</option>
                     </select>
 
-                    <button style="padding: 0.1em 1em; background-color: #ff4d30; border: none; color: white; border-radius: 6px" type="submit">Apply</button>
+                    <button style="padding: 0.1em 1em; background-color: hsl(357deg 100% 75% / 99%); border: none; color: white; border-radius: 6px" type="submit">Apply</button>
                 </form>
 
                 <table class="product-table">
@@ -267,7 +267,10 @@
                     </tr>
                     </tbody>
                 </table>
-                <div class="pagination">
+                <div th:if="${enrollmentList.isEmpty()}" style="text-align: center">
+                    No Class requested yet
+                </div>
+                <div class="pagination" th:if="${!enrollmentList.isEmpty()}">
                     <ul>
                         <li th:if="${currentPage > 0}">
                             <a th:href="@{/mentor/censor-class(

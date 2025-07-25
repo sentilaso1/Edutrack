@@ -36,19 +36,19 @@ public class RoleInterceptor implements HandlerInterceptor {
         String role = roleObj.toString();
 
         if (path.startsWith("/mentee") && !"mentee".equals(role)) {
-            response.sendRedirect("/forbidden");
+            response.sendRedirect("/unauthorized");
             return false;
         }
         if (path.startsWith("/mentor") && !"mentor".equals(role)) {
-            response.sendRedirect("/forbidden");
+            response.sendRedirect("/unauthorized");
             return false;
         }
         if (path.startsWith("/manager") && !"manager".equals(role)) {
-            response.sendRedirect("/forbidden");
+            response.sendRedirect("/unauthorized");
             return false;
         }
         if (path.startsWith("/admin") && !"admin".equals(role)) {
-            response.sendRedirect("/forbidden");
+            response.sendRedirect("/unauthorized");
             return false;
         }
 

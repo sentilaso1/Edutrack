@@ -16,7 +16,7 @@
         }
 
         .course-card:hover {
-            border-color: #ff6b00;
+            border-color: hsla(358, 100%, 70%, 0.99);
             box-shadow: 0 2px 10px rgba(255, 107, 0, 0.1);
         }
 
@@ -47,7 +47,7 @@
             position: absolute;
             right: 20px;
             top: 20px;
-            background-color: #ff6b00;
+            background-color: hsla(358, 100%, 70%, 0.99);
             color: white;
             border: none;
             border-radius: 50%;
@@ -60,7 +60,7 @@
         }
 
         .register-btn:hover {
-            background-color: #e35a00;
+            background-color: hsla(358, 100%, 70%, 0.99);
         }
 
         .tabs {
@@ -80,7 +80,7 @@
         }
 
         .tab.active {
-            border-bottom: 3px solid #ff2000;
+            border-bottom: 3px solid hsla(358, 100%, 70%, 0.99);
             color: #000;
         }
 
@@ -109,7 +109,7 @@
         }
 
         .progress {
-            stroke: orange;
+            stroke: hsla(358, 100%, 70%, 0.99);
             stroke-dasharray: 283; /* 2πr với r=45 */
             stroke-dashoffset: calc(283 - (283 * 75 / 100)); /* 75% */
             transition: stroke-dashoffset 0.5s ease;
@@ -122,7 +122,7 @@
             transform: translate(-50%, -50%);
             font-weight: bold;
             font-size: 18px;
-            color: orange;
+            color: hsla(358, 100%, 70%, 0.99);  ;
         }
         .pagination{
             display: flex;
@@ -139,8 +139,8 @@
         .pagination ul li a {
             display: block;
             padding: 8px 12px;
-            border: 1px solid #ff4d30;
-            color: #ff4d30;
+            border: 1px solid hsla(358, 100%, 70%, 0.99);
+            color: hsla(358, 100%, 70%, 0.99);
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
@@ -148,7 +148,7 @@
 
         .pagination ul li.active a,
         .pagination ul li a:hover {
-            background-color: #ff4d30;
+            background-color: hsla(358, 100%, 70%, 0.99);
             color: white;
         }
         .search-input {
@@ -226,7 +226,7 @@
                         <option th:value="20" th:selected="${size == 20}">20</option>
                     </select>
 
-                    <button type="submit" style="padding: 0.5em; background-color: #ff4d30; border: none; color: white; border-radius: 6px">Filter</button>
+                    <button type="submit" style="padding: 0.5em; background-color: hsla(358, 100%, 70%, 0.99);; border: none; color: white; border-radius: 6px">Filter</button>
 
                     <a th:href="@{/mentor/classes(
                 status=${status},
@@ -267,8 +267,11 @@
                     </a>
                 </div>
 
+                <div th:if="${enrollmentPage.isEmpty()}" style="text-align: center">
+                    No Class registered yet
+                </div>
                 <!-- PHÂN TRANG -->
-                <div class="pagination">
+                <div class="pagination" th:if="${!enrollmentPage.isEmpty()}">
                     <ul>
                         <!-- Prev -->
                         <li th:if="${enrollmentPage.number > 0}">

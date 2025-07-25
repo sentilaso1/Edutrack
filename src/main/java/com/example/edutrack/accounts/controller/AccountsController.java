@@ -209,15 +209,19 @@ public class AccountsController {
                 return "redirect:/profile";
         }
 
-        @GetMapping("/avatar")
-        public void getAvatar(HttpSession session, HttpServletResponse response) throws IOException {
-                User loggedInUser = (User) session.getAttribute("loggedInUser");
-                String id = loggedInUser.getId().toString();
+        @GetMapping("/avatar/{id}")
+        public void getAvatar(@PathVariable String id, HttpServletResponse response) throws IOException {
                 User user = userService.getUserById(id);
+
                 if (user != null && user.getAvatar() != null) {
                         response.setContentType("image/jpeg");
                         response.getOutputStream().write(user.getAvatar());
-                        response.getOutputStream().close();
+                } else {
+                        response.sendRedirect("/assets/images/default-avatar.svg");
+                        return;
                 }
+
+                response.getOutputStream().close();
         }
+
 }

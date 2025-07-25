@@ -11,13 +11,13 @@ import java.util.UUID;
 
 public interface CourseMentorService {
 
-    Page<CourseMentor> findAlByOrderByCreatedDateAsc(Pageable pageable);
+    Page<CourseMentor> findAlByOrderByCreatedDateAsc(Pageable pageable, String search);
 
-    Page<CourseMentor> findAlByOrderByCreatedDateDesc(Pageable pageable);
+    Page<CourseMentor> findAlByOrderByCreatedDateDesc(Pageable pageable, String search);
 
-    Page<CourseMentor> findAlByOrderByTitleDesc(Pageable pageable);
+    Page<CourseMentor> findAlByOrderByTitleDesc(Pageable pageable, String search);
 
-    Page<CourseMentor> findAlByOrderByTitleAsc(Pageable pageable);
+    Page<CourseMentor> findAlByOrderByTitleAsc(Pageable pageable, String search);
 
     Page<CourseMentor> findAll(Pageable pageable);
 
@@ -29,7 +29,7 @@ public interface CourseMentorService {
 
     List<CourseMentor> getCourseMentorByMentorId(UUID id);
 
-    Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable);
+    Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable, String search);
 
     List<CourseMentor> findByCourseId(UUID courseMentorId);
 
@@ -60,4 +60,6 @@ public interface CourseMentorService {
     boolean alreadyHasPendingEnrollment(CourseMentor courseMentor, Mentee mentee);
 
     void save(CourseMentor courseMentor);
+
+    long getTotalActiveCourseCount();
 }

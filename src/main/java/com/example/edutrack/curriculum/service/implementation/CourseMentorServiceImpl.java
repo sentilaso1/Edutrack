@@ -59,23 +59,27 @@ public class CourseMentorServiceImpl implements CourseMentorService {
 
 
     @Override
-    public Page<CourseMentor> findAlByOrderByCreatedDateAsc(Pageable pageable) {
-        return courseMentorRepository.findAlByOrderByCreatedDateAsc(pageable);
+    public Page<CourseMentor> findAlByOrderByCreatedDateAsc(Pageable pageable, String search) {
+
+        return courseMentorRepository.findAlByOrderByCreatedDateAsc(pageable, search);
     }
 
     @Override
-    public Page<CourseMentor> findAlByOrderByCreatedDateDesc(Pageable pageable) {
-        return courseMentorRepository.findAlByOrderByCreatedDateDesc(pageable);
+    public Page<CourseMentor> findAlByOrderByCreatedDateDesc(Pageable pageable, String search) {
+
+        return courseMentorRepository.findAlByOrderByCreatedDateDesc(pageable, search);
     }
 
     @Override
-    public Page<CourseMentor> findAlByOrderByTitleDesc(Pageable pageable) {
-        return courseMentorRepository.findAlByOrderByTitleDesc(pageable);
+    public Page<CourseMentor> findAlByOrderByTitleDesc(Pageable pageable, String search) {
+
+        return courseMentorRepository.findAlByOrderByTitleDesc(pageable, search);
     }
 
     @Override
-    public Page<CourseMentor> findAlByOrderByTitleAsc(Pageable pageable) {
-        return courseMentorRepository.findAlByOrderByTitleAsc(pageable);
+    public Page<CourseMentor> findAlByOrderByTitleAsc(Pageable pageable, String search) {
+
+        return courseMentorRepository.findAlByOrderByTitleAsc(pageable, search);
     }
 
     public Page<CourseMentor> findAll(Pageable pageable) {
@@ -104,8 +108,9 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     }
 
     @Override
-    public Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable) {
-        return courseMentorRepository.findFilteredCourseMentors(skillIds, subjectIds, pageable);
+    public Page<CourseMentor> findFilteredCourseMentors(List<UUID> skillIds, List<Integer> subjectIds, Pageable pageable, String search) {
+
+        return courseMentorRepository.findFilteredCourseMentors(skillIds, subjectIds, pageable, search);
     }
 
     @Override
@@ -318,6 +323,11 @@ public class CourseMentorServiceImpl implements CourseMentorService {
     @Override
     public void save(CourseMentor cm) {
         courseMentorRepository.save(cm);
+    }
+
+    @Override
+    public long getTotalActiveCourseCount() {
+        return courseMentorRepository.countDistinctAcceptedCourses();
     }
 }
 

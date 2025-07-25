@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Literal, List
 
 from runeterra.config import Config
 from runeterra.models import create_llm
@@ -25,9 +26,13 @@ app.add_middleware(
 llm = create_llm(Config.MODEL)
 llm = llm.bind_tools(get_available_tools())
 
+class Message(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
 class ChatRequest(BaseModel):
     message: str
-    history: list 
+    history: List[Message]
 
 @app.post("/chat")
 def chat_endpoint(req: ChatRequest):
@@ -39,8 +44,11 @@ def chat_endpoint(req: ChatRequest):
 
     chat_history = create_history()
     if req.history:
-        chat_history += [HumanMessage(msg) if idx % 2 == 0 else AIMessage(msg)
-                     for idx, msg in enumerate(req.history)]
+        for msg in req.history:
+            if msg.role == "user":
+                chat_history.append(HumanMessage(content=msg.content))
+            elif msg.role == "assistant":
+                chat_history.append(AIMessage(content=msg.content))
     reply = ask(req.message, chat_history, llm)
 
     log_panel(

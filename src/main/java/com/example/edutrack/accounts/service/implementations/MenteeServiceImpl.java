@@ -65,4 +65,9 @@ public class MenteeServiceImpl implements MenteeService {
     public Optional<Mentee> findByEmail(String email) {
         return menteeRepository.findByEmail(email);
     }
+
+    @Override
+    public long getTotalMenteeCount() {
+        return menteeRepository.count();
+    }
 }

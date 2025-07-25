@@ -20,4 +20,6 @@ public interface MenteeService {
     Optional<Mentee> promoteToMentee(UUID userId);
 
     Optional<Mentee> findByEmail(String email);
+
+    long getTotalMenteeCount();
 }

@@ -1,5 +1,7 @@
 package com.example.edutrack.accounts.service.implementations;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import com.example.edutrack.accounts.dto.IncomeStatsDTO;
@@ -232,36 +234,63 @@ public class MentorServiceImpl implements MentorService {
     @Override
     public IncomeStatsDTO getIncomeStats(UUID mentorId) {
         // Lấy tổng thu nhập
-        Long totalIncome = courseMentorRepository.getTotalIncomeByMentorId(mentorId);
-        if (totalIncome == null)
+        Long totalIncome = -courseMentorRepository.getTotalIncomeByMentorId(mentorId);
+        if (totalIncome == null) {
             totalIncome = 0L;
+        }
 
         // Lấy thu nhập mỗi slot
-        Long incomePerSlot = courseMentorRepository.getIncomePerSlot(mentorId);
-        if (incomePerSlot == null)
+        Long incomePerSlot = -courseMentorRepository.getIncomePerSlot(mentorId);
+        if (incomePerSlot == null) {
             incomePerSlot = 0L;
+        }
 
         // Lấy thu nhập 12 tháng gần nhất
-        List<Long> incomeOverTime = courseMentorRepository.getMonthlyIncomeList(mentorId);
-
+        LocalDateTime startDate = LocalDate.now().minusMonths(12).atStartOfDay();
+        List<Long> incomeOverTime = courseMentorRepository.getMonthlyIncomeList(mentorId, startDate);
+        List<Long> incomeOverTimeCopy = new ArrayList<>();
+        for (int i = 0; i < incomeOverTime.size(); i++) {
+            incomeOverTime.set(i, -incomeOverTime.get(i)); // Chuyển đổi sang giá trị dương
+        }
         // Nếu không có dữ liệu, tạo list 12 tháng với giá trị 0
         if (incomeOverTime == null || incomeOverTime.isEmpty()) {
-            incomeOverTime = new ArrayList<>();
             for (int i = 0; i < 12; i++) {
-                incomeOverTime.add(0L);
+                incomeOverTimeCopy.add(0L);
+            }
+        } else if (incomeOverTime.size() < 12) {
+            for (int i = 0; i < 12; i++) {
+                if(i == 6) {
+                    incomeOverTimeCopy.add(incomeOverTime.get(0));
+                    continue;
+                }
+                incomeOverTimeCopy.add(0L);
             }
         }
-        int previousMonth = (java.time.LocalDate.now().minusMonths(1).getMonthValue() - 1) % 12 + 1;
-        int previousYear = java.time.LocalDate.now().minusMonths(1).getYear();
 
-        Long incomeThisMonth = courseMentorRepository.getCurrentMonthIncome(mentorId);
-        Long incomeLastMonth = courseMentorRepository.getLastMonthIncome(mentorId, previousMonth, previousYear);
-        double percentChange = ((double) (incomeThisMonth - incomeLastMonth) / incomeLastMonth) * 100;
+        // Lấy thu nhập tháng hiện tại
+        int currentMonth = LocalDate.now().getMonthValue();
+        int currentYear = LocalDate.now().getYear();
+        Long incomeThisMonth = -courseMentorRepository.getCurrentMonthIncome(mentorId, currentYear, currentMonth);
+        if (incomeThisMonth == null) {
+            incomeThisMonth = 0L;
+        }
+
+        // Lấy thu nhập tháng trước
+        int previousMonth = LocalDate.now().minusMonths(1).getMonthValue();
+        int previousYear = LocalDate.now().minusMonths(1).getYear();
+        Long incomeLastMonth = -courseMentorRepository.getLastMonthIncome(mentorId, previousMonth, previousYear);
+        if (incomeLastMonth == null) {
+            incomeLastMonth = 0L;
+        }
+
+        // Tính phần trăm thay đổi
+        double percentChange = incomeLastMonth == 0 ? 100.0 : 
+            ((double) (incomeThisMonth - incomeLastMonth) / incomeLastMonth) * 100;
         if (Double.isNaN(percentChange) || Double.isInfinite(percentChange)) {
             percentChange = 0.0;
-
         }
-        return new IncomeStatsDTO(totalIncome, incomeOverTime, incomePerSlot, percentChange);
+
+        return new IncomeStatsDTO(totalIncome, incomeOverTimeCopy, incomePerSlot, percentChange);
     }
 
     @Override
@@ -288,5 +317,10 @@ public class MentorServiceImpl implements MentorService {
     @Override
     public void save(Mentor mentor) {
         mentorRepository.save(mentor);
+    }
+
+    @Override
+    public long getTotalMentorCount() {
+        return mentorRepository.count();
     }
 }

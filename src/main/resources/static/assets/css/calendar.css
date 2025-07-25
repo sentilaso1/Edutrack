@@ -20,7 +20,7 @@
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    color: #f84e4e;
+    color: hsl(357deg 100% 75% / 99%);
     transition: all 0.2s ease-in-out;
 }
 
@@ -65,14 +65,14 @@
 
 .slot-label {
     font-weight: bold;
-    color: #f84e4e;
+    color: hsl(357deg 100% 75% / 99%);
     margin: 0.5em;
     font-size: 1em;
 }
 
 .slot-card {
     background-color: rgba(248, 78, 78, 0.2);
-    border-left: 4px solid #f84e4e;
+    border-left: 4px solid hsl(357deg 100% 75% / 99%);
     margin: 6px 6px 0 6px;
     padding: 6px;
     border-radius: 8px;
@@ -99,6 +99,6 @@ input[type="date"] {
 
 input[type="date"]:focus {
     outline: none;
-    border-color:#f84e4e;
+    border-color: hsl(357deg 100% 75% / 99%);
 }
 
