@@ -99,6 +99,6 @@ input[type="date"] {
 
 input[type="date"]:focus {
     outline: none;
-    border-color:hsl(357deg 100% 75% / 99%);
+    border-color: hsl(357deg 100% 75% / 99%);
 }
 

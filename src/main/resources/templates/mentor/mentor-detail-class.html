@@ -116,7 +116,7 @@
                     <tr th:each="item, iStat : ${enrollmentSchedules}">
                         <td th:text="${iStat.index + 1}"></td>
                         <td th:text="${item.date}"></td>
-                        <td th:text="${item.slot}"></td>
+                        <td th:text="${item.slot.startTime + '-' + item.slot.endTime}"></td>
                         <td>
                                 <span th:class="'status-badge status-' + ${item.attendance.toString().toLowerCase()}"
                                       th:text="${item.attendance}"></span>
