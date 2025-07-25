@@ -60,4 +60,6 @@ public interface CourseMentorService {
     boolean alreadyHasPendingEnrollment(CourseMentor courseMentor, Mentee mentee);
 
     void save(CourseMentor courseMentor);
+
+    long getTotalActiveCourseCount();
 }

@@ -289,4 +289,9 @@ public class MentorServiceImpl implements MentorService {
     public void save(Mentor mentor) {
         mentorRepository.save(mentor);
     }
+
+    @Override
+    public long getTotalMentorCount() {
+        return mentorRepository.count();
+    }
 }

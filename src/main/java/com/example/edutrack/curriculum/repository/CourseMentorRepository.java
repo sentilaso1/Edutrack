@@ -345,5 +345,8 @@ public interface CourseMentorRepository extends JpaRepository<CourseMentor, Cour
           AND e.status = 'PENDING'
         """)
     boolean alreadyHasPendingEnrollment(@Param("courseMentor") CourseMentor courseMentor, @Param("mentee") Mentee mentee);
+
+    @Query("SELECT COUNT(DISTINCT cm.course) FROM CourseMentor cm WHERE cm.status = 'ACCEPTED'")
+    long countDistinctAcceptedCourses();
 }
 

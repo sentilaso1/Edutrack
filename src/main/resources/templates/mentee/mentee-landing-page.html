@@ -146,7 +146,7 @@
             font-size: 0.85rem;
         }
 
-        #rating{
+        #rating {
             color: #d8d50a;
             font-weight: bold;
         }
@@ -182,6 +182,7 @@
             font-size: 14px;
             color: #555;
         }
+
         .mentor-card .card-banner {
             width: 100%;
             height: 200px;
@@ -198,28 +199,40 @@
 
         #interest-modal-backdrop {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             z-index: 10000;
-            background: rgba(16,20,40, 0.45);
+            background: rgba(16, 20, 40, 0.45);
             backdrop-filter: blur(6px);
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
         .interest-modal {
             background: #fff;
             border-radius: 18px;
-            box-shadow: 0 6px 36px rgba(0,0,0,0.13);
+            box-shadow: 0 6px 36px rgba(0, 0, 0, 0.13);
             padding: 2.5rem 2.5rem 2rem 2.5rem;
             min-width: 370px;
             max-width: 95vw;
             text-align: center;
             animation: modalFadeIn .38s;
         }
+
         @keyframes modalFadeIn {
-            from { transform: scale(0.98) translateY(30px); opacity: 0; }
-            to { transform: scale(1) translateY(0); opacity: 1; }
+            from {
+                transform: scale(0.98) translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
         }
+
         #interest-modal-backdrop .tag-list {
             display: flex;
             flex-wrap: wrap;
@@ -227,6 +240,7 @@
             margin: 18px 0 10px 0;
             justify-content: center;
         }
+
         #interest-modal-backdrop .tag {
             padding: 8px 19px;
             border-radius: 25px;
@@ -237,29 +251,53 @@
             transition: all 0.16s;
             font-size: 1.07em;
         }
+
         #interest-modal-backdrop .tag.selected {
             background: #fe8189;
             color: #fff;
             border-color: #fe8189;
         }
+
         #interest-modal-backdrop .modal-actions {
             margin-top: 20px;
             display: flex;
             gap: 22px;
             justify-content: center;
         }
+
         #interest-modal-backdrop .btn-primary {
-            background: #fe8189; color: #fff; border: none;
-            border-radius: 7px; padding: 9px 26px; font-size: 1em; cursor: pointer;
+            background: #fe8189;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 9px 26px;
+            font-size: 1em;
+            cursor: pointer;
         }
-        #interest-modal-backdrop .btn-primary:disabled { background: #bbb; }
+
+        #interest-modal-backdrop .btn-primary:disabled {
+            background: #bbb;
+        }
+
         #interest-modal-backdrop .btn-secondary {
-            background: #eee; color: #444; border: none;
-            border-radius: 7px; padding: 9px 26px; font-size: 1em; cursor: pointer;
+            background: #eee;
+            color: #444;
+            border: none;
+            border-radius: 7px;
+            padding: 9px 26px;
+            font-size: 1em;
+            cursor: pointer;
         }
+
         #interest-modal-backdrop input[type="text"] {
-            margin-top: 8px; width: 89%; padding: 7px 12px; border-radius: 6px; border: 1px solid #fe8189; font-size: 1em;
+            margin-top: 8px;
+            width: 89%;
+            padding: 7px 12px;
+            border-radius: 6px;
+            border: 1px solid #fe8189;
+            font-size: 1em;
         }
+
         #interest-modal-backdrop #interest-msg {
             color: #d22632;
             margin-top: 14px;
@@ -274,7 +312,7 @@
             text-align: center;
         }
 
-         .contact-button {
+        .contact-button {
             position: fixed;
             bottom: 24px;
             left: 24px;
@@ -290,6 +328,7 @@
             transition: transform 0.3s ease, background-color 0.3s ease;
             z-index: 1000;
         }
+
         .contact-modal {
             display: none;
             position: fixed;
@@ -304,10 +343,12 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
+
         .contact-modal.active {
             display: flex;
             opacity: 1;
         }
+
         .contact-modal-content {
             background-color: #ffffff;
             padding: 2.5rem;
@@ -319,10 +360,12 @@
             opacity: 0;
             transition: transform 0.4s ease, opacity 0.4s ease;
         }
+
         .contact-modal.active .contact-modal-content {
             transform: translateY(0);
             opacity: 1;
         }
+
         .contact-modal-content h2 {
             font-size: 2rem;
             font-weight: 700;
@@ -330,6 +373,7 @@
             margin-bottom: 1.5rem;
             line-height: 1.2;
         }
+
         .contact-modal-content input,
         .contact-modal-content textarea {
             font-size: 1.125rem;
@@ -340,12 +384,14 @@
             padding: 0.75rem 1rem;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
+
         .contact-modal-content input:focus,
         .contact-modal-content textarea:focus {
             outline: none;
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
+
         .contact-modal-content label {
             font-size: 1rem;
             font-weight: 500;
@@ -353,6 +399,7 @@
             margin-bottom: 0.5rem;
             display: block;
         }
+
         .contact-modal-content button[type="submit"] {
             font-size: 1.125rem;
             font-weight: 600;
@@ -362,6 +409,7 @@
             border-radius: 0.5rem;
             transition: background-color 0.3s ease;
         }
+
         .contact-modal-content button[type="submit"]:hover {
             background-color: #1d4ed8;
         }
@@ -385,22 +433,14 @@
 <div th:replace="fragments/chat-box :: chatbox"></div>
 <main>
     <article>
-
-        <!--
-          - #HERO
-        -->
         <section class="section hero has-bg-image" aria-labelledby="hero-label"
                  th:style="|background-image: url('${heroImageUrl}')|">
-            <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-
-                <!-- LEFT: Welcome / Title -->
+            <div class="container"
+                 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                 <div class="hero-content" style="max-width: 55%;">
-                    <!-- Headline (name for logged in user) -->
                     <h1 class="headline-lg" id="hero-label" th:text="${heroHeadline}">
                         Better <span class="span">Learning Future</span> Starts With Youdemi
                     </h1>
-
-                    <!-- Subtitle -->
                     <p class="title-md" style="margin-top: 8px;" th:text="${heroSubHeadline}">
                         It is long established fact that reader distracted by the readable content.
                     </p>
@@ -475,17 +515,16 @@
                         We Provide The Best Online <span class="span has-after">Education</span>
                     </h2>
 
-                    <p class="title-sm section-text"  th:text="${aboutDescription}">
+                    <p class="title-sm section-text" th:text="${aboutDescription}">
                         There are many variations of passages of Lorem Ipsum available, but the majority have suffered
                         alteration
                         in some form, by injected humour.
                     </p>
-
                     <ul class="progress-list">
                         <li>
                             <div class="progress-label-wrapper">
-                                <p class="title-sm">Business Studies</p>
-                                <p class="title-sm">86%</p>
+                                <p class="title-sm">Active Courses</p>
+                                <p class="title-sm" th:text="${totalCourses}"></p>
                             </div>
                             <div class="progress">
                                 <div class="progress-fill red"></div>
@@ -494,8 +533,8 @@
 
                         <li>
                             <div class="progress-label-wrapper">
-                                <p class="title-sm">Marketing</p>
-                                <p class="title-sm">67%</p>
+                                <p class="title-sm">Expert Mentors</p>
+                                <p class="title-sm" th:text="${totalMentors}"></p>
                             </div>
                             <div class="progress">
                                 <div class="progress-fill green"></div>
@@ -504,8 +543,8 @@
 
                         <li>
                             <div class="progress-label-wrapper">
-                                <p class="title-sm">Design & Development</p>
-                                <p class="title-sm">95%</p>
+                                <p class="title-sm">Happy Mentees</p>
+                                <p class="title-sm" th:text="${totalMentees}"></p>
                             </div>
                             <div class="progress">
                                 <div class="progress-fill yellow"></div>
@@ -534,8 +573,13 @@
                             <div class="card-container">
                                 <div class="card course-card">
                                     <figure class="card-banner">
-                                        <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
+                                        <img th:if="${courseMentor.mentor.avatar != null}"
+                                             th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
                                              class="img-cover" alt="Mentor Avatar"/>
+
+                                        <img th:if="${courseMentor.mentor.avatar == null}"
+                                             th:src="@{/assets/images/mentor.png}"
+                                             class="img-cover" alt="Default Mentor Avatar"/>
                                     </figure>
                                     <div class="card-content">
                                         <div class="wrapper">
@@ -597,8 +641,13 @@
                             <div class="card-container">
                                 <div class="card course-card">
                                     <figure class="card-banner">
-                                        <img th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
+                                        <img th:if="${courseMentor.mentor.avatar != null}"
+                                             th:src="@{/mentors/{id}/avatar(id=${courseMentor.mentor.id})}"
                                              class="img-cover" alt="Mentor Avatar"/>
+
+                                        <img th:if="${courseMentor.mentor.avatar == null}"
+                                             th:src="@{/assets/images/mentor.png}"
+                                             class="img-cover" alt="Default Mentor Avatar"/>
                                     </figure>
                                     <div class="card-content">
                                         <div class="wrapper">
@@ -643,7 +692,8 @@
                  th:if="${recommendedMentors != null}">
 
             <div class="container">
-                <p class="title-sm section-subtitle text-center" th:text="${mentorSectionSubtitle}">Top Mentors for You</p>
+                <p class="title-sm section-subtitle text-center" th:text="${mentorSectionSubtitle}">Top Mentors for
+                    You</p>
 
                 <h2 class="headline-md section-title text-center" id="course-label-3">
                     <span th:text="${mentorSectionTitle}">Recommended Mentors</span>
@@ -655,16 +705,51 @@
                             <div class="card-container">
                                 <div class="card mentor-card">
                                     <figure class="card-banner">
-                                        <img th:src="@{/mentors/{id}/avatar(id=${mentor.id})}"
+                                        <img th:if="${mentor.avatar != null}"
+                                             th:src="@{/mentors/{id}/avatar(id=${mentor.id})}"
+                                             alt="Mentor Avatar" class="img-cover"/>
+
+                                        <img th:if="${mentor.avatar == null}"
+                                             th:src="@{/assets/images/mentor.png}"
                                              alt="Mentor Avatar" class="img-cover"/>
                                     </figure>
                                     <div class="card-content">
-                                        <h3 class="title-lg card-title" th:text="${mentor.fullName}">Mentor Name</h3>
-                                        <p class="title-sm" th:text="'Expertise: ' + ${mentor.expertise}">Expertise</p>
-                                        <p class="title-sm" id="rating">
-                                            Rating:
-                                            <span th:text="${mentor.rating}">4.9</span>
-                                        </p>
+                                        <div><h3 class="title-lg card-title" th:text="${mentor.fullName}">Mentor
+                                            Name</h3>
+
+                                            <div class="rating-wrapper"
+                                                 style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+                                            <span th:if="${mentor.rating != null and mentor.rating > 0}"
+                                                  th:text="${#numbers.formatDecimal(mentor.rating, 1, 1)}"
+                                                  style="font-weight: bold; color: #f59e0b;">
+                                            </span>
+
+                                                <span th:each="i : ${#numbers.sequence(1,5)}">
+                                                <img th:if="${mentor.rating != null and i <= T(java.lang.Math).floor(mentor.rating)}"
+                                                     th:src="@{/assets/images/star-fill.svg}" width="16" height="16"
+                                                     alt=""/>
+                                                <img th:if="${mentor.rating != null and i > T(java.lang.Math).floor(mentor.rating)} and ${i - 1 < mentor.rating}"
+                                                     th:src="@{/assets/images/star-half.svg}" width="16" height="16"
+                                                     alt=""/>
+                                                <img th:if="${mentor.rating == null or i - 1 >= mentor.rating}"
+                                                     th:src="@{/assets/images/star-empty.svg}" width="16" height="16"
+                                                     alt=""/>
+                                            </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="expertise-pills">
+                                            <span th:if="${#lists.isEmpty(mentor.expertiseItem)}"
+                                                  class="pill pill-gray">
+                                                No Expertise
+                                            </span>
+                                            <span th:each="exp, stat : ${mentor.expertiseItem}"
+                                                  th:if="${stat.index < 3}"
+                                                  class="pill"
+                                                  th:text="${exp}">
+                                                Expertise
+                                            </span>
+                                        </div>
                                     </div>
                                     <a th:href="@{'/mentors/' + ${mentor.id}}" class="layer-link"
                                        th:aria-label="'Mentor Profile: ' + ${mentor.fullName}"></a>
@@ -678,7 +763,8 @@
                 </div>
 
                 <div class="carousel-indicators" id="mentor-indicators"></div>
-                <div class="view-more-wrapper text-center" style="margin-top: 30px; display: flex; justify-content: center">
+                <div class="view-more-wrapper text-center"
+                     style="margin-top: 30px; display: flex; justify-content: center">
                     <a th:href="@{/mentors}" class="btn btn-primary">View More</a>
                 </div>
             </div>
@@ -711,9 +797,9 @@
 <!-- Contact Button -->
 <div class="contact-button" onclick="toggleContactForm()">
     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg">
+         xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
         </path>
     </svg>
 </div>
@@ -734,12 +820,12 @@
             <div class="mb-6">
                 <label for="phone">Your Phone</label>
                 <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" class="w-full"
-                    required>
+                       required>
             </div>
             <div class="mb-6">
                 <label for="message">Your Message</label>
                 <textarea id="message" name="message" placeholder="Enter your message" class="w-full" rows="5"
-                    required></textarea>
+                          required></textarea>
             </div>
             <div class="mb-6">
                 <label for="file">Attach File</label>
@@ -773,6 +859,7 @@
             }, 5000);
         }
     });
+
     function toggleContactForm() {
         const modal = document.getElementById('contactModal');
         modal.classList.toggle('active');
@@ -849,13 +936,13 @@
             document.getElementById('interest-save').disabled = selectedInterestTagIds.size === 0;
         }
 
-        document.getElementById('interest-search').addEventListener('input', function(e) {
+        document.getElementById('interest-search').addEventListener('input', function (e) {
             fetchInterestTags(e.target.value);
         });
-        document.getElementById('interest-save').onclick = async function() {
+        document.getElementById('interest-save').onclick = async function () {
             await submitInterestSelection(false);
         };
-        document.getElementById('interest-skip').onclick = async function() {
+        document.getElementById('interest-skip').onclick = async function () {
             await submitInterestSelection(true);
         };
 
