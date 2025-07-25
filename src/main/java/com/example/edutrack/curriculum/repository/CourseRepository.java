@@ -114,4 +114,31 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     Long countByIsOpen(Boolean isOpen);
 
     Page<Course> findByIdNotIn(List<UUID> ids, Pageable pageable);
+
+    @Query(value = """
+            SELECT AVG(f.rating) FROM Course c
+            JOIN CourseMentor cm ON cm.course = c
+            JOIN Feedback f ON f.courseMentor = cm
+            WHERE c = :course
+            GROUP BY c
+            """)
+    Double findAverageCourseRating(
+            @Param("course") Course course
+    );
+
+    @Query("""
+            SELECT MIN(cm.price) FROM Course c
+            JOIN CourseMentor cm ON cm.course = c
+            WHERE c = :course
+              AND cm.status = 'ACCEPTED'
+            """)
+    Double findCourseStartingPrice(@Param("course") Course course);
+
+    @Query("""
+        SELECT COUNT(cm) FROM Course c
+        JOIN CourseMentor cm ON cm.course = c
+        WHERE c = :course
+          AND cm.status = 'ACCEPTED'
+        """)
+    Integer countTeachingMentors(@Param("course") Course course);
 }
