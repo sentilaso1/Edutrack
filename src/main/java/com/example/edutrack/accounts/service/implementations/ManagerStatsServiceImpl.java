@@ -50,7 +50,7 @@ public class ManagerStatsServiceImpl implements ManagerStatsService {
                 Double totalRevenue = transactionRepository.getTotalRevenueFromDate(startDate);
                 if (totalRevenue == null)
                         totalRevenue = 0.0;
-                stats.setTotalRevenue(-totalRevenue == 0.0 ? 0.0 : totalRevenue);
+                stats.setTotalRevenue(-totalRevenue == 0.0 ? 0.0 : -totalRevenue);
 
                 // Tính toán tăng trưởng doanh thu
                 LocalDateTime previousPeriodStart = getPreviousPeriodStart(period, startDate);
